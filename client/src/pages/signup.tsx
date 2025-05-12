@@ -4,6 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { useUser } from "@/lib/userContext";
 
 // Import step components
 import StepOne from "@/components/signup/StepOne";
@@ -37,6 +38,7 @@ export interface SignupFormData {
 export default function Signup() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
+  const { setUser } = useUser();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Partial<SignupFormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
