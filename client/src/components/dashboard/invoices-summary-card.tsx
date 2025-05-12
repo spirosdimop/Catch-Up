@@ -1,139 +1,120 @@
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { Invoice, Client, InvoiceStatus } from "@shared/schema";
-import { format } from "date-fns";
+import { CircleOff, DollarSign, FileCheck, Clock } from "lucide-react";
 
-export function InvoicesSummaryCard() {
-  const { data: invoices, isLoading: invoicesLoading } = useQuery<Invoice[]>({
+type Invoice = {
+  id: number;
+  clientId: number;
+  invoiceNumber: string;
+  issueDate: string;
+  dueDate: string;
+  amount: number;
+  status: string;
+  client?: {
+    name: string;
+  };
+};
+
+export default function InvoicesSummaryCard() {
+  const { data: invoices, isLoading } = useQuery<Invoice[]>({
     queryKey: ["/api/invoices"],
   });
-  
-  const { data: clients, isLoading: clientsLoading } = useQuery<Client[]>({
-    queryKey: ["/api/clients"],
-  });
-  
-  const isLoading = invoicesLoading || clientsLoading;
 
-  // Get client name by ID
-  const getClientName = (clientId: number) => {
-    const client = clients?.find((c) => c.id === clientId);
-    return client?.name || "Unknown Client";
+  // Calculate summary statistics
+  const summary = {
+    paid: 0,
+    pending: 0,
+    overdue: 0,
+    total: 0
   };
 
-  // Format currency
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
-
-  // Get status style
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case InvoiceStatus.PAID:
-        return "bg-green-100 text-green-800";
-      case InvoiceStatus.SENT:
-      case InvoiceStatus.DRAFT:
-        return "bg-yellow-100 text-yellow-800";
-      case InvoiceStatus.OVERDUE:
-        return "bg-red-100 text-red-800";
-      case InvoiceStatus.CANCELED:
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
+  if (invoices) {
+    const now = new Date();
+    
+    for (const invoice of invoices) {
+      const amount = invoice.amount;
+      summary.total += amount;
+      
+      if (invoice.status === "Paid") {
+        summary.paid += amount;
+      } else if (invoice.status === "Pending") {
+        summary.pending += amount;
+        
+        // Check if overdue
+        const dueDate = new Date(invoice.dueDate);
+        if (dueDate < now) {
+          summary.overdue += amount;
+        }
+      }
     }
-  };
+  }
 
-  // Calculate totals
-  const calculateTotals = () => {
-    if (!invoices) return { paid: 0, pending: 0, overdue: 0 };
-    
-    const paid = invoices
-      .filter(invoice => invoice.status === InvoiceStatus.PAID)
-      .reduce((sum, invoice) => sum + invoice.amount, 0);
-    
-    const pending = invoices
-      .filter(invoice => invoice.status === InvoiceStatus.SENT || invoice.status === InvoiceStatus.DRAFT)
-      .reduce((sum, invoice) => sum + invoice.amount, 0);
-    
-    const overdue = invoices
-      .filter(invoice => invoice.status === InvoiceStatus.OVERDUE)
-      .reduce((sum, invoice) => sum + invoice.amount, 0);
-    
-    return { paid, pending, overdue };
-  };
-
-  const totals = calculateTotals();
+  const items = [
+    {
+      title: "Total",
+      value: `$${summary.total.toLocaleString()}`,
+      icon: <DollarSign className="h-4 w-4" />,
+      color: "text-primary-600 bg-primary-50"
+    },
+    {
+      title: "Paid",
+      value: `$${summary.paid.toLocaleString()}`,
+      icon: <FileCheck className="h-4 w-4" />,
+      color: "text-green-600 bg-green-50"
+    },
+    {
+      title: "Pending",
+      value: `$${summary.pending.toLocaleString()}`,
+      icon: <CircleOff className="h-4 w-4" />,
+      color: "text-amber-600 bg-amber-50"
+    },
+    {
+      title: "Overdue",
+      value: `$${summary.overdue.toLocaleString()}`,
+      icon: <Clock className="h-4 w-4" />,
+      color: "text-red-600 bg-red-50"
+    }
+  ];
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="p-5 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-gray-800">Invoices</CardTitle>
-          <Link href="/invoices">
-            <a className="text-sm font-medium text-primary hover:text-primary/80">View all</a>
-          </Link>
-        </div>
+    <Card className="h-full">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Invoices Summary</CardTitle>
+        <Link href="/invoices">
+          <span className="text-sm text-blue-500 hover:underline cursor-pointer">
+            View all
+          </span>
+        </Link>
       </CardHeader>
-      <CardContent className="p-5">
-        <div className="flex justify-between mb-4">
-          <div>
-            <h4 className="text-base font-medium text-gray-900">Invoice Summary</h4>
-            <p className="text-sm text-gray-500">{format(new Date(), "MMMM yyyy")}</p>
-          </div>
-          <Link href="/invoices/new">
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-1" /> New
-            </Button>
-          </Link>
-        </div>
-
-        <div className="flex mb-3">
-          <div className="flex-1 py-2 text-center bg-green-100 rounded-l-md">
-            <span className="block text-sm font-medium text-green-800">Paid</span>
-            <span className="text-lg font-semibold text-green-800">{formatCurrency(totals.paid)}</span>
-          </div>
-          <div className="flex-1 py-2 text-center bg-yellow-100">
-            <span className="block text-sm font-medium text-yellow-800">Pending</span>
-            <span className="text-lg font-semibold text-yellow-800">{formatCurrency(totals.pending)}</span>
-          </div>
-          <div className="flex-1 py-2 text-center bg-red-100 rounded-r-md">
-            <span className="block text-sm font-medium text-red-800">Overdue</span>
-            <span className="text-lg font-semibold text-red-800">{formatCurrency(totals.overdue)}</span>
-          </div>
-        </div>
-
-        <div className="space-y-3 mt-5">
-          <h4 className="text-sm font-medium text-gray-900">Recent Invoices</h4>
-          
-          {isLoading ? (
-            <div className="text-sm text-gray-500">Loading invoices...</div>
-          ) : invoices && invoices.length > 0 ? (
-            invoices.slice(0, 3).map((invoice) => (
-              <div key={invoice.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                <div>
-                  <div className="flex items-center">
-                    <div className="text-sm font-medium text-gray-900">{getClientName(invoice.clientId)}</div>
-                    <span className={`ml-2 px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusStyle(invoice.status)}`}>
-                      {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
-                    </span>
-                  </div>
-                  <div className="text-xs text-gray-500">{format(new Date(invoice.issueDate), "MMM d, yyyy")}</div>
-                </div>
-                <div className="text-sm font-semibold text-gray-900">{formatCurrency(invoice.amount)}</div>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex justify-between items-center">
+                <div className="w-1/3 h-5 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-1/4 h-5 bg-gray-200 rounded animate-pulse"></div>
               </div>
-            ))
-          ) : (
-            <div className="text-sm text-gray-500">No invoices found</div>
-          )}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {items.map((item, index) => (
+              <div key={index} className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className={`p-2 rounded-lg mr-3 ${item.color.split(" ")[1]}`}>
+                    <div className={item.color.split(" ")[0]}>
+                      {item.icon}
+                    </div>
+                  </div>
+                  <span className="text-sm font-medium">{item.title}</span>
+                </div>
+                <span className="font-bold">{item.value}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
 }
-
-export default InvoicesSummaryCard;

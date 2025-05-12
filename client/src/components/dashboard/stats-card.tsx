@@ -1,64 +1,70 @@
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { ArrowUp, ArrowDown } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ReactNode } from "react";
+import { ArrowDownIcon, ArrowUpIcon, MinusIcon } from "lucide-react";
 
-type StatCardProps = {
+interface StatCardProps {
   title: string;
   value: string;
-  icon: React.ReactNode;
-  iconColor: string;
-  iconBgColor: string;
+  icon: ReactNode;
+  iconColor?: string;
+  iconBgColor?: string;
   changeValue?: string;
-  changeType?: "increase" | "decrease" | "neutral";
-  footerContent?: React.ReactNode;
-};
+  changeType?: 'increase' | 'decrease' | 'neutral';
+  footerContent?: ReactNode;
+}
 
-export function StatCard({
+export default function StatCard({
   title,
   value,
   icon,
-  iconColor,
-  iconBgColor,
+  iconColor = "text-primary",
+  iconBgColor = "bg-primary/10",
   changeValue,
-  changeType,
-  footerContent,
+  changeType = 'neutral',
+  footerContent
 }: StatCardProps) {
+  const getChangeIcon = () => {
+    switch (changeType) {
+      case 'increase':
+        return <ArrowUpIcon className="h-3 w-3 text-green-500" />;
+      case 'decrease':
+        return <ArrowDownIcon className="h-3 w-3 text-red-500" />;
+      default:
+        return <MinusIcon className="h-3 w-3 text-gray-500" />;
+    }
+  };
+
+  const getChangeColor = () => {
+    switch (changeType) {
+      case 'increase':
+        return 'text-green-500';
+      case 'decrease':
+        return 'text-red-500';
+      default:
+        return 'text-gray-500';
+    }
+  };
+
   return (
     <Card>
-      <CardContent className="p-5">
-        <div className="flex items-center">
-          <div className={cn("flex-shrink-0 rounded-md p-3", iconBgColor)}>
-            <div className={cn("text-xl", iconColor)}>{icon}</div>
-          </div>
-          <div className="ml-5 w-0 flex-1">
-            <div className="text-sm font-medium text-gray-500 truncate">{title}</div>
-            <div className="text-lg font-bold text-gray-900">{value}</div>
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium text-gray-500">{title}</h3>
+          <div className={`p-2 rounded-lg ${iconBgColor}`}>
+            <div className={`h-5 w-5 ${iconColor}`}>
+              {icon}
+            </div>
           </div>
         </div>
+        <div className="text-2xl font-bold mb-2">{value}</div>
+        {changeValue && (
+          <div className="flex items-center text-xs">
+            {getChangeIcon()}
+            <span className={`ml-1 ${getChangeColor()}`}>{changeValue}</span>
+          </div>
+        )}
+        {footerContent && <div className="mt-2">{footerContent}</div>}
       </CardContent>
-      {(changeValue || footerContent) && (
-        <CardFooter className="bg-gray-50 px-5 py-3">
-          {changeValue && changeType && (
-            <div className={cn(
-              "text-sm flex items-center",
-              changeType === "increase" && "text-green-600",
-              changeType === "decrease" && "text-red-600",
-              changeType === "neutral" && "text-blue-600"
-            )}>
-              {changeType === "increase" && <ArrowUp className="h-4 w-4 mr-1" />}
-              {changeType === "decrease" && <ArrowDown className="h-4 w-4 mr-1" />}
-              <span>{changeValue}</span>
-            </div>
-          )}
-          {footerContent && (
-            <div className="text-sm text-gray-600">
-              {footerContent}
-            </div>
-          )}
-        </CardFooter>
-      )}
     </Card>
   );
 }
-
-export default StatCard;

@@ -1,140 +1,82 @@
-import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
-import { Project, Client } from "@shared/schema";
-import { Laptop, Smartphone, PenTool } from "lucide-react";
-import { format } from "date-fns";
 
-export function ActiveProjectsCard() {
-  const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
+type Project = {
+  id: number;
+  name: string;
+  client: string;
+  deadline: string;
+  status: string;
+  progress: number;
+};
+
+export default function ActiveProjectsCard() {
+  const { data: projects, isLoading } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
   });
 
-  const { data: clients, isLoading: clientsLoading } = useQuery<Client[]>({
-    queryKey: ["/api/clients"],
-  });
-
-  const isLoading = projectsLoading || clientsLoading;
-
-  // Get client name by ID
-  const getClientName = (clientId: number) => {
-    const client = clients?.find((c) => c.id === clientId);
-    return client?.name || "Unknown Client";
-  };
-
-  // Get icon based on project name
-  const getProjectIcon = (projectName: string) => {
-    const name = projectName.toLowerCase();
-    if (name.includes("website") || name.includes("web")) {
-      return <Laptop className="h-4 w-4" />;
-    } else if (name.includes("mobile") || name.includes("app")) {
-      return <Smartphone className="h-4 w-4" />;
-    } else {
-      return <PenTool className="h-4 w-4" />;
-    }
-  };
-
-  // Get status style
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case "in_progress":
-        return "bg-green-100 text-green-800";
-      case "on_hold":
-        return "bg-yellow-100 text-yellow-800";
-      case "not_started":
-        return "bg-blue-100 text-blue-800";
-      case "completed":
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  // Format status text
-  const formatStatus = (status: string) => {
-    switch (status) {
-      case "in_progress":
-        return "On Track";
-      case "on_hold":
-        return "At Risk";
-      case "not_started":
-        return "Not Started";
-      case "completed":
-        return "Completed";
-      default:
-        return status;
-    }
-  };
+  // Only display active projects, limited to 5
+  const activeProjects = projects
+    ? projects
+        .filter(project => project.status === "In Progress")
+        .slice(0, 5)
+    : [];
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="p-5 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-gray-800">Active Projects</CardTitle>
-          <Link href="/projects">
-            <a className="text-sm font-medium text-primary hover:text-primary/80">View all</a>
-          </Link>
-        </div>
+    <Card className="h-full">
+      <CardHeader className="flex flex-row items-center justify-between">
+        <CardTitle>Active Projects</CardTitle>
+        <Link href="/projects">
+          <span className="text-sm text-blue-500 hover:underline cursor-pointer">
+            View all
+          </span>
+        </Link>
       </CardHeader>
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Project</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Client</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Deadline</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {isLoading ? (
-              <tr>
-                <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">
-                  Loading projects...
-                </td>
-              </tr>
-            ) : projects && projects.length > 0 ? (
-              projects.slice(0, 3).map((project) => (
-                <tr key={project.id}>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 h-8 w-8 bg-primary-100 text-primary-600 rounded-md flex items-center justify-center">
-                        {getProjectIcon(project.name)}
-                      </div>
-                      <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{project.name}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{getClientName(project.clientId)}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-500">
-                      {project.endDate 
-                        ? format(new Date(project.endDate), "MMM d, yyyy") 
-                        : "No deadline"}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusStyle(project.status)}`}>
-                      {formatStatus(project.status)}
-                    </span>
-                  </td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} className="px-6 py-4 text-center text-sm text-gray-500">
-                  No active projects
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+      <CardContent>
+        {isLoading ? (
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="flex justify-between items-center">
+                <div className="w-1/3 h-5 bg-gray-200 rounded animate-pulse"></div>
+                <div className="w-1/4 h-5 bg-gray-200 rounded animate-pulse"></div>
+              </div>
+            ))}
+          </div>
+        ) : activeProjects.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <p>No active projects</p>
+          </div>
+        ) : (
+          <div className="space-y-5">
+            {activeProjects.map((project) => (
+              <div key={project.id} className="flex flex-col">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <Link href={`/projects/${project.id}`}>
+                      <h3 className="font-medium hover:text-primary hover:underline cursor-pointer">
+                        {project.name}
+                      </h3>
+                    </Link>
+                    <p className="text-sm text-gray-500">{project.client}</p>
+                  </div>
+                  <Badge variant="outline" className="text-xs">
+                    {new Date(project.deadline).toLocaleDateString()}
+                  </Badge>
+                </div>
+                <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+                  <div
+                    className="bg-primary h-2 rounded-full"
+                    style={{ width: `${project.progress}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs text-right mt-1 text-gray-500">{project.progress}% complete</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 }
-
-export default ActiveProjectsCard;
