@@ -114,8 +114,24 @@ export default function Profile() {
   const queryClient = useQueryClient();
   
   // Template loading from API
-  const { data: templateData } = useQuery({
+  const { data: templateData, isLoading: templatesLoading, error: templatesError } = useQuery({
     queryKey: ['/api/event-templates', user?.id],
+    queryFn: async () => {
+      console.log('Fetching templates for user ID:', user?.id);
+      if (!user?.id) {
+        console.log('No user ID available for fetching templates');
+        return [];
+      }
+      const response = await fetch(`/api/event-templates/${user.id}`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.error('Failed to fetch templates:', response.status, errorData);
+        throw new Error(`Failed to fetch templates: ${response.status}`);
+      }
+      const data = await response.json();
+      console.log('Fetched templates:', data);
+      return data;
+    },
     enabled: !!user?.id,
   });
   
@@ -590,14 +606,90 @@ export default function Profile() {
                 Cancel
               </Button>
               <Button 
-                type="submit" 
+                type="button" // Changed from submit to button
                 disabled={createTemplateMutation.isPending || updateTemplateMutation.isPending}
                 onClick={(e) => {
+                  e.preventDefault();
                   console.log("Submit button clicked");
-                  // The actual form submission will happen through the form's onSubmit handler
-                  // This is just for debugging
+                  
+                  // Call the submit handler directly
+                  if (!user || !user.id) {
+                    console.error('Cannot create template: No user ID available');
+                    alert('Please log in to create templates');
+                    return;
+                  }
+                  
+                  const templateData = {
+                    ...templateForm,
+                    userId: user.id,
+                    duration: Number(templateForm.duration),
+                  };
+                  
+                  console.log('Submitting template directly from button:', templateData);
+                  
+                  try {
+                    if (editingTemplate) {
+                      // Direct API call for updating
+                      console.log('Direct update API call for template:', templateData);
+                      fetch(`/api/event-templates/${editingTemplate.id}`, {
+                        method: 'PUT',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(templateData),
+                      })
+                      .then(response => {
+                        if (!response.ok) {
+                          return response.json().then(err => {
+                            throw new Error(JSON.stringify(err));
+                          });
+                        }
+                        return response.json();
+                      })
+                      .then(data => {
+                        console.log('Template updated successfully:', data);
+                        queryClient.invalidateQueries({ queryKey: ['/api/event-templates', user?.id] });
+                        setShowNewTemplateDialog(false);
+                        resetTemplateForm();
+                        setEditingTemplate(null);
+                      })
+                      .catch(error => {
+                        console.error('Error updating template:', error);
+                      });
+                    } else {
+                      // Direct API call for creation
+                      console.log('Direct create API call for template:', templateData);
+                      fetch('/api/event-templates', {
+                        method: 'POST',
+                        headers: {
+                          'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(templateData),
+                      })
+                      .then(response => {
+                        if (!response.ok) {
+                          return response.json().then(err => {
+                            throw new Error(JSON.stringify(err));
+                          });
+                        }
+                        return response.json();
+                      })
+                      .then(data => {
+                        console.log('Template created successfully:', data);
+                        queryClient.invalidateQueries({ queryKey: ['/api/event-templates', user?.id] });
+                        setShowNewTemplateDialog(false);
+                        resetTemplateForm();
+                      })
+                      .catch(error => {
+                        console.error('Error creating template:', error);
+                      });
+                    }
+                  } catch (error) {
+                    console.error('Error in button click handler:', error);
+                  }
                 }}
               >
+                {/* Use a state variable to track API call status */}
                 {editingTemplate ? 'Update Template' : 'Create Template'}
               </Button>
             </DialogFooter>
