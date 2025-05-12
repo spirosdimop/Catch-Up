@@ -301,3 +301,52 @@ export const InvoiceStatus = {
   OVERDUE: 'overdue',
   CANCELED: 'canceled'
 } as const;
+
+// Calendar event type enum
+export const eventTypeEnum = pgEnum("event_type", [
+  "private",
+  "busy",
+  "available",
+  "travel"
+]);
+
+// Calendar events schema
+export const events = pgTable("events", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(), // Using string for userId to support Replit Auth
+  title: text("title").notNull(),
+  description: text("description"),
+  startTime: timestamp("start_time").notNull(),
+  endTime: timestamp("end_time").notNull(),
+  location: text("location"),
+  clientName: text("client_name"),
+  isConfirmed: boolean("is_confirmed").default(false).notNull(),
+  eventType: eventTypeEnum("event_type").default("busy").notNull(),
+  color: text("color"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertEventSchema = createInsertSchema(events).pick({
+  userId: true,
+  title: true,
+  description: true,
+  startTime: true,
+  endTime: true,
+  location: true,
+  clientName: true,
+  isConfirmed: true,
+  eventType: true,
+  color: true,
+});
+
+export type Event = typeof events.$inferSelect;
+export type InsertEvent = z.infer<typeof insertEventSchema>;
+
+// Helper enum for frontend
+export const EventType = {
+  PRIVATE: 'private',
+  BUSY: 'busy',
+  AVAILABLE: 'available',
+  TRAVEL: 'travel'
+} as const;

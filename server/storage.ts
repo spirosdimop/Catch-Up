@@ -20,7 +20,10 @@ import {
   ServiceProvider,
   InsertServiceProvider,
   Service,
-  InsertService
+  InsertService,
+  Event,
+  InsertEvent,
+  EventType
 } from "@shared/schema";
 
 export interface IStorage {
@@ -91,6 +94,13 @@ export interface IStorage {
   createService(service: InsertService): Promise<Service>;
   updateService(id: number, service: Partial<InsertService>): Promise<Service | undefined>;
   deleteService(id: number): Promise<boolean>;
+  
+  // Calendar Event operations
+  getEvents(userId: string): Promise<Event[]>;
+  getEvent(id: number): Promise<Event | undefined>;
+  createEvent(event: InsertEvent): Promise<Event>;
+  updateEvent(id: number, event: Partial<InsertEvent>): Promise<Event | undefined>;
+  deleteEvent(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -101,6 +111,9 @@ export class MemStorage implements IStorage {
   private timeEntries: Map<number, TimeEntry>;
   private invoices: Map<number, Invoice>;
   private invoiceItems: Map<number, InvoiceItem>;
+  private events: Map<number, Event>;
+  private serviceProviders: Map<number, ServiceProvider>;
+  private services: Map<number, Service>;
 
   private userIdCounter: number;
   private clientIdCounter: number;
@@ -109,6 +122,9 @@ export class MemStorage implements IStorage {
   private timeEntryIdCounter: number;
   private invoiceIdCounter: number;
   private invoiceItemIdCounter: number;
+  private eventIdCounter: number;
+  private serviceProviderIdCounter: number;
+  private serviceIdCounter: number;
 
   constructor() {
     this.users = new Map();
