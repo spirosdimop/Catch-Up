@@ -94,15 +94,15 @@ export function Sidebar() {
           {navItems.map((item) => (
             <li key={item.href}>
               <Link href={item.href}>
-                <a className={cn(
-                  "flex items-center px-3 py-2 text-sm font-medium rounded-md",
+                <div className={cn(
+                  "flex items-center px-3 py-2 text-sm font-medium rounded-md cursor-pointer",
                   location === item.href
                     ? "bg-primary-50 text-primary"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 )}>
                   {item.icon}
                   {item.title}
-                </a>
+                </div>
               </Link>
             </li>
           ))}
@@ -131,11 +131,11 @@ export function Sidebar() {
           </div>
           <div className="flex ml-auto">
             <Link href="/settings">
-              <a className="mr-1">
+              <div className="mr-1">
                 <Button variant="ghost" size="icon">
                   <Cog className="h-4 w-4" />
                 </Button>
-              </a>
+              </div>
             </Link>
             {user && (
               <Button 
