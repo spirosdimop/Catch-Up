@@ -66,6 +66,25 @@ export default function Signup() {
       // This is where you would send data to the backend
       console.log("Submitting form data:", formData);
       
+      // Create the user data object for global context
+      const userData = {
+        id: `user-${Date.now()}`, // Generate a temporary ID
+        firstName: formData.firstName || "",
+        lastName: formData.lastName || "",
+        email: formData.email || "",
+        phone: formData.phone || "",
+        businessName: formData.businessName || "",
+        profession: formData.profession || "",
+        locationType: formData.locationType || "",
+        services: formData.services || [],
+        profileImageUrl: `https://ui-avatars.com/api/?name=${encodeURIComponent(
+          `${formData.firstName || ""} ${formData.lastName || ""}`
+        )}&background=6366F1&color=fff`
+      };
+      
+      // Update the user context
+      setUser(userData);
+      
       /*
       // This is commented out for now until we implement the backend
       await apiRequest("/api/service-providers", {
@@ -78,12 +97,12 @@ export default function Signup() {
       */
       
       // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
       // Show success toast
       toast({
         title: "Registration successful!",
-        description: "Your account has been created. You can now log in.",
+        description: "Your account has been created and your data is now available across the app.",
         variant: "default",
       });
 

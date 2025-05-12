@@ -10,10 +10,12 @@ import {
   Settings,
   UserCircle,
   Cog,
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUser } from "@/lib/userContext";
 
 type SidebarNavItem = {
   title: string;
@@ -66,12 +68,14 @@ const navItems: SidebarNavItem[] = [
 
 export function Sidebar() {
   const [location] = useLocation();
+  const { user, clearUser } = useUser();
 
-  // In a real app, you would fetch user data from an API
-  const user = {
-    name: "Alex Johnson",
-    email: "alex@example.com",
-    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+  // Default user data if none is available in context
+  const userData = user || {
+    firstName: "Guest",
+    lastName: "User",
+    email: "guest@example.com",
+    profileImageUrl: "",
   };
 
   return (
@@ -106,16 +110,43 @@ export function Sidebar() {
       <div className="p-4 border-t border-gray-200">
         <div className="flex items-center">
           <Avatar>
-            <AvatarImage src={user.avatarUrl} alt="User profile photo" />
-            <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+            <AvatarImage src={userData.profileImageUrl} alt="User profile photo" />
+            <AvatarFallback>{userData.firstName?.charAt(0)}{userData.lastName?.charAt(0)}</AvatarFallback>
           </Avatar>
-          <div className="ml-3">
-            <p className="text-sm font-medium text-gray-700">{user.name}</p>
-            <p className="text-xs font-medium text-gray-500">{user.email}</p>
+          <div className="ml-3 overflow-hidden">
+            <p className="text-sm font-medium text-gray-700 truncate">
+              {userData.firstName} {userData.lastName}
+            </p>
+            <p className="text-xs font-medium text-gray-500 truncate">
+              {userData.email}
+            </p>
+            {userData.businessName && (
+              <p className="text-xs text-purple-600 truncate">
+                {userData.businessName}
+              </p>
+            )}
           </div>
-          <Button variant="ghost" size="icon" className="ml-auto">
-            <Cog className="h-4 w-4" />
-          </Button>
+          <div className="flex ml-auto">
+            <Link href="/settings">
+              <a className="mr-1">
+                <Button variant="ghost" size="icon">
+                  <Cog className="h-4 w-4" />
+                </Button>
+              </a>
+            </Link>
+            {user && (
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={() => {
+                  clearUser();
+                  window.location.href = "/signup"; // Force full reload to clear state
+                }}
+              >
+                <LogOut className="h-4 w-4 text-red-600" />
+              </Button>
+            )}
+          </div>
         </div>
       </div>
     </aside>

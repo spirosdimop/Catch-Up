@@ -8,22 +8,28 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { UserCircle, Mail, Globe, MapPin, Calendar, Clock, CheckCircle2 } from "lucide-react";
+import { UserCircle, Mail, Globe, MapPin, Calendar, Clock, CheckCircle2, Building, BriefcaseBusiness } from "lucide-react";
 import { format, addDays } from "date-fns";
+import { useUser } from "@/lib/userContext";
 
 export default function Profile() {
   const [tab, setTab] = useState("profile");
+  const { user } = useUser();
   
-  // Mock user profile data
+  // Combined profile data from user context and default values
   const profile = {
-    name: "Alex Johnson",
-    title: "Professional UI/UX Designer",
-    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-    email: "alex@example.com",
-    website: "www.alexdesigns.com",
-    location: "New York, NY",
-    bio: "Professional UI/UX designer with over 8 years of experience creating user-centered designs for web and mobile applications. Specializing in design systems, interaction design, and usability testing.",
-    skills: ["UI Design", "UX Research", "Wireframing", "Prototyping", "User Testing", "Design Systems"],
+    name: user ? `${user.firstName} ${user.lastName}` : "Guest User",
+    title: user?.profession || "Professional Service Provider",
+    avatar: user?.profileImageUrl || "",
+    email: user?.email || "guest@example.com",
+    businessName: user?.businessName || "",
+    website: "www.mywebsite.com", // Default, can be added to user context later
+    location: user?.locationType === "has_shop" ? "Has Office Location" : 
+              user?.locationType === "goes_to_clients" ? "Mobile Service" : 
+              user?.locationType === "both" ? "Office & Mobile Service" : "Location not specified",
+    bio: user ? `${user.profession || 'Professional'} providing services${user.services?.length ? ` including ${user.services.map(s => s.name).join(', ')}` : ''}.` 
+          : "Professional service provider helping clients achieve their goals.",
+    skills: user?.services?.map(s => s.name) || ["Service 1", "Service 2"],
     availability: {
       monday: { morning: true, afternoon: true, evening: false },
       tuesday: { morning: true, afternoon: true, evening: false },
@@ -143,6 +149,12 @@ export default function Profile() {
                     <Mail className="h-5 w-5 text-muted-foreground" />
                     <span>{profile.email}</span>
                   </div>
+                  {profile.businessName && (
+                    <div className="flex items-center gap-2">
+                      <Building className="h-5 w-5 text-muted-foreground" />
+                      <span>{profile.businessName}</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <Globe className="h-5 w-5 text-muted-foreground" />
                     <span>{profile.website}</span>
@@ -151,6 +163,25 @@ export default function Profile() {
                     <MapPin className="h-5 w-5 text-muted-foreground" />
                     <span>{profile.location}</span>
                   </div>
+                  {user?.services && user.services.length > 0 && (
+                    <div className="mt-4">
+                      <h4 className="font-medium mb-2">Services</h4>
+                      <div className="space-y-2">
+                        {user.services.map((service, index) => (
+                          <div key={index} className="border p-3 rounded-md">
+                            <div className="flex justify-between items-center">
+                              <span className="font-medium">{service.name}</span>
+                              <Badge variant="outline">${service.price}</Badge>
+                            </div>
+                            <div className="flex items-center mt-1 text-sm text-muted-foreground">
+                              <Clock className="h-4 w-4 mr-1" />
+                              <span>{service.duration} minutes</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
                 
                 <div>
@@ -310,12 +341,17 @@ export default function Profile() {
                       <form onSubmit={handleBookingSubmit} className="space-y-4">
                         <div className="space-y-2">
                           <Label htmlFor="name">Your Name</Label>
-                          <Input id="name" required />
+                          <Input id="name" required defaultValue={user ? `${user.firstName} ${user.lastName}` : ""} />
                         </div>
                         
                         <div className="space-y-2">
                           <Label htmlFor="email">Email Address</Label>
-                          <Input id="email" type="email" required />
+                          <Input id="email" type="email" required defaultValue={user?.email || ""} />
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor="phone">Phone Number</Label>
+                          <Input id="phone" type="tel" required defaultValue={user?.phone || ""} />
                         </div>
                         
                         <div className="space-y-2">
