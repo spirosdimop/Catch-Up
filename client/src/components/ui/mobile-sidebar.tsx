@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useUser } from "@/lib/userContext";
 
 type MobileSidebarProps = {
   isOpen: boolean;
@@ -27,7 +28,7 @@ type SidebarNavItem = {
 const navItems: SidebarNavItem[] = [
   {
     title: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     icon: <LayoutDashboard className="w-5 h-5 mr-2" />,
   },
   {
@@ -69,12 +70,15 @@ const navItems: SidebarNavItem[] = [
 
 export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
   const [location] = useLocation();
+  const { user } = useUser();
 
-  // In a real app, you would fetch user data from an API
-  const user = {
-    name: "Alex Johnson",
-    email: "alex@example.com",
-    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+  // Default user data if none is available in context
+  const userData = user || {
+    firstName: "Guest",
+    lastName: "User",
+    email: "guest@example.com",
+    profileImageUrl: "",
+    businessName: "",
   };
 
   if (!isOpen) return null;

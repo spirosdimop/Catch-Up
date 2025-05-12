@@ -76,6 +76,8 @@ export function Sidebar() {
     lastName: "User",
     email: "guest@example.com",
     profileImageUrl: "",
+    // Add optional fields that might be expected elsewhere
+    businessName: "",
   };
 
   return (
@@ -120,7 +122,8 @@ export function Sidebar() {
             <p className="text-xs font-medium text-gray-500 truncate">
               {userData.email}
             </p>
-            {userData.businessName && (
+            {/* Business name optional - only shown if available */}
+            {'businessName' in userData && userData.businessName && (
               <p className="text-xs text-purple-600 truncate">
                 {userData.businessName}
               </p>
