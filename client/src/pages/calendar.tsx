@@ -58,7 +58,7 @@ interface CalendarEvent {
   location?: string | null;
   clientName?: string | null;
   isConfirmed: boolean;
-  eventType: 'private' | 'appointment' | 'meeting' | 'travel';
+  eventType: 'private' | 'busy' | 'available' | 'travel';
   color?: string | null;
   allDay?: boolean;
   userId: string;
@@ -83,7 +83,7 @@ export default function CalendarPage() {
       location: "",
       clientName: "",
       isConfirmed: false,
-      eventType: "appointment",
+      eventType: "busy",
       color: "#3b82f6", // Default blue color
     },
   });
@@ -270,7 +270,7 @@ export default function CalendarPage() {
         location: "",
         clientName: "",
         isConfirmed: false,
-        eventType: "appointment",
+        eventType: "busy",
         color: "#3b82f6",
       });
       setOpenEventDialog(true);
@@ -352,7 +352,7 @@ export default function CalendarPage() {
                   location: "",
                   clientName: "",
                   isConfirmed: false,
-                  eventType: "appointment",
+                  eventType: "busy",
                   color: "#3b82f6",
                 });
                 setOpenEventDialog(true);
@@ -483,8 +483,8 @@ export default function CalendarPage() {
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="appointment">Appointment</SelectItem>
-                        <SelectItem value="meeting">Meeting</SelectItem>
+                        <SelectItem value="busy">Busy</SelectItem>
+                        <SelectItem value="available">Available</SelectItem>
                         <SelectItem value="private">Private</SelectItem>
                         <SelectItem value="travel">Travel</SelectItem>
                       </SelectContent>
