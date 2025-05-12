@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageTitle } from "@/components/ui/page-title";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -8,9 +8,31 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { UserCircle, Mail, Globe, MapPin, Calendar, Clock, CheckCircle2, Building, BriefcaseBusiness } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Switch } from "@/components/ui/switch";
+import { Separator } from "@/components/ui/separator";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { 
+  UserCircle, 
+  Mail, 
+  Globe, 
+  MapPin, 
+  Calendar, 
+  Clock, 
+  CheckCircle2, 
+  Building, 
+  BriefcaseBusiness 
+} from "lucide-react";
 import { format, addDays } from "date-fns";
 import { useUser } from "@/lib/userContext";
+import { EventTemplate } from "@shared/schema";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Profile() {
   const [tab, setTab] = useState("profile");
@@ -112,9 +134,11 @@ export default function Profile() {
       />
       
       <Tabs defaultValue="profile" className="w-full" value={tab} onValueChange={setTab}>
-        <TabsList className="grid grid-cols-2 w-[400px]">
+        <TabsList className="grid grid-cols-4 w-[600px]">
           <TabsTrigger value="profile">Profile</TabsTrigger>
           <TabsTrigger value="booking">Booking</TabsTrigger>
+          <TabsTrigger value="templates">Event Templates</TabsTrigger>
+          <TabsTrigger value="availability">Availability</TabsTrigger>
         </TabsList>
         
         {/* Profile Tab */}
@@ -367,6 +391,151 @@ export default function Profile() {
                   )}
                 </div>
               )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Event Templates Tab */}
+        <TabsContent value="templates" className="space-y-6">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <div>
+                <CardTitle>Event Templates</CardTitle>
+                <CardDescription>
+                  Create reusable event templates for quick scheduling
+                </CardDescription>
+              </div>
+              <Button variant="outline" className="gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 5v14M5 12h14"/>
+                </svg>
+                Add Template
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
+                {/* Empty state */}
+                <div className="col-span-full py-12 text-center">
+                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
+                    <Calendar className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-lg font-medium">No templates yet</h3>
+                  <p className="text-muted-foreground mt-2 mb-4">
+                    Create your first event template to enable quick scheduling
+                  </p>
+                  <Button>
+                    Create Template
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Availability Tab */}
+        <TabsContent value="availability" className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Manage Availability</CardTitle>
+              <CardDescription>
+                Set your regular availability for client bookings
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="flex flex-col space-y-4">
+                  {Object.entries(profile.availability).map(([day, slots]) => (
+                    <div key={day} className="flex flex-col space-y-2">
+                      <div className="flex items-center justify-between">
+                        <h3 className="font-medium capitalize">{day}</h3>
+                        <div className="flex items-center space-x-2">
+                          <Switch 
+                            id={`${day}-toggle`} 
+                            checked={slots.morning || slots.afternoon || slots.evening}
+                          />
+                          <Label htmlFor={`${day}-toggle`}>Available</Label>
+                        </div>
+                      </div>
+                      
+                      {(slots.morning || slots.afternoon || slots.evening) && (
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pl-4 pt-2">
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`${day}-morning`} 
+                              checked={slots.morning}
+                            />
+                            <Label htmlFor={`${day}-morning`}>Morning (9am - 12pm)</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`${day}-afternoon`} 
+                              checked={slots.afternoon}
+                            />
+                            <Label htmlFor={`${day}-afternoon`}>Afternoon (1pm - 5pm)</Label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Checkbox 
+                              id={`${day}-evening`} 
+                              checked={slots.evening}
+                            />
+                            <Label htmlFor={`${day}-evening`}>Evening (5pm - 8pm)</Label>
+                          </div>
+                        </div>
+                      )}
+                      
+                      <Separator className="mt-2" />
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="flex flex-col space-y-4">
+                  <h3 className="font-medium">Booking Settings</h3>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                      <Label htmlFor="min-notice">Minimum notice time</Label>
+                      <Select defaultValue="1h">
+                        <SelectTrigger id="min-notice">
+                          <SelectValue placeholder="Select minimum notice" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="30m">30 minutes</SelectItem>
+                          <SelectItem value="1h">1 hour</SelectItem>
+                          <SelectItem value="2h">2 hours</SelectItem>
+                          <SelectItem value="4h">4 hours</SelectItem>
+                          <SelectItem value="1d">1 day</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        How far in advance clients need to book
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="buffer-time">Buffer time between appointments</Label>
+                      <Select defaultValue="15m">
+                        <SelectTrigger id="buffer-time">
+                          <SelectValue placeholder="Select buffer time" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="0">No buffer</SelectItem>
+                          <SelectItem value="5m">5 minutes</SelectItem>
+                          <SelectItem value="10m">10 minutes</SelectItem>
+                          <SelectItem value="15m">15 minutes</SelectItem>
+                          <SelectItem value="30m">30 minutes</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <p className="text-xs text-muted-foreground">
+                        Time between consecutive appointments
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="pt-4">
+                  <Button>Save Availability</Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
