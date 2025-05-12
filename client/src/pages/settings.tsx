@@ -1,14 +1,59 @@
+import { useState } from "react";
 import { PageTitle } from "@/components/ui/page-title";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings as SettingsIcon, User, Bell, Shield, Palette } from "lucide-react";
+import { Settings as SettingsIcon, User, Bell, Shield, Palette, Briefcase, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { useUser } from "@/lib/userContext";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Settings() {
+  const { user, updateUser } = useUser();
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    firstName: user?.firstName || "",
+    lastName: user?.lastName || "",
+    email: user?.email || "",
+    businessName: user?.businessName || "",
+    phone: user?.phone || "",
+    profession: user?.profession || ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  const handleSaveChanges = () => {
+    setIsSubmitting(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+      // Update user context with form data
+      if (user) {
+        updateUser({
+          ...formData
+        });
+      }
+      
+      toast({
+        title: "Settings updated",
+        description: "Your account information has been updated successfully.",
+        variant: "default",
+      });
+      
+      setIsSubmitting(false);
+    }, 800);
+  };
+  
   return (
     <div className="space-y-6 p-6">
       <PageTitle 
@@ -50,29 +95,70 @@ export default function Settings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" defaultValue="Alex" />
+                    <Input 
+                      id="firstName" 
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                    />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" defaultValue="Johnson" />
+                    <Input 
+                      id="lastName" 
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                    />
                   </div>
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" defaultValue="alex@example.com" />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    value={formData.email}
+                    onChange={handleInputChange}
+                  />
                 </div>
                 
                 <div className="space-y-2">
-                  <Label htmlFor="company">Company Name</Label>
-                  <Input id="company" defaultValue="Freelance Studios" />
+                  <Label htmlFor="phone">Phone Number</Label>
+                  <Input 
+                    id="phone" 
+                    type="tel" 
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="businessName">Business Name</Label>
+                  <Input 
+                    id="businessName"
+                    value={formData.businessName}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="profession">Profession</Label>
+                  <Input 
+                    id="profession"
+                    value={formData.profession}
+                    onChange={handleInputChange}
+                  />
                 </div>
               </div>
               
               <Separator />
               
               <div className="flex justify-end">
-                <Button>Save Changes</Button>
+                <Button 
+                  onClick={handleSaveChanges}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Saving..." : "Save Changes"}
+                </Button>
               </div>
             </CardContent>
           </Card>
