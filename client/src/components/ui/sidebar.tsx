@@ -8,6 +8,7 @@ import {
   BookOpen,
   Bot,
   Settings,
+  UserCircle,
   Cog,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -45,6 +46,11 @@ const navItems: SidebarNavItem[] = [
     title: "Calendar",
     href: "/calendar",
     icon: <Calendar className="w-5 h-5 mr-2" />,
+  },
+  {
+    title: "Profile",
+    href: "/profile",
+    icon: <UserCircle className="w-5 h-5 mr-2" />,
   },
   {
     title: "AI Assistant",

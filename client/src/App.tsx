@@ -13,6 +13,7 @@ import Settings from "@/pages/settings";
 import Messages from "@/pages/messages";
 import Bookings from "@/pages/bookings";
 import Calendar from "@/pages/calendar";
+import Profile from "@/pages/profile";
 import AIAssistant from "@/pages/ai-assistant";
 
 function Router() {
@@ -24,6 +25,7 @@ function Router() {
         <Route path="/bookings" component={Bookings} />
         <Route path="/messages" component={Messages} />
         <Route path="/calendar" component={Calendar} />
+        <Route path="/profile" component={Profile} />
         <Route path="/ai-assistant" component={AIAssistant} />
         <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
