@@ -81,14 +81,18 @@ export default function Profile() {
   }, [templateData]);
   
   // Event template handlers
-  const handleEditTemplate = (id: number) => {
+  const handleEditTemplate = (template: EventTemplate) => {
     // Implement edit template functionality
-    console.log("Edit template:", id);
+    console.log("Edit template:", template);
+    // Show template edit dialog (to be implemented)
+    setShowNewTemplateDialog(true);
+    // To be implemented: set selected template for editing
   };
   
   const handleDeleteTemplate = (id: number) => {
     // Implement delete template functionality
     console.log("Delete template:", id);
+    // To be implemented: call API to delete template and update state
   };
   
   // Availability handlers
@@ -463,19 +467,77 @@ export default function Profile() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
-                {/* Empty state */}
-                <div className="col-span-full py-12 text-center">
-                  <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
-                    <Calendar className="h-6 w-6 text-muted-foreground" />
+                {templates.length === 0 ? (
+                  /* Empty state */
+                  <div className="col-span-full py-12 text-center">
+                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
+                      <Calendar className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <h3 className="text-lg font-medium">No templates yet</h3>
+                    <p className="text-muted-foreground mt-2 mb-4">
+                      Create your first event template to enable quick scheduling
+                    </p>
+                    <Button onClick={() => setShowNewTemplateDialog(true)}>
+                      Create Template
+                    </Button>
                   </div>
-                  <h3 className="text-lg font-medium">No templates yet</h3>
-                  <p className="text-muted-foreground mt-2 mb-4">
-                    Create your first event template to enable quick scheduling
-                  </p>
-                  <Button onClick={() => setShowNewTemplateDialog(true)}>
-                    Create Template
-                  </Button>
-                </div>
+                ) : (
+                  /* Template cards */
+                  templates.map(template => (
+                    <Card key={template.id} className="overflow-hidden">
+                      <CardHeader className="p-4 pb-2">
+                        <div className="flex items-start justify-between">
+                          <CardTitle className="text-md">{template.name}</CardTitle>
+                          <div className="flex gap-2 ml-auto">
+                            <Button 
+                              variant="ghost" 
+                              size="icon"
+                              onClick={() => handleEditTemplate(template)}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                                <path d="m15 5 4 4"/>
+                              </svg>
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="icon" 
+                              className="text-destructive"
+                              onClick={() => handleDeleteTemplate(template.id)}
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M3 6h18"/>
+                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                                <line x1="10" x2="10" y1="11" y2="17"/>
+                                <line x1="14" x2="14" y1="11" y2="17"/>
+                              </svg>
+                            </Button>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="p-4 pt-2">
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
+                          <Clock className="h-4 w-4" />
+                          <span>{template.duration} minutes</span>
+                        </div>
+                        {template.description && (
+                          <p className="text-sm mt-2">{template.description}</p>
+                        )}
+                        <Badge 
+                          variant="outline" 
+                          className="mt-3" 
+                          style={{ 
+                            backgroundColor: template.color || '#f0f0f0',
+                            color: template.color ? '#fff' : 'inherit'
+                          }}
+                        >
+                          {template.eventType}
+                        </Badge>
+                      </CardContent>
+                    </Card>
+                  ))
+                )}
               </div>
             </CardContent>
           </Card>
