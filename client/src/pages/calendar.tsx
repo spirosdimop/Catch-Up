@@ -85,6 +85,9 @@ export default function CalendarPage() {
       description: "",
       location: "",
       clientName: "",
+      clientId: null,
+      projectId: null,
+      invoiceId: null,
       isConfirmed: false,
       eventType: "busy",
       color: "#3b82f6", // Default blue color
@@ -92,9 +95,27 @@ export default function CalendarPage() {
   });
 
   // Query to fetch events
-  const { data: events = [], isLoading, isError } = useQuery({
+  const { data: events = [], isLoading: eventsLoading, isError: eventsError } = useQuery({
     queryKey: ['/api/events'],
     staleTime: 60000, // 1 minute
+  });
+  
+  // Query to fetch clients for linking
+  const { data: clients = [] } = useQuery({
+    queryKey: ['/api/clients'],
+    staleTime: 300000, // 5 minutes
+  });
+  
+  // Query to fetch projects for linking
+  const { data: projects = [] } = useQuery({
+    queryKey: ['/api/projects'],
+    staleTime: 300000, // 5 minutes
+  });
+  
+  // Query to fetch invoices for linking
+  const { data: invoices = [] } = useQuery({
+    queryKey: ['/api/invoices'],
+    staleTime: 300000, // 5 minutes
   });
 
   // Mutation to create event
@@ -131,6 +152,9 @@ export default function CalendarPage() {
         endTime: endDate.toISOString(),
         location: values.location || null,
         clientName: values.clientName || null,
+        clientId: values.clientId || null,
+        projectId: values.projectId || null,
+        invoiceId: values.invoiceId || null,
         isConfirmed: Boolean(values.isConfirmed),
         eventType: values.eventType || "busy",
         color: values.color || "#3b82f6",
@@ -435,11 +459,11 @@ export default function CalendarPage() {
 
         <Card className="border rounded-lg shadow">
           <CardContent className="p-4 overflow-hidden h-[calc(100vh-200px)]">
-            {isLoading ? (
+            {eventsLoading ? (
               <div className="flex justify-center items-center h-full">
                 <p>Loading calendar...</p>
               </div>
-            ) : isError ? (
+            ) : eventsError ? (
               <div className="flex justify-center items-center h-full">
                 <p>Error loading events. Please try again later.</p>
               </div>
