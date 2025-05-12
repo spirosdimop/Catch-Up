@@ -100,6 +100,8 @@ export default function Profile() {
   // Create template mutation
   const createTemplateMutation = useMutation({
     mutationFn: async (newTemplate: Partial<EventTemplate>) => {
+      console.log('Submitting template data:', newTemplate);
+      
       const response = await fetch('/api/event-templates', {
         method: 'POST',
         headers: {
@@ -109,16 +111,24 @@ export default function Profile() {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to create template');
+        const errorData = await response.json().catch(() => null);
+        console.error('Template creation failed:', response.status, errorData);
+        throw new Error(`Failed to create template: ${response.status} ${errorData ? JSON.stringify(errorData) : ''}`);
       }
       
-      return await response.json();
+      const result = await response.json();
+      console.log('Template created successfully:', result);
+      return result;
     },
     onSuccess: () => {
+      console.log('Template creation successful, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['/api/event-templates', user?.id] });
       setShowNewTemplateDialog(false);
       resetTemplateForm();
     },
+    onError: (error) => {
+      console.error('Template creation error:', error);
+    }
   });
   
   // Update template mutation
