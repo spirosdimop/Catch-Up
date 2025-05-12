@@ -1,6 +1,7 @@
-import { Router, type Express } from "express";
+import { Router, type Express, type Request, type Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { processSchedulingRequest, generateScheduleSummary, SchedulingResponse } from "./openai";
 import { 
   insertClientSchema, 
   insertProjectSchema, 
