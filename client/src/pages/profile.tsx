@@ -84,7 +84,7 @@ export default function Profile() {
     duration: 30,
     description: '',
     location: '',
-    eventType: 'client_meeting',
+    eventType: 'client_meeting' as "private" | "busy" | "available" | "travel" | "client_meeting" | "consultation" | "project_work" | "follow_up" | "training",
     isPublic: true,
     color: '#4f46e5', // Default indigo color
   });
