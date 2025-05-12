@@ -7,24 +7,25 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 import AppShell from "@/components/layout/app-shell";
 import NotFound from "@/pages/not-found";
 import Dashboard from "@/pages/dashboard";
-import Projects from "@/pages/projects";
 import Clients from "@/pages/clients";
-import Tasks from "@/pages/tasks";
-import Invoices from "@/pages/invoices";
-import TimeTracking from "@/pages/time-tracking";
-import Reports from "@/pages/reports";
+// Import placeholder pages for the new routes
+import Settings from "@/pages/settings";
+import Messages from "@/pages/messages";
+import Bookings from "@/pages/bookings";
+import Calendar from "@/pages/calendar";
+import AIAssistant from "@/pages/ai-assistant";
 
 function Router() {
   return (
     <AppShell>
       <Switch>
         <Route path="/" component={Dashboard} />
-        <Route path="/projects" component={Projects} />
         <Route path="/clients" component={Clients} />
-        <Route path="/tasks" component={Tasks} />
-        <Route path="/invoices" component={Invoices} />
-        <Route path="/time-tracking" component={TimeTracking} />
-        <Route path="/reports" component={Reports} />
+        <Route path="/bookings" component={Bookings} />
+        <Route path="/messages" component={Messages} />
+        <Route path="/calendar" component={Calendar} />
+        <Route path="/ai-assistant" component={AIAssistant} />
+        <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>
     </AppShell>

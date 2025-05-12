@@ -2,12 +2,12 @@ import { Link, useLocation } from "wouter";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
-  LayoutPanelLeft,
   Users,
-  CheckSquare,
-  FileText,
-  Clock,
-  BarChart3,
+  Calendar,
+  MessageSquare,
+  BookOpen,
+  Bot,
+  Settings,
   Cog,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -27,34 +27,34 @@ const navItems: SidebarNavItem[] = [
     icon: <LayoutDashboard className="w-5 h-5 mr-2" />,
   },
   {
-    title: "Projects",
-    href: "/projects",
-    icon: <LayoutPanelLeft className="w-5 h-5 mr-2" />,
-  },
-  {
     title: "Clients",
     href: "/clients",
     icon: <Users className="w-5 h-5 mr-2" />,
   },
   {
-    title: "Tasks",
-    href: "/tasks",
-    icon: <CheckSquare className="w-5 h-5 mr-2" />,
+    title: "Bookings",
+    href: "/bookings",
+    icon: <BookOpen className="w-5 h-5 mr-2" />,
   },
   {
-    title: "Invoices",
-    href: "/invoices",
-    icon: <FileText className="w-5 h-5 mr-2" />,
+    title: "Messages",
+    href: "/messages",
+    icon: <MessageSquare className="w-5 h-5 mr-2" />,
   },
   {
-    title: "Time Tracking",
-    href: "/time-tracking",
-    icon: <Clock className="w-5 h-5 mr-2" />,
+    title: "Calendar",
+    href: "/calendar",
+    icon: <Calendar className="w-5 h-5 mr-2" />,
   },
   {
-    title: "Reports",
-    href: "/reports",
-    icon: <BarChart3 className="w-5 h-5 mr-2" />,
+    title: "AI Assistant",
+    href: "/ai-assistant",
+    icon: <Bot className="w-5 h-5 mr-2" />,
+  },
+  {
+    title: "Settings",
+    href: "/settings",
+    icon: <Settings className="w-5 h-5 mr-2" />,
   },
 ];
 
@@ -72,7 +72,7 @@ export function Sidebar() {
     <aside className="hidden md:flex flex-col bg-white border-r border-gray-200 w-64 transition-all duration-300 ease-in-out">
       <div className="p-6 border-b border-gray-200">
         <h1 className="text-2xl font-semibold text-primary flex items-center">
-          <CheckSquare className="mr-2" />
+          <Bot className="mr-2" />
           FreelanceFlow
         </h1>
       </div>

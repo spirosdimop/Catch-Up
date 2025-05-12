@@ -14,8 +14,8 @@ import {
   Bell,
   Menu,
   Search,
+  Bot
 } from "lucide-react";
-import { CheckSquare } from "lucide-react";
 
 type HeaderProps = {
   onMenuToggle: () => void;
@@ -37,7 +37,7 @@ export function Header({ onMenuToggle }: HeaderProps) {
             <Menu className="h-5 w-5" />
           </Button>
           <h1 className="text-lg font-semibold text-primary ml-2 flex items-center">
-            <CheckSquare className="mr-2 h-5 w-5" />
+            <Bot className="mr-2 h-5 w-5" />
             FreelanceFlow
           </h1>
         </div>
