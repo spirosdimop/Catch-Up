@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,7 +8,7 @@ import { SignupFormData } from "@/pages/signup";
 
 // Schema for this step
 const formSchema = z.object({
-  firstName: z.string().min(1, "First name is required")
+  firstName: z.string().min(2, "First name must be at least 2 characters")
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -34,8 +33,8 @@ const StepOne = ({ formData, onNext }: StepOneProps) => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-xl font-bold">What's your name?</h3>
-        <p className="text-gray-500 mt-1">Let's start with your first name</p>
+        <h3 className="text-xl font-bold">What's your first name?</h3>
+        <p className="text-gray-500 mt-1">We'll personalize your experience</p>
       </div>
 
       <Form {...form}>

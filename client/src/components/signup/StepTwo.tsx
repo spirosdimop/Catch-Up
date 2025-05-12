@@ -8,7 +8,7 @@ import { SignupFormData } from "@/pages/signup";
 
 // Schema for this step
 const formSchema = z.object({
-  lastName: z.string().min(1, "Last name is required")
+  lastName: z.string().min(2, "Last name must be at least 2 characters")
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -34,8 +34,8 @@ const StepTwo = ({ formData, onNext, onPrev }: StepTwoProps) => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-xl font-bold">What's your surname?</h3>
-        <p className="text-gray-500 mt-1">Please enter your last name</p>
+        <h3 className="text-xl font-bold">What's your last name?</h3>
+        <p className="text-gray-500 mt-1">This helps us address you properly</p>
       </div>
 
       <Form {...form}>
