@@ -188,10 +188,20 @@ export default function Profile() {
   // Handle template form input change
   const handleTemplateInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setTemplateForm(prev => ({
-      ...prev,
-      [name]: value,
-    }));
+    
+    if (name === 'eventType') {
+      // Ensure eventType is properly typed
+      const eventTypeValue = value as "private" | "busy" | "available" | "travel" | "client_meeting" | "consultation" | "project_work" | "follow_up" | "training";
+      setTemplateForm(prev => ({
+        ...prev,
+        [name]: eventTypeValue
+      }));
+    } else {
+      setTemplateForm(prev => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
   
   // Handle checkbox change
@@ -414,7 +424,10 @@ export default function Profile() {
                 <Select 
                   name="eventType" 
                   value={templateForm.eventType}
-                  onValueChange={(value) => setTemplateForm(prev => ({ ...prev, eventType: value }))}
+                  onValueChange={(value) => {
+                    const eventTypeValue = value as "private" | "busy" | "available" | "travel" | "client_meeting" | "consultation" | "project_work" | "follow_up" | "training";
+                    setTemplateForm(prev => ({ ...prev, eventType: eventTypeValue }));
+                  }}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select event type" />
