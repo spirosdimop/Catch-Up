@@ -271,8 +271,8 @@ export default function Profile() {
   
   // Handle template submit
   const handleTemplateSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
+    e.preventDefault(); // Prevent the default form submission
+    console.log('Form submission event:', e);
     console.log('Form submission, user context:', user);
     
     if (!user || !user.id) {
@@ -289,13 +289,19 @@ export default function Profile() {
     
     console.log('Prepared template data for submission:', templateData);
     
-    if (editingTemplate) {
-      updateTemplateMutation.mutate({
-        ...templateData,
-        id: editingTemplate.id,
-      });
-    } else {
-      createTemplateMutation.mutate(templateData);
+    try {
+      if (editingTemplate) {
+        console.log('Updating existing template with ID:', editingTemplate.id);
+        updateTemplateMutation.mutate({
+          ...templateData,
+          id: editingTemplate.id,
+        });
+      } else {
+        console.log('Creating new template');
+        createTemplateMutation.mutate(templateData);
+      }
+    } catch (error) {
+      console.error('Error submitting template form:', error);
     }
   };
   
@@ -408,7 +414,26 @@ export default function Profile() {
     <div className="space-y-6">
       
       {/* Template create/edit dialog */}
-      <Dialog open={showNewTemplateDialog} onOpenChange={setShowNewTemplateDialog}>
+      <Dialog 
+        open={showNewTemplateDialog} 
+        onOpenChange={(open) => {
+          console.log('Dialog open state changing to:', open);
+          if (!open) {
+            // Only allow closing if we're not in the middle of a mutation
+            if (!createTemplateMutation.isPending && !updateTemplateMutation.isPending) {
+              setShowNewTemplateDialog(false);
+              resetTemplateForm();
+              setEditingTemplate(null);
+            } else {
+              console.log('Cannot close dialog during mutation');
+              // Prevent dialog from closing during mutation
+              return;
+            }
+          } else {
+            setShowNewTemplateDialog(true);
+          }
+        }}
+      >
         <DialogContent className="sm:max-w-[500px]">
           <DialogHeader>
             <DialogTitle>
@@ -553,17 +578,25 @@ export default function Profile() {
             </div>
             
             <DialogFooter>
-              <DialogClose asChild>
-                <Button type="button" variant="outline" onClick={() => {
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => {
                   setEditingTemplate(null);
                   resetTemplateForm();
-                }}>
-                  Cancel
-                </Button>
-              </DialogClose>
+                  setShowNewTemplateDialog(false);
+                }}
+              >
+                Cancel
+              </Button>
               <Button 
                 type="submit" 
                 disabled={createTemplateMutation.isPending || updateTemplateMutation.isPending}
+                onClick={(e) => {
+                  console.log("Submit button clicked");
+                  // The actual form submission will happen through the form's onSubmit handler
+                  // This is just for debugging
+                }}
               >
                 {editingTemplate ? 'Update Template' : 'Create Template'}
               </Button>
