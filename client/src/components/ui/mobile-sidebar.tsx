@@ -134,12 +134,22 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
         <div className="p-4 border-t border-gray-200">
           <div className="flex items-center">
             <Avatar>
-              <AvatarImage src={user.avatarUrl} alt="User profile photo" />
-              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+              <AvatarImage src={userData.profileImageUrl} alt="User profile photo" />
+              <AvatarFallback>{userData.firstName.charAt(0)}</AvatarFallback>
             </Avatar>
-            <div className="ml-3">
-              <p className="text-sm font-medium text-gray-700">{user.name}</p>
-              <p className="text-xs font-medium text-gray-500">{user.email}</p>
+            <div className="ml-3 overflow-hidden">
+              <p className="text-sm font-medium text-gray-700 truncate">
+                {userData.firstName} {userData.lastName}
+              </p>
+              <p className="text-xs font-medium text-gray-500 truncate">
+                {userData.email}
+              </p>
+              {/* Business name optional - only shown if available */}
+              {'businessName' in userData && userData.businessName && (
+                <p className="text-xs text-purple-600 truncate">
+                  {userData.businessName}
+                </p>
+              )}
             </div>
           </div>
         </div>
