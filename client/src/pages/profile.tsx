@@ -62,6 +62,55 @@ export default function Profile() {
       sunday: { morning: false, afternoon: false, evening: false },
     }
   };
+  
+  // State for event templates and dialog
+  const [showNewTemplateDialog, setShowNewTemplateDialog] = useState(false);
+  const [templates, setTemplates] = useState<EventTemplate[]>([]);
+  
+  // Template loading from API
+  const { data: templateData } = useQuery({
+    queryKey: ['/api/event-templates', user?.id],
+    enabled: !!user?.id,
+  });
+  
+  // Load templates when data is available
+  useEffect(() => {
+    if (templateData && Array.isArray(templateData)) {
+      setTemplates(templateData);
+    }
+  }, [templateData]);
+  
+  // Event template handlers
+  const handleEditTemplate = (id: number) => {
+    // Implement edit template functionality
+    console.log("Edit template:", id);
+  };
+  
+  const handleDeleteTemplate = (id: number) => {
+    // Implement delete template functionality
+    console.log("Delete template:", id);
+  };
+  
+  // Availability handlers
+  const handleDayToggle = (day: string, checked: boolean) => {
+    const updatedProfile = {...profile};
+    updatedProfile.availability[day as keyof typeof profile.availability] = {
+      morning: checked,
+      afternoon: checked,
+      evening: checked
+    };
+    // For a real application, this would trigger an API call to update the user's availability
+    console.log("Updated availability for", day, ":", checked);
+  };
+  
+  const handleSlotToggle = (day: string, slot: string, checked: boolean) => {
+    const updatedProfile = {...profile};
+    const dayAvailability = {...updatedProfile.availability[day as keyof typeof profile.availability]};
+    dayAvailability[slot as keyof typeof dayAvailability] = checked;
+    updatedProfile.availability[day as keyof typeof profile.availability] = dayAvailability;
+    // For a real application, this would trigger an API call to update the user's availability
+    console.log("Updated slot", slot, "for", day, ":", checked);
+  };
 
   // Generate time slots for the booking system
   const generateTimeSlots = () => {
@@ -405,7 +454,7 @@ export default function Profile() {
                   Create reusable event templates for quick scheduling
                 </CardDescription>
               </div>
-              <Button variant="outline" className="gap-1">
+              <Button variant="outline" className="gap-1" onClick={() => setShowNewTemplateDialog(true)}>
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M12 5v14M5 12h14"/>
                 </svg>
@@ -423,7 +472,7 @@ export default function Profile() {
                   <p className="text-muted-foreground mt-2 mb-4">
                     Create your first event template to enable quick scheduling
                   </p>
-                  <Button>
+                  <Button onClick={() => setShowNewTemplateDialog(true)}>
                     Create Template
                   </Button>
                 </div>
@@ -452,6 +501,7 @@ export default function Profile() {
                           <Switch 
                             id={`${day}-toggle`} 
                             checked={slots.morning || slots.afternoon || slots.evening}
+                            onCheckedChange={(checked) => handleDayToggle(day, checked)}
                           />
                           <Label htmlFor={`${day}-toggle`}>Available</Label>
                         </div>
@@ -463,6 +513,7 @@ export default function Profile() {
                             <Checkbox 
                               id={`${day}-morning`} 
                               checked={slots.morning}
+                              onCheckedChange={(checked) => handleSlotToggle(day, 'morning', !!checked)}
                             />
                             <Label htmlFor={`${day}-morning`}>Morning (9am - 12pm)</Label>
                           </div>
@@ -470,6 +521,7 @@ export default function Profile() {
                             <Checkbox 
                               id={`${day}-afternoon`} 
                               checked={slots.afternoon}
+                              onCheckedChange={(checked) => handleSlotToggle(day, 'afternoon', !!checked)}
                             />
                             <Label htmlFor={`${day}-afternoon`}>Afternoon (1pm - 5pm)</Label>
                           </div>
@@ -477,6 +529,7 @@ export default function Profile() {
                             <Checkbox 
                               id={`${day}-evening`} 
                               checked={slots.evening}
+                              onCheckedChange={(checked) => handleSlotToggle(day, 'evening', !!checked)}
                             />
                             <Label htmlFor={`${day}-evening`}>Evening (5pm - 8pm)</Label>
                           </div>
