@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 
+// Message types
 type Message = {
   id: number;
   text: string;
@@ -17,7 +18,25 @@ type Message = {
   timestamp: Date;
 }
 
+// Response types from OpenAI endpoints
+type SchedulingAction = 'create' | 'reschedule' | 'cancel' | 'suggest_times';
+type SchedulingStatus = 'confirmed' | 'pending' | 'conflict' | 'cancelled';
+
+interface SchedulingResponse {
+  action: SchedulingAction;
+  event_title?: string;
+  start_time?: string;
+  end_time?: string;
+  status: SchedulingStatus;
+  notes: string;
+  event_id?: number;
+}
+
 export default function AIAssistant() {
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("chat");
+  
+  // General chat state
   const [inputValue, setInputValue] = useState("");
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -27,8 +46,25 @@ export default function AIAssistant() {
       timestamp: new Date()
     }
   ]);
+  
+  // Scheduling assistant state
+  const [schedulingRequest, setSchedulingRequest] = useState("");
+  const [isProcessingScheduling, setIsProcessingScheduling] = useState(false);
+  const [schedulingResponse, setSchedulingResponse] = useState<SchedulingResponse | null>(null);
+  
+  // Schedule summary state
+  const [timeframe, setTimeframe] = useState("upcoming week");
+  const [isFetchingSummary, setIsFetchingSummary] = useState(false);
+  const [scheduleSummary, setScheduleSummary] = useState("");
+  
+  // Fetch user's calendar events for reference
+  const { data: events, isLoading: isLoadingEvents } = useQuery({
+    queryKey: ['/api/events'],
+    refetchOnWindowFocus: false,
+  });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Handle general chat submission
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!inputValue.trim()) return;
@@ -44,7 +80,8 @@ export default function AIAssistant() {
     setMessages(prev => [...prev, userMessage]);
     setInputValue("");
     
-    // Simulate AI response
+    // In a real implementation, this would call the OpenAI API
+    // But for now we'll simulate a response after a delay
     setTimeout(() => {
       const aiResponses = [
         "I can help you with that! Let me look into it.",
@@ -65,6 +102,92 @@ export default function AIAssistant() {
       setMessages(prev => [...prev, aiMessage]);
     }, 1000);
   };
+  
+  // Handle scheduling request submission
+  const handleSchedulingRequest = async () => {
+    if (!schedulingRequest.trim()) {
+      toast({
+        title: "Empty request",
+        description: "Please enter a scheduling request to process.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsProcessingScheduling(true);
+    setSchedulingResponse(null);
+    
+    try {
+      const response = await fetch('/api/ai/scheduling', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          request: schedulingRequest,
+          schedule: events, // Pass the user's existing schedule
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to process scheduling request');
+      }
+      
+      const data = await response.json();
+      setSchedulingResponse(data);
+      
+      // Show confirmation toast based on action
+      if (data.action === 'create' && data.status === 'confirmed') {
+        toast({
+          title: "Event Created",
+          description: `Event "${data.event_title}" has been scheduled.`,
+        });
+      }
+    } catch (error) {
+      console.error('Error processing scheduling request:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process your scheduling request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingScheduling(false);
+    }
+  };
+  
+  // Handle schedule summary request
+  const handleScheduleSummary = async () => {
+    setIsFetchingSummary(true);
+    setScheduleSummary("");
+    
+    try {
+      const response = await fetch('/api/ai/schedule-summary', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          timeframe: timeframe,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate schedule summary');
+      }
+      
+      const { summary } = await response.json();
+      setScheduleSummary(summary || "No scheduled events found for this timeframe.");
+    } catch (error) {
+      console.error('Error generating schedule summary:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate your schedule summary. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsFetchingSummary(false);
+    }
+  };
 
   return (
     <div className="space-y-6 p-6">
@@ -74,46 +197,202 @@ export default function AIAssistant() {
         icon={<Bot className="h-6 w-6 text-primary" />}
       />
       
-      <Card className="h-[calc(100vh-220px)] flex flex-col">
-        <CardHeader>
-          <CardTitle>Virtual Assistant</CardTitle>
-        </CardHeader>
-        <CardContent className="flex-1 overflow-y-auto space-y-4 pb-0">
-          {messages.map(message => (
-            <div 
-              key={message.id}
-              className={`flex items-start gap-3 max-w-[80%] ${message.sender === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
-            >
-              <Avatar className="h-8 w-8">
-                <AvatarFallback className={message.sender === 'ai' ? "bg-primary text-primary-foreground" : ""}>
-                  {message.sender === 'ai' ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
-                </AvatarFallback>
-              </Avatar>
-              <div className={`p-3 rounded-lg ${message.sender === 'ai' ? 'bg-muted' : 'bg-primary text-primary-foreground'}`}>
-                <p>{message.text}</p>
-                <p className={`text-xs mt-1 ${message.sender === 'ai' ? 'text-muted-foreground' : 'text-primary-foreground/70'}`}>
-                  {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </p>
-              </div>
-            </div>
-          ))}
-        </CardContent>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-3 mb-6">
+          <TabsTrigger value="chat">
+            <Bot className="h-4 w-4 mr-2" />
+            General Assistant
+          </TabsTrigger>
+          <TabsTrigger value="scheduling">
+            <Calendar className="h-4 w-4 mr-2" />
+            Scheduling Assistant
+          </TabsTrigger>
+          <TabsTrigger value="summary">
+            <Clock className="h-4 w-4 mr-2" />
+            Schedule Summary
+          </TabsTrigger>
+        </TabsList>
         
-        <div className="p-4 mt-auto">
-          <form onSubmit={handleSubmit} className="flex gap-2">
-            <Input 
-              placeholder="Ask anything about managing your freelance business..." 
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              className="flex-1"
-            />
-            <Button type="submit">
-              <Send className="h-4 w-4 mr-2" />
-              Send
-            </Button>
-          </form>
-        </div>
-      </Card>
+        {/* General Chat Tab */}
+        <TabsContent value="chat" className="mt-0">
+          <Card className="h-[calc(100vh-300px)] flex flex-col">
+            <CardHeader>
+              <CardTitle>Virtual Assistant</CardTitle>
+              <CardDescription>
+                Ask for advice, guidance, or information about managing your freelance business
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto space-y-4 pb-0">
+              {messages.map(message => (
+                <div 
+                  key={message.id}
+                  className={`flex items-start gap-3 max-w-[80%] ${message.sender === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
+                >
+                  <Avatar className="h-8 w-8">
+                    <AvatarFallback className={message.sender === 'ai' ? "bg-primary text-primary-foreground" : ""}>
+                      {message.sender === 'ai' ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className={`p-3 rounded-lg ${message.sender === 'ai' ? 'bg-muted' : 'bg-primary text-primary-foreground'}`}>
+                    <p>{message.text}</p>
+                    <p className={`text-xs mt-1 ${message.sender === 'ai' ? 'text-muted-foreground' : 'text-primary-foreground/70'}`}>
+                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </CardContent>
+            
+            <div className="p-4 mt-auto">
+              <form onSubmit={handleSubmit} className="flex gap-2">
+                <Input 
+                  placeholder="Ask anything about managing your freelance business..." 
+                  value={inputValue}
+                  onChange={(e) => setInputValue(e.target.value)}
+                  className="flex-1"
+                />
+                <Button type="submit">
+                  <Send className="h-4 w-4 mr-2" />
+                  Send
+                </Button>
+              </form>
+            </div>
+          </Card>
+        </TabsContent>
+        
+        {/* Scheduling Assistant Tab */}
+        <TabsContent value="scheduling" className="mt-0">
+          <Card className="h-[calc(100vh-300px)] flex flex-col">
+            <CardHeader>
+              <CardTitle>Scheduling Assistant</CardTitle>
+              <CardDescription>
+                Let AI help you schedule meetings and appointments by analyzing your calendar
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-2">What would you like to schedule?</h3>
+                <Textarea 
+                  placeholder="e.g., 'Schedule a client meeting with John on Tuesday at 3 PM for 1 hour' or 'Find a time slot for a project review next week'"
+                  value={schedulingRequest}
+                  onChange={(e) => setSchedulingRequest(e.target.value)}
+                  className="h-32 mb-4"
+                />
+                <Button 
+                  onClick={handleSchedulingRequest} 
+                  className="w-full"
+                  disabled={isProcessingScheduling || !schedulingRequest.trim()}
+                >
+                  {isProcessingScheduling ? "Processing..." : "Process Scheduling Request"}
+                </Button>
+              </div>
+              
+              {schedulingResponse && (
+                <div className="border rounded-lg p-4 mt-4">
+                  <h3 className="text-lg font-semibold mb-2 flex items-center">
+                    {schedulingResponse.action === 'create' && (
+                      <>
+                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs mr-2">
+                          Event Created
+                        </span>
+                        <span>{schedulingResponse.event_title}</span>
+                      </>
+                    )}
+                    {schedulingResponse.action === 'suggest_times' && (
+                      <>
+                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs mr-2">
+                          Suggestions
+                        </span>
+                        <span>Available Time Slots</span>
+                      </>
+                    )}
+                    {schedulingResponse.action === 'reschedule' && (
+                      <>
+                        <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs mr-2">
+                          Rescheduled
+                        </span>
+                        <span>{schedulingResponse.event_title}</span>
+                      </>
+                    )}
+                    {schedulingResponse.action === 'cancel' && (
+                      <>
+                        <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs mr-2">
+                          Cancelled
+                        </span>
+                        <span>{schedulingResponse.event_title}</span>
+                      </>
+                    )}
+                  </h3>
+                  
+                  {(schedulingResponse.start_time && schedulingResponse.end_time) && (
+                    <div className="flex items-center text-sm text-muted-foreground mb-2">
+                      <Calendar className="h-4 w-4 mr-1" />
+                      <span>
+                        {new Date(schedulingResponse.start_time).toLocaleDateString()} | 
+                        {new Date(schedulingResponse.start_time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})} - 
+                        {new Date(schedulingResponse.end_time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
+                      </span>
+                    </div>
+                  )}
+                  
+                  <div className="text-sm mt-3">
+                    <p>{schedulingResponse.notes}</p>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* Schedule Summary Tab */}
+        <TabsContent value="summary" className="mt-0">
+          <Card className="h-[calc(100vh-300px)] flex flex-col">
+            <CardHeader>
+              <CardTitle>Schedule Summary</CardTitle>
+              <CardDescription>
+                Get a summary and insights about your upcoming schedule
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-2">Select Timeframe</h3>
+                <div className="flex gap-2 mb-4">
+                  <Input 
+                    placeholder="e.g., today, this week, next month"
+                    value={timeframe}
+                    onChange={(e) => setTimeframe(e.target.value)}
+                    className="flex-1"
+                  />
+                  <Button 
+                    onClick={handleScheduleSummary} 
+                    disabled={isFetchingSummary || !timeframe.trim()}
+                  >
+                    {isFetchingSummary ? "Generating..." : "Generate Summary"}
+                  </Button>
+                </div>
+              </div>
+              
+              {isLoadingEvents && (
+                <div className="text-center py-8 text-muted-foreground">
+                  Loading your calendar data...
+                </div>
+              )}
+              
+              {scheduleSummary && (
+                <div className="border rounded-lg p-4">
+                  <h3 className="text-lg font-semibold mb-2 flex items-center">
+                    <Calendar className="h-5 w-5 mr-2 text-primary" />
+                    Schedule Summary for {timeframe}
+                  </h3>
+                  <div className="mt-2 whitespace-pre-line">
+                    {scheduleSummary}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

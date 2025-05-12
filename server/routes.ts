@@ -864,7 +864,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             startTime: new Date(schedulingResponse.start_time),
             endTime: new Date(schedulingResponse.end_time),
             isConfirmed: schedulingResponse.status === 'confirmed',
-            eventType: 'meeting', // Default event type
+            eventType: 'client_meeting', // Default event type
           });
           
           // Add the created event ID to the response
