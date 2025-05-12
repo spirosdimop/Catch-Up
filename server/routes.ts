@@ -503,18 +503,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   apiRouter.post("/events", async (req, res) => {
     try {
-      const eventData = insertEventSchema.parse(req.body);
-      // Default userId for demo purposes, in a real app this would come from auth
-      if (!eventData.userId) {
-        eventData.userId = "user-1";
+      // Manually validate and transform the event data before validation
+      const { 
+        userId, 
+        title, 
+        description, 
+        startTime, 
+        endTime, 
+        location, 
+        clientName, 
+        isConfirmed, 
+        eventType, 
+        color 
+      } = req.body;
+      
+      // Validate required fields
+      if (!title) {
+        return res.status(400).json({ message: "Title is required" });
       }
+      
+      // Parse dates manually
+      let parsedStartTime, parsedEndTime;
+      try {
+        parsedStartTime = new Date(startTime);
+        parsedEndTime = new Date(endTime);
+        
+        if (isNaN(parsedStartTime.getTime()) || isNaN(parsedEndTime.getTime())) {
+          throw new Error("Invalid date format");
+        }
+      } catch (err) {
+        return res.status(400).json({ 
+          message: "Invalid date format", 
+          details: "Start time and end time must be valid date strings" 
+        });
+      }
+      
+      // Create sanitized event data
+      const eventData = {
+        userId: userId || "user-1",
+        title,
+        description: description || null,
+        startTime: parsedStartTime,
+        endTime: parsedEndTime,
+        location: location || null,
+        clientName: clientName || null,
+        isConfirmed: Boolean(isConfirmed),
+        eventType: eventType || "busy",
+        color: color || null
+      };
+      
+      console.log("Creating event with data:", eventData);
       
       const event = await storage.createEvent(eventData);
       res.status(201).json(event);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid event data", errors: error.errors });
-      }
       console.error("Error creating event:", error);
       res.status(500).json({ message: "Failed to create event" });
     }
@@ -527,8 +569,66 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid event ID" });
       }
       
-      const eventData = insertEventSchema.partial().parse(req.body);
-      const event = await storage.updateEvent(id, eventData);
+      // Manually validate and transform the event data
+      const { 
+        userId, 
+        title, 
+        description, 
+        startTime, 
+        endTime, 
+        location, 
+        clientName, 
+        isConfirmed, 
+        eventType, 
+        color 
+      } = req.body;
+      
+      // Create update data with non-undefined fields
+      const updateData: any = {};
+      
+      if (title !== undefined) updateData.title = title;
+      if (description !== undefined) updateData.description = description || null;
+      if (location !== undefined) updateData.location = location || null;
+      if (clientName !== undefined) updateData.clientName = clientName || null;
+      if (isConfirmed !== undefined) updateData.isConfirmed = Boolean(isConfirmed);
+      if (eventType !== undefined) updateData.eventType = eventType || "busy";
+      if (color !== undefined) updateData.color = color || null;
+      if (userId !== undefined) updateData.userId = userId;
+      
+      // Parse dates if provided
+      if (startTime !== undefined) {
+        try {
+          const parsedStartTime = new Date(startTime);
+          if (isNaN(parsedStartTime.getTime())) {
+            throw new Error("Invalid start time format");
+          }
+          updateData.startTime = parsedStartTime;
+        } catch (err) {
+          return res.status(400).json({ 
+            message: "Invalid date format", 
+            details: "Start time must be a valid date string" 
+          });
+        }
+      }
+      
+      if (endTime !== undefined) {
+        try {
+          const parsedEndTime = new Date(endTime);
+          if (isNaN(parsedEndTime.getTime())) {
+            throw new Error("Invalid end time format");
+          }
+          updateData.endTime = parsedEndTime;
+        } catch (err) {
+          return res.status(400).json({ 
+            message: "Invalid date format", 
+            details: "End time must be a valid date string" 
+          });
+        }
+      }
+      
+      console.log("Updating event with data:", updateData);
+      
+      const event = await storage.updateEvent(id, updateData);
       
       if (!event) {
         return res.status(404).json({ message: "Event not found" });
@@ -536,9 +636,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json(event);
     } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid event data", errors: error.errors });
-      }
       console.error("Error updating event:", error);
       res.status(500).json({ message: "Failed to update event" });
     }
