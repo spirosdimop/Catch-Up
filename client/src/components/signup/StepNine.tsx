@@ -61,6 +61,10 @@ const StepNine = ({ formData, onSubmit, onPrev, isSubmitting }: StepNineProps) =
                     <dd className="font-medium">{formData.email}</dd>
                   </div>
                   <div>
+                    <dt className="text-sm text-muted-foreground">Password</dt>
+                    <dd className="font-medium">••••••••••</dd>
+                  </div>
+                  <div>
                     <dt className="text-sm text-muted-foreground">Phone</dt>
                     <dd className="font-medium">{formData.phone}</dd>
                   </div>

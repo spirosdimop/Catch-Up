@@ -5,10 +5,19 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { SignupFormData } from "@/pages/signup";
+import { Mail, Lock, User } from "lucide-react";
 
-// Schema for this step
+// Schema for this step with combined fields
 const formSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters")
+  firstName: z.string().min(2, "First name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
+  email: z.string().min(1, "Email is required").email("Please enter a valid email address"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+    .regex(/[0-9]/, "Password must contain at least one number")
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -22,8 +31,12 @@ const StepOne = ({ formData, onNext }: StepOneProps) => {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      firstName: formData.firstName || ""
-    }
+      firstName: formData.firstName || "",
+      lastName: formData.lastName || "",
+      email: formData.email || "",
+      password: formData.password || ""
+    },
+    mode: "onChange"
   });
 
   const onSubmit = (data: FormValues) => {
@@ -33,24 +46,71 @@ const StepOne = ({ formData, onNext }: StepOneProps) => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-xl font-bold">What's your first name?</h3>
-        <p className="text-gray-500 mt-1">We'll personalize your experience</p>
+        <h3 className="text-xl font-bold">Create your account</h3>
+        <p className="text-gray-500 mt-1">Enter your details to get started</p>
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="firstName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base flex items-center">
+                    <User className="h-4 w-4 mr-1" />
+                    First Name
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter your first name"
+                      className="text-lg p-4 h-12"
+                      {...field}
+                      autoFocus
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="lastName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-base flex items-center">
+                    Last Name
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder="Enter your last name"
+                      className="text-lg p-4 h-12"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
           <FormField
             control={form.control}
-            name="firstName"
+            name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base">First Name</FormLabel>
+                <FormLabel className="text-base flex items-center">
+                  <Mail className="h-4 w-4 mr-1" />
+                  Email Address
+                </FormLabel>
                 <FormControl>
                   <Input
-                    placeholder="Enter your first name"
-                    className="text-lg p-6 h-14"
+                    type="email"
+                    placeholder="yourname@example.com"
+                    className="text-lg p-4 h-12"
                     {...field}
-                    autoFocus
                   />
                 </FormControl>
                 <FormMessage />
@@ -58,12 +118,37 @@ const StepOne = ({ formData, onNext }: StepOneProps) => {
             )}
           />
 
+          <FormField
+            control={form.control}
+            name="password"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel className="text-base flex items-center">
+                  <Lock className="h-4 w-4 mr-1" />
+                  Password
+                </FormLabel>
+                <FormControl>
+                  <Input
+                    type="password"
+                    placeholder="Create a secure password"
+                    className="text-lg p-4 h-12"
+                    {...field}
+                  />
+                </FormControl>
+                <FormMessage className="text-sm text-gray-500" />
+                <p className="text-xs text-gray-500 mt-1">
+                  Password must contain at least 8 characters, including uppercase, lowercase, and a number
+                </p>
+              </FormItem>
+            )}
+          />
+
           <Button 
             type="submit" 
-            className="w-full p-6 h-14 text-lg font-medium"
+            className="w-full p-5 h-12 text-lg font-medium mt-4"
             disabled={!form.formState.isValid}
           >
-            Next
+            Continue
           </Button>
         </form>
       </Form>

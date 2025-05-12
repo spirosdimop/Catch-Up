@@ -7,8 +7,6 @@ import { apiRequest } from "@/lib/queryClient";
 
 // Import step components
 import StepOne from "@/components/signup/StepOne";
-import StepTwo from "@/components/signup/StepTwo";
-import StepThree from "@/components/signup/StepThree";
 import StepFour from "@/components/signup/StepFour";
 import StepFive from "@/components/signup/StepFive";
 import StepSix from "@/components/signup/StepSix";
@@ -28,6 +26,7 @@ export interface SignupFormData {
   firstName: string;
   lastName: string;
   email: string;
+  password: string;
   phone: string;
   businessName: string;
   profession: string;
@@ -42,7 +41,7 @@ export default function Signup() {
   const [formData, setFormData] = useState<Partial<SignupFormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const totalSteps = 9;
+  const totalSteps = 7;
   const progress = (currentStep / totalSteps) * 100;
 
   // Function to move to next step
@@ -106,20 +105,16 @@ export default function Signup() {
       case 1:
         return <StepOne formData={formData} onNext={handleNext} />;
       case 2:
-        return <StepTwo formData={formData} onNext={handleNext} onPrev={handlePrev} />;
-      case 3:
-        return <StepThree formData={formData} onNext={handleNext} onPrev={handlePrev} />;
-      case 4:
         return <StepFour formData={formData} onNext={handleNext} onPrev={handlePrev} />;
-      case 5:
+      case 3:
         return <StepFive formData={formData} onNext={handleNext} onPrev={handlePrev} />;
-      case 6:
+      case 4:
         return <StepSix formData={formData} onNext={handleNext} onPrev={handlePrev} />;
-      case 7:
+      case 5:
         return <StepSeven formData={formData} onNext={handleNext} onPrev={handlePrev} />;
-      case 8:
+      case 6:
         return <StepEight formData={formData} onNext={handleNext} onPrev={handlePrev} />;
-      case 9:
+      case 7:
         return <StepNine 
                  formData={formData} 
                  onSubmit={handleSubmit} 
