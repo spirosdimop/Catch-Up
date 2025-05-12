@@ -831,6 +831,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // AI Assistant Endpoints
+  apiRouter.post("/ai/scheduling", async (req, res) => {
+    try {
+      const { schedule, request } = req.body;
+      
+      if (!request || typeof request !== 'string') {
+        return res.status(400).json({ message: "Invalid request. 'request' must be a string." });
+      }
+      
+      // Default userId for demo purposes, in a real app this would come from auth
+      const userId = req.query.userId as string || "user-1";
+      
+      // If no schedule provided, fetch from storage
+      const userSchedule = schedule || await storage.getEvents(userId);
+      
+      // Process the scheduling request with OpenAI
+      const schedulingResponse = await processSchedulingRequest(userSchedule, request);
+      
+      // If action is create, actually create the event
+      if (schedulingResponse.action === 'create' && 
+          schedulingResponse.event_title && 
+          schedulingResponse.start_time && 
+          schedulingResponse.end_time) {
+        
+        try {
+          // Create the event in the database
+          const newEvent = await storage.createEvent({
+            userId,
+            title: schedulingResponse.event_title,
+            description: schedulingResponse.notes,
+            startTime: new Date(schedulingResponse.start_time),
+            endTime: new Date(schedulingResponse.end_time),
+            isConfirmed: schedulingResponse.status === 'confirmed',
+            eventType: 'meeting', // Default event type
+          });
+          
+          // Add the created event ID to the response
+          schedulingResponse.event_id = newEvent.id;
+        } catch (createError) {
+          console.error("Error creating event:", createError);
+          // Continue with response even if event creation fails
+        }
+      }
+      
+      res.json(schedulingResponse);
+    } catch (error) {
+      console.error("Error processing scheduling request:", error);
+      res.status(500).json({ 
+        message: "Failed to process scheduling request",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  apiRouter.post("/ai/schedule-summary", async (req, res) => {
+    try {
+      const { userId, timeframe } = req.body;
+      
+      // Default userId and timeframe if not provided
+      const userIdToUse = userId || "user-1";
+      const timeframeToUse = timeframe || "upcoming";
+      
+      // Fetch user's events
+      const events = await storage.getEvents(userIdToUse);
+      
+      // Generate summary using OpenAI
+      const summary = await generateScheduleSummary(events, timeframeToUse);
+      
+      res.json({ summary });
+    } catch (error) {
+      console.error("Error generating schedule summary:", error);
+      res.status(500).json({ 
+        message: "Failed to generate schedule summary",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   app.use("/api", apiRouter);
   
   const httpServer = createServer(app);

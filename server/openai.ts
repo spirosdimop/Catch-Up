@@ -18,6 +18,7 @@ export interface SchedulingResponse {
   end_time?: string;
   status: 'confirmed' | 'pending' | 'conflict' | 'cancelled';
   notes: string;
+  event_id?: number; // Added for when events are created
 }
 
 /**

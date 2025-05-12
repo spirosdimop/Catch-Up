@@ -1,10 +1,14 @@
 import { PageTitle } from "@/components/ui/page-title";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Bot, Send, User } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Bot, Calendar, Send, User, Clock, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 type Message = {
   id: number;
