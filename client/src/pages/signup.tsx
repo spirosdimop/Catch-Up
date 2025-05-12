@@ -106,8 +106,8 @@ export default function Signup() {
         variant: "default",
       });
 
-      // Navigate to home page or login page
-      navigate("/");
+      // Navigate to dashboard after successful signup
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error submitting form:", error);
       toast({
