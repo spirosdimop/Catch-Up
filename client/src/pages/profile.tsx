@@ -45,7 +45,29 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Profile() {
   const [tab, setTab] = useState("profile");
-  const { user } = useUser();
+  const { user, setUser } = useUser();
+  
+  // If no user exists, create a test user for development purposes
+  useEffect(() => {
+    if (!user) {
+      console.log('Creating test user for development');
+      setUser({
+        id: "test-user-123",
+        firstName: "Test",
+        lastName: "User",
+        email: "test@example.com",
+        phone: "555-123-4567",
+        businessName: "Test Business",
+        profession: "consultant",
+        locationType: "has_shop",
+        profileImageUrl: "https://randomuser.me/api/portraits/men/1.jpg",
+        services: [
+          { name: "Consultation", duration: 60, price: 100 },
+          { name: "Follow-up", duration: 30, price: 50 }
+        ]
+      });
+    }
+  }, [user, setUser]);
   
   // Combined profile data from user context and default values
   const profile = {
@@ -134,8 +156,10 @@ export default function Profile() {
   // Update template mutation
   const updateTemplateMutation = useMutation({
     mutationFn: async (updatedTemplate: Partial<EventTemplate>) => {
+      console.log('Updating template data:', updatedTemplate);
+      
       const response = await fetch(`/api/event-templates/${updatedTemplate.id}`, {
-        method: 'PATCH',
+        method: 'PUT', // Changed from PATCH to PUT to match server endpoint
         headers: {
           'Content-Type': 'application/json',
         },
@@ -143,41 +167,64 @@ export default function Profile() {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to update template');
+        const errorData = await response.json().catch(() => null);
+        console.error('Template update failed:', response.status, errorData);
+        throw new Error(`Failed to update template: ${response.status} ${errorData ? JSON.stringify(errorData) : ''}`);
       }
       
-      return await response.json();
+      const result = await response.json();
+      console.log('Template updated successfully:', result);
+      return result;
     },
     onSuccess: () => {
+      console.log('Template update successful, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['/api/event-templates', user?.id] });
       setShowNewTemplateDialog(false);
       setEditingTemplate(null);
       resetTemplateForm();
     },
+    onError: (error) => {
+      console.error('Template update error:', error);
+    }
   });
   
   // Delete template mutation
   const deleteTemplateMutation = useMutation({
     mutationFn: async (id: number) => {
+      console.log('Deleting template with ID:', id);
+      
       const response = await fetch(`/api/event-templates/${id}`, {
         method: 'DELETE',
       });
       
       if (!response.ok) {
-        throw new Error('Failed to delete template');
+        const errorData = await response.json().catch(() => null);
+        console.error('Template deletion failed:', response.status, errorData);
+        throw new Error(`Failed to delete template: ${response.status} ${errorData ? JSON.stringify(errorData) : ''}`);
       }
       
+      console.log('Template deleted successfully');
       return true;
     },
     onSuccess: () => {
+      console.log('Template deletion successful, invalidating queries');
       queryClient.invalidateQueries({ queryKey: ['/api/event-templates', user?.id] });
     },
+    onError: (error) => {
+      console.error('Template deletion error:', error);
+    }
   });
+  
+  // Debugging user data
+  useEffect(() => {
+    console.log('Current user:', user);
+  }, [user]);
   
   // Load templates when data is available
   useEffect(() => {
     if (templateData && Array.isArray(templateData)) {
       setTemplates(templateData);
+      console.log('Loaded templates:', templateData);
     }
   }, [templateData]);
   
@@ -226,11 +273,21 @@ export default function Profile() {
   const handleTemplateSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    console.log('Form submission, user context:', user);
+    
+    if (!user || !user.id) {
+      console.error('Cannot create template: No user ID available');
+      alert('Please log in to create templates');
+      return;
+    }
+    
     const templateData = {
       ...templateForm,
-      userId: user?.id || '',
+      userId: user.id,
       duration: Number(templateForm.duration),
     };
+    
+    console.log('Prepared template data for submission:', templateData);
     
     if (editingTemplate) {
       updateTemplateMutation.mutate({

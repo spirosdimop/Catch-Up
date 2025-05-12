@@ -714,15 +714,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   apiRouter.post("/event-templates", async (req, res) => {
     try {
+      console.log("Received template creation request with data:", req.body);
+      
       const templateData = insertEventTemplateSchema.parse(req.body);
+      console.log("Template data after parsing:", templateData);
+      
       const template = await storage.createEventTemplate(templateData);
+      console.log("Template created successfully:", template);
+      
       res.status(201).json(template);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid template data", errors: error.errors });
+        console.error("Invalid template data:", error.errors);
+        return res.status(400).json({ 
+          message: "Invalid template data", 
+          errors: error.errors,
+          details: error.format() 
+        });
       }
       console.error("Error creating template:", error);
-      res.status(500).json({ message: "Failed to create template" });
+      res.status(500).json({ 
+        message: "Failed to create template",
+        error: error instanceof Error ? error.message : String(error)
+      });
     }
   });
   
