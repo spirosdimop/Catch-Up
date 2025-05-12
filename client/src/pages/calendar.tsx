@@ -434,6 +434,10 @@ export default function CalendarPage() {
     [form]
   );
 
+  // State for notifications/reminders
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [notifications, setNotifications] = useState<CalendarEvent[]>([]);
+  
   // Default colors for different event types
   const eventTypeColors = {
     busy: '#3b82f6', // blue
@@ -446,6 +450,43 @@ export default function CalendarPage() {
     follow_up: '#ec4899', // pink
     training: '#14b8a6', // teal
   };
+  
+  // Check for upcoming events and create notifications
+  useEffect(() => {
+    if (!events || !Array.isArray(events)) return;
+    
+    // Get events happening today or tomorrow
+    const now = new Date();
+    const tomorrow = add(now, { days: 1 });
+    
+    const upcomingEvents = events
+      .filter((event: any) => {
+        const eventStart = new Date(event.startTime);
+        return eventStart >= now && eventStart <= tomorrow;
+      })
+      .map((event: any) => ({
+        id: event.id,
+        title: event.title,
+        start: new Date(event.startTime),
+        end: new Date(event.endTime),
+        description: event.description,
+        location: event.location,
+        clientName: event.clientName,
+        clientId: event.clientId,
+        projectId: event.projectId,
+        invoiceId: event.invoiceId,
+        isConfirmed: event.isConfirmed,
+        eventType: event.eventType,
+        color: event.color,
+        userId: event.userId,
+      }))
+      .sort((a, b) => a.start.getTime() - b.start.getTime());
+      
+    if (upcomingEvents.length > 0) {
+      setNotifications(upcomingEvents);
+      setShowNotifications(true);
+    }
+  }, [events]);
 
   // Event styling with improved colors by event type
   const eventPropGetter = useCallback(
@@ -519,25 +560,46 @@ export default function CalendarPage() {
                 <TabsTrigger value="day">Day</TabsTrigger>
               </TabsList>
             </Tabs>
-            <Button 
-              onClick={() => {
-                setSelectedEvent(null);
-                form.reset({
-                  title: "",
-                  startTime: new Date(),
-                  endTime: add(new Date(), { hours: 1 }),
-                  description: "",
-                  location: "",
-                  clientName: "",
-                  isConfirmed: false,
-                  eventType: "busy",
-                  color: "#3b82f6",
-                });
-                setOpenEventDialog(true);
-              }}
-            >
-              Add Event
-            </Button>
+            
+            <div className="flex gap-2">
+              <Button 
+                variant="outline"
+                onClick={() => setShowFilters(true)}
+                className="flex items-center gap-1"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-filter">
+                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+                Filter
+                {(filters.eventTypes.length > 0 || filters.clients.length > 0 || 
+                 filters.projects.length > 0 || filters.onlyConfirmed) && (
+                  <span className="ml-1 flex h-2 w-2 rounded-full bg-primary"></span>
+                )}
+              </Button>
+              
+              <Button 
+                onClick={() => {
+                  setSelectedEvent(null);
+                  form.reset({
+                    title: "",
+                    startTime: new Date(),
+                    endTime: add(new Date(), { hours: 1 }),
+                    description: "",
+                    location: "",
+                    clientName: "",
+                    clientId: null,
+                    projectId: null,
+                    invoiceId: null,
+                    isConfirmed: false,
+                    eventType: "busy",
+                    color: "#3b82f6",
+                  });
+                  setOpenEventDialog(true);
+                }}
+              >
+                Add Event
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -891,6 +953,183 @@ export default function CalendarPage() {
               </DialogFooter>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Filter Dialog */}
+      <Dialog open={showFilters} onOpenChange={setShowFilters}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Filter Events</DialogTitle>
+            <DialogDescription>
+              Customize which events are displayed on your calendar.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Event Type Filter */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Event Types</h3>
+              <div className="flex flex-wrap gap-2">
+                {Object.entries(eventTypeColors).map(([type, color]) => (
+                  <div 
+                    key={type}
+                    onClick={() => {
+                      setFilters(prev => {
+                        if (prev.eventTypes.includes(type)) {
+                          return {
+                            ...prev,
+                            eventTypes: prev.eventTypes.filter(t => t !== type)
+                          };
+                        } else {
+                          return {
+                            ...prev,
+                            eventTypes: [...prev.eventTypes, type]
+                          };
+                        }
+                      });
+                    }}
+                    className={`
+                      px-3 py-1 rounded-full text-xs cursor-pointer flex items-center gap-1
+                      ${filters.eventTypes.includes(type) 
+                        ? 'bg-opacity-100 text-white' 
+                        : 'bg-opacity-30 text-gray-700 hover:bg-opacity-50'}
+                    `}
+                    style={{ backgroundColor: filters.eventTypes.includes(type) ? color : `${color}30` }}
+                  >
+                    {filters.eventTypes.includes(type) && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    )}
+                    {type.replace('_', ' ').charAt(0).toUpperCase() + type.replace('_', ' ').slice(1)}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Client Filter */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Clients</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {clients.map((client) => (
+                  <div 
+                    key={client.id}
+                    onClick={() => {
+                      setFilters(prev => {
+                        if (prev.clients.includes(client.id)) {
+                          return {
+                            ...prev,
+                            clients: prev.clients.filter(id => id !== client.id)
+                          };
+                        } else {
+                          return {
+                            ...prev,
+                            clients: [...prev.clients, client.id]
+                          };
+                        }
+                      });
+                    }}
+                    className={`
+                      px-3 py-2 rounded-md text-sm cursor-pointer flex items-center gap-1
+                      ${filters.clients.includes(client.id) 
+                        ? 'bg-primary text-white' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
+                    `}
+                  >
+                    {filters.clients.includes(client.id) && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    )}
+                    {client.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Project Filter */}
+            <div className="space-y-2">
+              <h3 className="text-sm font-medium">Projects</h3>
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {projects.map((project) => (
+                  <div 
+                    key={project.id}
+                    onClick={() => {
+                      setFilters(prev => {
+                        if (prev.projects.includes(project.id)) {
+                          return {
+                            ...prev,
+                            projects: prev.projects.filter(id => id !== project.id)
+                          };
+                        } else {
+                          return {
+                            ...prev,
+                            projects: [...prev.projects, project.id]
+                          };
+                        }
+                      });
+                    }}
+                    className={`
+                      px-3 py-2 rounded-md text-sm cursor-pointer flex items-center gap-1
+                      ${filters.projects.includes(project.id) 
+                        ? 'bg-primary text-white' 
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}
+                    `}
+                  >
+                    {filters.projects.includes(project.id) && (
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-check">
+                        <polyline points="20 6 9 17 4 12"/>
+                      </svg>
+                    )}
+                    {project.name}
+                  </div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Confirmation Status Filter */}
+            <div className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                id="confirmed-only"
+                checked={filters.onlyConfirmed}
+                onChange={(e) => {
+                  setFilters(prev => ({
+                    ...prev,
+                    onlyConfirmed: e.target.checked
+                  }));
+                }}
+                className="h-4 w-4 rounded border-gray-300"
+              />
+              <label htmlFor="confirmed-only" className="text-sm font-medium">
+                Show only confirmed events
+              </label>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setFilters({
+                  eventTypes: [],
+                  clients: [],
+                  projects: [],
+                  onlyConfirmed: false,
+                  dateRange: {
+                    start: startOfDay(new Date()).toISOString(),
+                    end: endOfMonth(new Date()).toISOString()
+                  }
+                });
+              }}
+            >
+              Reset Filters
+            </Button>
+            <Button onClick={() => setShowFilters(false)}>
+              Apply Filters
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
