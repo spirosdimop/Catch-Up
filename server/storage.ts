@@ -16,7 +16,11 @@ import {
   ProjectStatus,
   TaskStatus,
   TaskPriority,
-  InvoiceStatus
+  InvoiceStatus,
+  ServiceProvider,
+  InsertServiceProvider,
+  Service,
+  InsertService
 } from "@shared/schema";
 
 export interface IStorage {
@@ -71,6 +75,22 @@ export interface IStorage {
   createInvoiceItem(invoiceItem: InsertInvoiceItem): Promise<InvoiceItem>;
   updateInvoiceItem(id: number, invoiceItem: Partial<InsertInvoiceItem>): Promise<InvoiceItem | undefined>;
   deleteInvoiceItem(id: number): Promise<boolean>;
+  
+  // ServiceProvider related operations
+  getServiceProviders(): Promise<ServiceProvider[]>;
+  getServiceProvider(id: number): Promise<ServiceProvider | undefined>;
+  getServiceProviderByEmail(email: string): Promise<ServiceProvider | undefined>;
+  createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider>;
+  updateServiceProvider(id: number, provider: Partial<InsertServiceProvider>): Promise<ServiceProvider | undefined>;
+  deleteServiceProvider(id: number): Promise<boolean>;
+  
+  // Service related operations
+  getServices(): Promise<Service[]>;
+  getServicesByProvider(providerId: number): Promise<Service[]>;
+  getService(id: number): Promise<Service | undefined>;
+  createService(service: InsertService): Promise<Service>;
+  updateService(id: number, service: Partial<InsertService>): Promise<Service | undefined>;
+  deleteService(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {

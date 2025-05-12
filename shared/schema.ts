@@ -202,6 +202,76 @@ export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 export type InvoiceItem = typeof invoiceItems.$inferSelect;
 export type InsertInvoiceItem = z.infer<typeof insertInvoiceItemSchema>;
 
+// Sign-up related schemas
+export const locationTypeEnum = pgEnum("location_type", [
+  "has_shop",
+  "goes_to_clients",
+  "both"
+]);
+
+export const professionEnum = pgEnum("profession", [
+  "electrician",
+  "plumber",
+  "tutor",
+  "trainer",
+  "carpenter",
+  "painter",
+  "gardener",
+  "cleaner",
+  "other"
+]);
+
+export const serviceProviders = pgTable("service_providers", {
+  id: serial("id").primaryKey(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull().unique(),
+  phone: text("phone").notNull(),
+  businessName: text("business_name").notNull(),
+  profession: professionEnum("profession").notNull(),
+  locationType: locationTypeEnum("location_type").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const services = pgTable("services", {
+  id: serial("id").primaryKey(),
+  providerId: integer("provider_id").notNull().references(() => serviceProviders.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  duration: integer("duration").notNull(), // in minutes
+  price: doublePrecision("price").notNull(), // in EUR
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertServiceProviderSchema = createInsertSchema(serviceProviders).pick({
+  firstName: true,
+  lastName: true,
+  email: true,
+  phone: true,
+  businessName: true,
+  profession: true,
+  locationType: true,
+});
+
+export const insertServiceSchema = createInsertSchema(services).pick({
+  providerId: true,
+  name: true,
+  duration: true,
+  price: true,
+});
+
+export type ServiceProvider = typeof serviceProviders.$inferSelect;
+export type InsertServiceProvider = z.infer<typeof insertServiceProviderSchema>;
+
+export type Service = typeof services.$inferSelect;
+export type InsertService = z.infer<typeof insertServiceSchema>;
+
+// Location type constants
+export const LocationType = {
+  HAS_SHOP: 'has_shop',
+  GOES_TO_CLIENTS: 'goes_to_clients',
+  BOTH: 'both'
+} as const;
+
 // Helper enums for frontend
 export const ProjectStatus = {
   NOT_STARTED: 'not_started',
