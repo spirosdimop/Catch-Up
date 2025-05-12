@@ -384,6 +384,9 @@ export const insertEventSchema = createInsertSchema(events).pick({
 export type Event = typeof events.$inferSelect;
 export type InsertEvent = z.infer<typeof insertEventSchema>;
 
+export type EventTemplate = typeof eventTemplates.$inferSelect;
+export type InsertEventTemplate = z.infer<typeof insertEventTemplateSchema>;
+
 // Helper enum for frontend
 export const EventType = {
   PRIVATE: 'private',

@@ -23,6 +23,8 @@ import {
   InsertService,
   Event,
   InsertEvent,
+  EventTemplate,
+  InsertEventTemplate,
   EventType
 } from "@shared/schema";
 
@@ -101,6 +103,14 @@ export interface IStorage {
   createEvent(event: InsertEvent): Promise<Event>;
   updateEvent(id: number, event: Partial<InsertEvent>): Promise<Event | undefined>;
   deleteEvent(id: number): Promise<boolean>;
+  
+  // Event Template operations
+  getEventTemplates(userId: string): Promise<EventTemplate[]>;
+  getPublicEventTemplates(userId: string): Promise<EventTemplate[]>;
+  getEventTemplate(id: number): Promise<EventTemplate | undefined>;
+  createEventTemplate(template: InsertEventTemplate): Promise<EventTemplate>;
+  updateEventTemplate(id: number, template: Partial<InsertEventTemplate>): Promise<EventTemplate | undefined>;
+  deleteEventTemplate(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -112,6 +122,7 @@ export class MemStorage implements IStorage {
   private invoices: Map<number, Invoice>;
   private invoiceItems: Map<number, InvoiceItem>;
   private events: Map<number, Event>;
+  private eventTemplates: Map<number, EventTemplate>;
   private serviceProviders: Map<number, ServiceProvider>;
   private services: Map<number, Service>;
 
@@ -123,6 +134,7 @@ export class MemStorage implements IStorage {
   private invoiceIdCounter: number;
   private invoiceItemIdCounter: number;
   private eventIdCounter: number;
+  private eventTemplateIdCounter: number;
   private serviceProviderIdCounter: number;
   private serviceIdCounter: number;
 
@@ -135,6 +147,7 @@ export class MemStorage implements IStorage {
     this.invoices = new Map();
     this.invoiceItems = new Map();
     this.events = new Map();
+    this.eventTemplates = new Map();
     this.serviceProviders = new Map();
     this.services = new Map();
 
@@ -146,6 +159,7 @@ export class MemStorage implements IStorage {
     this.invoiceIdCounter = 1;
     this.invoiceItemIdCounter = 1;
     this.eventIdCounter = 1;
+    this.eventTemplateIdCounter = 1;
     this.serviceProviderIdCounter = 1;
     this.serviceIdCounter = 1;
 
