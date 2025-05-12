@@ -7,8 +7,9 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 import { UserProvider } from "@/lib/userContext";
 import AppShell from "@/components/layout/app-shell";
 import NotFound from "@/pages/not-found";
-import Dashboard from "@/pages/dashboard";
-import Clients from "@/pages/clients";
+// Use lowercase imports for consistency 
+import Dashboard from "./pages/dashboard";
+import Clients from "./pages/clients";
 // Import placeholder pages for the new routes
 import Settings from "@/pages/settings";
 import Messages from "@/pages/messages";
@@ -17,25 +18,29 @@ import Calendar from "@/pages/calendar";
 import Profile from "@/pages/profile";
 import AIAssistant from "@/pages/ai-assistant";
 import Signup from "@/pages/signup";
+import LandingPage from "@/pages/landing";
 
 function Router() {
   const [location] = useLocation();
   
-  // Don't render the AppShell for the signup page
-  const isSignupPage = location === "/signup";
+  // Pages that don't use the main application shell
+  const noAppShellPages = ["/signup", "/"];
   
-  if (isSignupPage) {
+  // Check if current location should not use AppShell
+  if (noAppShellPages.includes(location)) {
     return (
       <Switch>
+        <Route path="/" component={LandingPage} />
         <Route path="/signup" component={Signup} />
       </Switch>
     );
   }
   
+  // Main app pages with the AppShell
   return (
     <AppShell>
       <Switch>
-        <Route path="/" component={Dashboard} />
+        <Route path="/dashboard" component={Dashboard} />
         <Route path="/clients" component={Clients} />
         <Route path="/bookings" component={Bookings} />
         <Route path="/messages" component={Messages} />

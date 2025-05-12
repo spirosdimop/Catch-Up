@@ -26,7 +26,7 @@ type SidebarNavItem = {
 const navItems: SidebarNavItem[] = [
   {
     title: "Dashboard",
-    href: "/",
+    href: "/dashboard",
     icon: <LayoutDashboard className="w-5 h-5 mr-2" />,
   },
   {
