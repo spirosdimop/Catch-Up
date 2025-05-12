@@ -43,7 +43,7 @@ const eventFormSchema = z.object({
   location: z.string().optional().nullable(),
   clientName: z.string().optional().nullable(),
   isConfirmed: z.boolean().default(false),
-  eventType: z.enum(['appointment', 'meeting', 'private', 'travel']).default('appointment'),
+  eventType: z.enum(['private', 'busy', 'available', 'travel']).default('busy'),
   color: z.string().optional().nullable(),
 });
 
@@ -97,13 +97,21 @@ export default function CalendarPage() {
   // Mutation to create event
   const createEventMutation = useMutation({
     mutationFn: async (values: EventFormValues) => {
+      // Ensure values contain all the required fields
       const eventData = {
-        ...values,
         userId: "user-1", // Default user ID for demo
-        // Convert to server format
+        title: values.title,
+        description: values.description || null,
         startTime: values.startTime.toISOString(),
         endTime: values.endTime.toISOString(),
+        location: values.location || null,
+        clientName: values.clientName || null,
+        isConfirmed: Boolean(values.isConfirmed),
+        eventType: values.eventType || "appointment",
+        color: values.color || "#3b82f6",
       };
+      
+      console.log("Sending event data:", eventData);
       
       const response = await fetch('/api/events', {
         method: 'POST',
@@ -114,7 +122,9 @@ export default function CalendarPage() {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to create event');
+        const errorData = await response.json();
+        console.error("Event creation error:", errorData);
+        throw new Error(`Failed to create event: ${JSON.stringify(errorData)}`);
       }
       
       return response.json();
