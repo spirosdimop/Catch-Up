@@ -12,6 +12,15 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
 import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose
+} from "@/components/ui/dialog";
+import { 
   Select,
   SelectContent,
   SelectItem,
@@ -31,8 +40,8 @@ import {
 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { useUser } from "@/lib/userContext";
-import { EventTemplate } from "@shared/schema";
-import { useQuery } from "@tanstack/react-query";
+import { EventTemplate, EventType } from "@shared/schema";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Profile() {
   const [tab, setTab] = useState("profile");
@@ -66,11 +75,93 @@ export default function Profile() {
   // State for event templates and dialog
   const [showNewTemplateDialog, setShowNewTemplateDialog] = useState(false);
   const [templates, setTemplates] = useState<EventTemplate[]>([]);
+  const [editingTemplate, setEditingTemplate] = useState<EventTemplate | null>(null);
+  
+  // Form state for template creation/editing
+  const [templateForm, setTemplateForm] = useState({
+    name: '',
+    title: '',
+    duration: 30,
+    description: '',
+    location: '',
+    eventType: 'client_meeting',
+    isPublic: true,
+    color: '#4f46e5', // Default indigo color
+  });
+  
+  const queryClient = useQueryClient();
   
   // Template loading from API
   const { data: templateData } = useQuery({
     queryKey: ['/api/event-templates', user?.id],
     enabled: !!user?.id,
+  });
+  
+  // Create template mutation
+  const createTemplateMutation = useMutation({
+    mutationFn: async (newTemplate: Partial<EventTemplate>) => {
+      const response = await fetch('/api/event-templates', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newTemplate),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create template');
+      }
+      
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/event-templates', user?.id] });
+      setShowNewTemplateDialog(false);
+      resetTemplateForm();
+    },
+  });
+  
+  // Update template mutation
+  const updateTemplateMutation = useMutation({
+    mutationFn: async (updatedTemplate: Partial<EventTemplate>) => {
+      const response = await fetch(`/api/event-templates/${updatedTemplate.id}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedTemplate),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to update template');
+      }
+      
+      return await response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/event-templates', user?.id] });
+      setShowNewTemplateDialog(false);
+      setEditingTemplate(null);
+      resetTemplateForm();
+    },
+  });
+  
+  // Delete template mutation
+  const deleteTemplateMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const response = await fetch(`/api/event-templates/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to delete template');
+      }
+      
+      return true;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/event-templates', user?.id] });
+    },
   });
   
   // Load templates when data is available
@@ -80,19 +171,77 @@ export default function Profile() {
     }
   }, [templateData]);
   
+  // Reset template form
+  const resetTemplateForm = () => {
+    setTemplateForm({
+      name: '',
+      title: '',
+      duration: 30,
+      description: '',
+      location: '',
+      eventType: 'client_meeting',
+      isPublic: true,
+      color: '#4f46e5',
+    });
+  };
+  
+  // Handle template form input change
+  const handleTemplateInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setTemplateForm(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+  
+  // Handle checkbox change
+  const handleTemplateCheckboxChange = (name: string, checked: boolean) => {
+    setTemplateForm(prev => ({
+      ...prev,
+      [name]: checked,
+    }));
+  };
+  
+  // Handle template submit
+  const handleTemplateSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const templateData = {
+      ...templateForm,
+      userId: user?.id || '',
+      duration: Number(templateForm.duration),
+    };
+    
+    if (editingTemplate) {
+      updateTemplateMutation.mutate({
+        ...templateData,
+        id: editingTemplate.id,
+      });
+    } else {
+      createTemplateMutation.mutate(templateData);
+    }
+  };
+  
   // Event template handlers
   const handleEditTemplate = (template: EventTemplate) => {
-    // Implement edit template functionality
-    console.log("Edit template:", template);
-    // Show template edit dialog (to be implemented)
+    setEditingTemplate(template);
+    setTemplateForm({
+      name: template.name,
+      title: template.title,
+      duration: template.duration,
+      description: template.description || '',
+      location: template.location || '',
+      eventType: template.eventType,
+      isPublic: template.isPublic,
+      color: template.color || '#4f46e5',
+    });
     setShowNewTemplateDialog(true);
-    // To be implemented: set selected template for editing
   };
   
   const handleDeleteTemplate = (id: number) => {
-    // Implement delete template functionality
-    console.log("Delete template:", id);
-    // To be implemented: call API to delete template and update state
+    if (confirm('Are you sure you want to delete this template?')) {
+      deleteTemplateMutation.mutate(id);
+    }
   };
   
   // Availability handlers
@@ -179,10 +328,173 @@ export default function Profile() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
+      
+      {/* Template create/edit dialog */}
+      <Dialog open={showNewTemplateDialog} onOpenChange={setShowNewTemplateDialog}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingTemplate ? 'Edit Event Template' : 'Create Event Template'}
+            </DialogTitle>
+            <DialogDescription>
+              {editingTemplate 
+                ? 'Update this template for quick scheduling with clients'
+                : 'Create a reusable template for quick scheduling'}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleTemplateSubmit}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="name" className="text-right">
+                  Template Name
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  placeholder="Client Consultation"
+                  className="col-span-3"
+                  value={templateForm.name}
+                  onChange={handleTemplateInputChange}
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="title" className="text-right">
+                  Event Title
+                </Label>
+                <Input
+                  id="title"
+                  name="title"
+                  placeholder="Initial Consultation"
+                  className="col-span-3"
+                  value={templateForm.title}
+                  onChange={handleTemplateInputChange}
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="duration" className="text-right">
+                  Duration (min)
+                </Label>
+                <Input
+                  id="duration"
+                  name="duration"
+                  type="number"
+                  min="15"
+                  step="15"
+                  className="col-span-3"
+                  value={templateForm.duration}
+                  onChange={handleTemplateInputChange}
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="location" className="text-right">
+                  Location
+                </Label>
+                <Input
+                  id="location"
+                  name="location"
+                  placeholder="Office or Virtual"
+                  className="col-span-3"
+                  value={templateForm.location}
+                  onChange={handleTemplateInputChange}
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="eventType" className="text-right">
+                  Event Type
+                </Label>
+                <Select 
+                  name="eventType" 
+                  value={templateForm.eventType}
+                  onValueChange={(value) => setTemplateForm(prev => ({ ...prev, eventType: value }))}
+                >
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select event type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="client_meeting">Client Meeting</SelectItem>
+                    <SelectItem value="consultation">Consultation</SelectItem>
+                    <SelectItem value="project_work">Project Work</SelectItem>
+                    <SelectItem value="follow_up">Follow-up</SelectItem>
+                    <SelectItem value="training">Training</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="color" className="text-right">
+                  Color
+                </Label>
+                <Input
+                  id="color"
+                  name="color"
+                  type="color"
+                  className="col-span-3 w-16 h-8 p-1"
+                  value={templateForm.color}
+                  onChange={handleTemplateInputChange}
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="description" className="text-right">
+                  Description
+                </Label>
+                <Textarea
+                  id="description"
+                  name="description"
+                  placeholder="Template description..."
+                  className="col-span-3"
+                  value={templateForm.description}
+                  onChange={handleTemplateInputChange}
+                />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <div className="text-right">Visibility</div>
+                <div className="flex items-center space-x-2 col-span-3">
+                  <Checkbox 
+                    id="isPublic" 
+                    checked={templateForm.isPublic}
+                    onCheckedChange={(checked) => handleTemplateCheckboxChange('isPublic', !!checked)}
+                  />
+                  <Label htmlFor="isPublic">
+                    Make public (visible on your booking page)
+                  </Label>
+                </div>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="outline" onClick={() => {
+                  setEditingTemplate(null);
+                  resetTemplateForm();
+                }}>
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button 
+                type="submit" 
+                disabled={createTemplateMutation.isPending || updateTemplateMutation.isPending}
+              >
+                {editingTemplate ? 'Update Template' : 'Create Template'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
       <PageTitle 
         title="Professional Profile" 
-        description="Manage your public profile and booking availability" 
+        description="Manage your public profile and booking availability"
         icon={<UserCircle className="h-6 w-6 text-primary" />}
       />
       
