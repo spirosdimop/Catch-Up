@@ -7,7 +7,8 @@ import {
   insertTaskSchema, 
   insertTimeEntrySchema, 
   insertInvoiceSchema, 
-  insertInvoiceItemSchema 
+  insertInvoiceItemSchema,
+  insertEventSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -465,6 +466,102 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     res.status(204).end();
+  });
+
+  // Event endpoints
+  apiRouter.get("/events", async (req, res) => {
+    try {
+      // Default userId for demo purposes, in a real app this would come from auth
+      const userId = req.query.userId as string || "user-1";
+      const events = await storage.getEvents(userId);
+      res.json(events);
+    } catch (error) {
+      console.error("Error fetching events:", error);
+      res.status(500).json({ message: "Failed to fetch events" });
+    }
+  });
+  
+  apiRouter.get("/events/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
+      
+      const event = await storage.getEvent(id);
+      
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      res.json(event);
+    } catch (error) {
+      console.error("Error fetching event:", error);
+      res.status(500).json({ message: "Failed to fetch event" });
+    }
+  });
+  
+  apiRouter.post("/events", async (req, res) => {
+    try {
+      const eventData = insertEventSchema.parse(req.body);
+      // Default userId for demo purposes, in a real app this would come from auth
+      if (!eventData.userId) {
+        eventData.userId = "user-1";
+      }
+      
+      const event = await storage.createEvent(eventData);
+      res.status(201).json(event);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid event data", errors: error.errors });
+      }
+      console.error("Error creating event:", error);
+      res.status(500).json({ message: "Failed to create event" });
+    }
+  });
+  
+  apiRouter.put("/events/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
+      
+      const eventData = insertEventSchema.partial().parse(req.body);
+      const event = await storage.updateEvent(id, eventData);
+      
+      if (!event) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      res.json(event);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid event data", errors: error.errors });
+      }
+      console.error("Error updating event:", error);
+      res.status(500).json({ message: "Failed to update event" });
+    }
+  });
+  
+  apiRouter.delete("/events/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid event ID" });
+      }
+      
+      const success = await storage.deleteEvent(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Event not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting event:", error);
+      res.status(500).json({ message: "Failed to delete event" });
+    }
   });
 
   // Dashboard stats

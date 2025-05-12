@@ -134,6 +134,9 @@ export class MemStorage implements IStorage {
     this.timeEntries = new Map();
     this.invoices = new Map();
     this.invoiceItems = new Map();
+    this.events = new Map();
+    this.serviceProviders = new Map();
+    this.services = new Map();
 
     this.userIdCounter = 1;
     this.clientIdCounter = 1;
@@ -142,6 +145,9 @@ export class MemStorage implements IStorage {
     this.timeEntryIdCounter = 1;
     this.invoiceIdCounter = 1;
     this.invoiceItemIdCounter = 1;
+    this.eventIdCounter = 1;
+    this.serviceProviderIdCounter = 1;
+    this.serviceIdCounter = 1;
 
     // Add a demo user
     this.createUser({
@@ -565,6 +571,125 @@ export class MemStorage implements IStorage {
 
   async deleteInvoiceItem(id: number): Promise<boolean> {
     return this.invoiceItems.delete(id);
+  }
+  
+  // Implementation of calendar event operations
+  async getEvents(userId: string): Promise<Event[]> {
+    return Array.from(this.events.values()).filter(event => event.userId === userId);
+  }
+  
+  async getEvent(id: number): Promise<Event | undefined> {
+    return this.events.get(id);
+  }
+  
+  async createEvent(event: InsertEvent): Promise<Event> {
+    const id = this.eventIdCounter++;
+    const createdAt = new Date();
+    const updatedAt = new Date();
+    const newEvent: Event = { 
+      id, 
+      ...event, 
+      createdAt, 
+      updatedAt 
+    };
+    this.events.set(id, newEvent);
+    return newEvent;
+  }
+  
+  async updateEvent(id: number, event: Partial<InsertEvent>): Promise<Event | undefined> {
+    const existingEvent = this.events.get(id);
+    if (!existingEvent) {
+      return undefined;
+    }
+    
+    const updatedAt = new Date();
+    const updatedEvent = { 
+      ...existingEvent, 
+      ...event, 
+      updatedAt 
+    };
+    this.events.set(id, updatedEvent);
+    return updatedEvent;
+  }
+  
+  async deleteEvent(id: number): Promise<boolean> {
+    return this.events.delete(id);
+  }
+  
+  // ServiceProvider operations
+  async getServiceProviders(): Promise<ServiceProvider[]> {
+    return Array.from(this.serviceProviders.values());
+  }
+  
+  async getServiceProvider(id: number): Promise<ServiceProvider | undefined> {
+    return this.serviceProviders.get(id);
+  }
+  
+  async getServiceProviderByEmail(email: string): Promise<ServiceProvider | undefined> {
+    return Array.from(this.serviceProviders.values()).find(
+      provider => provider.email === email
+    );
+  }
+  
+  async createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider> {
+    const id = this.serviceProviderIdCounter++;
+    const createdAt = new Date();
+    const newProvider: ServiceProvider = { id, ...provider, createdAt };
+    this.serviceProviders.set(id, newProvider);
+    return newProvider;
+  }
+  
+  async updateServiceProvider(id: number, provider: Partial<InsertServiceProvider>): Promise<ServiceProvider | undefined> {
+    const existingProvider = this.serviceProviders.get(id);
+    if (!existingProvider) {
+      return undefined;
+    }
+    
+    const updatedProvider = { ...existingProvider, ...provider };
+    this.serviceProviders.set(id, updatedProvider);
+    return updatedProvider;
+  }
+  
+  async deleteServiceProvider(id: number): Promise<boolean> {
+    return this.serviceProviders.delete(id);
+  }
+  
+  // Service operations
+  async getServices(): Promise<Service[]> {
+    return Array.from(this.services.values());
+  }
+  
+  async getServicesByProvider(providerId: number): Promise<Service[]> {
+    return Array.from(this.services.values()).filter(
+      service => service.providerId === providerId
+    );
+  }
+  
+  async getService(id: number): Promise<Service | undefined> {
+    return this.services.get(id);
+  }
+  
+  async createService(service: InsertService): Promise<Service> {
+    const id = this.serviceIdCounter++;
+    const createdAt = new Date();
+    const newService: Service = { id, ...service, createdAt };
+    this.services.set(id, newService);
+    return newService;
+  }
+  
+  async updateService(id: number, service: Partial<InsertService>): Promise<Service | undefined> {
+    const existingService = this.services.get(id);
+    if (!existingService) {
+      return undefined;
+    }
+    
+    const updatedService = { ...existingService, ...service };
+    this.services.set(id, updatedService);
+    return updatedService;
+  }
+  
+  async deleteService(id: number): Promise<boolean> {
+    return this.services.delete(id);
   }
 }
 
