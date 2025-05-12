@@ -43,7 +43,7 @@ export default function Profile() {
     // Generate next 7 days
     for (let i = 1; i <= 7; i++) {
       const date = addDays(today, i);
-      const dayName = format(date, 'EEEE').toLowerCase();
+      const dayName = format(date, 'EEEE').toLowerCase() as keyof typeof profile.availability;
       const formattedDate = format(date, 'MMM d, yyyy');
       
       // Generate time slots based on availability
