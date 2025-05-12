@@ -6,7 +6,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from '@/components/ui/dialog';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -1128,6 +1128,80 @@ export default function CalendarPage() {
             </Button>
             <Button onClick={() => setShowFilters(false)}>
               Apply Filters
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Notifications Dialog */}
+      <Dialog open={showNotifications} onOpenChange={setShowNotifications}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Upcoming Events</DialogTitle>
+            <DialogDescription>
+              You have upcoming events in the next 24 hours.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4 max-h-[60vh] overflow-auto">
+            {notifications.map(event => {
+              const eventColor = event.color || eventTypeColors[event.eventType as keyof typeof eventTypeColors] || '#3b82f6';
+              return (
+                <div 
+                  key={event.id}
+                  className="p-4 rounded-md border border-gray-200 shadow-sm"
+                >
+                  <div className="flex items-start gap-3">
+                    <div 
+                      className="w-3 h-3 rounded-full mt-1.5" 
+                      style={{ backgroundColor: eventColor }}
+                    />
+                    <div className="flex-1">
+                      <h4 className="font-medium text-base">{event.title}</h4>
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1 text-sm text-gray-600">
+                        <div>
+                          {format(event.start, 'MMM dd, yyyy')} • {format(event.start, 'h:mm a')} - {format(event.end, 'h:mm a')}
+                        </div>
+                        {event.location && (
+                          <div className="flex items-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/>
+                              <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                            {event.location}
+                          </div>
+                        )}
+                      </div>
+                      
+                      {event.clientName && (
+                        <div className="mt-2 text-sm bg-gray-50 px-2 py-1 rounded inline-flex items-center gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                          </svg>
+                          {event.clientName}
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="ml-auto">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        onClick={() => handleSelectEvent(event)}
+                      >
+                        View
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          
+          <DialogFooter>
+            <Button onClick={() => setShowNotifications(false)}>
+              Dismiss All
             </Button>
           </DialogFooter>
         </DialogContent>
