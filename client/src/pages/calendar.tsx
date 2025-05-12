@@ -97,17 +97,39 @@ export default function CalendarPage() {
   // Mutation to create event
   const createEventMutation = useMutation({
     mutationFn: async (values: EventFormValues) => {
-      // Ensure values contain all the required fields
+      // Parse date strings to Date objects if needed and handle date conversion
+      let startDate, endDate;
+      
+      try {
+        // Handle various input formats
+        startDate = values.startTime instanceof Date 
+          ? values.startTime 
+          : new Date(values.startTime);
+          
+        endDate = values.endTime instanceof Date
+          ? values.endTime
+          : new Date(values.endTime);
+          
+        // Validate that we have valid dates
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          throw new Error("Invalid date values");
+        }
+      } catch (err) {
+        console.error("Date parsing error:", err);
+        throw new Error("Invalid date format for start or end time");
+      }
+      
+      // Ensure values contain all the required fields with proper types
       const eventData = {
         userId: "user-1", // Default user ID for demo
         title: values.title,
         description: values.description || null,
-        startTime: values.startTime.toISOString(),
-        endTime: values.endTime.toISOString(),
+        startTime: startDate.toISOString(),
+        endTime: endDate.toISOString(),
         location: values.location || null,
         clientName: values.clientName || null,
         isConfirmed: Boolean(values.isConfirmed),
-        eventType: values.eventType || "appointment",
+        eventType: values.eventType || "busy",
         color: values.color || "#3b82f6",
       };
       
@@ -152,11 +174,34 @@ export default function CalendarPage() {
     mutationFn: async (values: EventFormValues & { id: number }) => {
       const { id, ...eventData } = values;
       
+      // Parse date strings to Date objects if needed
+      let startDate, endDate;
+      
+      try {
+        // Handle various input formats
+        startDate = eventData.startTime instanceof Date 
+          ? eventData.startTime 
+          : new Date(eventData.startTime);
+          
+        endDate = eventData.endTime instanceof Date
+          ? eventData.endTime
+          : new Date(eventData.endTime);
+          
+        // Validate that we have valid dates
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) {
+          throw new Error("Invalid date values");
+        }
+      } catch (err) {
+        console.error("Date parsing error:", err);
+        throw new Error("Invalid date format for start or end time");
+      }
+      
       // Convert to server format
       const serverData = {
         ...eventData,
-        startTime: eventData.startTime.toISOString(),
-        endTime: eventData.endTime.toISOString(),
+        startTime: startDate.toISOString(),
+        endTime: endDate.toISOString(),
+        eventType: eventData.eventType || "busy"
       };
       
       const response = await fetch(`/api/events/${id}`, {
