@@ -52,6 +52,36 @@ const eventFormSchema = z.object({
 
 type EventFormValues = z.infer<typeof eventFormSchema>;
 
+// Define interfaces for our data types
+interface Client {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  address?: string;
+}
+
+interface Project {
+  id: number;
+  name: string;
+  clientId?: number;
+  description?: string;
+  startDate: Date | string;
+  endDate?: Date | string;
+  status: string;
+}
+
+interface Invoice {
+  id: number;
+  invoiceNumber: string;
+  clientId: number;
+  issueDate: Date | string;
+  dueDate: Date | string;
+  amount: number;
+  status: string;
+}
+
 interface CalendarEvent {
   id: number;
   title: string;
@@ -60,8 +90,11 @@ interface CalendarEvent {
   description?: string | null;
   location?: string | null;
   clientName?: string | null;
+  clientId?: number | null;
+  projectId?: number | null;
+  invoiceId?: number | null;
   isConfirmed: boolean;
-  eventType: 'private' | 'busy' | 'available' | 'travel';
+  eventType: 'private' | 'busy' | 'available' | 'travel' | 'client_meeting' | 'consultation' | 'project_work' | 'follow_up' | 'training';
   color?: string | null;
   allDay?: boolean;
   userId: string;
@@ -74,6 +107,19 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
   const { toast } = useToast();
+  
+  // State for filters
+  const [showFilters, setShowFilters] = useState(false);
+  const [filters, setFilters] = useState({
+    eventTypes: [] as string[],
+    clients: [] as number[],
+    projects: [] as number[],
+    onlyConfirmed: false,
+    dateRange: {
+      start: startOfDay(new Date()).toISOString(),
+      end: endOfMonth(new Date()).toISOString()
+    }
+  });
 
   // Form setup
   const form = useForm<EventFormValues>({
@@ -101,19 +147,19 @@ export default function CalendarPage() {
   });
   
   // Query to fetch clients for linking
-  const { data: clients = [] } = useQuery({
+  const { data: clients = [] } = useQuery<Client[]>({
     queryKey: ['/api/clients'],
     staleTime: 300000, // 5 minutes
   });
   
   // Query to fetch projects for linking
-  const { data: projects = [] } = useQuery({
+  const { data: projects = [] } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
     staleTime: 300000, // 5 minutes
   });
   
   // Query to fetch invoices for linking
-  const { data: invoices = [] } = useQuery({
+  const { data: invoices = [] } = useQuery<Invoice[]>({
     queryKey: ['/api/invoices'],
     staleTime: 300000, // 5 minutes
   });
@@ -293,11 +339,12 @@ export default function CalendarPage() {
     },
   });
 
-  // Transform events data for calendar display
+  // Transform events data for calendar display with filtering
   const calendarEvents = useMemo(() => {
     if (!events || !Array.isArray(events) || events.length === 0) return [];
     
-    return events.map((event: any) => ({
+    // First map the events to our CalendarEvent type
+    const mappedEvents = events.map((event: any) => ({
       id: event.id,
       title: event.title,
       start: new Date(event.startTime),
@@ -305,12 +352,49 @@ export default function CalendarPage() {
       description: event.description,
       location: event.location,
       clientName: event.clientName,
+      clientId: event.clientId,
+      projectId: event.projectId,
+      invoiceId: event.invoiceId,
       isConfirmed: event.isConfirmed,
       eventType: event.eventType,
       color: event.color,
       userId: event.userId,
     }));
-  }, [events]);
+    
+    // Then apply filters if any are active
+    return mappedEvents.filter(event => {
+      // Filter by event type
+      if (filters.eventTypes.length > 0 && !filters.eventTypes.includes(event.eventType)) {
+        return false;
+      }
+      
+      // Filter by client
+      if (filters.clients.length > 0 && (!event.clientId || !filters.clients.includes(event.clientId))) {
+        return false;
+      }
+      
+      // Filter by project
+      if (filters.projects.length > 0 && (!event.projectId || !filters.projects.includes(event.projectId))) {
+        return false;
+      }
+      
+      // Filter by confirmation status
+      if (filters.onlyConfirmed && !event.isConfirmed) {
+        return false;
+      }
+      
+      // Filter by date range (always apply date range filter)
+      const eventStart = event.start.getTime();
+      const filterStart = new Date(filters.dateRange.start).getTime();
+      const filterEnd = new Date(filters.dateRange.end).getTime();
+      
+      if (eventStart < filterStart || eventStart > filterEnd) {
+        return false;
+      }
+      
+      return true;
+    });
+  }, [events, filters]);
 
   // Handle event selection
   const handleSelectEvent = useCallback((event: CalendarEvent) => {
@@ -640,6 +724,99 @@ export default function CalendarPage() {
                     </FormItem>
                   )}
                 />
+              </div>
+              
+              <div className="space-y-4 pt-2 pb-2 border-t border-b">
+                <h3 className="text-sm font-medium text-slate-500">Link to business data</h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="clientId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Client</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(parseInt(value) || null)}
+                          value={field.value?.toString() || ""}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Link to client" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="">None</SelectItem>
+                            {clients.map((client: any) => (
+                              <SelectItem key={client.id} value={client.id.toString()}>
+                                {client.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="projectId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Project</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(parseInt(value) || null)}
+                          value={field.value?.toString() || ""}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Link to project" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="">None</SelectItem>
+                            {projects.map((project: any) => (
+                              <SelectItem key={project.id} value={project.id.toString()}>
+                                {project.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  
+                  <FormField
+                    control={form.control}
+                    name="invoiceId"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Invoice</FormLabel>
+                        <Select
+                          onValueChange={(value) => field.onChange(parseInt(value) || null)}
+                          value={field.value?.toString() || ""}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Link to invoice" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="">None</SelectItem>
+                            {invoices.map((invoice: any) => (
+                              <SelectItem key={invoice.id} value={invoice.id.toString()}>
+                                {invoice.invoiceNumber}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
               <FormField
