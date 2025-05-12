@@ -325,6 +325,9 @@ export const events = pgTable("events", {
   endTime: timestamp("end_time").notNull(),
   location: text("location"),
   clientName: text("client_name"),
+  clientId: integer("client_id").references(() => clients.id), // Reference to client
+  projectId: integer("project_id").references(() => projects.id), // Reference to project
+  invoiceId: integer("invoice_id").references(() => invoices.id), // Reference to invoice
   isConfirmed: boolean("is_confirmed").default(false).notNull(),
   eventType: eventTypeEnum("event_type").default("busy").notNull(),
   color: text("color"),
@@ -340,6 +343,9 @@ export const insertEventSchema = createInsertSchema(events).pick({
   endTime: true,
   location: true,
   clientName: true,
+  clientId: true,
+  projectId: true,
+  invoiceId: true,
   isConfirmed: true,
   eventType: true,
   color: true,

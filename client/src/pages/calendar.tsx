@@ -42,8 +42,11 @@ const eventFormSchema = z.object({
   description: z.string().optional().nullable(),
   location: z.string().optional().nullable(),
   clientName: z.string().optional().nullable(),
+  clientId: z.number().optional().nullable(),
+  projectId: z.number().optional().nullable(),
+  invoiceId: z.number().optional().nullable(),
   isConfirmed: z.boolean().default(false),
-  eventType: z.enum(['private', 'busy', 'available', 'travel']).default('busy'),
+  eventType: z.enum(['private', 'busy', 'available', 'travel', 'client_meeting', 'consultation', 'project_work', 'follow_up', 'training']).default('busy'),
   color: z.string().optional().nullable(),
 });
 
@@ -323,10 +326,26 @@ export default function CalendarPage() {
     [form]
   );
 
-  // Event styling
+  // Default colors for different event types
+  const eventTypeColors = {
+    busy: '#3b82f6', // blue
+    available: '#10b981', // green
+    private: '#6366f1', // indigo
+    travel: '#f59e0b', // amber
+    client_meeting: '#ef4444', // red
+    consultation: '#8b5cf6', // purple
+    project_work: '#0ea5e9', // sky
+    follow_up: '#ec4899', // pink
+    training: '#14b8a6', // teal
+  };
+
+  // Event styling with improved colors by event type
   const eventPropGetter = useCallback(
     (event: CalendarEvent) => {
-      const backgroundColor = event.color || '#3b82f6';
+      // Use custom color if set, otherwise use the color for the event type
+      const defaultColor = event.eventType ? eventTypeColors[event.eventType as keyof typeof eventTypeColors] : '#3b82f6';
+      const backgroundColor = event.color || defaultColor;
+      
       const style = {
         backgroundColor,
         borderRadius: '4px',
@@ -334,8 +353,14 @@ export default function CalendarPage() {
         color: '#fff',
         border: 'none',
         display: 'block',
+        fontWeight: event.isConfirmed ? 'bold' : 'normal',
+        boxShadow: event.isConfirmed ? '0 1px 3px rgba(0,0,0,0.2)' : 'none',
       };
-      return { style };
+      
+      return {
+        style,
+        className: `event-type-${event.eventType} ${event.isConfirmed ? 'confirmed' : 'unconfirmed'}`
+      };
     },
     []
   );
