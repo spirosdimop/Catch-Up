@@ -8,7 +8,8 @@ import {
   insertTimeEntrySchema, 
   insertInvoiceSchema, 
   insertInvoiceItemSchema,
-  insertEventSchema
+  insertEventSchema,
+  insertEventTemplateSchema
 } from "@shared/schema";
 import { z } from "zod";
 
@@ -658,6 +659,114 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deleting event:", error);
       res.status(500).json({ message: "Failed to delete event" });
+    }
+  });
+  
+  // Event Template endpoints
+  apiRouter.get("/event-templates/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const templates = await storage.getEventTemplates(userId);
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching templates:", error);
+      res.status(500).json({ message: "Failed to fetch templates" });
+    }
+  });
+  
+  apiRouter.get("/event-templates/public/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const templates = await storage.getPublicEventTemplates(userId);
+      res.json(templates);
+    } catch (error) {
+      console.error("Error fetching public templates:", error);
+      res.status(500).json({ message: "Failed to fetch public templates" });
+    }
+  });
+  
+  apiRouter.get("/event-templates/:userId/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid template ID" });
+      }
+      
+      const template = await storage.getEventTemplate(id);
+      if (!template) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+      
+      res.json(template);
+    } catch (error) {
+      console.error("Error fetching template:", error);
+      res.status(500).json({ message: "Failed to fetch template" });
+    }
+  });
+  
+  apiRouter.post("/event-templates", async (req, res) => {
+    try {
+      const templateData = insertEventTemplateSchema.parse(req.body);
+      const template = await storage.createEventTemplate(templateData);
+      res.status(201).json(template);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid template data", errors: error.errors });
+      }
+      console.error("Error creating template:", error);
+      res.status(500).json({ message: "Failed to create template" });
+    }
+  });
+  
+  apiRouter.put("/event-templates/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid template ID" });
+      }
+      
+      const templateData = insertEventTemplateSchema.partial().parse(req.body);
+      const template = await storage.updateEventTemplate(id, templateData);
+      
+      if (!template) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+      
+      res.json(template);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid template data", errors: error.errors });
+      }
+      console.error("Error updating template:", error);
+      res.status(500).json({ message: "Failed to update template" });
+    }
+  });
+  
+  apiRouter.delete("/event-templates/:id", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid template ID" });
+      }
+      
+      const success = await storage.deleteEventTemplate(id);
+      
+      if (!success) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+      
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting template:", error);
+      res.status(500).json({ message: "Failed to delete template" });
     }
   });
 

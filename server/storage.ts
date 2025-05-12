@@ -630,6 +630,65 @@ export class MemStorage implements IStorage {
     return this.events.delete(id);
   }
   
+  // Event Template operations
+  async getEventTemplates(userId: string): Promise<EventTemplate[]> {
+    return Array.from(this.eventTemplates.values()).filter(
+      template => template.userId === userId
+    );
+  }
+  
+  async getPublicEventTemplates(userId: string): Promise<EventTemplate[]> {
+    return Array.from(this.eventTemplates.values()).filter(
+      template => template.userId === userId && template.isPublic
+    );
+  }
+  
+  async getEventTemplate(id: number): Promise<EventTemplate | undefined> {
+    return this.eventTemplates.get(id);
+  }
+  
+  async createEventTemplate(template: InsertEventTemplate): Promise<EventTemplate> {
+    const id = this.eventTemplateIdCounter++;
+    const createdAt = new Date();
+    const updatedAt = new Date();
+    
+    const newTemplate: EventTemplate = {
+      id,
+      createdAt,
+      updatedAt,
+      ...template
+    };
+    
+    this.eventTemplates.set(id, newTemplate);
+    return newTemplate;
+  }
+  
+  async updateEventTemplate(id: number, template: Partial<InsertEventTemplate>): Promise<EventTemplate | undefined> {
+    const existingTemplate = this.eventTemplates.get(id);
+    
+    if (!existingTemplate) {
+      return undefined;
+    }
+    
+    const updatedTemplate: EventTemplate = {
+      ...existingTemplate,
+      ...template,
+      updatedAt: new Date()
+    };
+    
+    this.eventTemplates.set(id, updatedTemplate);
+    return updatedTemplate;
+  }
+  
+  async deleteEventTemplate(id: number): Promise<boolean> {
+    if (!this.eventTemplates.has(id)) {
+      return false;
+    }
+    
+    this.eventTemplates.delete(id);
+    return true;
+  }
+  
   // ServiceProvider operations
   async getServiceProviders(): Promise<ServiceProvider[]> {
     return Array.from(this.serviceProviders.values());
