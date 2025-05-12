@@ -532,6 +532,11 @@ export default function CalendarPage() {
                         <SelectItem value="available">Available</SelectItem>
                         <SelectItem value="private">Private</SelectItem>
                         <SelectItem value="travel">Travel</SelectItem>
+                        <SelectItem value="client_meeting">Client Meeting</SelectItem>
+                        <SelectItem value="consultation">Consultation</SelectItem>
+                        <SelectItem value="project_work">Project Work</SelectItem>
+                        <SelectItem value="follow_up">Follow-up Call</SelectItem>
+                        <SelectItem value="training">Training/Workshop</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />

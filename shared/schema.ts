@@ -307,7 +307,12 @@ export const eventTypeEnum = pgEnum("event_type", [
   "private",
   "busy",
   "available",
-  "travel"
+  "travel",
+  "client_meeting",
+  "consultation",
+  "project_work",
+  "follow_up",
+  "training"
 ]);
 
 // Calendar events schema
@@ -348,5 +353,10 @@ export const EventType = {
   PRIVATE: 'private',
   BUSY: 'busy',
   AVAILABLE: 'available',
-  TRAVEL: 'travel'
+  TRAVEL: 'travel',
+  CLIENT_MEETING: 'client_meeting',
+  CONSULTATION: 'consultation',
+  PROJECT_WORK: 'project_work',
+  FOLLOW_UP: 'follow_up',
+  TRAINING: 'training'
 } as const;
