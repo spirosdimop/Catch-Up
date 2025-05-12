@@ -315,6 +315,22 @@ export const eventTypeEnum = pgEnum("event_type", [
   "training"
 ]);
 
+// Event templates schema
+export const eventTemplates = pgTable("event_templates", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(), // Using string for userId to support Replit Auth
+  name: text("name").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  duration: integer("duration").notNull(), // Duration in minutes
+  location: text("location"),
+  eventType: eventTypeEnum("event_type").default("busy").notNull(),
+  color: text("color"),
+  isPublic: boolean("is_public").default(true).notNull(), // Whether this template is available for public booking
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 // Calendar events schema
 export const events = pgTable("events", {
   id: serial("id").primaryKey(),
@@ -330,9 +346,22 @@ export const events = pgTable("events", {
   invoiceId: integer("invoice_id").references(() => invoices.id), // Reference to invoice
   isConfirmed: boolean("is_confirmed").default(false).notNull(),
   eventType: eventTypeEnum("event_type").default("busy").notNull(),
+  templateId: integer("template_id").references(() => eventTemplates.id), // Reference to template
   color: text("color"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertEventTemplateSchema = createInsertSchema(eventTemplates).pick({
+  userId: true,
+  name: true,
+  title: true,
+  description: true,
+  duration: true,
+  location: true,
+  eventType: true,
+  color: true,
+  isPublic: true,
 });
 
 export const insertEventSchema = createInsertSchema(events).pick({
@@ -348,6 +377,7 @@ export const insertEventSchema = createInsertSchema(events).pick({
   invoiceId: true,
   isConfirmed: true,
   eventType: true,
+  templateId: true,
   color: true,
 });
 
