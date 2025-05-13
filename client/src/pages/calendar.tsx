@@ -714,12 +714,14 @@ export default function CalendarPage() {
                     <FormLabel>Event Type</FormLabel>
                     <Select
                       onValueChange={field.onChange}
-                      defaultValue={field.value}
-                      value={field.value}
+                      defaultValue={field.value || "busy"}
+                      value={field.value || "busy"}
                     >
                       <FormControl>
                         <SelectTrigger>
-                          <SelectValue placeholder="Select event type" />
+                          <SelectValue placeholder="Select event type">
+                            {field.value || "Busy"}
+                          </SelectValue>
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
@@ -804,7 +806,9 @@ export default function CalendarPage() {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Link to client" />
+                              <SelectValue placeholder="Link to client">
+                                {field.value ? clients.find((c: any) => c.id === field.value)?.name || field.value : "None"}
+                              </SelectValue>
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -833,7 +837,9 @@ export default function CalendarPage() {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Link to project" />
+                              <SelectValue placeholder="Link to project">
+                                {field.value ? projects.find((p: any) => p.id === field.value)?.name || field.value : "None"}
+                              </SelectValue>
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
@@ -862,7 +868,9 @@ export default function CalendarPage() {
                         >
                           <FormControl>
                             <SelectTrigger>
-                              <SelectValue placeholder="Link to invoice" />
+                              <SelectValue placeholder="Link to invoice">
+                                {field.value ? invoices.find((i: any) => i.id === field.value)?.invoiceNumber || field.value : "None"}
+                              </SelectValue>
                             </SelectTrigger>
                           </FormControl>
                           <SelectContent>
