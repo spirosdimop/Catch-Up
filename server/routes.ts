@@ -1350,7 +1350,19 @@ Remember: The most helpful thing you can do is direct users to the specialized t
               start_time: startDate.toISOString(),
               end_time: endDate.toISOString(),
               status: 'confirmed',
-              notes: `Created from user request: "${routingResult.calendar_prompt}"`,
+              notes: `Meeting scheduled for ${startDate.toLocaleString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: 'numeric'
+              })}. Created from user request: "${routingResult.calendar_prompt}". Today's date is ${new Date().toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+              })}.`,
               event_id: undefined // Add this to match the SchedulingResponse interface
             };
           }
