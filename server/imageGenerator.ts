@@ -24,6 +24,10 @@ export async function generateImage(prompt: string, outputPath?: string): Promis
       quality: "standard",
     });
 
+    if (!response.data || response.data.length === 0) {
+      throw new Error("No image data returned from OpenAI");
+    }
+    
     const imageUrl = response.data[0].url;
     
     if (!imageUrl) {

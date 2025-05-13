@@ -28,6 +28,7 @@ import ProfileRedesign from "@/pages/profile-redesign";
 import AIAssistant from "@/pages/ai-assistant";
 import Signup from "@/pages/signup";
 import LandingPage from "@/pages/landing";
+import LandingPageGenerator from "@/pages/landing-page-generator";
 
 function Router() {
   const [location] = useLocation();
@@ -65,6 +66,7 @@ function Router() {
         <Route path="/profile-original" component={Profile} />
         <Route path="/profile" component={ProfileRedesign} />
         <Route path="/ai-assistant" component={AIAssistant} />
+        <Route path="/landing-generator" component={LandingPageGenerator} />
         <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>

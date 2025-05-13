@@ -25,9 +25,12 @@ router.post("/generate", async (req: Request, res: Response) => {
       const result = await generateImage(prompt);
       return res.json(result);
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating image:", error);
-    res.status(500).json({ error: "Failed to generate image", details: error.message });
+    res.status(500).json({ 
+      error: "Failed to generate image", 
+      details: error.message || "Unknown error" 
+    });
   }
 });
 
