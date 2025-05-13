@@ -429,44 +429,44 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="w-full py-6 bg-background border-t">
+      <footer className="w-full py-10 bg-[#0F1D3A] text-white">
         <div className="container px-4 md:px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">Platform</h4>
-              <ul className="space-y-2">
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-white">Platform</h4>
+              <ul className="space-y-3">
                 <li>
-                  <a href="#features" className="text-sm text-muted-foreground hover:underline">
+                  <a href="#features" className="text-sm text-blue-200 hover:text-white transition-colors">
                     Features
                   </a>
                 </li>
                 <li>
-                  <a href="#pricing" className="text-sm text-muted-foreground hover:underline">
+                  <a href="#pricing" className="text-sm text-blue-200 hover:text-white transition-colors">
                     Pricing
                   </a>
                 </li>
                 <li>
-                  <a href="#testimonials" className="text-sm text-muted-foreground hover:underline">
+                  <a href="#testimonials" className="text-sm text-blue-200 hover:text-white transition-colors">
                     Testimonials
                   </a>
                 </li>
               </ul>
             </div>
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">Company</h4>
-              <ul className="space-y-2">
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-white">Company</h4>
+              <ul className="space-y-3">
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:underline">
+                  <a href="#" className="text-sm text-blue-200 hover:text-white transition-colors">
                     About
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:underline">
+                  <a href="#" className="text-sm text-blue-200 hover:text-white transition-colors">
                     Blog
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:underline">
+                  <a href="#" className="text-sm text-blue-200 hover:text-white transition-colors">
                     Careers
                   </a>
                 </li>
