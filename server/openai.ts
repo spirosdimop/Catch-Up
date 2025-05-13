@@ -222,3 +222,81 @@ export async function generateAutoResponse(
     return "Sorry I missed you. I'll get back to you as soon as possible.";
   }
 }
+
+/**
+ * Interface for the routing determination result
+ */
+export interface CommandRoutingResult {
+  settings_prompt?: string;
+  calendar_prompt?: string;
+  message_prompt?: string;
+  clarification_prompt?: string;
+  missing_fields?: string[];
+}
+
+/**
+ * Routes a user input message to the appropriate specialized API
+ * @param message The user's natural language input message
+ * @returns An object containing prompts for each API or clarification requests
+ */
+export async function routeInputToApis(message: string): Promise<CommandRoutingResult> {
+  try {
+    // Get OpenAI client specifically for routing (using the general client)
+    const routingClient = getOpenAIClient('general');
+    
+    // Create system prompt for the command router
+    const systemPrompt = `
+      You are an AI assistant that routes user requests to the appropriate specialized API. 
+      Based on the user's message, determine which of the following APIs should handle the request:
+      
+      1. settings_api - For changing app settings, preferences, availability status, etc.
+      2. calendar_api - For scheduling, rescheduling, or canceling events and meetings.
+      3. message_api - For generating professional auto-response messages when the user is unavailable.
+      
+      Analyze the user's message and output a JSON object with the following structure:
+      {
+        "settings_prompt": "...", // Include only if the message contains a settings-related request (null otherwise)
+        "calendar_prompt": "...", // Include only if the message contains a calendar-related request (null otherwise)
+        "message_prompt": "...", // Include only if the message contains a message generation request (null otherwise)
+        "clarification_prompt": "...", // Include only if more information is needed to process the request (null otherwise)
+        "missing_fields": ["field1", "field2"] // List any missing information needed for the request (empty if none)
+      }
+      
+      If the user's intent is unclear or lacks specific information, return a clarification_prompt and missing_fields.
+      Don't make up information - only route to APIs where the user has provided the necessary context.
+      
+      Example 1: "Change my status to away and write an auto-reply that I'm on vacation until Friday"
+      Should return both settings_prompt and message_prompt.
+      
+      Example 2: "Schedule a meeting" (lacks details like when, with whom, etc.)
+      Should return clarification_prompt and missing_fields.
+    `;
+
+    // Make the API call to OpenAI
+    const response = await routingClient.chat.completions.create({
+      model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: message }
+      ],
+      temperature: 0.2, // Low temperature for more consistent routing decisions
+      max_tokens: 1000,
+      response_format: { type: 'json_object' }
+    });
+
+    // Parse the response
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('No content in response from OpenAI');
+    }
+
+    return JSON.parse(content) as CommandRoutingResult;
+
+  } catch (error) {
+    console.error('Error routing input to APIs:', error);
+    // Return a fallback response asking for clarification
+    return {
+      clarification_prompt: "I'm having trouble understanding your request. Could you please be more specific about what you'd like to do?"
+    };
+  }
+}
