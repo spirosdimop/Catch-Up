@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { PageTitle } from "@/components/ui/page-title";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -36,7 +35,8 @@ import {
   Clock, 
   CheckCircle2, 
   Building, 
-  BriefcaseBusiness 
+  BriefcaseBusiness,
+  Phone
 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { useUser } from "@/lib/userContext";
@@ -44,7 +44,6 @@ import { EventTemplate, EventType } from "@shared/schema";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Profile() {
-  const [tab, setTab] = useState("profile");
   const { user, setUser, updateUser } = useUser();
   
   // If no user exists, create a test user for development purposes
@@ -182,7 +181,7 @@ export default function Profile() {
       console.log('Updating template data:', updatedTemplate);
       
       const response = await fetch(`/api/event-templates/${updatedTemplate.id}`, {
-        method: 'PUT', // Changed from PATCH to PUT to match server endpoint
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -238,11 +237,6 @@ export default function Profile() {
     }
   });
   
-  // Debugging user data
-  useEffect(() => {
-    console.log('Current user:', user);
-  }, [user]);
-  
   // Load templates when data is available
   useEffect(() => {
     if (templateData && Array.isArray(templateData)) {
@@ -294,9 +288,7 @@ export default function Profile() {
   
   // Handle template submit
   const handleTemplateSubmit = (e: React.FormEvent) => {
-    e.preventDefault(); // Prevent the default form submission
-    console.log('Form submission event:', e);
-    console.log('Form submission, user context:', user);
+    e.preventDefault();
     
     if (!user || !user.id) {
       console.error('Cannot create template: No user ID available');
@@ -310,17 +302,13 @@ export default function Profile() {
       duration: Number(templateForm.duration),
     };
     
-    console.log('Prepared template data for submission:', templateData);
-    
     try {
       if (editingTemplate) {
-        console.log('Updating existing template with ID:', editingTemplate.id);
         updateTemplateMutation.mutate({
           ...templateData,
           id: editingTemplate.id,
         });
       } else {
-        console.log('Creating new template');
         createTemplateMutation.mutate(templateData);
       }
     } catch (error) {
@@ -490,7 +478,8 @@ export default function Profile() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-10">
+      <PageTitle title="Profile" description="Manage your professional profile information" />
       
       {/* Profile editing dialog */}
       <Dialog 
@@ -670,17 +659,11 @@ export default function Profile() {
       <Dialog 
         open={showNewTemplateDialog} 
         onOpenChange={(open) => {
-          console.log('Dialog open state changing to:', open);
           if (!open) {
-            // Only allow closing if we're not in the middle of a mutation
             if (!createTemplateMutation.isPending && !updateTemplateMutation.isPending) {
               setShowNewTemplateDialog(false);
               resetTemplateForm();
               setEditingTemplate(null);
-            } else {
-              console.log('Cannot close dialog during mutation');
-              // Prevent dialog from closing during mutation
-              return;
             }
           } else {
             setShowNewTemplateDialog(true);
@@ -693,9 +676,7 @@ export default function Profile() {
               {editingTemplate ? 'Edit Event Template' : 'Create Event Template'}
             </DialogTitle>
             <DialogDescription>
-              {editingTemplate 
-                ? 'Update this template for quick scheduling with clients'
-                : 'Create a reusable template for quick scheduling'}
+              Create templates for events that you schedule regularly.
             </DialogDescription>
           </DialogHeader>
           
@@ -755,7 +736,7 @@ export default function Profile() {
                 <Input
                   id="location"
                   name="location"
-                  placeholder="Office or Virtual"
+                  placeholder="Office or Client Location"
                   className="col-span-3"
                   value={templateForm.location}
                   onChange={handleTemplateInputChange}
@@ -769,10 +750,7 @@ export default function Profile() {
                 <Select 
                   name="eventType" 
                   value={templateForm.eventType}
-                  onValueChange={(value) => {
-                    const eventTypeValue = value as "private" | "busy" | "available" | "travel" | "client_meeting" | "consultation" | "project_work" | "follow_up" | "training";
-                    setTemplateForm(prev => ({ ...prev, eventType: eventTypeValue }));
-                  }}
+                  onValueChange={(value) => setTemplateForm(prev => ({ ...prev, eventType: value as any }))}
                 >
                   <SelectTrigger className="col-span-3">
                     <SelectValue placeholder="Select event type" />
@@ -780,8 +758,12 @@ export default function Profile() {
                   <SelectContent>
                     <SelectItem value="client_meeting">Client Meeting</SelectItem>
                     <SelectItem value="consultation">Consultation</SelectItem>
-                    <SelectItem value="project_work">Project Work</SelectItem>
                     <SelectItem value="follow_up">Follow-up</SelectItem>
+                    <SelectItem value="project_work">Project Work</SelectItem>
+                    <SelectItem value="travel">Travel Time</SelectItem>
+                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="busy">Busy</SelectItem>
+                    <SelectItem value="available">Available</SelectItem>
                     <SelectItem value="training">Training</SelectItem>
                   </SelectContent>
                 </Select>
@@ -791,654 +773,506 @@ export default function Profile() {
                 <Label htmlFor="color" className="text-right">
                   Color
                 </Label>
-                <Input
-                  id="color"
-                  name="color"
-                  type="color"
-                  className="col-span-3 w-16 h-8 p-1"
-                  value={templateForm.color}
-                  onChange={handleTemplateInputChange}
-                />
+                <div className="col-span-3 flex gap-2 items-center">
+                  <Input
+                    id="color"
+                    name="color"
+                    type="color"
+                    className="w-12 h-8 p-1"
+                    value={templateForm.color}
+                    onChange={handleTemplateInputChange}
+                  />
+                  <span className="text-sm text-muted-foreground">
+                    Event color in calendar
+                  </span>
+                </div>
               </div>
               
               <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="description" className="text-right">
+                <Label className="text-right">
+                  Public Booking
+                </Label>
+                <div className="flex items-center col-span-3 space-x-2">
+                  <Checkbox 
+                    id="isPublic" 
+                    checked={templateForm.isPublic}
+                    onCheckedChange={(checked) => 
+                      handleTemplateCheckboxChange('isPublic', checked as boolean)
+                    }
+                  />
+                  <label
+                    htmlFor="isPublic"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Available for clients to book online
+                  </label>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-4 items-start gap-4">
+                <Label htmlFor="description" className="text-right pt-2">
                   Description
                 </Label>
                 <Textarea
                   id="description"
                   name="description"
-                  placeholder="Template description..."
+                  placeholder="Details about this event template"
                   className="col-span-3"
+                  rows={3}
                   value={templateForm.description}
                   onChange={handleTemplateInputChange}
                 />
               </div>
-              
-              <div className="grid grid-cols-4 items-center gap-4">
-                <div className="text-right">Visibility</div>
-                <div className="flex items-center space-x-2 col-span-3">
-                  <Checkbox 
-                    id="isPublic" 
-                    checked={templateForm.isPublic}
-                    onCheckedChange={(checked) => handleTemplateCheckboxChange('isPublic', !!checked)}
-                  />
-                  <Label htmlFor="isPublic">
-                    Make public (visible on your booking page)
-                  </Label>
-                </div>
-              </div>
             </div>
             
             <DialogFooter>
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => {
-                  setEditingTemplate(null);
-                  resetTemplateForm();
-                  setShowNewTemplateDialog(false);
-                }}
-              >
+              <Button type="button" variant="outline" onClick={() => setShowNewTemplateDialog(false)}>
                 Cancel
               </Button>
-              <Button 
-                type="button" // Changed from submit to button
-                disabled={createTemplateMutation.isPending || updateTemplateMutation.isPending}
-                onClick={(e) => {
-                  e.preventDefault();
-                  console.log("Submit button clicked");
-                  
-                  // Call the submit handler directly
-                  if (!user || !user.id) {
-                    console.error('Cannot create template: No user ID available');
-                    alert('Please log in to create templates');
-                    return;
-                  }
-                  
-                  const templateData = {
-                    ...templateForm,
-                    userId: user.id,
-                    duration: Number(templateForm.duration),
-                  };
-                  
-                  console.log('Submitting template directly from button:', templateData);
-                  
-                  try {
-                    if (editingTemplate) {
-                      // Direct API call for updating
-                      console.log('Direct update API call for template:', templateData);
-                      fetch(`/api/event-templates/${editingTemplate.id}`, {
-                        method: 'PUT',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(templateData),
-                      })
-                      .then(response => {
-                        if (!response.ok) {
-                          return response.json().then(err => {
-                            throw new Error(JSON.stringify(err));
-                          });
-                        }
-                        return response.json();
-                      })
-                      .then(data => {
-                        console.log('Template updated successfully:', data);
-                        queryClient.invalidateQueries({ queryKey: ['/api/event-templates', user?.id] });
-                        setShowNewTemplateDialog(false);
-                        resetTemplateForm();
-                        setEditingTemplate(null);
-                      })
-                      .catch(error => {
-                        console.error('Error updating template:', error);
-                      });
-                    } else {
-                      // Direct API call for creation
-                      console.log('Direct create API call for template:', templateData);
-                      fetch('/api/event-templates', {
-                        method: 'POST',
-                        headers: {
-                          'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(templateData),
-                      })
-                      .then(response => {
-                        if (!response.ok) {
-                          return response.json().then(err => {
-                            throw new Error(JSON.stringify(err));
-                          });
-                        }
-                        return response.json();
-                      })
-                      .then(data => {
-                        console.log('Template created successfully:', data);
-                        queryClient.invalidateQueries({ queryKey: ['/api/event-templates', user?.id] });
-                        setShowNewTemplateDialog(false);
-                        resetTemplateForm();
-                      })
-                      .catch(error => {
-                        console.error('Error creating template:', error);
-                      });
-                    }
-                  } catch (error) {
-                    console.error('Error in button click handler:', error);
-                  }
-                }}
-              >
-                {/* Use a state variable to track API call status */}
-                {editingTemplate ? 'Update Template' : 'Create Template'}
+              <Button type="submit" disabled={createTemplateMutation.isPending || updateTemplateMutation.isPending}>
+                {createTemplateMutation.isPending || updateTemplateMutation.isPending
+                  ? 'Saving...'
+                  : editingTemplate
+                    ? 'Update Template'
+                    : 'Create Template'
+                }
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
       
-      <PageTitle 
-        title="Professional Profile" 
-        description="Manage your public profile and booking availability"
-        icon={<UserCircle className="h-6 w-6 text-primary" />}
-      />
-      
-      <Tabs defaultValue="profile" className="w-full" value={tab} onValueChange={setTab}>
-        <TabsList className="grid grid-cols-4 w-[600px]">
-          <TabsTrigger value="profile">Profile</TabsTrigger>
-          <TabsTrigger value="booking">Booking</TabsTrigger>
-          <TabsTrigger value="templates">Event Templates</TabsTrigger>
-          <TabsTrigger value="availability">Availability</TabsTrigger>
-        </TabsList>
-        
-        {/* Profile Tab */}
-        <TabsContent value="profile" className="space-y-6">
-          <Card>
-            <CardHeader className="pb-4">
-              <div className="flex flex-col md:flex-row md:items-center gap-6">
-                <Avatar className="h-24 w-24">
-                  <AvatarImage src={profile.avatar} alt={profile.name} />
-                  <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
-                </Avatar>
+      {/* Personal Information Section */}
+      <div className="space-y-6">
+        <Card>
+          <CardHeader className="pb-4">
+            <div className="flex flex-col md:flex-row md:items-center gap-6">
+              <Avatar className="h-24 w-24">
+                <AvatarImage src={profile.avatar} alt={profile.name} />
+                <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
+              </Avatar>
+              <div>
+                <CardTitle className="text-2xl">{profile.name}</CardTitle>
+                <CardDescription className="text-lg">{profile.title}</CardDescription>
+                
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {profile.skills.map(skill => (
+                    <Badge key={skill} variant="secondary">{skill}</Badge>
+                  ))}
+                </div>
+              </div>
+              
+              <div className="md:ml-auto">
+                <Button className="w-full md:w-auto" onClick={handleEditProfileClick}>Edit Profile</Button>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <Mail className="h-5 w-5 text-muted-foreground" />
+                  <span>{profile.email}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Phone className="h-5 w-5 text-muted-foreground" />
+                  <span>{profile.phone}</span>
+                </div>
+                {profile.businessName && (
+                  <div className="flex items-center gap-2">
+                    <Building className="h-5 w-5 text-muted-foreground" />
+                    <span>{profile.businessName}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2">
+                  <Globe className="h-5 w-5 text-muted-foreground" />
+                  <span>{profile.website}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-5 w-5 text-muted-foreground" />
+                  <span>{profile.location}</span>
+                </div>
+                {profile.serviceArea && (
+                  <div className="flex items-center gap-2">
+                    <BriefcaseBusiness className="h-5 w-5 text-muted-foreground" />
+                    <span>Service Area: {profile.serviceArea}</span>
+                  </div>
+                )}
+                {user?.services && user.services.length > 0 && (
+                  <div className="mt-4">
+                    <h4 className="font-medium mb-2">Services</h4>
+                    <div className="space-y-2">
+                      {user.services.map((service, index) => (
+                        <div key={index} className="border p-3 rounded-md">
+                          <div className="flex justify-between items-center">
+                            <span className="font-medium">{service.name}</span>
+                            <Badge variant="outline">${service.price}</Badge>
+                          </div>
+                          <div className="flex items-center mt-1 text-sm text-muted-foreground">
+                            <Clock className="h-4 w-4 mr-1" />
+                            <span>{service.duration} minutes</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              <div className="space-y-6">
                 <div>
-                  <CardTitle className="text-2xl">{profile.name}</CardTitle>
-                  <CardDescription className="text-lg">{profile.title}</CardDescription>
-                  
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {profile.skills.map(skill => (
-                      <Badge key={skill} variant="secondary">{skill}</Badge>
+                  <h3 className="text-lg font-medium mb-2">About</h3>
+                  <p className="text-muted-foreground">{profile.bio}</p>
+                </div>
+                
+                {profile.voicemailMessage && (
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">Voicemail Message</h3>
+                    <Card className="p-3 bg-gray-50">
+                      <p className="text-sm text-muted-foreground italic">"{profile.voicemailMessage}"</p>
+                    </Card>
+                  </div>
+                )}
+                
+                {profile.smsFollowUpMessage && (
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">SMS Follow-Up</h3>
+                    <Card className="p-3 bg-gray-50">
+                      <p className="text-sm text-muted-foreground italic">"{profile.smsFollowUpMessage}"</p>
+                    </Card>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Availability Section */}
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold">Availability</h2>
+        <Card>
+          <CardHeader>
+            <CardTitle>Manage Availability</CardTitle>
+            <CardDescription>
+              Set your regular availability for client bookings
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              <div className="flex flex-col space-y-4">
+                {Object.entries(profile.availability).map(([day, slots]) => (
+                  <div key={day} className="border rounded-md p-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-medium capitalize">{day}</h3>
+                      <div className="flex items-center">
+                        <Switch 
+                          id={`${day}-available`} 
+                          checked={slots.morning || slots.afternoon || slots.evening}
+                          onCheckedChange={(checked) => handleDayToggle(day, checked)}
+                        />
+                        <Label htmlFor={`${day}-available`} className="ml-2">
+                          {slots.morning || slots.afternoon || slots.evening ? 'Available' : 'Unavailable'}
+                        </Label>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`${day}-morning`} 
+                          checked={slots.morning}
+                          onCheckedChange={(checked) => handleSlotToggle(day, 'morning', !!checked)}
+                          disabled={!(slots.morning || slots.afternoon || slots.evening)}
+                        />
+                        <label
+                          htmlFor={`${day}-morning`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          Morning (9AM-12PM)
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`${day}-afternoon`} 
+                          checked={slots.afternoon}
+                          onCheckedChange={(checked) => handleSlotToggle(day, 'afternoon', !!checked)}
+                          disabled={!(slots.morning || slots.afternoon || slots.evening)}
+                        />
+                        <label
+                          htmlFor={`${day}-afternoon`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          Afternoon (1PM-5PM)
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id={`${day}-evening`} 
+                          checked={slots.evening}
+                          onCheckedChange={(checked) => handleSlotToggle(day, 'evening', !!checked)}
+                          disabled={!(slots.morning || slots.afternoon || slots.evening)}
+                        />
+                        <label
+                          htmlFor={`${day}-evening`}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          Evening (5PM-9PM)
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Booking System Section */}
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold">Book an Appointment</h2>
+        <Card className="booking-system">
+          <CardHeader>
+            <CardTitle>Book an Appointment</CardTitle>
+            <CardDescription>
+              Select a date and time to schedule a meeting
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {bookingStep === 4 ? (
+              <div className="text-center py-8 space-y-4">
+                <CheckCircle2 className="w-16 h-16 mx-auto text-green-500" />
+                <h3 className="text-xl font-medium">Booking Confirmed!</h3>
+                <p className="text-muted-foreground">
+                  Your appointment has been scheduled for:
+                  <br />
+                  <span className="font-medium">{selectedDate} at {selectedTime}</span>
+                </p>
+                <Button 
+                  onClick={() => setBookingStep(1)} 
+                  className="mt-4"
+                >
+                  Book Another Appointment
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                <div className={`${bookingStep !== 1 ? 'hidden' : ''}`}>
+                  <h3 className="font-medium mb-4">Select a date:</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
+                    {availableDays.map((day, index) => (
+                      <div 
+                        key={index}
+                        className={`p-3 border rounded-lg text-center cursor-pointer hover:bg-gray-50 transition-colors ${
+                          selectedDate === day.date ? 'border-primary bg-primary/10' : ''
+                        } ${day.slots.length === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        onClick={() => day.slots.length > 0 && handleDateSelect(day.date)}
+                      >
+                        <div className="font-medium">{day.day}</div>
+                        <div className="text-sm text-muted-foreground">{day.date}</div>
+                        <div className="mt-2 text-xs">
+                          {day.slots.length > 0 ? (
+                            <Badge variant="outline" className="w-full">
+                              {day.slots.length} slots
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="w-full bg-gray-100">
+                              No availability
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
                 
-                <div className="md:ml-auto">
-                  <Button className="w-full md:w-auto" onClick={handleEditProfileClick}>Edit Profile</Button>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <Mail className="h-5 w-5 text-muted-foreground" />
-                    <span>{profile.email}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <UserCircle className="h-5 w-5 text-muted-foreground" />
-                    <span>{profile.phone}</span>
-                  </div>
-                  {profile.businessName && (
-                    <div className="flex items-center gap-2">
-                      <Building className="h-5 w-5 text-muted-foreground" />
-                      <span>{profile.businessName}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-5 w-5 text-muted-foreground" />
-                    <span>{profile.website}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-5 w-5 text-muted-foreground" />
-                    <span>{profile.location}</span>
-                  </div>
-                  {profile.serviceArea && (
-                    <div className="flex items-center gap-2">
-                      <BriefcaseBusiness className="h-5 w-5 text-muted-foreground" />
-                      <span>Service Area: {profile.serviceArea}</span>
-                    </div>
-                  )}
-                  {user?.services && user.services.length > 0 && (
-                    <div className="mt-4">
-                      <h4 className="font-medium mb-2">Services</h4>
-                      <div className="space-y-2">
-                        {user.services.map((service, index) => (
-                          <div key={index} className="border p-3 rounded-md">
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium">{service.name}</span>
-                              <Badge variant="outline">${service.price}</Badge>
-                            </div>
-                            <div className="flex items-center mt-1 text-sm text-muted-foreground">
-                              <Clock className="h-4 w-4 mr-1" />
-                              <span>{service.duration} minutes</span>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-lg font-medium mb-2">About</h3>
-                    <p className="text-muted-foreground">{profile.bio}</p>
-                  </div>
-                  
-                  {profile.voicemailMessage && (
-                    <div>
-                      <h3 className="text-lg font-medium mb-2">Voicemail Message</h3>
-                      <Card className="p-3 bg-gray-50">
-                        <p className="text-sm text-muted-foreground italic">"{profile.voicemailMessage}"</p>
-                      </Card>
-                    </div>
-                  )}
-                  
-                  {profile.smsFollowUpMessage && (
-                    <div>
-                      <h3 className="text-lg font-medium mb-2">SMS Follow-Up</h3>
-                      <Card className="p-3 bg-gray-50">
-                        <p className="text-sm text-muted-foreground italic">"{profile.smsFollowUpMessage}"</p>
-                      </Card>
-                    </div>
-                  )}
-                </div>
-              </div>
-              
-              <div>
-                <h3 className="text-lg font-medium mb-3">Availability</h3>
-                <div className="grid grid-cols-2 md:grid-cols-7 gap-2">
-                  {Object.entries(profile.availability).map(([day, slots]) => (
-                    <div key={day} className="border rounded-lg p-3">
-                      <h4 className="font-medium capitalize">{day}</h4>
-                      <div className="mt-2 space-y-1 text-sm">
-                        <div className="flex items-center gap-1">
-                          <span className={`h-2 w-2 rounded-full ${slots.morning ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                          <span className={slots.morning ? 'font-medium' : 'text-muted-foreground'}>Morning</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className={`h-2 w-2 rounded-full ${slots.afternoon ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                          <span className={slots.afternoon ? 'font-medium' : 'text-muted-foreground'}>Afternoon</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span className={`h-2 w-2 rounded-full ${slots.evening ? 'bg-green-500' : 'bg-gray-300'}`}></span>
-                          <span className={slots.evening ? 'font-medium' : 'text-muted-foreground'}>Evening</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Booking Tab */}
-        <TabsContent value="booking" className="space-y-6">
-          <Card className="booking-system">
-            <CardHeader>
-              <CardTitle>Book an Appointment</CardTitle>
-              <CardDescription>
-                Select a date and time to schedule a meeting
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {bookingStep === 4 ? (
-                <div className="text-center py-8 space-y-4">
-                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 text-green-500 mx-auto">
-                    <CheckCircle2 className="h-8 w-8" />
-                  </div>
-                  <h3 className="text-xl font-semibold">Booking Confirmed!</h3>
-                  <p className="text-muted-foreground">
-                    Your appointment has been scheduled for {selectedDate} at {selectedTime}.
-                  </p>
-                  <Button 
-                    onClick={() => {
-                      setSelectedDate("");
-                      setSelectedTime("");
-                      setBookingStep(1);
-                    }}
-                    className="mt-4"
-                  >
-                    Book Another Appointment
-                  </Button>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {/* Step indicator */}
-                  <div className="flex items-center justify-between mb-8">
-                    <div className="w-full flex items-center">
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${bookingStep >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                        1
-                      </div>
-                      <div className={`flex-1 h-1 mx-2 ${bookingStep >= 2 ? 'bg-primary' : 'bg-muted'}`}></div>
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${bookingStep >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                        2
-                      </div>
-                      <div className={`flex-1 h-1 mx-2 ${bookingStep >= 3 ? 'bg-primary' : 'bg-muted'}`}></div>
-                      <div className={`flex items-center justify-center w-8 h-8 rounded-full ${bookingStep >= 3 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                        3
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Step 1: Select Date */}
-                  {bookingStep === 1 && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-medium">Select a Date</h3>
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {availableDays.map((day) => (
-                          <button
-                            key={day.date}
-                            className={`flex flex-col items-center p-4 border rounded-lg hover:border-primary transition-colors ${selectedDate === day.date ? 'border-primary bg-primary/5' : ''}`}
-                            onClick={() => handleDateSelect(day.date)}
-                            disabled={day.slots.length === 0}
-                          >
-                            <span className="text-sm text-muted-foreground">{day.day}</span>
-                            <span className="text-lg font-medium">{day.date}</span>
-                            <span className="mt-2 text-xs">
-                              {day.slots.length === 0 ? 'No availability' : `${day.slots.length} slots available`}
-                            </span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Step 2: Select Time */}
-                  {bookingStep === 2 && (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-medium">Select a Time</h3>
-                        <Button variant="outline" size="sm" onClick={() => setBookingStep(1)}>
-                          Back
-                        </Button>
-                      </div>
-                      
-                      <p className="text-muted-foreground">Date: {selectedDate}</p>
-                      
-                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                        {availableDays.find(day => day.date === selectedDate)?.slots.map((slot) => (
-                          <button
-                            key={slot.time}
-                            className={`p-3 border rounded-lg text-center hover:border-primary transition-colors ${selectedTime === slot.time ? 'border-primary bg-primary/5' : ''}`}
-                            onClick={() => handleTimeSelect(slot.time)}
-                            disabled={!slot.available}
-                          >
-                            <div className="flex items-center justify-center gap-2">
-                              <Clock className="h-4 w-4 text-muted-foreground" />
-                              <span>{slot.time}</span>
-                            </div>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Step 3: Booking Details */}
-                  {bookingStep === 3 && (
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-lg font-medium">Booking Details</h3>
-                        <Button variant="outline" size="sm" onClick={() => setBookingStep(2)}>
-                          Back
-                        </Button>
-                      </div>
-                      
-                      <div className="flex items-center gap-3 p-4 bg-muted rounded-lg mb-4">
-                        <Calendar className="h-5 w-5 text-primary" />
-                        <div>
-                          <p className="font-medium">{selectedDate}</p>
-                          <p className="text-sm text-muted-foreground">{selectedTime}</p>
-                        </div>
-                      </div>
-                      
-                      <form onSubmit={handleBookingSubmit} className="space-y-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="name">Your Name</Label>
-                          <Input id="name" required defaultValue={user ? `${user.firstName} ${user.lastName}` : ""} />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="email">Email Address</Label>
-                          <Input id="email" type="email" required defaultValue={user?.email || ""} />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="phone">Phone Number</Label>
-                          <Input id="phone" type="tel" required defaultValue={user?.phone || ""} />
-                        </div>
-                        
-                        <div className="space-y-2">
-                          <Label htmlFor="purpose">Purpose of Meeting</Label>
-                          <Textarea id="purpose" placeholder="Briefly describe what you'd like to discuss..." required />
-                        </div>
-                        
-                        <Button type="submit" className="w-full">
-                          Confirm Booking
-                        </Button>
-                      </form>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Event Templates Tab */}
-        <TabsContent value="templates" className="space-y-6">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <div>
-                <CardTitle>Event Templates</CardTitle>
-                <CardDescription>
-                  Create reusable event templates for quick scheduling
-                </CardDescription>
-              </div>
-              <Button variant="outline" className="gap-1" onClick={() => setShowNewTemplateDialog(true)}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 5v14M5 12h14"/>
-                </svg>
-                Add Template
-              </Button>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-2">
-                {templates.length === 0 ? (
-                  /* Empty state */
-                  <div className="col-span-full py-12 text-center">
-                    <div className="inline-flex h-12 w-12 items-center justify-center rounded-full bg-muted mb-4">
-                      <Calendar className="h-6 w-6 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-lg font-medium">No templates yet</h3>
-                    <p className="text-muted-foreground mt-2 mb-4">
-                      Create your first event template to enable quick scheduling
-                    </p>
-                    <Button onClick={() => setShowNewTemplateDialog(true)}>
-                      Create Template
+                <div className={`${bookingStep !== 2 ? 'hidden' : ''}`}>
+                  <div className="flex items-center mb-4">
+                    <Button 
+                      variant="ghost" 
+                      className="p-0 h-auto mr-2" 
+                      onClick={() => setBookingStep(1)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M15 18l-6-6 6-6" />
+                      </svg>
                     </Button>
+                    <h3 className="font-medium">Select a time for {selectedDate}:</h3>
                   </div>
-                ) : (
-                  /* Template cards */
-                  templates.map(template => (
-                    <Card key={template.id} className="overflow-hidden">
-                      <CardHeader className="p-4 pb-2">
-                        <div className="flex items-start justify-between">
-                          <CardTitle className="text-md">{template.name}</CardTitle>
-                          <div className="flex gap-2 ml-auto">
-                            <Button 
-                              variant="ghost" 
-                              size="icon"
-                              onClick={() => handleEditTemplate(template)}
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
-                                <path d="m15 5 4 4"/>
-                              </svg>
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="icon" 
-                              className="text-destructive"
-                              onClick={() => handleDeleteTemplate(template.id)}
-                            >
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                <path d="M3 6h18"/>
-                                <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
-                                <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                                <line x1="10" x2="10" y1="11" y2="17"/>
-                                <line x1="14" x2="14" y1="11" y2="17"/>
-                              </svg>
-                            </Button>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-2">
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-2">
-                          <Clock className="h-4 w-4" />
-                          <span>{template.duration} minutes</span>
-                        </div>
-                        {template.description && (
-                          <p className="text-sm mt-2">{template.description}</p>
-                        )}
-                        <Badge 
-                          variant="outline" 
-                          className="mt-3" 
-                          style={{ 
-                            backgroundColor: template.color || '#f0f0f0',
-                            color: template.color ? '#fff' : 'inherit'
-                          }}
-                        >
-                          {template.eventType}
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  ))
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Availability Tab */}
-        <TabsContent value="availability" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Manage Availability</CardTitle>
-              <CardDescription>
-                Set your regular availability for client bookings
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="flex flex-col space-y-4">
-                  {Object.entries(profile.availability).map(([day, slots]) => (
-                    <div key={day} className="flex flex-col space-y-2">
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-medium capitalize">{day}</h3>
-                        <div className="flex items-center space-x-2">
-                          <Switch 
-                            id={`${day}-toggle`} 
-                            checked={slots.morning || slots.afternoon || slots.evening}
-                            onCheckedChange={(checked) => handleDayToggle(day, checked)}
-                          />
-                          <Label htmlFor={`${day}-toggle`}>Available</Label>
-                        </div>
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {availableDays.find(day => day.date === selectedDate)?.slots.map((slot, index) => (
+                      <div 
+                        key={index}
+                        className={`p-3 border rounded-lg text-center cursor-pointer hover:bg-gray-50 transition-colors ${
+                          selectedTime === slot.time ? 'border-primary bg-primary/10' : ''
+                        }`}
+                        onClick={() => handleTimeSelect(slot.time)}
+                      >
+                        {slot.time}
                       </div>
-                      
-                      {(slots.morning || slots.afternoon || slots.evening) && (
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pl-4 pt-2">
-                          <div className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`${day}-morning`} 
-                              checked={slots.morning}
-                              onCheckedChange={(checked) => handleSlotToggle(day, 'morning', !!checked)}
-                            />
-                            <Label htmlFor={`${day}-morning`}>Morning (9am - 12pm)</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`${day}-afternoon`} 
-                              checked={slots.afternoon}
-                              onCheckedChange={(checked) => handleSlotToggle(day, 'afternoon', !!checked)}
-                            />
-                            <Label htmlFor={`${day}-afternoon`}>Afternoon (1pm - 5pm)</Label>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            <Checkbox 
-                              id={`${day}-evening`} 
-                              checked={slots.evening}
-                              onCheckedChange={(checked) => handleSlotToggle(day, 'evening', !!checked)}
-                            />
-                            <Label htmlFor={`${day}-evening`}>Evening (5pm - 8pm)</Label>
-                          </div>
-                        </div>
-                      )}
-                      
-                      <Separator className="mt-2" />
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
                 
-                <div className="flex flex-col space-y-4">
-                  <h3 className="font-medium">Booking Settings</h3>
+                <div className={`${bookingStep !== 3 ? 'hidden' : ''}`}>
+                  <div className="flex items-center mb-4">
+                    <Button 
+                      variant="ghost" 
+                      className="p-0 h-auto mr-2" 
+                      onClick={() => setBookingStep(2)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M15 18l-6-6 6-6" />
+                      </svg>
+                    </Button>
+                    <h3 className="font-medium">Confirm your booking:</h3>
+                  </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label htmlFor="min-notice">Minimum notice time</Label>
-                      <Select defaultValue="1h">
-                        <SelectTrigger id="min-notice">
-                          <SelectValue placeholder="Select minimum notice" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="30m">30 minutes</SelectItem>
-                          <SelectItem value="1h">1 hour</SelectItem>
-                          <SelectItem value="2h">2 hours</SelectItem>
-                          <SelectItem value="4h">4 hours</SelectItem>
-                          <SelectItem value="1d">1 day</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-muted-foreground">
-                        How far in advance clients need to book
-                      </p>
+                  <div className="border rounded-lg p-4 mb-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-muted-foreground">Date</p>
+                        <p className="font-medium">{selectedDate}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Time</p>
+                        <p className="font-medium">{selectedTime}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Service</p>
+                        <p className="font-medium">
+                          {user?.services?.[0]?.name || "Consultation"}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Duration</p>
+                        <p className="font-medium">
+                          {user?.services?.[0]?.duration || "60"} minutes
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <form onSubmit={handleBookingSubmit}>
+                    <div className="space-y-4">
+                      <Button type="submit" className="w-full">
+                        Confirm Booking
+                      </Button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+      
+      {/* Event Templates Section */}
+      <div className="space-y-6">
+        <h2 className="text-2xl font-bold">Event Templates</h2>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle>Event Templates</CardTitle>
+              <CardDescription>
+                Create reusable event templates for quick scheduling
+              </CardDescription>
+            </div>
+            <Button variant="outline" className="gap-1" onClick={() => setShowNewTemplateDialog(true)}>
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14M5 12h14" />
+              </svg>
+              New Template
+            </Button>
+          </CardHeader>
+          <CardContent>
+            {templatesLoading ? (
+              <div className="text-center py-8">
+                <p>Loading templates...</p>
+              </div>
+            ) : templates.length === 0 ? (
+              <div className="text-center py-8 space-y-3">
+                <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center">
+                  <Calendar className="h-6 w-6 text-gray-500" />
+                </div>
+                <h3 className="font-medium">No templates yet</h3>
+                <p className="text-sm text-muted-foreground">
+                  Create event templates to quickly schedule recurring events
+                </p>
+                <Button onClick={() => setShowNewTemplateDialog(true)}>
+                  Create Template
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {templates.map((template) => (
+                  <div key={template.id} className="border rounded-md p-4">
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h4 className="font-medium text-lg">{template.name}</h4>
+                        <p className="text-sm text-muted-foreground">{template.title}</p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleEditTemplate(template)}
+                        >
+                          Edit
+                        </Button>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleDeleteTemplate(template.id)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
                     </div>
                     
-                    <div className="space-y-2">
-                      <Label htmlFor="buffer-time">Buffer time between appointments</Label>
-                      <Select defaultValue="15m">
-                        <SelectTrigger id="buffer-time">
-                          <SelectValue placeholder="Select buffer time" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="0">No buffer</SelectItem>
-                          <SelectItem value="5m">5 minutes</SelectItem>
-                          <SelectItem value="10m">10 minutes</SelectItem>
-                          <SelectItem value="15m">15 minutes</SelectItem>
-                          <SelectItem value="30m">30 minutes</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <p className="text-xs text-muted-foreground">
-                        Time between consecutive appointments
-                      </p>
+                    <div className="mt-3 grid grid-cols-2 md:grid-cols-3 gap-x-4 gap-y-2 text-sm">
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-1 text-muted-foreground" />
+                        <span>{template.duration} minutes</span>
+                      </div>
+                      {template.location && (
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
+                          <span>{template.location}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center">
+                        <span 
+                          className="h-3 w-3 rounded-full mr-1"
+                          style={{ backgroundColor: template.color || '#4f46e5' }}
+                        ></span>
+                        <span className="capitalize">{template.eventType.replace('_', ' ')}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-1 text-muted-foreground">
+                          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                          <circle cx="9" cy="7" r="4" />
+                          <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                        </svg>
+                        <span>{template.isPublic ? 'Public booking' : 'Private'}</span>
+                      </div>
                     </div>
+                    
+                    {template.description && (
+                      <div className="mt-3 text-sm text-muted-foreground">
+                        {template.description}
+                      </div>
+                    )}
                   </div>
-                </div>
-                
-                <div className="pt-4">
-                  <Button>Save Availability</Button>
-                </div>
+                ))}
               </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }
