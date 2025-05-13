@@ -18,6 +18,7 @@ import MessagesRedesign from "@/pages/messages-redesign";
 import Bookings from "@/pages/bookings";
 import BookingsRedesign from "@/pages/bookings-redesign";
 import BookingManagement from "@/pages/booking-management";
+import BookingsTab from "@/pages/bookings-tab";
 import Calendar from "@/pages/calendar";
 import CalendarNew from "@/pages/calendar-new";
 import Profile from "@/pages/profile";
@@ -51,7 +52,8 @@ function Router() {
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/clients" component={Clients} />
         <Route path="/bookings-original" component={Bookings} />
-        <Route path="/bookings" component={BookingsRedesign} />
+        <Route path="/bookings-old" component={BookingsRedesign} />
+        <Route path="/bookings" component={BookingsTab} />
         <Route path="/booking-management" component={BookingManagement} />
         <Route path="/messages-original" component={Messages} />
         <Route path="/messages" component={MessagesRedesign} />
