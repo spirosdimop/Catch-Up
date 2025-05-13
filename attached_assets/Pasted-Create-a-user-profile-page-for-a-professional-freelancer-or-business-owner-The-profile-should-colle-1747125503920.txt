@@ -1,0 +1,49 @@
+Create a user profile page for a professional freelancer or business owner. The profile should collect essential information about their business, services, and personal preferences. The profile includes the following sections:
+
+Personal Information:
+
+Name: Ask the user for their full name.
+
+Email Address: Request the user’s email for communication purposes.
+
+Phone Number: Collect the user’s contact number for appointment scheduling and notifications.
+
+Business Name: Allow the user to input their business name.
+
+Professional Details:
+
+Profession: Ask the user to select or enter their profession (e.g., electrician, tutor, plumber, etc.).
+
+Business Type: Ask whether the user operates from a physical shop, visits clients at their locations, or offers both options.
+
+Service Offerings: Provide fields for the user to describe their services (e.g., '2-hour English lessons for $40', 'Plumbing repair and maintenance').
+
+Availability:
+
+Availability Hours: Allow the user to input their working hours (e.g., Monday to Friday, 9 AM to 6 PM) for appointment scheduling.
+
+Location Information: Ask the user to enter their primary service area or location for route optimization.
+
+Profile Picture (Optional):
+
+Upload Photo: Provide an option to upload a profile image or logo.
+
+Additional Customization:
+
+Custom Voicemail Message: Allow the user to record or write a personalized voicemail greeting for missed calls.
+
+SMS Follow-Up Message: Ask the user to create a short, polite SMS to send after a missed call, including the link to their booking page.
+
+Loyalty Settings: Give the user the option to mark clients as ‘loyal’ or ‘one-time’ for customized follow-up messaging.
+
+After completing the profile setup, users should be able to save their information and move on to the main dashboard."
+
+Explanation of the AI Prompt's Intent:
+Data Collection: The prompt is structured to gather all the necessary information for the user’s profile while being intuitive and easy to follow.
+
+Customization Options: Users have flexibility in personalizing their profile with features like voicemail messages and SMS responses.
+
+Business Details: Helps the app tailor services and scheduling to the user's business type (physical location, client visits, etc.).
+
+Efficiency: The AI can automatically guide the user through each step, providing assistance as needed, and ensuring they complete all necessary fields.
+

@@ -230,6 +230,11 @@ export const serviceProviders = pgTable("service_providers", {
   businessName: text("business_name").notNull(),
   profession: professionEnum("profession").notNull(),
   locationType: locationTypeEnum("location_type").notNull(),
+  serviceArea: text("service_area"),
+  profileImage: text("profile_image"),
+  voicemailMessage: text("voicemail_message"),
+  smsFollowUpMessage: text("sms_followup_message"),
+  availabilityHours: text("availability_hours"), // JSON string with availability hours
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
