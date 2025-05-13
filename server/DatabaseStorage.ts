@@ -431,7 +431,11 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createAiCommand(command: InsertAiCommand): Promise<AiCommand> {
-    const [result] = await db.insert(aiCommands).values(command).returning();
+    const [result] = await db.insert(aiCommands).values({
+      ...command,
+      status: command.status || 'success',
+      commandType: command.commandType || 'unified'
+    }).returning();
     return result;
   }
   
@@ -443,7 +447,10 @@ export class DatabaseStorage implements IStorage {
   }
   
   async createAiCommandEffect(effect: InsertAiCommandEffect): Promise<AiCommandEffect> {
-    const [result] = await db.insert(aiCommandEffects).values(effect).returning();
+    const [result] = await db.insert(aiCommandEffects).values({
+      ...effect,
+      targetId: effect.targetId ?? null
+    }).returning();
     return result;
   }
 }
