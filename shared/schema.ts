@@ -255,6 +255,11 @@ export const insertServiceProviderSchema = createInsertSchema(serviceProviders).
   businessName: true,
   profession: true,
   locationType: true,
+  serviceArea: true,
+  profileImage: true,
+  voicemailMessage: true,
+  smsFollowUpMessage: true,
+  availabilityHours: true,
 });
 
 export const insertServiceSchema = createInsertSchema(services).pick({

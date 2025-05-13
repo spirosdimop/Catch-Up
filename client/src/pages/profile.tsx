@@ -60,7 +60,10 @@ export default function Profile() {
         businessName: "Test Business",
         profession: "consultant",
         locationType: "has_shop",
+        serviceArea: "Downtown & Surrounding Areas",
         profileImageUrl: "https://randomuser.me/api/portraits/men/1.jpg",
+        voicemailMessage: "Hello, you've reached Test Business. I'm currently unavailable but please leave a message and I'll get back to you as soon as possible.",
+        smsFollowUpMessage: "Hi, this is Test from Test Business. Sorry I missed your call. You can book an appointment at: https://mybooking.com/test",
         services: [
           { name: "Consultation", duration: 60, price: 100 },
           { name: "Follow-up", duration: 30, price: 50 }
@@ -75,14 +78,18 @@ export default function Profile() {
     title: user?.profession || "Professional Service Provider",
     avatar: user?.profileImageUrl || "",
     email: user?.email || "guest@example.com",
+    phone: user?.phone || "",
     businessName: user?.businessName || "",
     website: "www.mywebsite.com", // Default, can be added to user context later
     location: user?.locationType === "has_shop" ? "Has Office Location" : 
               user?.locationType === "goes_to_clients" ? "Mobile Service" : 
               user?.locationType === "both" ? "Office & Mobile Service" : "Location not specified",
+    serviceArea: user?.serviceArea || "Not specified",
     bio: user ? `${user.profession || 'Professional'} providing services${user.services?.length ? ` including ${user.services.map(s => s.name).join(', ')}` : ''}.` 
           : "Professional service provider helping clients achieve their goals.",
     skills: user?.services?.map(s => s.name) || ["Service 1", "Service 2"],
+    voicemailMessage: user?.voicemailMessage || "",
+    smsFollowUpMessage: user?.smsFollowUpMessage || "",
     availability: {
       monday: { morning: true, afternoon: true, evening: false },
       tuesday: { morning: true, afternoon: true, evening: false },
