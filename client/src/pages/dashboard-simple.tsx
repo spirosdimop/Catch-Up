@@ -187,14 +187,14 @@ const DashboardSimple = () => {
                 
                 <div className="bg-[#0a2342] rounded-md border border-[#2a4d7d] p-4">
                   <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-400">Monthly Earnings</div>
+                    <div className="text-sm text-gray-400">Task Completion</div>
                     <div className="bg-purple-500/20 rounded-full p-2">
-                      <FileText className="h-4 w-4 text-purple-400" />
+                      <CheckCircle2 className="h-4 w-4 text-purple-400" />
                     </div>
                   </div>
-                  <div className="text-2xl font-semibold mt-2">${dashboardData.monthlyEarnings.toLocaleString()}</div>
+                  <div className="text-2xl font-semibold mt-2">{dashboardData.tasksCompleted}</div>
                   <div className="mt-3 text-xs text-gray-400">
-                    {dashboardData.invoiceSummary.pending} pending {dashboardData.invoiceSummary.pending === 1 ? 'invoice' : 'invoices'}
+                    {dashboardData.tasksCompletionRate}% completion rate
                   </div>
                 </div>
               </div>
@@ -274,22 +274,21 @@ const DashboardSimple = () => {
                 </div>
                 
                 <div>
-                  <h3 className="text-sm font-medium text-gray-400 mb-2">Invoice Summary</h3>
-                  <div className="bg-[#0a2342] rounded-md border border-[#2a4d7d] p-4">
-                    <div className="grid grid-cols-3 gap-2 text-center">
-                      <div>
-                        <div className="text-green-500 font-medium">${dashboardData.invoiceSummary.paid}</div>
-                        <div className="text-xs text-gray-400 mt-1">Paid</div>
-                      </div>
-                      <div>
-                        <div className="text-yellow-500 font-medium">${dashboardData.invoiceSummary.pending}</div>
-                        <div className="text-xs text-gray-400 mt-1">Pending</div>
-                      </div>
-                      <div>
-                        <div className="text-red-500 font-medium">${dashboardData.invoiceSummary.overdue}</div>
-                        <div className="text-xs text-gray-400 mt-1">Overdue</div>
-                      </div>
-                    </div>
+                  <h3 className="text-sm font-medium text-gray-400 mb-2">Upcoming Activity</h3>
+                  <div className="bg-[#0a2342] rounded-md border border-[#2a4d7d] p-4 text-center">
+                    <CalendarIcon className="h-10 w-10 mx-auto mb-2 opacity-50 text-gray-400" />
+                    <p className="text-sm font-medium">Your schedule for the week</p>
+                    <p className="mt-1 mb-2 text-gray-400 text-xs">Plan ahead for your appointments</p>
+                    <Link href="/calendar">
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        className="mt-2 border-[#2a4d7d] hover:bg-[#0a2342] text-white"
+                      >
+                        View Calendar
+                        <ChevronRight className="ml-1 h-3 w-3" />
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -327,10 +326,10 @@ const DashboardSimple = () => {
                 <Button 
                   variant="outline" 
                   className="h-auto py-4 flex-col border-[#2a4d7d] hover:bg-[#0a2342] text-white"
-                  onClick={() => window.location.href = '/invoices'}
+                  onClick={() => window.location.href = '/calendar'}
                 >
-                  <FileText className="h-10 w-10 mb-2 text-[#1d4ed8]" />
-                  <span className="text-base font-medium">Send Invoice</span>
+                  <Clock className="h-10 w-10 mb-2 text-[#1d4ed8]" />
+                  <span className="text-base font-medium">View Schedule</span>
                 </Button>
                 
                 <Button 
