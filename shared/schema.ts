@@ -399,3 +399,62 @@ export const EventType = {
   FOLLOW_UP: 'follow_up',
   TRAINING: 'training'
 } as const;
+
+// AI command type enum
+export const aiCommandTypeEnum = pgEnum("ai_command_type", [
+  "general",
+  "scheduling",
+  "settings",
+  "autoresponse",
+  "unified"
+]);
+
+// AI command status enum
+export const aiCommandStatusEnum = pgEnum("ai_command_status", [
+  "success",
+  "needs_clarification",
+  "error"
+]);
+
+// AI Command History
+export const aiCommands = pgTable("ai_commands", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(), // Using string for userId to support Replit Auth
+  commandType: aiCommandTypeEnum("command_type").default("unified").notNull(),
+  userPrompt: text("user_prompt").notNull(),
+  status: aiCommandStatusEnum("status").default("success").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// AI command effects to track changes made by the AI
+export const aiCommandEffects = pgTable("ai_command_effects", {
+  id: serial("id").primaryKey(),
+  commandId: integer("command_id").notNull().references(() => aiCommands.id, { onDelete: "cascade" }),
+  effectType: text("effect_type").notNull(), // "create_event", "update_settings", "generate_message", etc.
+  targetType: text("target_type").notNull(), // "event", "settings", "auto_response", etc.
+  targetId: text("target_id"), // ID of the affected entity if applicable
+  details: text("details").notNull(), // JSON stringified details of what was changed
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Export schemas and types
+export const insertAiCommandSchema = createInsertSchema(aiCommands).pick({
+  userId: true,
+  commandType: true,
+  userPrompt: true,
+  status: true,
+});
+
+export const insertAiCommandEffectSchema = createInsertSchema(aiCommandEffects).pick({
+  commandId: true,
+  effectType: true,
+  targetType: true,
+  targetId: true,
+  details: true,
+});
+
+export type AiCommand = typeof aiCommands.$inferSelect;
+export type InsertAiCommand = z.infer<typeof insertAiCommandSchema>;
+
+export type AiCommandEffect = typeof aiCommandEffects.$inferSelect;
+export type InsertAiCommandEffect = z.infer<typeof insertAiCommandEffectSchema>;

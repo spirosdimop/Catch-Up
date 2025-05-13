@@ -25,7 +25,11 @@ import {
   InsertEvent,
   EventTemplate,
   InsertEventTemplate,
-  EventType
+  EventType,
+  AiCommand,
+  InsertAiCommand,
+  AiCommandEffect,
+  InsertAiCommandEffect
 } from "@shared/schema";
 
 export interface IStorage {
@@ -111,6 +115,13 @@ export interface IStorage {
   createEventTemplate(template: InsertEventTemplate): Promise<EventTemplate>;
   updateEventTemplate(id: number, template: Partial<InsertEventTemplate>): Promise<EventTemplate | undefined>;
   deleteEventTemplate(id: number): Promise<boolean>;
+  
+  // AI Command operations
+  getAiCommands(userId: string, limit?: number): Promise<AiCommand[]>;
+  getAiCommand(id: number): Promise<AiCommand | undefined>;
+  createAiCommand(command: InsertAiCommand): Promise<AiCommand>;
+  getAiCommandEffects(commandId: number): Promise<AiCommandEffect[]>;
+  createAiCommandEffect(effect: InsertAiCommandEffect): Promise<AiCommandEffect>;
 }
 
 export class MemStorage implements IStorage {
@@ -125,6 +136,8 @@ export class MemStorage implements IStorage {
   private eventTemplates: Map<number, EventTemplate>;
   private serviceProviders: Map<number, ServiceProvider>;
   private services: Map<number, Service>;
+  private aiCommands: Map<number, AiCommand>;
+  private aiCommandEffects: Map<number, AiCommandEffect>;
 
   private userIdCounter: number;
   private clientIdCounter: number;
@@ -137,6 +150,8 @@ export class MemStorage implements IStorage {
   private eventTemplateIdCounter: number;
   private serviceProviderIdCounter: number;
   private serviceIdCounter: number;
+  private aiCommandIdCounter: number;
+  private aiCommandEffectIdCounter: number;
 
   constructor() {
     this.users = new Map();
@@ -150,6 +165,8 @@ export class MemStorage implements IStorage {
     this.eventTemplates = new Map();
     this.serviceProviders = new Map();
     this.services = new Map();
+    this.aiCommands = new Map();
+    this.aiCommandEffects = new Map();
 
     this.userIdCounter = 1;
     this.clientIdCounter = 1;
