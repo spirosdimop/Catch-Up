@@ -1,13 +1,14 @@
 import { OpenAI } from 'openai';
 
 // Supported assistant types
-export type AssistantType = 'general' | 'scheduling' | 'settings';
+export type AssistantType = 'general' | 'scheduling' | 'settings' | 'autoresponse';
 
 // Define environment variable keys for different assistants
 const API_KEY_MAP: Record<AssistantType, string> = {
   'general': 'OPENAI_API_KEY',           // General assistant uses the main OpenAI API key
   'scheduling': 'OPENAI_SCHEDULING_KEY', // Scheduling assistant can use a separate key
-  'settings': 'OPENAI_SETTINGS_KEY'      // Settings assistant can use a separate key
+  'settings': 'OPENAI_SETTINGS_KEY',     // Settings assistant can use a separate key
+  'autoresponse': 'OPENAI_AUTORESPONSE_KEY' // Auto-response assistant uses a dedicated key
 };
 
 // Function to get the appropriate API key for an assistant type
@@ -176,5 +177,48 @@ export async function generateScheduleSummary(
   } catch (error) {
     console.error('Error generating schedule summary:', error);
     return 'Unable to generate schedule summary due to an error. Please try again later.';
+  }
+}
+
+/**
+ * Generates a professional auto-response message
+ * @param context Optional context about the situation requiring an auto-response
+ * @returns A short, human, professional auto-response message
+ */
+export async function generateAutoResponse(
+  context: string = 'missed call'
+): Promise<string> {
+  try {
+    // Get OpenAI client specifically for auto-responses
+    const autoResponseClient = getOpenAIClient('autoresponse');
+    
+    // Create system prompt for the auto-response generator
+    const systemPrompt = `
+      You are a polite virtual assistant. The user wants a message that will be automatically sent 
+      when they miss a call or cannot respond. Based on their request, generate a short, human, 
+      professional, and kind message. Keep the output under 300 characters. 
+      Only return the message as plain text with no formatting or tags.
+      
+      Example output:
+      "Hi! Sorry I missed your call. I'll get back to you as soon as I can. Thanks for reaching out!"
+    `;
+
+    // Make the API call to OpenAI
+    const response = await autoResponseClient.chat.completions.create({
+      model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Please generate an auto-response message for this situation: ${context}` }
+      ],
+      temperature: 0.7,
+      max_tokens: 150 // Keep responses concise
+    });
+
+    return response.choices[0]?.message?.content || "Sorry I missed you. I'll get back to you as soon as possible.";
+
+  } catch (error) {
+    console.error('Error generating auto-response:', error);
+    // Return a fallback response
+    return "Sorry I missed you. I'll get back to you as soon as possible.";
   }
 }
