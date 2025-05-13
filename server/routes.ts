@@ -5,6 +5,7 @@ import { OpenAI } from "openai";
 import { 
   processSchedulingRequest, 
   generateScheduleSummary, 
+  generateAutoResponse,
   SchedulingResponse,
   getOpenAIClient,
   AssistantType
@@ -1023,6 +1024,27 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       console.error("Error processing app settings:", error);
       res.status(500).json({ 
         message: "Failed to process app settings request",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
+  // API endpoint for auto-response generation
+  apiRouter.post("/ai/auto-response", async (req, res) => {
+    try {
+      const { context } = req.body;
+      
+      // Default context if not provided
+      const contextToUse = typeof context === 'string' ? context : 'missed call';
+      
+      // Generate auto-response message using OpenAI with dedicated key
+      const autoResponseMessage = await generateAutoResponse(contextToUse);
+      
+      res.json({ message: autoResponseMessage });
+    } catch (error) {
+      console.error("Error generating auto-response:", error);
+      res.status(500).json({ 
+        message: "Failed to generate auto-response message",
         error: error instanceof Error ? error.message : String(error)
       });
     }

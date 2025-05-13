@@ -65,6 +65,11 @@ export default function AIAssistant() {
   const [isProcessingSettings, setIsProcessingSettings] = useState(false);
   const [settingsResult, setSettingsResult] = useState<Record<string, any> | null>(null);
   
+  // Auto-response state
+  const [autoResponseContext, setAutoResponseContext] = useState("missed call");
+  const [isGeneratingAutoResponse, setIsGeneratingAutoResponse] = useState(false);
+  const [autoResponseMessage, setAutoResponseMessage] = useState("");
+  
   // Fetch user's calendar events for reference
   const { data: events, isLoading: isLoadingEvents } = useQuery({
     queryKey: ['/api/events'],
@@ -307,6 +312,49 @@ export default function AIAssistant() {
       });
     } finally {
       setIsFetchingSummary(false);
+    }
+  };
+  
+  // Handle auto-response generation
+  const handleAutoResponseGeneration = async () => {
+    if (!autoResponseContext.trim()) {
+      toast({
+        title: "Empty context",
+        description: "Please enter a context for the auto-response message.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsGeneratingAutoResponse(true);
+    setAutoResponseMessage("");
+    
+    try {
+      const response = await fetch('/api/ai/auto-response', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          context: autoResponseContext,
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate auto-response message');
+      }
+      
+      const { message } = await response.json();
+      setAutoResponseMessage(message);
+    } catch (error) {
+      console.error('Error generating auto-response:', error);
+      toast({
+        title: "Error",
+        description: "Failed to generate auto-response message. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsGeneratingAutoResponse(false);
     }
   };
   
@@ -556,7 +604,7 @@ export default function AIAssistant() {
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-4 mb-6">
+        <TabsList className="grid grid-cols-5 mb-6">
           <TabsTrigger value="chat">
             <Bot className="h-4 w-4 mr-2" />
             General Assistant
@@ -568,6 +616,10 @@ export default function AIAssistant() {
           <TabsTrigger value="summary">
             <Clock className="h-4 w-4 mr-2" />
             Schedule Summary
+          </TabsTrigger>
+          <TabsTrigger value="autoresponse">
+            <User className="h-4 w-4 mr-2" />
+            Auto-Response
           </TabsTrigger>
           <TabsTrigger value="settings">
             <Settings className="h-4 w-4 mr-2" />
