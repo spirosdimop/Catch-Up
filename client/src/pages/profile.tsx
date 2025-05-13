@@ -198,10 +198,11 @@ export default function Profile() {
                 <Input 
                   id="firstName" 
                   name="firstName" 
-                  value={profileForm.firstName} 
-                  onChange={handleProfileInputChange} 
-                  required 
+                  value={profileForm.firstName}
+                  disabled
+                  className="bg-gray-100 text-gray-700"
                 />
+                <p className="text-xs text-muted-foreground">Name cannot be changed</p>
               </div>
               
               <div className="space-y-2">
@@ -209,10 +210,11 @@ export default function Profile() {
                 <Input 
                   id="lastName" 
                   name="lastName" 
-                  value={profileForm.lastName} 
-                  onChange={handleProfileInputChange} 
-                  required 
+                  value={profileForm.lastName}
+                  disabled
+                  className="bg-gray-100 text-gray-700"
                 />
+                <p className="text-xs text-muted-foreground">Surname cannot be changed</p>
               </div>
               
               <div className="space-y-2">
@@ -221,10 +223,11 @@ export default function Profile() {
                   id="email" 
                   name="email" 
                   type="email" 
-                  value={profileForm.email} 
-                  onChange={handleProfileInputChange} 
-                  required 
+                  value={profileForm.email}
+                  disabled
+                  className="bg-gray-100 text-gray-700"
                 />
+                <p className="text-xs text-muted-foreground">Email cannot be changed</p>
               </div>
               
               <div className="space-y-2">
@@ -305,17 +308,66 @@ export default function Profile() {
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="profileImage">Profile Image URL</Label>
-                <div className="space-y-2">
-                  <Input 
-                    id="profileImage" 
-                    name="profileImageUrl" 
-                    value={profileForm.profileImageUrl} 
-                    onChange={handleProfileInputChange} 
-                    placeholder="https://example.com/your-image.jpg" 
-                  />
-                  <p className="text-sm text-muted-foreground">
-                    Enter a URL to your profile image. You can upload an image to a free image hosting service and paste the URL here.
+                <Label htmlFor="profileImage">Profile Image</Label>
+                <div className="grid gap-2">
+                  <div className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-md p-6 bg-gray-50">
+                    {/* File preview area */}
+                    {profileForm.profileImageUrl ? (
+                      <div className="relative w-32 h-32 mb-4">
+                        <img
+                          src={profileForm.profileImageUrl}
+                          alt="Profile preview"
+                          className="object-cover w-full h-full rounded-full"
+                        />
+                        <button
+                          type="button" 
+                          className="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1"
+                          onClick={() => setProfileForm(prev => ({ ...prev, profileImageUrl: "" }))}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 6L6 18"></path>
+                            <path d="M6 6l12 12"></path>
+                          </svg>
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex flex-col items-center justify-center text-gray-500">
+                        <svg className="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <p className="text-sm mb-2">Drag and drop your image here</p>
+                        <p className="text-xs text-gray-400">PNG, JPG, PDF up to 5MB</p>
+                      </div>
+                    )}
+                    
+                    {/* File input button */}
+                    <Input
+                      id="profileImage"
+                      name="profileImage"
+                      type="file"
+                      className="hidden"
+                      accept=".png,.jpg,.jpeg,.pdf"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          // For demo purposes, create a URL for the file
+                          // In a real app, you would upload this to a server
+                          const imageUrl = URL.createObjectURL(file);
+                          setProfileForm(prev => ({ ...prev, profileImageUrl: imageUrl }));
+                        }
+                      }}
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="mt-4"
+                      onClick={() => document.getElementById('profileImage')?.click()}
+                    >
+                      Select Image
+                    </Button>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    Upload your profile image in PNG, JPG, or PDF format.
                   </p>
                 </div>
               </div>
