@@ -77,6 +77,9 @@ export async function processSchedulingRequest(
       - Set meeting titles to be descriptive (e.g., "Meeting with Client Name: Purpose")
       - Always set status to "confirmed" unless there's a specific conflict
       - Include meeting details in the notes field
+      - ALWAYS use the current year (${new Date().getFullYear()}) for dates unless explicitly specified otherwise
+      - For any dates without a year specified, use the current year or a future date
+      - If a meeting is scheduled for a date that has already passed in the current year, schedule it for next year
       
       Return ONLY a JSON object with:
       - action (create, reschedule, cancel, suggest_times)
