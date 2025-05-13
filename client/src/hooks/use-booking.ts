@@ -25,6 +25,7 @@ export interface TimeSlot {
 export function useBooking() {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<TimeSlot | null>(null);
+  const [resetForm, setResetForm] = useState<() => void>(() => () => {});
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -65,6 +66,15 @@ export function useBooking() {
         title: "Booking Successful",
         description: "Your appointment has been scheduled. You will receive a confirmation shortly."
       });
+      
+      // Reset form if a reset callback was provided
+      resetForm();
+      
+      // Reset selected date and time slot
+      setSelectedDate(null);
+      setSelectedTimeSlot(null);
+      
+      // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['availableSlots'] });
     },
     onError: (error: any) => {
@@ -84,6 +94,7 @@ export function useBooking() {
     availableSlots: availableSlotsQuery.data || [],
     isLoadingSlots: availableSlotsQuery.isLoading,
     createBooking: createBookingMutation.mutate,
-    isPendingBooking: createBookingMutation.isPending
+    isPendingBooking: createBookingMutation.isPending,
+    setResetFormCallback: setResetForm
   };
 }

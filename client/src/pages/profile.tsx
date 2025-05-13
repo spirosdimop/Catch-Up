@@ -51,8 +51,24 @@ export default function Profile() {
     availableSlots,
     isLoadingSlots,
     createBooking,
-    isPendingBooking
+    isPendingBooking,
+    setResetFormCallback
   } = useBooking();
+  
+  // Register the reset form callback
+  useEffect(() => {
+    setResetFormCallback(() => () => {
+      setBookingForm({
+        name: "",
+        email: "",
+        phone: "",
+        date: format(new Date(), 'yyyy-MM-dd'),
+        time: "",
+        notes: "",
+      });
+      setSelectedService(null);
+    });
+  }, [setResetFormCallback]);
   
   // If no user exists, create a test user for development purposes
   useEffect(() => {
@@ -256,7 +272,10 @@ export default function Profile() {
                     
                     {selectedService === index && (
                       <div className="mt-4 pt-4 border-t">
-                        <Button className="w-full" onClick={() => document.getElementById('appointment-tab')?.click()}>
+                        <Button className="w-full" onClick={() => {
+                          const element = document.getElementById('appointment-tab') as HTMLElement;
+                          element?.click();
+                        }}>
                           Continue to Booking
                         </Button>
                       </div>
@@ -268,7 +287,10 @@ export default function Profile() {
             
             {selectedService !== null && (
               <div className="mt-8 flex justify-center">
-                <Button id="appointment-tab" size="lg" onClick={() => document.querySelector('[data-value="appointment"]')?.click()}>
+                <Button id="appointment-tab" size="lg" onClick={() => {
+                  const element = document.querySelector('[data-value="appointment"]') as HTMLElement;
+                  element?.click();
+                }}>
                   Continue to Appointment
                 </Button>
               </div>
@@ -432,8 +454,20 @@ export default function Profile() {
                       </div>
                       
                       <div className="pt-2">
-                        <Button type="submit" size="lg" className="w-full">
-                          Book Appointment
+                        <Button 
+                          type="submit" 
+                          size="lg" 
+                          className="w-full"
+                          disabled={isPendingBooking || selectedService === null || !bookingForm.time}
+                        >
+                          {isPendingBooking ? (
+                            <>
+                              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                              Processing...
+                            </>
+                          ) : (
+                            "Book Appointment"
+                          )}
                         </Button>
                         <p className="text-xs text-center text-muted-foreground mt-2">
                           By booking, you agree to our cancellation and rescheduling policies.
@@ -451,7 +485,12 @@ export default function Profile() {
                 <p className="text-muted-foreground mb-4">
                   Go back to the Services tab to choose a service
                 </p>
-                <Button onClick={() => document.querySelector('[data-value="services"]')?.click()}>
+                <Button onClick={() => {
+                  const element = document.querySelector('[data-value="services"]');
+                  if (element) {
+                    (element as HTMLElement).click();
+                  }
+                }}>
                   Select a Service
                 </Button>
               </div>
