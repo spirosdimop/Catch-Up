@@ -1055,7 +1055,7 @@ Remember: The most helpful thing you can do is direct users to the specialized t
   // Unified command API endpoint
   apiRouter.post("/command", async (req, res) => {
     try {
-      const { message, userId = "user-1" } = req.body;
+      const { message, userId = "user-1", conversationContext } = req.body;
       
       if (!message || typeof message !== 'string') {
         return res.status(400).json({ 
@@ -1081,7 +1081,8 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       // First, route the message to determine which APIs to call
       let routingResult;
       try {
-        routingResult = await routeInputToApis(message);
+        // Pass the conversation context if provided
+        routingResult = await routeInputToApis(message, conversationContext);
       } catch (routingError) {
         console.error('Error during API routing:', routingError);
         
@@ -1101,18 +1102,20 @@ Remember: The most helpful thing you can do is direct users to the specialized t
         });
       }
       
-      // If clarification is needed, return that to the client
+      // If clarification is needed, return that to the client along with context
       if (routingResult.clarification_prompt) {
         return res.json({
           status: "needs_clarification",
           ask_user: routingResult.clarification_prompt,
-          missing_fields: routingResult.missing_fields || []
+          missing_fields: routingResult.missing_fields || [],
+          conversation_context: routingResult.conversation_context || conversationContext
         });
       }
       
       // Results object to collect responses from each API
       const results: Record<string, any> = {
-        status: "success"
+        status: "success",
+        conversation_context: routingResult.conversation_context || conversationContext
       };
       
       // Process settings request if present

@@ -245,7 +245,7 @@ export interface CommandRoutingResult {
   missing_fields?: string[];
   // For direct responses without calling OpenAI (fallback)
   settings_response?: Record<string, any>;
-  // For maintaining conversation context
+  // For maintaining conversation context between user sessions
   conversation_context?: string;
 }
 
@@ -257,8 +257,10 @@ export interface CommandRoutingResult {
 function fallbackKeywordRouter(message: string): CommandRoutingResult {
   const lowerMessage = message.toLowerCase();
   
-  // Initialize the result
-  const result: CommandRoutingResult = {};
+  // Initialize the result with conversation context
+  const result: CommandRoutingResult = {
+    conversation_context: `User asked: "${message}"`
+  };
   
   // Check for settings-related keywords
   if (
@@ -365,7 +367,7 @@ export async function routeInputToApis(message: string, conversationContext?: st
     }
     
     // Create system prompt for the command router
-    const systemPrompt = `
+    let systemPrompt = `
       You are an AI assistant that routes user requests to the appropriate specialized API. 
       Based on the user's message, determine which of the following APIs should handle the request:
       
@@ -379,7 +381,8 @@ export async function routeInputToApis(message: string, conversationContext?: st
         "calendar_prompt": "...", // Include only if the message contains a calendar-related request (null otherwise)
         "message_prompt": "...", // Include only if the message contains a message generation request (null otherwise)
         "clarification_prompt": "...", // Include only if more information is needed to process the request (null otherwise)
-        "missing_fields": ["field1", "field2"] // List any missing information needed for the request (empty if none)
+        "missing_fields": ["field1", "field2"], // List any missing information needed for the request (empty if none)
+        "conversation_context": "..." // A summary of the current conversation context for future requests
       }
       
       If the user's intent is unclear or lacks specific information, return a clarification_prompt and missing_fields.
@@ -390,7 +393,15 @@ export async function routeInputToApis(message: string, conversationContext?: st
       
       Example 2: "Schedule a meeting" (lacks details like when, with whom, etc.)
       Should return clarification_prompt and missing_fields.
+      
+      ALWAYS include a brief "conversation_context" that summarizes the current request and relevant details.
+      This will be used to maintain context in follow-up requests.
     `;
+    
+    // If we have previous conversation context, include it
+    if (conversationContext) {
+      systemPrompt += `\n\nIMPORTANT: This is a follow-up to a previous conversation. Here's the context:\n${conversationContext}\n\nPlease consider this context when determining how to route the user's current message.`;
+    }
 
     // Make the API call to OpenAI
     const response = await routingClient.chat.completions.create({
