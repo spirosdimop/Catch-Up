@@ -64,7 +64,8 @@ const UpcomingTasks = ({ tasks }: { tasks: Task[] }) => {
   const formatDueDate = (date: Date): React.ReactNode => {
     const now = new Date();
     const dueDate = new Date(date);
-    const diffDays = Math.ceil((dueDate - now) / (1000 * 60 * 60 * 24));
+    const diffTime = dueDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
     if (diffDays < 0) return <span className="text-red-500">Overdue</span>;
     if (diffDays === 0) return <span className="text-amber-500">Today</span>;
@@ -206,7 +207,13 @@ const EventComponent = ({ event }: { event: CalendarEvent }) => {
 };
 
 // Calendar toolbar component
-const CustomToolbar = ({ date, onNavigate }) => {
+const CustomToolbar = ({ 
+  date, 
+  onNavigate 
+}: { 
+  date: Date; 
+  onNavigate: (action: 'PREV' | 'NEXT' | 'TODAY') => void 
+}) => {
   const goToBack = () => {
     onNavigate('PREV');
   };
@@ -245,16 +252,21 @@ const CustomToolbar = ({ date, onNavigate }) => {
 
 // Main calendar component
 const CalendarRedesign = () => {
-  const [currentDate, setCurrentDate] = useState(new Date());
-  const [selectedEvent, setSelectedEvent] = useState(null);
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   
-  // Mock events data (would normally come from API)
-  const { data: events = [] } = useQuery({
+  // Events data from API with fallback
+  const { data: events = [] } = useQuery<CalendarEvent[], Error>({
     queryKey: ['/api/events'],
     queryFn: async () => {
-      // If API fails, return mock data
       try {
-        return await apiRequest('/api/events');
+        const response = await apiRequest('/api/events');
+        // Convert date strings to Date objects if needed
+        return Array.isArray(response) ? response.map(event => ({
+          ...event,
+          start: new Date(event.start),
+          end: new Date(event.end)
+        })) : [];
       } catch (error) {
         console.error('Failed to fetch events', error);
         return [
@@ -295,13 +307,17 @@ const CalendarRedesign = () => {
     }
   });
   
-  // Mock tasks data (would normally come from API)
-  const { data: tasks = [] } = useQuery({
+  // Tasks data from API with fallback
+  const { data: tasks = [] } = useQuery<Task[], Error>({
     queryKey: ['/api/tasks'],
     queryFn: async () => {
-      // If API fails, return mock data
       try {
-        return await apiRequest('/api/tasks');
+        const response = await apiRequest('/api/tasks', {});
+        // Convert date strings to Date objects if needed
+        return Array.isArray(response) ? response.map(task => ({
+          ...task,
+          dueDate: new Date(task.dueDate)
+        })) : [];
       } catch (error) {
         console.error('Failed to fetch tasks', error);
         return [
@@ -337,11 +353,11 @@ const CalendarRedesign = () => {
     }
   });
   
-  const handleSelectEvent = (event) => {
+  const handleSelectEvent = (event: CalendarEvent) => {
     setSelectedEvent(event);
   };
   
-  const handleNavigate = (date) => {
+  const handleNavigate = (date: Date) => {
     setCurrentDate(date);
   };
   
