@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/ui/theme-provider";
 import { UserProvider } from "@/lib/userContext";
+import { AppSettingsProvider } from "@/lib/appSettingsContext";
 import AppShell from "@/components/layout/app-shell";
 import NotFound from "@/pages/not-found";
 // Use lowercase imports for consistency 
@@ -61,10 +62,12 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="freelance-flow-theme">
         <UserProvider>
-          <TooltipProvider>
-            <Toaster />
-            <Router />
-          </TooltipProvider>
+          <AppSettingsProvider>
+            <TooltipProvider>
+              <Toaster />
+              <Router />
+            </TooltipProvider>
+          </AppSettingsProvider>
         </UserProvider>
       </ThemeProvider>
     </QueryClientProvider>

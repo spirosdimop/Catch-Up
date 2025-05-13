@@ -2,17 +2,20 @@ import { useState } from "react";
 import { PageTitle } from "@/components/ui/page-title";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Settings as SettingsIcon, User, Bell, Shield, Palette, Briefcase, Phone } from "lucide-react";
+import { Settings as SettingsIcon, User, Bell, Shield, Palette, Globe, Briefcase, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Separator } from "@/components/ui/separator";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useUser } from "@/lib/userContext";
+import { useAppSettings } from "@/lib/appSettingsContext";
 import { useToast } from "@/hooks/use-toast";
 
 export default function Settings() {
   const { user, updateUser } = useUser();
+  const { settings, updateSettings } = useAppSettings();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     firstName: user?.firstName || "",
@@ -63,7 +66,7 @@ export default function Settings() {
       />
       
       <Tabs defaultValue="account" className="w-full">
-        <TabsList className="grid grid-cols-4 md:w-fit">
+        <TabsList className="grid grid-cols-5 md:w-fit">
           <TabsTrigger value="account" className="flex items-center gap-2">
             <User className="h-4 w-4" />
             <span className="hidden md:inline">Account</span>
@@ -79,6 +82,10 @@ export default function Settings() {
           <TabsTrigger value="appearance" className="flex items-center gap-2">
             <Palette className="h-4 w-4" />
             <span className="hidden md:inline">Appearance</span>
+          </TabsTrigger>
+          <TabsTrigger value="language" className="flex items-center gap-2">
+            <Globe className="h-4 w-4" />
+            <span className="hidden md:inline">Language</span>
           </TabsTrigger>
         </TabsList>
         
