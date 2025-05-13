@@ -96,79 +96,91 @@ export default function LandingPage() {
           </div>
           <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8">
             {/* Feature 1 */}
-            <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-              <Users className="h-12 w-12 text-primary" />
-              <h3 className="text-xl font-bold">Client Management</h3>
-              <p className="text-sm text-muted-foreground text-center">
+            <div className="flex flex-col items-center space-y-3 rounded-lg border-2 border-blue-100 p-6 shadow-md bg-white hover:shadow-lg transition-shadow">
+              <div className="p-3 rounded-full bg-blue-50">
+                <Users className="h-10 w-10 text-[#0F1D3A]" />
+              </div>
+              <h3 className="text-xl font-bold text-[#0F1D3A]">Client Management</h3>
+              <p className="text-sm text-gray-600 text-center">
                 Keep all client information organized and easily accessible in one place.
               </p>
             </div>
             
             {/* Feature 2 */}
-            <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-              <Clock className="h-12 w-12 text-primary" />
-              <h3 className="text-xl font-bold">Time Tracking</h3>
-              <p className="text-sm text-muted-foreground text-center">
+            <div className="flex flex-col items-center space-y-3 rounded-lg border-2 border-blue-100 p-6 shadow-md bg-white hover:shadow-lg transition-shadow">
+              <div className="p-3 rounded-full bg-blue-50">
+                <Clock className="h-10 w-10 text-[#0F1D3A]" />
+              </div>
+              <h3 className="text-xl font-bold text-[#0F1D3A]">Time Tracking</h3>
+              <p className="text-sm text-gray-600 text-center">
                 Track time spent on projects and tasks to ensure accurate billing.
               </p>
             </div>
             
             {/* Feature 3 */}
-            <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-              <svg 
-                className="h-12 w-12 text-primary" 
-                xmlns="http://www.w3.org/2000/svg" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              <h3 className="text-xl font-bold">Invoicing</h3>
-              <p className="text-sm text-muted-foreground text-center">
+            <div className="flex flex-col items-center space-y-3 rounded-lg border-2 border-blue-100 p-6 shadow-md bg-white hover:shadow-lg transition-shadow">
+              <div className="p-3 rounded-full bg-blue-50">
+                <svg 
+                  className="h-10 w-10 text-[#0F1D3A]" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-[#0F1D3A]">Invoicing</h3>
+              <p className="text-sm text-gray-600 text-center">
                 Create and send professional invoices to clients with ease.
               </p>
             </div>
             
             {/* Feature 4 */}
-            <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-              <svg 
-                className="h-12 w-12 text-primary" 
-                xmlns="http://www.w3.org/2000/svg" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <h3 className="text-xl font-bold">Scheduling</h3>
-              <p className="text-sm text-muted-foreground text-center">
+            <div className="flex flex-col items-center space-y-3 rounded-lg border-2 border-blue-100 p-6 shadow-md bg-white hover:shadow-lg transition-shadow">
+              <div className="p-3 rounded-full bg-blue-50">
+                <svg 
+                  className="h-10 w-10 text-[#0F1D3A]" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-[#0F1D3A]">Scheduling</h3>
+              <p className="text-sm text-gray-600 text-center">
                 Manage appointments and meetings with an integrated calendar.
               </p>
             </div>
             
             {/* Feature 5 */}
-            <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-              <svg 
-                className="h-12 w-12 text-primary" 
-                xmlns="http://www.w3.org/2000/svg" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-              </svg>
-              <h3 className="text-xl font-bold">Project Tracking</h3>
-              <p className="text-sm text-muted-foreground text-center">
+            <div className="flex flex-col items-center space-y-3 rounded-lg border-2 border-blue-100 p-6 shadow-md bg-white hover:shadow-lg transition-shadow">
+              <div className="p-3 rounded-full bg-blue-50">
+                <svg 
+                  className="h-10 w-10 text-[#0F1D3A]" 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-[#0F1D3A]">Project Tracking</h3>
+              <p className="text-sm text-gray-600 text-center">
                 Keep track of project progress, deadlines, and deliverables.
               </p>
             </div>
             
             {/* Feature 6 */}
-            <div className="flex flex-col items-center space-y-2 rounded-lg border p-6 shadow-sm">
-              <Globe className="h-12 w-12 text-primary" />
-              <h3 className="text-xl font-bold">Client Portal</h3>
-              <p className="text-sm text-muted-foreground text-center">
+            <div className="flex flex-col items-center space-y-3 rounded-lg border-2 border-blue-100 p-6 shadow-md bg-white hover:shadow-lg transition-shadow">
+              <div className="p-3 rounded-full bg-blue-50">
+                <Globe className="h-10 w-10 text-[#0F1D3A]" />
+              </div>
+              <h3 className="text-xl font-bold text-[#0F1D3A]">Client Portal</h3>
+              <p className="text-sm text-gray-600 text-center">
                 Let clients book appointments and view project progress through a dedicated portal.
               </p>
             </div>
@@ -177,124 +189,124 @@ export default function LandingPage() {
       </section>
 
       {/* Pricing Section */}
-      <section id="pricing" className="w-full py-12 md:py-24 bg-muted">
+      <section id="pricing" className="w-full py-12 md:py-24 bg-[#F0F5FF]">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <div className="inline-block rounded-lg bg-background px-3 py-1 text-sm text-primary">
+              <div className="inline-block rounded-lg bg-white px-3 py-1 text-sm text-[#0F1D3A] font-medium">
                 Pricing
               </div>
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl text-[#0F1D3A]">
                 Simple, Transparent Pricing
               </h2>
-              <p className="max-w-[700px] text-muted-foreground md:text-xl">
+              <p className="max-w-[700px] text-gray-600 md:text-xl">
                 Choose the plan that works best for your freelance business.
               </p>
             </div>
           </div>
           <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-3 mt-8">
             {/* Free Plan */}
-            <div className="flex flex-col overflow-hidden rounded-lg border bg-background shadow-sm">
+            <div className="flex flex-col overflow-hidden rounded-lg border-2 border-blue-100 bg-white shadow-md hover:shadow-lg transition-shadow">
               <div className="p-6">
-                <h3 className="text-2xl font-bold">Free</h3>
-                <div className="mt-4 text-4xl font-bold">$0</div>
-                <p className="mt-1 text-sm text-muted-foreground">Forever free</p>
+                <h3 className="text-2xl font-bold text-[#0F1D3A]">Free</h3>
+                <div className="mt-4 text-4xl font-bold text-[#0F1D3A]">$0</div>
+                <p className="mt-1 text-sm text-gray-500">Forever free</p>
                 <ul className="mt-6 space-y-3">
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">5 clients</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">5 clients</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">Basic project tracking</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">Basic project tracking</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">Simple invoicing</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">Simple invoicing</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">Calendar management</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">Calendar management</span>
                   </li>
                 </ul>
                 <div className="mt-6">
                   <Link href="/signup">
-                    <Button className="w-full">Get Started</Button>
+                    <Button className="w-full bg-[#0F1D3A] hover:bg-[#172B52] text-white">Get Started</Button>
                   </Link>
                 </div>
               </div>
             </div>
             
             {/* Pro Plan */}
-            <div className="flex flex-col overflow-hidden rounded-lg border bg-background shadow-sm relative">
-              <div className="absolute top-0 right-0 bg-primary px-3 py-1 text-xs font-medium text-primary-foreground rounded-bl-lg">
+            <div className="flex flex-col overflow-hidden rounded-lg border-2 border-blue-300 bg-white shadow-lg relative scale-105 z-10">
+              <div className="absolute top-0 right-0 bg-[#0F1D3A] px-3 py-1 text-xs font-medium text-white rounded-bl-lg">
                 Popular
               </div>
               <div className="p-6">
-                <h3 className="text-2xl font-bold">Pro</h3>
-                <div className="mt-4 text-4xl font-bold">$19</div>
-                <p className="mt-1 text-sm text-muted-foreground">Per month, billed monthly</p>
+                <h3 className="text-2xl font-bold text-[#0F1D3A]">Pro</h3>
+                <div className="mt-4 text-4xl font-bold text-[#0F1D3A]">$19</div>
+                <p className="mt-1 text-sm text-gray-500">Per month, billed monthly</p>
                 <ul className="mt-6 space-y-3">
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">Unlimited clients</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">Unlimited clients</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">Advanced project tracking</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">Advanced project tracking</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">Custom invoices</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">Custom invoices</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">Time tracking</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">Time tracking</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">Client portal</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">Client portal</span>
                   </li>
                 </ul>
                 <div className="mt-6">
                   <Link href="/signup">
-                    <Button className="w-full" variant="default">Get Started</Button>
+                    <Button className="w-full bg-[#0F1D3A] hover:bg-[#172B52] text-white">Get Started</Button>
                   </Link>
                 </div>
               </div>
             </div>
             
             {/* Business Plan */}
-            <div className="flex flex-col overflow-hidden rounded-lg border bg-background shadow-sm">
+            <div className="flex flex-col overflow-hidden rounded-lg border-2 border-blue-100 bg-white shadow-md hover:shadow-lg transition-shadow">
               <div className="p-6">
-                <h3 className="text-2xl font-bold">Business</h3>
-                <div className="mt-4 text-4xl font-bold">$49</div>
-                <p className="mt-1 text-sm text-muted-foreground">Per month, billed monthly</p>
+                <h3 className="text-2xl font-bold text-[#0F1D3A]">Business</h3>
+                <div className="mt-4 text-4xl font-bold text-[#0F1D3A]">$49</div>
+                <p className="mt-1 text-sm text-gray-500">Per month, billed monthly</p>
                 <ul className="mt-6 space-y-3">
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">Everything in Pro</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">Everything in Pro</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">Team management</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">Team management</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">Advanced reporting</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">Advanced reporting</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">API access</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">API access</span>
                   </li>
                   <li className="flex items-center">
-                    <CheckCircle className="mr-2 h-4 w-4 text-green-500" />
-                    <span className="text-sm">Priority support</span>
+                    <CheckCircle className="mr-2 h-4 w-4 text-blue-500" />
+                    <span className="text-sm text-gray-600">Priority support</span>
                   </li>
                 </ul>
                 <div className="mt-6">
                   <Link href="/signup">
-                    <Button className="w-full">Get Started</Button>
+                    <Button className="w-full bg-[#0F1D3A] hover:bg-[#172B52] text-white">Get Started</Button>
                   </Link>
                 </div>
               </div>
@@ -304,60 +316,87 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials */}
-      <section id="testimonials" className="w-full py-12 md:py-24 bg-background">
+      <section id="testimonials" className="w-full py-12 md:py-24 bg-white">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm text-primary">
+              <div className="inline-block rounded-lg bg-blue-100 px-3 py-1 text-sm text-[#0F1D3A] font-medium">
                 Testimonials
               </div>
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl text-[#0F1D3A]">
                 Trusted by Freelancers Worldwide
               </h2>
-              <p className="max-w-[700px] text-muted-foreground md:text-xl">
+              <p className="max-w-[700px] text-gray-600 md:text-xl">
                 See what other freelancers are saying about our platform.
               </p>
             </div>
           </div>
           <div className="mx-auto grid max-w-5xl grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 mt-8">
             {/* Testimonial 1 */}
-            <div className="flex flex-col space-y-2 rounded-lg border p-6 shadow-sm">
-              <p className="text-sm text-muted-foreground">
+            <div className="flex flex-col space-y-2 rounded-lg border-2 border-blue-100 p-6 shadow-md bg-white hover:shadow-lg transition-shadow">
+              <div className="mb-4">
+                <div className="flex text-yellow-400 mb-2">
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 italic">
                 "This platform has completely transformed how I manage my freelance business. I've saved hours on admin tasks and can focus on what I do best."
               </p>
-              <div className="flex items-center space-x-2 pt-2">
-                <div className="rounded-full bg-muted h-8 w-8"></div>
-                <div>
-                  <p className="text-sm font-medium">Sarah Johnson</p>
-                  <p className="text-xs text-muted-foreground">Web Designer</p>
+              <div className="flex items-center pt-4 border-t border-blue-50 mt-4">
+                <div className="h-10 w-10 rounded-full bg-[#0F1D3A] text-white flex items-center justify-center font-bold">SJ</div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-[#0F1D3A]">Sarah Johnson</p>
+                  <p className="text-xs text-gray-500">Web Designer</p>
                 </div>
               </div>
             </div>
             
             {/* Testimonial 2 */}
-            <div className="flex flex-col space-y-2 rounded-lg border p-6 shadow-sm">
-              <p className="text-sm text-muted-foreground">
+            <div className="flex flex-col space-y-2 rounded-lg border-2 border-blue-100 p-6 shadow-md bg-white hover:shadow-lg transition-shadow">
+              <div className="mb-4">
+                <div className="flex text-yellow-400 mb-2">
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 italic">
                 "The invoicing and payment tracking features alone are worth the subscription. My cash flow has improved significantly since I started using this platform."
               </p>
-              <div className="flex items-center space-x-2 pt-2">
-                <div className="rounded-full bg-muted h-8 w-8"></div>
-                <div>
-                  <p className="text-sm font-medium">David Chen</p>
-                  <p className="text-xs text-muted-foreground">Digital Marketer</p>
+              <div className="flex items-center pt-4 border-t border-blue-50 mt-4">
+                <div className="h-10 w-10 rounded-full bg-[#0F1D3A] text-white flex items-center justify-center font-bold">DC</div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-[#0F1D3A]">David Chen</p>
+                  <p className="text-xs text-gray-500">Digital Marketer</p>
                 </div>
               </div>
             </div>
             
             {/* Testimonial 3 */}
-            <div className="flex flex-col space-y-2 rounded-lg border p-6 shadow-sm">
-              <p className="text-sm text-muted-foreground">
+            <div className="flex flex-col space-y-2 rounded-lg border-2 border-blue-100 p-6 shadow-md bg-white hover:shadow-lg transition-shadow">
+              <div className="mb-4">
+                <div className="flex text-yellow-400 mb-2">
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                  <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"></path></svg>
+                </div>
+              </div>
+              <p className="text-sm text-gray-600 italic">
                 "The scheduling tool has eliminated the back-and-forth emails with clients. They can now book appointments directly through my profile page."
               </p>
-              <div className="flex items-center space-x-2 pt-2">
-                <div className="rounded-full bg-muted h-8 w-8"></div>
-                <div>
-                  <p className="text-sm font-medium">Emily Rodriguez</p>
-                  <p className="text-xs text-muted-foreground">Consultant</p>
+              <div className="flex items-center pt-4 border-t border-blue-50 mt-4">
+                <div className="h-10 w-10 rounded-full bg-[#0F1D3A] text-white flex items-center justify-center font-bold">JM</div>
+                <div className="ml-3">
+                  <p className="text-sm font-medium text-[#0F1D3A]">Emily Rodriguez</p>
+                  <p className="text-xs text-gray-500">Consultant</p>
                 </div>
               </div>
             </div>
@@ -366,22 +405,22 @@ export default function LandingPage() {
       </section>
 
       {/* CTA Section */}
-      <section className="w-full py-12 md:py-24 bg-primary text-primary-foreground">
+      <section className="w-full py-12 md:py-24 bg-[#0F1D3A] text-white">
         <div className="container px-4 md:px-6">
-          <div className="flex flex-col items-center justify-center space-y-4 text-center">
-            <div className="space-y-2">
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+          <div className="flex flex-col items-center justify-center space-y-6 text-center">
+            <div className="space-y-3">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl lg:text-5xl">
                 Ready to Streamline Your Freelance Business?
               </h2>
-              <p className="max-w-[700px] md:text-xl text-primary-foreground/90">
+              <p className="max-w-[700px] md:text-xl text-blue-200">
                 Join thousands of freelancers who have transformed their workflow with our platform.
               </p>
             </div>
-            <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex flex-col md:flex-row gap-4 mt-4">
               <Link href="/signup">
-                <Button size="lg" variant="secondary" className="px-8">
+                <Button size="lg" className="px-8 bg-white text-[#0F1D3A] hover:bg-blue-100 text-lg font-medium">
                   Get Started for Free
-                  <ArrowRight className="ml-2 h-4 w-4" />
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
             </div>
