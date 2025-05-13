@@ -11,7 +11,12 @@ import { Input } from "@/components/ui/input";
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { queryClient } from '@/lib/queryClient';
 import { apiRequest } from '@/lib/queryClient';
 import {
   ChevronLeft,
@@ -172,10 +177,20 @@ const EventDetails = ({ event }: { event: CalendarEvent | null }) => {
             </>
           )}
           <div className="mt-6 flex space-x-2">
-            <Button size="sm" variant="outline" className="flex-1">
+            <Button 
+              size="sm" 
+              variant="outline" 
+              className="flex-1"
+              onClick={() => setIsEditEventModalOpen(true)}
+            >
               Edit
             </Button>
-            <Button size="sm" variant="destructive" className="flex-1">
+            <Button 
+              size="sm" 
+              variant="destructive" 
+              className="flex-1"
+              onClick={handleDeleteEvent}
+            >
               Delete
             </Button>
           </div>
@@ -242,7 +257,10 @@ const CustomToolbar = ({
           Today
         </Button>
       </div>
-      <Button className="bg-[#0a2342] hover:bg-[#1d4ed8]">
+      <Button 
+        className="bg-[#0a2342] hover:bg-[#1d4ed8]"
+        onClick={() => setIsAddEventModalOpen(true)}
+      >
         <PlusCircle className="h-4 w-4 mr-2" />
         Add Event
       </Button>
@@ -254,6 +272,9 @@ const CustomToolbar = ({
 const CalendarRedesign = () => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [isAddEventModalOpen, setIsAddEventModalOpen] = useState<boolean>(false);
+  const [isEditEventModalOpen, setIsEditEventModalOpen] = useState<boolean>(false);
+  const { toast } = useToast();
   
   // Events data from API with fallback
   const { data: events = [] } = useQuery<CalendarEvent[], Error>({
@@ -355,6 +376,108 @@ const CalendarRedesign = () => {
     }
   });
   
+  // Handle mutations for adding, editing, and deleting events
+  const createEventMutation = useMutation({
+    mutationFn: async (newEvent: Omit<CalendarEvent, 'id'>) => {
+      const res = await apiRequest("POST", "/api/events", newEvent);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      setIsAddEventModalOpen(false);
+      toast({
+        title: "Event created",
+        description: "The event has been added to your calendar.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error creating event",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const updateEventMutation = useMutation({
+    mutationFn: async ({ id, event }: { id: number; event: Partial<CalendarEvent> }) => {
+      const res = await apiRequest("PATCH", `/api/events/${id}`, event);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      setIsEditEventModalOpen(false);
+      setSelectedEvent(null);
+      toast({
+        title: "Event updated",
+        description: "The event has been updated successfully.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error updating event",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const deleteEventMutation = useMutation({
+    mutationFn: async (id: number) => {
+      const res = await apiRequest("DELETE", `/api/events/${id}`);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      setSelectedEvent(null);
+      toast({
+        title: "Event deleted",
+        description: "The event has been removed from your calendar.",
+      });
+    },
+    onError: (error) => {
+      toast({
+        title: "Error deleting event",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleAddEvent = (event: any) => {
+    // Format dates appropriately
+    const newEvent = {
+      ...event,
+      start: new Date(event.start),
+      end: new Date(event.end),
+      userId: "user-1", // This would be dynamically set in a real app
+    };
+    
+    createEventMutation.mutate(newEvent);
+  };
+
+  const handleUpdateEvent = (event: any) => {
+    if (!selectedEvent) return;
+    
+    // Format dates appropriately
+    const updatedEvent = {
+      ...event,
+      start: new Date(event.start),
+      end: new Date(event.end),
+    };
+    
+    updateEventMutation.mutate({ 
+      id: selectedEvent.id, 
+      event: updatedEvent 
+    });
+  };
+
+  const handleDeleteEvent = () => {
+    if (!selectedEvent) return;
+    deleteEventMutation.mutate(selectedEvent.id);
+  };
+
+  // Calendar interaction handlers
   const handleSelectEvent = (event: CalendarEvent) => {
     setSelectedEvent(event);
   };
@@ -410,6 +533,267 @@ const CalendarRedesign = () => {
           </div>
         </div>
       </div>
+      
+      {/* Add Event Modal */}
+      <Dialog open={isAddEventModalOpen} onOpenChange={setIsAddEventModalOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Add New Event</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={(e) => {
+            e.preventDefault();
+            const formData = new FormData(e.currentTarget);
+            const startDate = new Date(formData.get('startDate') as string);
+            const startTime = formData.get('startTime') as string;
+            const endDate = new Date(formData.get('endDate') as string);
+            const endTime = formData.get('endTime') as string;
+            
+            // Set hours and minutes
+            if (startTime) {
+              const [hours, minutes] = startTime.split(':').map(Number);
+              startDate.setHours(hours, minutes);
+            }
+            
+            if (endTime) {
+              const [hours, minutes] = endTime.split(':').map(Number);
+              endDate.setHours(hours, minutes);
+            }
+            
+            handleAddEvent({
+              title: formData.get('title'),
+              description: formData.get('description'),
+              start: startDate,
+              end: endDate,
+              type: formData.get('type') || 'event'
+            });
+          }}>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="title" className="text-right">
+                  Title
+                </Label>
+                <Input id="title" name="title" className="col-span-3" required />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="description" className="text-right">
+                  Description
+                </Label>
+                <Textarea id="description" name="description" className="col-span-3" />
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="type" className="text-right">
+                  Event Type
+                </Label>
+                <Select name="type" defaultValue="event">
+                  <SelectTrigger className="col-span-3">
+                    <SelectValue placeholder="Select event type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="meeting">Meeting</SelectItem>
+                    <SelectItem value="task">Task</SelectItem>
+                    <SelectItem value="reminder">Reminder</SelectItem>
+                    <SelectItem value="event">Other Event</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="startDate" className="text-right">
+                  Start Date
+                </Label>
+                <div className="col-span-3 flex gap-2">
+                  <Input 
+                    id="startDate" 
+                    name="startDate" 
+                    type="date" 
+                    defaultValue={format(new Date(), 'yyyy-MM-dd')}
+                    required 
+                  />
+                  <Input 
+                    id="startTime" 
+                    name="startTime" 
+                    type="time" 
+                    defaultValue="09:00"
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="endDate" className="text-right">
+                  End Date
+                </Label>
+                <div className="col-span-3 flex gap-2">
+                  <Input 
+                    id="endDate" 
+                    name="endDate" 
+                    type="date" 
+                    defaultValue={format(new Date(), 'yyyy-MM-dd')}
+                    required 
+                  />
+                  <Input 
+                    id="endTime" 
+                    name="endTime" 
+                    type="time" 
+                    defaultValue="10:00"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            <DialogFooter>
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setIsAddEventModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" className="bg-[#0a2342] hover:bg-[#1d4ed8]">
+                Add Event
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Edit Event Modal */}
+      {selectedEvent && (
+        <Dialog open={isEditEventModalOpen} onOpenChange={setIsEditEventModalOpen}>
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>Edit Event</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              const formData = new FormData(e.currentTarget);
+              const startDate = new Date(formData.get('startDate') as string);
+              const startTime = formData.get('startTime') as string;
+              const endDate = new Date(formData.get('endDate') as string);
+              const endTime = formData.get('endTime') as string;
+              
+              // Set hours and minutes
+              if (startTime) {
+                const [hours, minutes] = startTime.split(':').map(Number);
+                startDate.setHours(hours, minutes);
+              }
+              
+              if (endTime) {
+                const [hours, minutes] = endTime.split(':').map(Number);
+                endDate.setHours(hours, minutes);
+              }
+              
+              handleUpdateEvent({
+                title: formData.get('title'),
+                description: formData.get('description'),
+                start: startDate,
+                end: endDate,
+                type: formData.get('type') || 'event'
+              });
+            }}>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-title" className="text-right">
+                    Title
+                  </Label>
+                  <Input 
+                    id="edit-title" 
+                    name="title" 
+                    className="col-span-3" 
+                    defaultValue={selectedEvent.title}
+                    required 
+                  />
+                </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-description" className="text-right">
+                    Description
+                  </Label>
+                  <Textarea 
+                    id="edit-description" 
+                    name="description" 
+                    className="col-span-3"
+                    defaultValue={selectedEvent.description} 
+                  />
+                </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-type" className="text-right">
+                    Event Type
+                  </Label>
+                  <Select name="type" defaultValue={selectedEvent.type || "event"}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select event type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="meeting">Meeting</SelectItem>
+                      <SelectItem value="task">Task</SelectItem>
+                      <SelectItem value="reminder">Reminder</SelectItem>
+                      <SelectItem value="event">Other Event</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-startDate" className="text-right">
+                    Start Date
+                  </Label>
+                  <div className="col-span-3 flex gap-2">
+                    <Input 
+                      id="edit-startDate" 
+                      name="startDate" 
+                      type="date" 
+                      defaultValue={format(new Date(selectedEvent.start), 'yyyy-MM-dd')}
+                      required 
+                    />
+                    <Input 
+                      id="edit-startTime" 
+                      name="startTime" 
+                      type="time" 
+                      defaultValue={format(new Date(selectedEvent.start), 'HH:mm')}
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="edit-endDate" className="text-right">
+                    End Date
+                  </Label>
+                  <div className="col-span-3 flex gap-2">
+                    <Input 
+                      id="edit-endDate" 
+                      name="endDate" 
+                      type="date" 
+                      defaultValue={format(new Date(selectedEvent.end), 'yyyy-MM-dd')}
+                      required 
+                    />
+                    <Input 
+                      id="edit-endTime" 
+                      name="endTime" 
+                      type="time" 
+                      defaultValue={format(new Date(selectedEvent.end), 'HH:mm')}
+                    />
+                  </div>
+                </div>
+              </div>
+              
+              <DialogFooter>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setIsEditEventModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" className="bg-[#0a2342] hover:bg-[#1d4ed8]">
+                  Update Event
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      )}
       
       {/* Custom CSS for the calendar */}
       <style>{`
