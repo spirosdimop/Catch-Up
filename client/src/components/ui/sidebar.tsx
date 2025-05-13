@@ -130,13 +130,16 @@ export function Sidebar() {
             )}
           </div>
           <div className="flex ml-auto">
-            <Link href="/settings">
-              <div className="mr-1">
-                <Button variant="ghost" size="icon">
-                  <Cog className="h-4 w-4" />
-                </Button>
-              </div>
-            </Link>
+            {/* Replace Link with Button and handle navigation programmatically */}
+            <div className="mr-1">
+              <Button 
+                variant="ghost" 
+                size="icon"
+                onClick={() => window.location.href = "/settings"}
+              >
+                <Cog className="h-4 w-4" />
+              </Button>
+            </div>
             {user && (
               <Button 
                 variant="ghost" 

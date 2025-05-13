@@ -1,6 +1,7 @@
 import { Router, type Express, type Request, type Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { OpenAI } from "openai";
 import { processSchedulingRequest, generateScheduleSummary, SchedulingResponse } from "./openai";
 import { 
   insertClientSchema, 
@@ -832,6 +833,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // AI Assistant Endpoints
+  apiRouter.post("/ai/chat", async (req, res) => {
+    try {
+      const { message, history } = req.body;
+      
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ message: "Invalid request. 'message' must be a string." });
+      }
+      
+      // Initialize OpenAI client
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+      
+      // Prepare messages for OpenAI
+      const messages = [
+        { role: 'system', content: 'You are a helpful freelancer business assistant. You provide concise, practical advice for freelancers managing their business. Focus on actionable tips about client management, pricing, productivity, and business growth.' },
+      ];
+      
+      // Add conversation history if provided
+      if (Array.isArray(history)) {
+        // Only include the last 10 messages to stay within token limits
+        const recentHistory = history.slice(-10);
+        messages.push(...recentHistory);
+      }
+      
+      // Add the current user message
+      messages.push({ role: 'user', content: message });
+      
+      // Make the API call to OpenAI
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+        messages,
+        temperature: 0.7,
+        max_tokens: 500
+      });
+      
+      const responseContent = response.choices[0]?.message?.content || "I'm sorry, I couldn't generate a response.";
+      
+      res.json({ message: responseContent });
+    } catch (error) {
+      console.error("Error in AI chat:", error);
+      res.status(500).json({ 
+        message: "Failed to process chat message",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
   apiRouter.post("/ai/scheduling", async (req, res) => {
     try {
       const { schedule, request } = req.body;

@@ -80,27 +80,71 @@ export default function AIAssistant() {
     setMessages(prev => [...prev, userMessage]);
     setInputValue("");
     
-    // In a real implementation, this would call the OpenAI API
-    // But for now we'll simulate a response after a delay
-    setTimeout(() => {
-      const aiResponses = [
-        "I can help you with that! Let me look into it.",
-        "That's a great question about freelancing. Here's what I recommend...",
-        "Based on your freelance business, you might want to consider these options...",
-        "I've analyzed your request and here are some suggestions for your consideration."
-      ];
+    // Create a temporary message to show that the AI is typing
+    const tempId = Date.now();
+    const typingMessage: Message = {
+      id: tempId,
+      text: "Thinking...",
+      sender: 'ai',
+      timestamp: new Date()
+    };
+    
+    setMessages(prev => [...prev, typingMessage]);
+    
+    try {
+      // Call OpenAI API through our backend
+      const response = await fetch('/api/ai/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          message: userMessage.text,
+          history: messages.map(msg => ({
+            role: msg.sender === 'user' ? 'user' : 'assistant',
+            content: msg.text
+          }))
+        })
+      });
       
-      const randomResponse = aiResponses[Math.floor(Math.random() * aiResponses.length)];
+      if (!response.ok) {
+        throw new Error('Failed to get AI response');
+      }
       
+      const data = await response.json();
+      
+      // Remove the temporary typing message
+      setMessages(prev => prev.filter(msg => msg.id !== tempId));
+      
+      // Add the real AI response
       const aiMessage: Message = {
         id: messages.length + 2,
-        text: randomResponse,
+        text: data.message || "I'm sorry, I couldn't process that request.",
         sender: 'ai',
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, aiMessage]);
-    }, 1000);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      
+      // Remove the temporary typing message
+      setMessages(prev => prev.filter(msg => msg.id !== tempId));
+      
+      // Add error message
+      const errorMessage: Message = {
+        id: messages.length + 2,
+        text: "Sorry, I'm having trouble connecting. Please try again later.",
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+      
+      toast({
+        title: "Connection Error",
+        description: "Failed to get a response from the AI assistant.",
+        variant: "destructive"
+      });
+    }
   };
   
   // Handle scheduling request submission

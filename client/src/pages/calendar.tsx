@@ -511,7 +511,7 @@ export default function CalendarPage() {
         className: `event-type-${event.eventType} ${event.isConfirmed ? 'confirmed' : 'unconfirmed'}`
       };
     },
-    []
+    [eventTypeColors] // Add missing dependency
   );
 
   // Form submission
