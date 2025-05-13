@@ -671,10 +671,31 @@ export default function Profile() {
                             <span className="font-medium">{service.name}</span>
                             <Badge variant="outline">${service.price}</Badge>
                           </div>
-                          <div className="flex items-center mt-1 text-sm text-muted-foreground">
-                            <Clock className="h-4 w-4 mr-1" />
-                            <span>{service.duration} minutes</span>
+                          <div className="flex flex-wrap gap-x-4 mt-1 text-sm text-muted-foreground">
+                            <div className="flex items-center">
+                              <Clock className="h-4 w-4 mr-1" />
+                              <span>{service.duration} minutes</span>
+                            </div>
+                            
+                            {service.locationType && (
+                              <div className="flex items-center">
+                                <MapPin className="h-4 w-4 mr-1" />
+                                <span>{
+                                  service.locationType === 'office' ? 'At my office' :
+                                  service.locationType === 'client' ? 'At client location' :
+                                  service.locationType === 'both' ? 'Office or client location' :
+                                  service.locationType === 'online' ? 'Online/Virtual' : 
+                                  'Location varies'
+                                }</span>
+                              </div>
+                            )}
                           </div>
+                          
+                          {service.description && (
+                            <div className="mt-2 text-sm text-muted-foreground">
+                              {service.description}
+                            </div>
+                          )}
                         </div>
                       ))}
                     </div>
