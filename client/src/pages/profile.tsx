@@ -60,9 +60,7 @@ export default function Profile() {
         profession: "consultant",
         locationType: "has_shop",
         serviceArea: "Downtown & Surrounding Areas",
-        profileImageUrl: "https://randomuser.me/api/portraits/men/1.jpg",
-        voicemailMessage: "Hello, you've reached Test Business. I'm currently unavailable but please leave a message and I'll get back to you as soon as possible.",
-        smsFollowUpMessage: "Hi, this is Test from Test Business. Sorry I missed your call. You can book an appointment at: https://mybooking.com/test",
+        profileImageUrl: "",
         services: [
           { name: "Consultation", duration: 60, price: 100 },
           { name: "Follow-up", duration: 30, price: 50 }
@@ -87,8 +85,7 @@ export default function Profile() {
     bio: user ? `${user.profession || 'Professional'} providing services${user.services?.length ? ` including ${user.services.map(s => s.name).join(', ')}` : ''}.` 
           : "Professional service provider helping clients achieve their goals.",
     skills: user?.services?.map(s => s.name) || ["Service 1", "Service 2"],
-    voicemailMessage: user?.voicemailMessage || "",
-    smsFollowUpMessage: user?.smsFollowUpMessage || "",
+
     availability: {
       monday: { morning: true, afternoon: true, evening: false },
       tuesday: { morning: true, afternoon: true, evening: false },
@@ -338,8 +335,13 @@ export default function Profile() {
           <CardHeader className="pb-4">
             <div className="flex flex-col md:flex-row md:items-center gap-6">
               <Avatar className="h-24 w-24">
-                <AvatarImage src={profile.avatar} alt={profile.name} />
-                <AvatarFallback>{profile.name.charAt(0)}</AvatarFallback>
+                {profile.avatar ? (
+                  <AvatarImage src={profile.avatar} alt={profile.name} />
+                ) : (
+                  <AvatarFallback className="bg-primary text-primary-foreground text-lg font-medium">
+                    {profile.name.split(' ').map(n => n[0]).join('')}
+                  </AvatarFallback>
+                )}
               </Avatar>
               <div>
                 <CardTitle className="text-2xl">{profile.name}</CardTitle>
