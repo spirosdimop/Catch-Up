@@ -36,6 +36,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Profile() {
+  console.log("Loading UPDATED profile component with reviews and hours!");
   const { user, setUser } = useUser();
   const [selectedService, setSelectedService] = useState<number | null>(null);
   const [activeSection, setActiveSection] = useState("book"); // book, reviews, hours
@@ -276,12 +277,14 @@ export default function Profile() {
       </div>
       
       {/* Navigation Menu */}
-      <div className="mb-8">
+      <div className="mb-8 bg-secondary p-4 rounded-lg">
+        <h2 className="text-xl font-bold mb-3">View Profile Information</h2>
         <div className="flex flex-wrap gap-2">
           <Button
             variant={activeSection === "book" ? "default" : "outline"}
             onClick={() => setActiveSection("book")}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2" 
+            size="lg"
           >
             <CalendarDays className="h-4 w-4" />
             Book Appointment
@@ -290,6 +293,7 @@ export default function Profile() {
             variant={activeSection === "reviews" ? "default" : "outline"}
             onClick={() => setActiveSection("reviews")}
             className="flex items-center gap-2"
+            size="lg"
           >
             <Star className="h-4 w-4" />
             Reviews
@@ -298,6 +302,7 @@ export default function Profile() {
             variant={activeSection === "hours" ? "default" : "outline"}
             onClick={() => setActiveSection("hours")}
             className="flex items-center gap-2"
+            size="lg"
           >
             <Clock className="h-4 w-4" />
             Business Hours
