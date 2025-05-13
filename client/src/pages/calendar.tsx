@@ -709,36 +709,41 @@ export default function CalendarPage() {
               <FormField
                 control={form.control}
                 name="eventType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Event Type</FormLabel>
-                    <Select
-                      onValueChange={field.onChange}
-                      defaultValue={field.value || "busy"}
-                      value={field.value || "busy"}
-                    >
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select event type">
-                            {field.value ? field.value.replace('_', ' ').charAt(0).toUpperCase() + field.value.replace('_', ' ').slice(1) : "Busy"}
-                          </SelectValue>
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="busy">Busy</SelectItem>
-                        <SelectItem value="available">Available</SelectItem>
-                        <SelectItem value="private">Private</SelectItem>
-                        <SelectItem value="travel">Travel</SelectItem>
-                        <SelectItem value="client_meeting">Client Meeting</SelectItem>
-                        <SelectItem value="consultation">Consultation</SelectItem>
-                        <SelectItem value="project_work">Project Work</SelectItem>
-                        <SelectItem value="follow_up">Follow-up Call</SelectItem>
-                        <SelectItem value="training">Training/Workshop</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
+                render={({ field }) => {
+                  // Ensure field.value is never null, undefined, or empty
+                  const safeValue = field.value || "busy";
+                  
+                  return (
+                    <FormItem>
+                      <FormLabel>Event Type</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={safeValue}
+                        value={safeValue}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select event type">
+                              {safeValue.replace('_', ' ').charAt(0).toUpperCase() + safeValue.replace('_', ' ').slice(1)}
+                            </SelectValue>
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="busy">Busy</SelectItem>
+                          <SelectItem value="available">Available</SelectItem>
+                          <SelectItem value="private">Private</SelectItem>
+                          <SelectItem value="travel">Travel</SelectItem>
+                          <SelectItem value="client_meeting">Client Meeting</SelectItem>
+                          <SelectItem value="consultation">Consultation</SelectItem>
+                          <SelectItem value="project_work">Project Work</SelectItem>
+                          <SelectItem value="follow_up">Follow-up Call</SelectItem>
+                          <SelectItem value="training">Training/Workshop</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  );
+                }}
               />
 
               <FormField

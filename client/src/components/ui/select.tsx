@@ -114,10 +114,12 @@ SelectLabel.displayName = SelectPrimitive.Label.displayName
 const SelectItem = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Item>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Item>
->(({ className, children, value = "", ...props }, ref) => {
-  // Ensure value is never undefined or null
-  if (value === undefined || value === null) {
-    console.warn('SelectItem missing required "value" prop. Providing empty string as fallback.');
+>(({ className, children, value, ...props }, ref) => {
+  // Ensure value is never undefined, null or empty string
+  if (value === undefined || value === null || value === "") {
+    console.warn('SelectItem missing required "value" prop. Providing fallback value.');
+    // Use content as fallback value if available, or use a placeholder string
+    value = children?.toString() || "option";
   }
   
   return (
