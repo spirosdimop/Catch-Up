@@ -57,11 +57,6 @@ const navItems: SidebarNavItem[] = [
   {
     title: "AI Assistant",
     href: "/ai-assistant",
-    icon: <Bot className="w-5 h-5 mr-2" />,
-  },
-  {
-    title: "Unified Assistant",
-    href: "/unified-assistant",
     icon: <Bot className="w-5 h-5 mr-2 text-primary" />,
   },
   {
