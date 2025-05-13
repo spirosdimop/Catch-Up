@@ -111,10 +111,19 @@ export default function Profile() {
     }));
   };
   
+  // Add effect to update selectedDate when booking form date changes
+  useEffect(() => {
+    if (bookingForm.date) {
+      setSelectedDate(parseISO(bookingForm.date));
+    }
+  }, [bookingForm.date, setSelectedDate]);
+
   const handleServiceSelect = (index: number) => {
     setSelectedService(index);
-    // In a real app, you would filter available times based on the service duration
-    // and existing bookings
+    // When a service is selected, refresh available times based on date
+    if (bookingForm.date) {
+      setSelectedDate(parseISO(bookingForm.date));
+    }
   };
   
   const handleBookingSubmit = (e: React.FormEvent) => {
@@ -124,19 +133,30 @@ export default function Profile() {
       return;
     }
     
-    // In a real app, you would submit this booking to your backend
-    alert(`Booking submitted successfully!\n\nService: ${user?.services[selectedService].name}\nDate: ${bookingForm.date}\nTime: ${bookingForm.time}`);
+    if (!user?.services[selectedService]) {
+      alert("Invalid service selected");
+      return;
+    }
     
-    // Reset form
-    setBookingForm({
-      name: "",
-      email: "",
-      phone: "",
-      date: format(new Date(), 'yyyy-MM-dd'),
-      time: "",
-      notes: "",
+    const selectedServiceData = user.services[selectedService];
+    
+    // Create booking through our API
+    createBooking({
+      serviceName: selectedServiceData.name,
+      serviceId: selectedService + 1, // Use index+1 as ID (for demo)
+      clientName: bookingForm.name,
+      clientEmail: bookingForm.email,
+      clientPhone: bookingForm.phone,
+      date: bookingForm.date,
+      time: bookingForm.time,
+      notes: bookingForm.notes,
+      providerId: user?.id?.toString() || '1', // Use default if undefined
+      duration: selectedServiceData.duration,
+      location: selectedServiceData.locationType || 'office',
+      price: selectedServiceData.price
     });
-    setSelectedService(null);
+    
+    // The form will be reset in the useBooking hook's onSuccess handler
   };
   
   if (!user) {
@@ -383,11 +403,17 @@ export default function Profile() {
                               <SelectValue placeholder="Select a time slot" />
                             </SelectTrigger>
                             <SelectContent>
-                              {availableTimes.map(time => (
-                                <SelectItem key={time} value={time}>
-                                  {time}
-                                </SelectItem>
-                              ))}
+                              {isLoadingSlots ? (
+                                <SelectItem value="loading">Loading available times...</SelectItem>
+                              ) : availableSlots.length === 0 ? (
+                                <SelectItem value="none">No available times</SelectItem>
+                              ) : (
+                                availableSlots.map((slot) => (
+                                  <SelectItem key={slot.time} value={slot.formatted}>
+                                    {slot.formatted}
+                                  </SelectItem>
+                                ))
+                              )}
                             </SelectContent>
                           </Select>
                         </div>
