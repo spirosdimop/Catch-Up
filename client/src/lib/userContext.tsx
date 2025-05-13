@@ -10,7 +10,11 @@ export interface UserData {
   businessName: string;
   profession: string;
   locationType: string;
+  serviceArea?: string;
   profileImageUrl?: string;
+  voicemailMessage?: string;
+  smsFollowUpMessage?: string;
+  availabilityHours?: string; // JSON string with availability hours
   services: Array<{
     name: string;
     duration: number;

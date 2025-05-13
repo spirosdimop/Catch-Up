@@ -45,7 +45,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Profile() {
   const [tab, setTab] = useState("profile");
-  const { user, setUser } = useUser();
+  const { user, setUser, updateUser } = useUser();
   
   // If no user exists, create a test user for development purposes
   useEffect(() => {
@@ -416,6 +416,22 @@ export default function Profile() {
   const [selectedTime, setSelectedTime] = useState("");
   const [bookingStep, setBookingStep] = useState(1);
   
+  // Profile editing state
+  const [showEditProfileDialog, setShowEditProfileDialog] = useState(false);
+  const [profileForm, setProfileForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    businessName: "",
+    profession: "",
+    locationType: "",
+    serviceArea: "",
+    profileImageUrl: "",
+    voicemailMessage: "",
+    smsFollowUpMessage: ""
+  });
+  
   const handleDateSelect = (date: string) => {
     setSelectedDate(date);
     setSelectedTime("");
@@ -432,9 +448,223 @@ export default function Profile() {
     // In a real app, this would submit the booking data to the server
     setBookingStep(4);
   };
+  
+  // Edit profile handlers
+  const handleEditProfileClick = () => {
+    if (user) {
+      setProfileForm({
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        phone: user.phone,
+        businessName: user.businessName,
+        profession: user.profession,
+        locationType: user.locationType,
+        serviceArea: user.serviceArea || "",
+        profileImageUrl: user.profileImageUrl || "",
+        voicemailMessage: user.voicemailMessage || "",
+        smsFollowUpMessage: user.smsFollowUpMessage || ""
+      });
+      setShowEditProfileDialog(true);
+    }
+  };
+  
+  const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setProfileForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleProfileSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (user) {
+      const updatedUser = {
+        ...user,
+        ...profileForm
+      };
+      updateUser(updatedUser);
+      setShowEditProfileDialog(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
+      
+      {/* Profile editing dialog */}
+      <Dialog 
+        open={showEditProfileDialog} 
+        onOpenChange={(open) => {
+          if (!open) {
+            setShowEditProfileDialog(false);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Edit Profile</DialogTitle>
+            <DialogDescription>
+              Update your profile information to help clients know more about you and your services.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <form onSubmit={handleProfileSubmit} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName">First Name</Label>
+                <Input 
+                  id="firstName" 
+                  name="firstName" 
+                  value={profileForm.firstName} 
+                  onChange={handleProfileInputChange} 
+                  required 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="lastName">Last Name</Label>
+                <Input 
+                  id="lastName" 
+                  name="lastName" 
+                  value={profileForm.lastName} 
+                  onChange={handleProfileInputChange} 
+                  required 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input 
+                  id="email" 
+                  name="email" 
+                  type="email" 
+                  value={profileForm.email} 
+                  onChange={handleProfileInputChange} 
+                  required 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone Number</Label>
+                <Input 
+                  id="phone" 
+                  name="phone" 
+                  type="tel" 
+                  value={profileForm.phone} 
+                  onChange={handleProfileInputChange} 
+                  required 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="businessName">Business Name</Label>
+                <Input 
+                  id="businessName" 
+                  name="businessName" 
+                  value={profileForm.businessName} 
+                  onChange={handleProfileInputChange} 
+                  required 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="profession">Profession</Label>
+                <Select 
+                  name="profession" 
+                  value={profileForm.profession} 
+                  onValueChange={(value) => setProfileForm(prev => ({ ...prev, profession: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select profession" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="electrician">Electrician</SelectItem>
+                    <SelectItem value="plumber">Plumber</SelectItem>
+                    <SelectItem value="tutor">Tutor</SelectItem>
+                    <SelectItem value="trainer">Trainer</SelectItem>
+                    <SelectItem value="carpenter">Carpenter</SelectItem>
+                    <SelectItem value="painter">Painter</SelectItem>
+                    <SelectItem value="gardener">Gardener</SelectItem>
+                    <SelectItem value="cleaner">Cleaner</SelectItem>
+                    <SelectItem value="consultant">Consultant</SelectItem>
+                    <SelectItem value="other">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="locationType">Business Type</Label>
+                <Select 
+                  name="locationType" 
+                  value={profileForm.locationType}
+                  onValueChange={(value) => setProfileForm(prev => ({ ...prev, locationType: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select location type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="has_shop">I have a physical shop</SelectItem>
+                    <SelectItem value="goes_to_clients">I visit clients at their location</SelectItem>
+                    <SelectItem value="both">Both options</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="serviceArea">Service Area</Label>
+                <Input 
+                  id="serviceArea" 
+                  name="serviceArea" 
+                  value={profileForm.serviceArea} 
+                  onChange={handleProfileInputChange} 
+                  placeholder="e.g., Downtown & Surrounding Areas" 
+                />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="profileImage">Profile Image URL</Label>
+                <Input 
+                  id="profileImage" 
+                  name="profileImageUrl" 
+                  value={profileForm.profileImageUrl} 
+                  onChange={handleProfileInputChange} 
+                  placeholder="URL to your profile image" 
+                />
+              </div>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="voicemailMessage">Custom Voicemail Message</Label>
+              <Textarea 
+                id="voicemailMessage" 
+                name="voicemailMessage" 
+                value={profileForm.voicemailMessage} 
+                onChange={handleProfileInputChange} 
+                placeholder="Enter your personalized voicemail greeting for missed calls" 
+                className="min-h-[100px]"
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="smsFollowUpMessage">SMS Follow-Up Message</Label>
+              <Textarea 
+                id="smsFollowUpMessage" 
+                name="smsFollowUpMessage" 
+                value={profileForm.smsFollowUpMessage} 
+                onChange={handleProfileInputChange} 
+                placeholder="Create a short, polite SMS to send after a missed call, including the link to your booking page" 
+                className="min-h-[100px]"
+              />
+            </div>
+            
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setShowEditProfileDialog(false)}>Cancel</Button>
+              <Button type="submit">Save Changes</Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
       
       {/* Template create/edit dialog */}
       <Dialog 
@@ -739,7 +969,7 @@ export default function Profile() {
                 </div>
                 
                 <div className="md:ml-auto">
-                  <Button className="w-full md:w-auto">Edit Profile</Button>
+                  <Button className="w-full md:w-auto" onClick={handleEditProfileClick}>Edit Profile</Button>
                 </div>
               </div>
             </CardHeader>
@@ -749,6 +979,10 @@ export default function Profile() {
                   <div className="flex items-center gap-2">
                     <Mail className="h-5 w-5 text-muted-foreground" />
                     <span>{profile.email}</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <UserCircle className="h-5 w-5 text-muted-foreground" />
+                    <span>{profile.phone}</span>
                   </div>
                   {profile.businessName && (
                     <div className="flex items-center gap-2">
@@ -764,6 +998,12 @@ export default function Profile() {
                     <MapPin className="h-5 w-5 text-muted-foreground" />
                     <span>{profile.location}</span>
                   </div>
+                  {profile.serviceArea && (
+                    <div className="flex items-center gap-2">
+                      <BriefcaseBusiness className="h-5 w-5 text-muted-foreground" />
+                      <span>Service Area: {profile.serviceArea}</span>
+                    </div>
+                  )}
                   {user?.services && user.services.length > 0 && (
                     <div className="mt-4">
                       <h4 className="font-medium mb-2">Services</h4>
@@ -785,9 +1025,29 @@ export default function Profile() {
                   )}
                 </div>
                 
-                <div>
-                  <h3 className="text-lg font-medium mb-2">About</h3>
-                  <p className="text-muted-foreground">{profile.bio}</p>
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-medium mb-2">About</h3>
+                    <p className="text-muted-foreground">{profile.bio}</p>
+                  </div>
+                  
+                  {profile.voicemailMessage && (
+                    <div>
+                      <h3 className="text-lg font-medium mb-2">Voicemail Message</h3>
+                      <Card className="p-3 bg-gray-50">
+                        <p className="text-sm text-muted-foreground italic">"{profile.voicemailMessage}"</p>
+                      </Card>
+                    </div>
+                  )}
+                  
+                  {profile.smsFollowUpMessage && (
+                    <div>
+                      <h3 className="text-lg font-medium mb-2">SMS Follow-Up</h3>
+                      <Card className="p-3 bg-gray-50">
+                        <p className="text-sm text-muted-foreground italic">"{profile.smsFollowUpMessage}"</p>
+                      </Card>
+                    </div>
+                  )}
                 </div>
               </div>
               
