@@ -14,6 +14,7 @@ import Clients from "./pages/clients";
 // Import placeholder pages for the new routes
 import Settings from "@/pages/settings";
 import Messages from "@/pages/messages";
+import MessagesRedesign from "@/pages/messages-redesign";
 import Bookings from "@/pages/bookings";
 import Calendar from "@/pages/calendar";
 import CalendarNew from "@/pages/calendar-new";
@@ -48,7 +49,8 @@ function Router() {
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/clients" component={Clients} />
         <Route path="/bookings" component={Bookings} />
-        <Route path="/messages" component={Messages} />
+        <Route path="/messages-original" component={Messages} />
+        <Route path="/messages" component={MessagesRedesign} />
         <Route path="/calendar-original" component={Calendar} />
         <Route path="/calendar" component={CalendarNew} />
         <Route path="/profile-original" component={Profile} />
