@@ -16,6 +16,7 @@ import Settings from "@/pages/settings";
 import Messages from "@/pages/messages";
 import Bookings from "@/pages/bookings";
 import Calendar from "@/pages/calendar";
+import CalendarRedesign from "@/pages/calendar-redesign";
 import Profile from "@/pages/profile";
 import ProfileRedesign from "@/pages/profile-redesign";
 import AIAssistant from "@/pages/ai-assistant";
@@ -48,7 +49,8 @@ function Router() {
         <Route path="/clients" component={Clients} />
         <Route path="/bookings" component={Bookings} />
         <Route path="/messages" component={Messages} />
-        <Route path="/calendar" component={Calendar} />
+        <Route path="/calendar-original" component={Calendar} />
+        <Route path="/calendar" component={CalendarRedesign} />
         <Route path="/profile-original" component={Profile} />
         <Route path="/profile" component={ProfileRedesign} />
         <Route path="/ai-assistant" component={AIAssistant} />
