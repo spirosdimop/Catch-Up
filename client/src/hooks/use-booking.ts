@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 
 export interface BookingData {
@@ -32,11 +31,15 @@ export function useBooking() {
   // Query for available time slots
   const availableSlotsQuery = useQuery({
     queryKey: ['availableSlots', selectedDate?.toISOString(), selectedTimeSlot],
-    queryFn: async () => {
+    queryFn: async ({ queryKey }) => {
       if (!selectedDate) return [];
       const dateString = selectedDate.toISOString().split('T')[0];
-      const response = await apiRequest(`/api/bookings/available-slots?date=${dateString}&providerId=1`);
-      return response as TimeSlot[];
+      // Use the default query function that's already configured
+      return await fetch(`/api/bookings/available-slots?date=${dateString}&providerId=1`)
+        .then(res => {
+          if (!res.ok) throw new Error('Failed to fetch time slots');
+          return res.json() as Promise<TimeSlot[]>;
+        });
     },
     enabled: !!selectedDate // Only run query if a date is selected
   });
@@ -44,20 +47,23 @@ export function useBooking() {
   // Mutation for creating a booking
   const createBookingMutation = useMutation({
     mutationFn: async (bookingData: BookingData) => {
-      const response = await apiRequest('/api/bookings', {
+      const response = await fetch('/api/bookings', {
         method: 'POST',
-        body: JSON.stringify(bookingData),
-        headers: {
-          'Content-Type': 'application/json'
-        }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
       });
-      return response;
+      
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: response.statusText }));
+        throw new Error(errorData.error || 'Failed to create booking');
+      }
+      
+      return response.json();
     },
     onSuccess: () => {
       toast({
         title: "Booking Successful",
-        description: "Your appointment has been scheduled. You will receive a confirmation shortly.",
-        variant: "success"
+        description: "Your appointment has been scheduled. You will receive a confirmation shortly."
       });
       queryClient.invalidateQueries({ queryKey: ['availableSlots'] });
     },

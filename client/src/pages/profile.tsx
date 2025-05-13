@@ -23,11 +23,14 @@ import {
   Clock, 
   CheckCircle2,
   Phone,
-  CalendarDays
+  CalendarDays,
+  Loader2
 } from "lucide-react";
-import { format, addDays } from "date-fns";
+import { format, addDays, parseISO } from "date-fns";
 import { useUser } from "@/lib/userContext";
 import { EventTemplate, EventType, ServiceLocationType } from "@shared/schema";
+import { useBooking, TimeSlot } from "@/hooks/use-booking";
+import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Profile() {
@@ -41,11 +44,15 @@ export default function Profile() {
     time: "",
     notes: "",
   });
-  const [availableTimes, setAvailableTimes] = useState([
-    "9:00 AM", "10:00 AM", "11:00 AM", 
-    "1:00 PM", "2:00 PM", "3:00 PM", "4:00 PM",
-    "5:00 PM", "6:00 PM", "7:00 PM"
-  ]);
+  
+  const { 
+    selectedDate, 
+    setSelectedDate, 
+    availableSlots,
+    isLoadingSlots,
+    createBooking,
+    isPendingBooking
+  } = useBooking();
   
   // If no user exists, create a test user for development purposes
   useEffect(() => {
