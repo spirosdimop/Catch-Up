@@ -108,7 +108,8 @@ export default function Profile() {
     profession: "",
     locationType: "",
     serviceArea: "",
-    profileImageUrl: ""
+    profileImageUrl: "",
+    services: [] as { name: string; duration: number; price: number; }[]
   });
   
   // Edit profile handlers
@@ -123,7 +124,8 @@ export default function Profile() {
         profession: user.profession,
         locationType: user.locationType,
         serviceArea: user.serviceArea || "",
-        profileImageUrl: user.profileImageUrl || ""
+        profileImageUrl: user.profileImageUrl || "",
+        services: user.services || []
       });
       setShowEditProfileDialog(true);
     }
@@ -371,6 +373,114 @@ export default function Profile() {
                   </p>
                 </div>
               </div>
+            </div>
+            
+            {/* Services Section */}
+            <div className="space-y-4 border-t pt-4 mt-4">
+              <div className="flex justify-between items-center">
+                <h3 className="text-lg font-medium">Services</h3>
+                <Button 
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setProfileForm(prev => ({
+                      ...prev,
+                      services: [
+                        ...prev.services,
+                        { name: "", duration: 30, price: 0 }
+                      ]
+                    }));
+                  }}
+                >
+                  Add Service
+                </Button>
+              </div>
+              
+              {profileForm.services.length === 0 ? (
+                <div className="text-center p-6 bg-gray-50 rounded-md">
+                  <p className="text-muted-foreground">No services added yet. Click "Add Service" to get started.</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {profileForm.services.map((service, index) => (
+                    <div key={index} className="border rounded-md p-4 relative bg-gray-50">
+                      <button
+                        type="button"
+                        className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                        onClick={() => {
+                          setProfileForm(prev => ({
+                            ...prev,
+                            services: prev.services.filter((_, i) => i !== index)
+                          }));
+                        }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 6h18"></path>
+                          <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
+                        </svg>
+                      </button>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor={`service-name-${index}`}>Service Name</Label>
+                          <Input
+                            id={`service-name-${index}`}
+                            value={service.name}
+                            onChange={(e) => {
+                              const updatedServices = [...profileForm.services];
+                              updatedServices[index].name = e.target.value;
+                              setProfileForm(prev => ({
+                                ...prev,
+                                services: updatedServices
+                              }));
+                            }}
+                            placeholder="e.g., Consultation"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`service-duration-${index}`}>Duration (minutes)</Label>
+                          <Input
+                            id={`service-duration-${index}`}
+                            type="number"
+                            value={service.duration}
+                            onChange={(e) => {
+                              const updatedServices = [...profileForm.services];
+                              updatedServices[index].duration = parseInt(e.target.value) || 0;
+                              setProfileForm(prev => ({
+                                ...prev,
+                                services: updatedServices
+                              }));
+                            }}
+                            min="5"
+                            step="5"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`service-price-${index}`}>Price ($)</Label>
+                          <Input
+                            id={`service-price-${index}`}
+                            type="number"
+                            value={service.price}
+                            onChange={(e) => {
+                              const updatedServices = [...profileForm.services];
+                              updatedServices[index].price = parseInt(e.target.value) || 0;
+                              setProfileForm(prev => ({
+                                ...prev,
+                                services: updatedServices
+                              }));
+                            }}
+                            min="0"
+                            step="5"
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
             
             <DialogFooter>
