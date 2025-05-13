@@ -235,6 +235,68 @@ export interface CommandRoutingResult {
 }
 
 /**
+ * Simple keyword-based routing when OpenAI API is unavailable
+ * @param message User message
+ * @returns Basic routing result based on keywords
+ */
+function fallbackKeywordRouter(message: string): CommandRoutingResult {
+  const lowerMessage = message.toLowerCase();
+  
+  // Initialize the result
+  const result: CommandRoutingResult = {};
+  
+  // Check for settings-related keywords
+  if (
+    lowerMessage.includes('settings') ||
+    lowerMessage.includes('preference') ||
+    lowerMessage.includes('mode') ||
+    lowerMessage.includes('theme') ||
+    lowerMessage.includes('notification') ||
+    lowerMessage.includes('status') ||
+    lowerMessage.includes('availability') ||
+    lowerMessage.includes('profile')
+  ) {
+    result.settings_prompt = message;
+  }
+  
+  // Check for calendar-related keywords
+  if (
+    lowerMessage.includes('schedule') ||
+    lowerMessage.includes('meeting') ||
+    lowerMessage.includes('appointment') ||
+    lowerMessage.includes('event') ||
+    lowerMessage.includes('calendar') ||
+    lowerMessage.includes('book') ||
+    lowerMessage.includes('reschedule') ||
+    lowerMessage.includes('cancel')
+  ) {
+    result.calendar_prompt = message;
+  }
+  
+  // Check for auto-response related keywords
+  if (
+    lowerMessage.includes('message') ||
+    lowerMessage.includes('reply') ||
+    lowerMessage.includes('respond') ||
+    lowerMessage.includes('auto') ||
+    lowerMessage.includes('away') ||
+    lowerMessage.includes('busy') ||
+    lowerMessage.includes('unavailable') ||
+    lowerMessage.includes('out of office')
+  ) {
+    result.message_prompt = message;
+  }
+  
+  // If no keywords matched, ask for clarification
+  if (!result.settings_prompt && !result.calendar_prompt && !result.message_prompt) {
+    result.clarification_prompt = "I'm not sure what you'd like to do. Could you please specify if you want to change settings, schedule an event, or create an auto-response message?";
+    result.missing_fields = ["request_type"];
+  }
+  
+  return result;
+}
+
+/**
  * Routes a user input message to the appropriate specialized API
  * @param message The user's natural language input message
  * @returns An object containing prompts for each API or clarification requests
@@ -243,6 +305,12 @@ export async function routeInputToApis(message: string): Promise<CommandRoutingR
   try {
     // Get OpenAI client specifically for routing (using the general client)
     const routingClient = getOpenAIClient('general');
+    
+    // If no API key is available, use the fallback router
+    if (!process.env.OPENAI_API_KEY) {
+      console.warn('No OpenAI API key available, using fallback keyword router');
+      return fallbackKeywordRouter(message);
+    }
     
     // Create system prompt for the command router
     const systemPrompt = `
@@ -294,9 +362,8 @@ export async function routeInputToApis(message: string): Promise<CommandRoutingR
 
   } catch (error) {
     console.error('Error routing input to APIs:', error);
-    // Return a fallback response asking for clarification
-    return {
-      clarification_prompt: "I'm having trouble understanding your request. Could you please be more specific about what you'd like to do?"
-    };
+    // Return a fallback response using the keyword router
+    console.log('Using fallback keyword router due to OpenAI API error');
+    return fallbackKeywordRouter(message);
   }
 }

@@ -1064,7 +1064,17 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       }
       
       // First, route the message to determine which APIs to call
-      const routingResult = await routeInputToApis(message);
+      let routingResult;
+      try {
+        routingResult = await routeInputToApis(message);
+      } catch (routingError) {
+        console.error('Error during API routing:', routingError);
+        // Return a friendly error message if the routing fails (likely due to API key issues)
+        return res.json({
+          status: "needs_clarification",
+          ask_user: "I'm sorry, but I'm having trouble understanding your request right now. Could you try again later or contact support if the issue persists?"
+        });
+      }
       
       // If clarification is needed, return that to the client
       if (routingResult.clarification_prompt) {
@@ -1082,69 +1092,87 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       
       // Process settings request if present
       if (routingResult.settings_prompt) {
-        const settingsClient = getOpenAIClient('settings');
-        
-        const settingsResponse = await settingsClient.chat.completions.create({
-          model: 'gpt-4o',
-          messages: [
-            { 
-              role: 'system', 
-              content: `You are an assistant that controls app settings. Convert the user's message into a JSON object 
-                        containing only the settings they want to change.`
-            },
-            { role: 'user', content: routingResult.settings_prompt }
-          ],
-          temperature: 0.1,
-          max_tokens: 300,
-          response_format: { type: "json_object" }
-        });
-        
-        const settingsContent = settingsResponse.choices[0]?.message?.content;
-        if (settingsContent) {
-          results.settings = JSON.parse(settingsContent);
+        try {
+          const settingsClient = getOpenAIClient('settings');
+          
+          const settingsResponse = await settingsClient.chat.completions.create({
+            model: 'gpt-4o',
+            messages: [
+              { 
+                role: 'system', 
+                content: `You are an assistant that controls app settings. Convert the user's message into a JSON object 
+                          containing only the settings they want to change.`
+              },
+              { role: 'user', content: routingResult.settings_prompt }
+            ],
+            temperature: 0.1,
+            max_tokens: 300,
+            response_format: { type: "json_object" }
+          });
+          
+          const settingsContent = settingsResponse.choices[0]?.message?.content;
+          if (settingsContent) {
+            results.settings = JSON.parse(settingsContent);
+          }
+        } catch (settingsError) {
+          console.error('Error processing settings:', settingsError);
+          // Add error information to the results
+          results.settings_error = "Unable to process settings request";
         }
       }
       
       // Process calendar request if present
       if (routingResult.calendar_prompt) {
-        // Get user's existing schedule
-        const userId = "user-1"; // Default user ID
-        const schedule = await storage.getEvents(userId);
-        
-        // Process the scheduling request
-        const calendarResponse = await processSchedulingRequest(schedule, routingResult.calendar_prompt);
-        
-        // If action is create, actually create the event
-        if (calendarResponse.action === 'create' && 
-            calendarResponse.event_title && 
-            calendarResponse.start_time && 
-            calendarResponse.end_time) {
-          try {
-            // Create the event in the database
-            const newEvent = await storage.createEvent({
-              userId,
-              title: calendarResponse.event_title,
-              description: calendarResponse.notes,
-              startTime: new Date(calendarResponse.start_time),
-              endTime: new Date(calendarResponse.end_time),
-              isConfirmed: calendarResponse.status === 'confirmed',
-              eventType: 'client_meeting', // Default event type
-            });
-            
-            // Add the created event ID to the response
-            calendarResponse.event_id = newEvent.id;
-          } catch (createError) {
-            console.error("Error creating event:", createError);
+        try {
+          // Get user's existing schedule
+          const userId = "user-1"; // Default user ID
+          const schedule = await storage.getEvents(userId);
+          
+          // Process the scheduling request
+          const calendarResponse = await processSchedulingRequest(schedule, routingResult.calendar_prompt);
+          
+          // If action is create, actually create the event
+          if (calendarResponse.action === 'create' && 
+              calendarResponse.event_title && 
+              calendarResponse.start_time && 
+              calendarResponse.end_time) {
+            try {
+              // Create the event in the database
+              const newEvent = await storage.createEvent({
+                userId,
+                title: calendarResponse.event_title,
+                description: calendarResponse.notes,
+                startTime: new Date(calendarResponse.start_time),
+                endTime: new Date(calendarResponse.end_time),
+                isConfirmed: calendarResponse.status === 'confirmed',
+                eventType: 'client_meeting', // Default event type
+              });
+              
+              // Add the created event ID to the response
+              calendarResponse.event_id = newEvent.id;
+            } catch (createError) {
+              console.error("Error creating event:", createError);
+            }
           }
+          
+          results.calendar = calendarResponse;
+        } catch (calendarError) {
+          console.error('Error processing calendar request:', calendarError);
+          // Add error information to the results
+          results.calendar_error = "Unable to process calendar request";
         }
-        
-        results.calendar = calendarResponse;
       }
       
       // Process message request if present
       if (routingResult.message_prompt) {
-        const messageResponse = await generateAutoResponse(routingResult.message_prompt);
-        results.message = messageResponse;
+        try {
+          const messageResponse = await generateAutoResponse(routingResult.message_prompt);
+          results.message = messageResponse;
+        } catch (messageError) {
+          console.error('Error generating auto-response:', messageError);
+          // Add error information to the results
+          results.message_error = "Unable to generate auto-response message";
+        }
       }
       
       res.json(results);
