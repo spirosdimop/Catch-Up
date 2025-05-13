@@ -39,6 +39,7 @@ interface CommandResult {
   calendar_error?: string;
   message?: string;
   message_error?: string;
+  conversation_context?: string; // For maintaining conversation continuity between sessions
 }
 
 export default function UnifiedAssistant() {
@@ -86,6 +87,13 @@ export default function UnifiedAssistant() {
   const [inClarificationMode, setInClarificationMode] = useState(false);
   const [originalMessage, setOriginalMessage] = useState("");
   
+  // Store conversation context between sessions
+  const [conversationContext, setConversationContext] = useState<string>(() => {
+    // Try to load saved conversation context from localStorage
+    const savedContext = localStorage.getItem('unifiedAssistantContext');
+    return savedContext || ""; // Return empty string if no context saved
+  });
+  
   // Save messages to localStorage whenever they change
   useEffect(() => {
     // We need to convert Date objects to strings for JSON serialization
@@ -96,6 +104,13 @@ export default function UnifiedAssistant() {
     
     localStorage.setItem('unifiedAssistantMessages', JSON.stringify(messagesToSave));
   }, [messages]);
+  
+  // Save conversation context to localStorage whenever it changes
+  useEffect(() => {
+    if (conversationContext) {
+      localStorage.setItem('unifiedAssistantContext', conversationContext);
+    }
+  }, [conversationContext]);
   
   // Handle command submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -127,7 +142,8 @@ export default function UnifiedAssistant() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: messageToSend
+          message: messageToSend,
+          conversationContext: conversationContext // Send the context for better continuity
         }),
       });
       
@@ -270,6 +286,11 @@ export default function UnifiedAssistant() {
       // Exit clarification mode
       setInClarificationMode(false);
       setOriginalMessage("");
+      
+      // Update the conversation context if returned from server
+      if (result.conversation_context) {
+        setConversationContext(result.conversation_context);
+      }
       
     } catch (error) {
       console.error('Error processing command:', error);
