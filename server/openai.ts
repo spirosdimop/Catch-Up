@@ -1,14 +1,42 @@
 import { OpenAI } from 'openai';
 
-// Ensure API key is set
-if (!process.env.OPENAI_API_KEY) {
-  console.warn('OPENAI_API_KEY environment variable is not set. AI features will not work properly.');
+// Supported assistant types
+export type AssistantType = 'general' | 'scheduling' | 'settings';
+
+// Define environment variable keys for different assistants
+const API_KEY_MAP: Record<AssistantType, string> = {
+  'general': 'OPENAI_API_KEY',           // General assistant uses the main OpenAI API key
+  'scheduling': 'OPENAI_SCHEDULING_KEY', // Scheduling assistant can use a separate key
+  'settings': 'OPENAI_SETTINGS_KEY'      // Settings assistant can use a separate key
+};
+
+// Function to get the appropriate API key for an assistant type
+export function getApiKey(assistantType: AssistantType): string | undefined {
+  const envKey = API_KEY_MAP[assistantType];
+  const apiKey = process.env[envKey];
+  
+  // Log missing keys (only in development)
+  if (!apiKey && process.env.NODE_ENV !== 'production') {
+    console.warn(`${envKey} environment variable is not set. Using default OPENAI_API_KEY as fallback.`);
+  }
+  
+  // Fallback to the main API key if a specific one isn't available
+  return apiKey || process.env.OPENAI_API_KEY;
 }
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Initialize OpenAI client factory function
+export function getOpenAIClient(assistantType: AssistantType = 'general'): OpenAI {
+  const apiKey = getApiKey(assistantType);
+  
+  // Warn if no API key is available
+  if (!apiKey) {
+    console.warn('No OpenAI API key available. AI features will not work properly.');
+  }
+  
+  return new OpenAI({
+    apiKey: apiKey,
+  });
+}
 
 // Type for AI scheduling responses
 export interface SchedulingResponse {
@@ -32,6 +60,9 @@ export async function processSchedulingRequest(
   request: string
 ): Promise<SchedulingResponse> {
   try {
+    // Get OpenAI client specifically for scheduling
+    const schedulingClient = getOpenAIClient('scheduling');
+    
     // Create system prompt for the scheduling assistant
     const systemPrompt = `
       You are an AI assistant managing a calendar for a busy professional. 
@@ -60,7 +91,7 @@ export async function processSchedulingRequest(
     const scheduleText = JSON.stringify(userSchedule, null, 2);
 
     // Make the API call to OpenAI
-    const response = await openai.chat.completions.create({
+    const response = await schedulingClient.chat.completions.create({
       model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [
         { role: 'system', content: systemPrompt },
@@ -107,6 +138,9 @@ export async function generateScheduleSummary(
   timeframe: string = 'upcoming'
 ): Promise<string> {
   try {
+    // Get OpenAI client specifically for scheduling
+    const schedulingClient = getOpenAIClient('scheduling');
+    
     // Create system prompt for summarization
     const systemPrompt = `
       You are an AI assistant helping a busy professional understand their schedule.
@@ -119,7 +153,7 @@ export async function generateScheduleSummary(
     const scheduleText = JSON.stringify(userSchedule, null, 2);
 
     // Make the API call to OpenAI
-    const response = await openai.chat.completions.create({
+    const response = await schedulingClient.chat.completions.create({
       model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
       messages: [
         { role: 'system', content: systemPrompt },

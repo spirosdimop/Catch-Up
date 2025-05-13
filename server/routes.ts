@@ -841,10 +841,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid request. 'message' must be a string." });
       }
       
-      // Initialize OpenAI client
-      const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-      });
+      // Get OpenAI client specifically for general chat
+      const generalChatClient = getOpenAIClient('general');
       
       // Prepare messages for OpenAI
       const messages = [
@@ -976,10 +974,8 @@ Remember: The most helpful thing you can do is direct users to the specialized t
         return res.status(400).json({ message: "Invalid request. 'message' must be a string." });
       }
       
-      // Initialize OpenAI client
-      const openai = new OpenAI({
-        apiKey: process.env.OPENAI_API_KEY,
-      });
+      // Get OpenAI client specifically for settings
+      const settingsClient = getOpenAIClient('settings');
       
       // System prompt for app settings extraction
       const systemPrompt = `
@@ -997,7 +993,7 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       `;
       
       // Make the API call to OpenAI
-      const response = await openai.chat.completions.create({
+      const response = await settingsClient.chat.completions.create({
         model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
         messages: [
           { role: 'system', content: systemPrompt },
