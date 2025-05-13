@@ -2,7 +2,13 @@ import { Router, type Express, type Request, type Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { OpenAI } from "openai";
-import { processSchedulingRequest, generateScheduleSummary, SchedulingResponse } from "./openai";
+import { 
+  processSchedulingRequest, 
+  generateScheduleSummary, 
+  SchedulingResponse,
+  getOpenAIClient,
+  AssistantType
+} from "./openai";
 import { 
   insertClientSchema, 
   insertProjectSchema, 
@@ -868,8 +874,8 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       // Add the current user message
       messages.push({ role: 'user', content: message });
       
-      // Make the API call to OpenAI
-      const response = await openai.chat.completions.create({
+      // Make the API call to OpenAI using the general client
+      const response = await generalChatClient.chat.completions.create({
         model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
         messages: messages as any, // Type casting to fix TypeScript error
         temperature: 0.7,
