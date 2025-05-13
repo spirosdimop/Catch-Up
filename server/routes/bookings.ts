@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "../db";
 import { events, EventType } from "@shared/schema";
 import { nanoid } from "nanoid";
+import { eq, and, gte, lt } from "drizzle-orm";
 
 // Schema for booking request validation
 const bookingSchema = z.object({
@@ -42,9 +43,13 @@ export const registerBookingRoutes = (app: any) => {
       
       // Get all events for the selected provider on the selected day
       const existingBookings = await db.select().from(events)
-        .where(el => el.userId.equals(providerId as string)
-          .and(el.startTime.gte(selectedDate))
-          .and(el.endTime.lt(nextDay)));
+        .where(
+          and(
+            eq(events.userId, providerId as string),
+            gte(events.startTime, selectedDate),
+            lt(events.endTime, nextDay)
+          )
+        );
       
       // Generate available time slots (9am to 5pm, 1-hour slots for simplicity)
       const availableSlots = [];
