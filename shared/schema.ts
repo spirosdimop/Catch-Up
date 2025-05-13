@@ -209,6 +209,13 @@ export const locationTypeEnum = pgEnum("location_type", [
   "both"
 ]);
 
+// Service location type enum
+export const serviceLocationTypeEnum = pgEnum("service_location_type", [
+  "office",
+  "client_location",
+  "online"
+]);
+
 export const professionEnum = pgEnum("profession", [
   "electrician",
   "plumber",
@@ -242,8 +249,10 @@ export const services = pgTable("services", {
   id: serial("id").primaryKey(),
   providerId: integer("provider_id").notNull().references(() => serviceProviders.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
+  description: text("description"),
   duration: integer("duration").notNull(), // in minutes
   price: doublePrecision("price").notNull(), // in EUR
+  locationType: serviceLocationTypeEnum("service_location_type").default("office").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -265,8 +274,10 @@ export const insertServiceProviderSchema = createInsertSchema(serviceProviders).
 export const insertServiceSchema = createInsertSchema(services).pick({
   providerId: true,
   name: true,
+  description: true,
   duration: true,
   price: true,
+  locationType: true,
 });
 
 export type ServiceProvider = typeof serviceProviders.$inferSelect;
@@ -280,6 +291,13 @@ export const LocationType = {
   HAS_SHOP: 'has_shop',
   GOES_TO_CLIENTS: 'goes_to_clients',
   BOTH: 'both'
+} as const;
+
+// Service location type constants
+export const ServiceLocationType = {
+  OFFICE: 'office',
+  CLIENT_LOCATION: 'client_location',
+  ONLINE: 'online'
 } as const;
 
 // Helper enums for frontend
