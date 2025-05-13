@@ -11,6 +11,7 @@ import NotFound from "@/pages/not-found";
 // Use lowercase imports for consistency 
 import Dashboard from "./pages/dashboard";
 import Clients from "./pages/clients";
+import ClientsRedesign from "@/pages/clients-redesign";
 // Import placeholder pages for the new routes
 import Settings from "@/pages/settings";
 import Messages from "@/pages/messages";
@@ -50,7 +51,8 @@ function Router() {
     <AppShell>
       <Switch>
         <Route path="/dashboard" component={Dashboard} />
-        <Route path="/clients" component={Clients} />
+        <Route path="/clients-original" component={Clients} />
+        <Route path="/clients" component={ClientsRedesign} />
         <Route path="/bookings-original" component={Bookings} />
         <Route path="/bookings-old" component={BookingsRedesign} />
         <Route path="/bookings" component={BookingsTab} />
