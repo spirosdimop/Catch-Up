@@ -28,11 +28,11 @@ interface CommandResult {
   settings?: Record<string, any>;
   settings_error?: string;
   calendar?: {
-    action: 'create' | 'reschedule' | 'cancel' | 'suggest_times';
+    action: 'create' | 'reschedule' | 'cancel' | 'delete' | 'suggest_times';
     event_title?: string;
     start_time?: string;
     end_time?: string;
-    status: 'confirmed' | 'pending' | 'conflict' | 'cancelled';
+    status: 'confirmed' | 'pending' | 'conflict' | 'cancelled' | 'deleted';
     notes: string;
     event_id?: number;
   };
@@ -263,7 +263,7 @@ export default function UnifiedAssistant() {
           setTimeout(() => {
             queryClient.invalidateQueries({ queryKey: ['/api/events'] });
           }, 500);
-        } else if ((calendar.action === 'cancel' || calendar.action === 'delete') as boolean) {
+        } else if (['cancel', 'delete'].includes(calendar.action)) {
           // Handle both cancel and delete actions the same way
           const status = calendar.status as 'deleted' | 'conflict' | 'cancelled' | 'confirmed' | 'pending';
           if (status === 'deleted') {
