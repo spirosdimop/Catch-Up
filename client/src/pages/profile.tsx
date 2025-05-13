@@ -111,9 +111,7 @@ export default function Profile() {
     profession: "",
     locationType: "",
     serviceArea: "",
-    profileImageUrl: "",
-    voicemailMessage: "",
-    smsFollowUpMessage: ""
+    profileImageUrl: ""
   });
   
   // Edit profile handlers
@@ -128,9 +126,7 @@ export default function Profile() {
         profession: user.profession,
         locationType: user.locationType,
         serviceArea: user.serviceArea || "",
-        profileImageUrl: user.profileImageUrl || "",
-        voicemailMessage: user.voicemailMessage || "",
-        smsFollowUpMessage: user.smsFollowUpMessage || ""
+        profileImageUrl: user.profileImageUrl || ""
       });
       setShowEditProfileDialog(true);
     }
@@ -323,30 +319,6 @@ export default function Profile() {
               </div>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="voicemailMessage">Custom Voicemail Message</Label>
-              <Textarea 
-                id="voicemailMessage" 
-                name="voicemailMessage" 
-                value={profileForm.voicemailMessage} 
-                onChange={handleProfileInputChange} 
-                placeholder="Enter your personalized voicemail greeting for missed calls" 
-                className="min-h-[100px]"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="smsFollowUpMessage">SMS Follow-Up Message</Label>
-              <Textarea 
-                id="smsFollowUpMessage" 
-                name="smsFollowUpMessage" 
-                value={profileForm.smsFollowUpMessage} 
-                onChange={handleProfileInputChange} 
-                placeholder="Create a short, polite SMS to send after a missed call, including the link to your booking page" 
-                className="min-h-[100px]"
-              />
-            </div>
-            
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => setShowEditProfileDialog(false)}>Cancel</Button>
               <Button type="submit">Save Changes</Button>
@@ -438,24 +410,6 @@ export default function Profile() {
                   <h3 className="text-lg font-medium mb-2">About</h3>
                   <p className="text-muted-foreground">{profile.bio}</p>
                 </div>
-                
-                {profile.voicemailMessage && (
-                  <div>
-                    <h3 className="text-lg font-medium mb-2">Voicemail Message</h3>
-                    <Card className="p-3 bg-gray-50">
-                      <p className="text-sm text-muted-foreground italic">"{profile.voicemailMessage}"</p>
-                    </Card>
-                  </div>
-                )}
-                
-                {profile.smsFollowUpMessage && (
-                  <div>
-                    <h3 className="text-lg font-medium mb-2">SMS Follow-Up</h3>
-                    <Card className="p-3 bg-gray-50">
-                      <p className="text-sm text-muted-foreground italic">"{profile.smsFollowUpMessage}"</p>
-                    </Card>
-                  </div>
-                )}
               </div>
             </div>
           </CardContent>
