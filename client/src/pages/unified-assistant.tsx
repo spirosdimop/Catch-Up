@@ -133,7 +133,41 @@ export default function UnifiedAssistant() {
       
       // Format the response based on what was processed
       if (result.settings) {
-        responseText += `\n\n✓ Settings updated: ${Object.keys(result.settings).join(', ')}`;
+        // Apply settings to localStorage
+        try {
+          const currentSettings = localStorage.getItem('appSettings') 
+            ? JSON.parse(localStorage.getItem('appSettings') || '{}')
+            : {};
+            
+          const newSettings = {
+            ...currentSettings,
+            ...result.settings
+          };
+          
+          localStorage.setItem('appSettings', JSON.stringify(newSettings));
+          console.log('Updated app settings in localStorage:', newSettings);
+          
+          // Show which settings were updated
+          responseText += `\n\n✓ Settings updated: ${Object.keys(result.settings).join(', ')}`;
+          
+          // Special message for language changes
+          if (result.settings.language) {
+            const languageNames: Record<string, string> = {
+              'en': 'English',
+              'es': 'Spanish',
+              'fr': 'French',
+              'de': 'German',
+              'zh': 'Chinese',
+              'ja': 'Japanese'
+            };
+            
+            const languageName = languageNames[result.settings.language] || result.settings.language;
+            responseText += `\n   Language changed to ${languageName}`;
+          }
+        } catch (error) {
+          console.error('Error updating settings in localStorage:', error);
+          responseText += `\n\n✓ Settings processed, but there was an error saving them locally: ${Object.keys(result.settings).join(', ')}`;
+        }
       } else if (result.settings_error) {
         responseText += `\n\n⚠️ ${result.settings_error}`;
       }

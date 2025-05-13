@@ -1148,7 +1148,22 @@ Remember: The most helpful thing you can do is direct users to the specialized t
                 { 
                   role: 'system', 
                   content: `You are an assistant that controls app settings. Convert the user's message into a JSON object 
-                            containing only the settings they want to change.`
+                            containing only the settings they want to change.
+                            
+                            For language settings, always use the ISO language code format:
+                            - 'en' for English
+                            - 'es' for Spanish
+                            - 'fr' for French
+                            - 'de' for German  
+                            - 'zh' for Chinese
+                            - 'ja' for Japanese
+                            
+                            Example output for language change:
+                            {
+                              "language": "es"
+                            }
+                            
+                            NEVER use full language names like "Spanish" - always use the code "es" instead.`
                 },
                 { role: 'user', content: routingResult.settings_prompt }
               ],
