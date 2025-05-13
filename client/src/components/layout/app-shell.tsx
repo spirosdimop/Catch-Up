@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Sidebar } from "@/components/ui/sidebar";
 import { MobileSidebar } from "@/components/ui/mobile-sidebar";
 import { Header } from "@/components/layout/header";
+import { UnifiedAssistantFloating } from "@/components/unified-assistant/floating-button";
 
 type AppShellProps = {
   children: React.ReactNode;
@@ -26,6 +27,9 @@ export function AppShell({ children }: AppShellProps) {
           {children}
         </main>
       </div>
+      
+      {/* Unified Assistant Floating Button - accessible from all app pages */}
+      <UnifiedAssistantFloating />
     </div>
   );
 }

@@ -26,7 +26,7 @@ function Router() {
   const [location] = useLocation();
   
   // Pages that don't use the main application shell
-  const noAppShellPages = ["/signup", "/"];
+  const noAppShellPages = ["/signup", "/", "/login"];
   
   // Check if current location should not use AppShell
   if (noAppShellPages.includes(location)) {
@@ -34,6 +34,7 @@ function Router() {
       <Switch>
         <Route path="/" component={LandingPage} />
         <Route path="/signup" component={Signup} />
+        <Route path="/login" component={Signup} /> {/* Reusing Signup component for login, update if you have a separate Login component */}
       </Switch>
     );
   }
