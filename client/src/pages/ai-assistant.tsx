@@ -9,6 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
+import { useAppSettings } from "@/lib/appSettingsContext";
 import { useQuery } from "@tanstack/react-query";
 
 // Message types
@@ -305,6 +306,9 @@ export default function AIAssistant() {
     }
   };
   
+  // Import the useAppSettings hook for accessing and updating app settings
+  const { updateSettings } = useAppSettings();
+  
   // Handle app settings submission
   const handleAppSettings = async () => {
     if (!settingsInput.trim()) {
@@ -337,10 +341,39 @@ export default function AIAssistant() {
       const result = await response.json();
       setSettingsResult(result);
       
+      // Actually apply the settings to the app
+      updateSettings(result);
+      
       toast({
-        title: "Settings Processed",
-        description: "Your app settings have been successfully updated.",
+        title: "Settings Updated",
+        description: "Your app settings have been successfully applied.",
       });
+      
+      // If language was changed, show a special message
+      if (result.language) {
+        const languageNames: Record<string, string> = {
+          'en': 'English',
+          'es': 'Spanish',
+          'fr': 'French',
+          'de': 'German',
+          'it': 'Italian',
+          'pt': 'Portuguese',
+          'ru': 'Russian',
+          'zh': 'Chinese',
+          'ja': 'Japanese',
+          'ko': 'Korean',
+          'ar': 'Arabic',
+          'hi': 'Hindi',
+          'el': 'Greek'
+        };
+        
+        const languageName = languageNames[result.language] || result.language;
+        
+        toast({
+          title: `Language Changed to ${languageName}`,
+          description: "Refresh the page to see all content in the new language",
+        });
+      }
     } catch (error) {
       console.error('Error processing app settings:', error);
       toast({
