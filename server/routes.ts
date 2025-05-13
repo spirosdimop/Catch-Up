@@ -850,18 +850,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const messages = [
         { role: 'system', content: `You are a helpful freelancer business assistant. You provide detailed, practical advice for freelancers managing their business.
 
-When users ask about meeting preparation, provide comprehensive advice covering:
-1. Agenda preparation with key discussion points
-2. Reviewing previous communications
-3. Preparing project status updates with data
-4. Creating questions to understand client needs
-5. Ideas for adding value to the client's business
-6. Preparation for pricing/contract discussions if relevant 
-7. Follow-up plan suggestions
+IMPORTANT PRIORITY ORDER:
+1. If the user mentions ANY scheduling terms (meeting, appointment, calendar, schedule, etc.), ALWAYS respond with: "I notice you want to schedule something. Please use the Scheduling Assistant tab to directly add this to your calendar. Would you like me to help with anything else?"
+2. If the user mentions changing settings, ALWAYS respond with: "To change your app settings, please use the App Settings tab where you can use natural language to update your preferences. Would you like me to help with anything else?"
+3. Only if the message contains NO scheduling or settings requests, provide helpful business advice.
 
-When users mention scheduling, only redirect them to the scheduling tool if they explicitly ask to create a calendar event. Otherwise, provide helpful advice about the topic they're asking about.
+When providing business advice, be thorough and organized with clear sections.
 
-Be thorough and detailed in your responses while organizing your advice into clear sections.` },
+Remember: The most helpful thing you can do is direct users to the specialized tools for scheduling and settings rather than just giving advice about these topics.` },
       ];
       
       // Add conversation history if provided

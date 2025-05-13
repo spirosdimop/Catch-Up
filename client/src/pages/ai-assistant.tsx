@@ -75,7 +75,73 @@ export default function AIAssistant() {
     
     if (!inputValue.trim()) return;
     
-    // Add user message
+    // Check if it looks like a scheduling request
+    const schedulingKeywords = ['schedule', 'meeting', 'calendar', 'appointment', 'book'];
+    const isSchedulingRequest = schedulingKeywords.some(keyword => 
+      inputValue.toLowerCase().includes(keyword)
+    );
+    
+    // Check if it looks like a settings request
+    const settingsKeywords = ['settings', 'preferences', 'language', 'status', 'availability'];
+    const isSettingsRequest = settingsKeywords.some(keyword => 
+      inputValue.toLowerCase().includes(keyword)
+    );
+    
+    // If it's a scheduling request, redirect to scheduling tab
+    if (isSchedulingRequest && activeTab === 'chat') {
+      // Add user message
+      const userMessage: Message = {
+        id: messages.length + 1,
+        text: inputValue,
+        sender: 'user',
+        timestamp: new Date()
+      };
+      
+      // Add AI redirect message
+      const redirectMessage: Message = {
+        id: messages.length + 2,
+        text: "I notice you want to schedule something. Let me switch you to the Scheduling Assistant tab to help with that.",
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, userMessage, redirectMessage]);
+      setInputValue("");
+      
+      // Switch to scheduling tab and set the input
+      setActiveTab('scheduling');
+      setSchedulingRequest(inputValue);
+      return;
+    }
+    
+    // If it's a settings request, redirect to settings tab
+    if (isSettingsRequest && activeTab === 'chat') {
+      // Add user message
+      const userMessage: Message = {
+        id: messages.length + 1,
+        text: inputValue,
+        sender: 'user',
+        timestamp: new Date()
+      };
+      
+      // Add AI redirect message
+      const redirectMessage: Message = {
+        id: messages.length + 2,
+        text: "I see you want to change your settings. Let me switch you to the App Settings tab to help with that.",
+        sender: 'ai',
+        timestamp: new Date()
+      };
+      
+      setMessages(prev => [...prev, userMessage, redirectMessage]);
+      setInputValue("");
+      
+      // Switch to settings tab and set the input
+      setActiveTab('settings');
+      setSettingsInput(inputValue);
+      return;
+    }
+    
+    // Add user message for regular chat
     const userMessage: Message = {
       id: messages.length + 1,
       text: inputValue,
