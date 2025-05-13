@@ -306,13 +306,18 @@ export default function Profile() {
               
               <div className="space-y-2">
                 <Label htmlFor="profileImage">Profile Image URL</Label>
-                <Input 
-                  id="profileImage" 
-                  name="profileImageUrl" 
-                  value={profileForm.profileImageUrl} 
-                  onChange={handleProfileInputChange} 
-                  placeholder="URL to your profile image" 
-                />
+                <div className="space-y-2">
+                  <Input 
+                    id="profileImage" 
+                    name="profileImageUrl" 
+                    value={profileForm.profileImageUrl} 
+                    onChange={handleProfileInputChange} 
+                    placeholder="https://example.com/your-image.jpg" 
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Enter a URL to your profile image. You can upload an image to a free image hosting service and paste the URL here.
+                  </p>
+                </div>
               </div>
             </div>
             
@@ -334,15 +339,22 @@ export default function Profile() {
         <Card>
           <CardHeader className="pb-4">
             <div className="flex flex-col md:flex-row md:items-center gap-6">
-              <Avatar className="h-24 w-24">
-                {profile.avatar ? (
-                  <AvatarImage src={profile.avatar} alt={profile.name} />
-                ) : (
-                  <AvatarFallback className="bg-primary text-primary-foreground text-lg font-medium">
-                    {profile.name.split(' ').map(n => n[0]).join('')}
-                  </AvatarFallback>
+              <div className="flex flex-col items-center">
+                <Avatar className="h-32 w-32 border-2 border-muted">
+                  {profile.avatar ? (
+                    <AvatarImage src={profile.avatar} alt={profile.name} />
+                  ) : (
+                    <AvatarFallback className="bg-muted text-muted-foreground text-2xl font-medium">
+                      {profile.name.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                {!profile.avatar && (
+                  <p className="text-xs text-muted-foreground mt-2 text-center">
+                    Click 'Edit Profile' to<br />add your photo
+                  </p>
                 )}
-              </Avatar>
+              </div>
               <div>
                 <CardTitle className="text-2xl">{profile.name}</CardTitle>
                 <CardDescription className="text-lg">{profile.title}</CardDescription>
