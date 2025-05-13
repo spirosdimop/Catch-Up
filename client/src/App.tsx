@@ -17,6 +17,7 @@ import Messages from "@/pages/messages";
 import Bookings from "@/pages/bookings";
 import Calendar from "@/pages/calendar";
 import Profile from "@/pages/profile";
+import ProfileRedesign from "@/pages/profile-redesign";
 import AIAssistant from "@/pages/ai-assistant";
 import UnifiedAssistant from "@/pages/unified-assistant";
 import Signup from "@/pages/signup";
@@ -49,6 +50,7 @@ function Router() {
         <Route path="/messages" component={Messages} />
         <Route path="/calendar" component={Calendar} />
         <Route path="/profile" component={Profile} />
+        <Route path="/profile-redesign" component={ProfileRedesign} />
         <Route path="/ai-assistant" component={AIAssistant} />
         <Route path="/unified-assistant" component={UnifiedAssistant} />
         <Route path="/settings" component={Settings} />
