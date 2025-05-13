@@ -273,8 +273,10 @@ export default function Profile() {
                     {selectedService === index && (
                       <div className="mt-4 pt-4 border-t">
                         <Button className="w-full" onClick={() => {
-                          const element = document.getElementById('appointment-tab') as HTMLElement;
-                          element?.click();
+                          const element = document.getElementById('appointment-tab');
+                          if (element) {
+                            (element as HTMLElement).click();
+                          }
                         }}>
                           Continue to Booking
                         </Button>
@@ -288,8 +290,10 @@ export default function Profile() {
             {selectedService !== null && (
               <div className="mt-8 flex justify-center">
                 <Button id="appointment-tab" size="lg" onClick={() => {
-                  const element = document.querySelector('[data-value="appointment"]') as HTMLElement;
-                  element?.click();
+                  const element = document.querySelector('[data-value="appointment"]');
+                  if (element) {
+                    (element as HTMLElement).click();
+                  }
                 }}>
                   Continue to Appointment
                 </Button>
@@ -421,14 +425,26 @@ export default function Profile() {
                             onValueChange={(value) => setBookingForm(prev => ({ ...prev, time: value }))}
                             required
                           >
-                            <SelectTrigger id="time">
-                              <SelectValue placeholder="Select a time slot" />
+                            <SelectTrigger id="time" disabled={isLoadingSlots || selectedService === null}>
+                              {isLoadingSlots ? (
+                                <div className="flex items-center">
+                                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                  <span>Loading times...</span>
+                                </div>
+                              ) : (
+                                <SelectValue placeholder={selectedService === null ? "Select a service first" : "Select a time slot"} />
+                              )}
                             </SelectTrigger>
                             <SelectContent>
                               {isLoadingSlots ? (
-                                <SelectItem value="loading">Loading available times...</SelectItem>
+                                <SelectItem value="loading">
+                                  <div className="flex items-center">
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                    <span>Loading available times...</span>
+                                  </div>
+                                </SelectItem>
                               ) : availableSlots.length === 0 ? (
-                                <SelectItem value="none">No available times</SelectItem>
+                                <SelectItem value="none">No available times for this date</SelectItem>
                               ) : (
                                 availableSlots.map((slot) => (
                                   <SelectItem key={slot.time} value={slot.formatted}>
