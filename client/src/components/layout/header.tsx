@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -25,12 +24,6 @@ type HeaderProps = {
 };
 
 export function Header({ onMenuToggle }: HeaderProps) {
-  // In a real app, you would fetch user data from an API
-  const user = {
-    name: "Alex Johnson",
-    email: "alex@example.com",
-    avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-  };
 
   // Get current language from app settings
   const { settings } = useAppSettings();
@@ -82,31 +75,32 @@ export function Header({ onMenuToggle }: HeaderProps) {
               {currentLanguageDisplay}
             </Badge>
             
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="h-5 w-5 text-gray-400" />
-              <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-amber-500"></span>
-            </Button>
-            
-            <div className="ml-3 relative">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="rounded-full">
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatarUrl} alt="User profile photo" />
-                      <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Profile</DropdownMenuItem>
-                  <DropdownMenuItem>Settings</DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuItem>Sign out</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="relative">
+                  <Bell className="h-5 w-5 text-gray-400" />
+                  <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-amber-500"></span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Notifications</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <div className="flex flex-col">
+                    <span className="font-medium">Meeting reminder</span>
+                    <span className="text-xs text-muted-foreground">Client meeting in 30 minutes</span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <div className="flex flex-col">
+                    <span className="font-medium">New message</span>
+                    <span className="text-xs text-muted-foreground">You have a new client inquiry</span>
+                  </div>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>View all notifications</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
