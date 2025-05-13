@@ -17,6 +17,7 @@ import Messages from "@/pages/messages";
 import MessagesRedesign from "@/pages/messages-redesign";
 import Bookings from "@/pages/bookings";
 import BookingsRedesign from "@/pages/bookings-redesign";
+import BookingManagement from "@/pages/booking-management";
 import Calendar from "@/pages/calendar";
 import CalendarNew from "@/pages/calendar-new";
 import Profile from "@/pages/profile";
@@ -51,6 +52,7 @@ function Router() {
         <Route path="/clients" component={Clients} />
         <Route path="/bookings-original" component={Bookings} />
         <Route path="/bookings" component={BookingsRedesign} />
+        <Route path="/booking-management" component={BookingManagement} />
         <Route path="/messages-original" component={Messages} />
         <Route path="/messages" component={MessagesRedesign} />
         <Route path="/calendar-original" component={Calendar} />
