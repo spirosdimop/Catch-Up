@@ -25,6 +25,7 @@ import {
   insertUserPreferencesSchema
 } from "@shared/schema";
 import { z } from "zod";
+import { registerBookingRoutes } from "./routes/bookings";
 
 // Helper functions for navigation tracking
 function getDisplayNameForPath(path: string): string {
@@ -1889,6 +1890,9 @@ Remember: The most helpful thing you can do is direct users to the specialized t
   });
 
   app.use("/api", apiRouter);
+  
+  // Register booking routes for client appointment scheduling
+  registerBookingRoutes(app);
   
   const httpServer = createServer(app);
   return httpServer;
