@@ -120,7 +120,7 @@ export class DatabaseStorage implements IStorage {
   
   async deleteProject(id: number): Promise<boolean> {
     const result = await db.delete(projects).where(eq(projects.id, id));
-    return result.rowCount > 0;
+    return result.rowCount ? result.rowCount > 0 : false;
   }
   
   // Task operations
@@ -155,7 +155,7 @@ export class DatabaseStorage implements IStorage {
   
   async deleteTask(id: number): Promise<boolean> {
     const result = await db.delete(tasks).where(eq(tasks.id, id));
-    return result.rowCount > 0;
+    return result.rowCount ? result.rowCount > 0 : false;
   }
   
   // TimeEntry operations
@@ -197,7 +197,7 @@ export class DatabaseStorage implements IStorage {
   
   async deleteTimeEntry(id: number): Promise<boolean> {
     const result = await db.delete(timeEntries).where(eq(timeEntries.id, id));
-    return result.rowCount > 0;
+    return result.rowCount ? result.rowCount > 0 : false;
   }
   
   // Invoice operations
@@ -232,7 +232,7 @@ export class DatabaseStorage implements IStorage {
   
   async deleteInvoice(id: number): Promise<boolean> {
     const result = await db.delete(invoices).where(eq(invoices.id, id));
-    return result.rowCount > 0;
+    return result.rowCount ? result.rowCount > 0 : false;
   }
   
   // InvoiceItem operations
@@ -262,7 +262,7 @@ export class DatabaseStorage implements IStorage {
   
   async deleteInvoiceItem(id: number): Promise<boolean> {
     const result = await db.delete(invoiceItems).where(eq(invoiceItems.id, id));
-    return result.rowCount > 0;
+    return result.rowCount ? result.rowCount > 0 : false;
   }
   
   // Event operations
@@ -293,7 +293,7 @@ export class DatabaseStorage implements IStorage {
   
   async deleteEvent(id: number): Promise<boolean> {
     const result = await db.delete(events).where(eq(events.id, id));
-    return result.rowCount > 0;
+    return result.rowCount ? result.rowCount > 0 : false;
   }
   
   // EventTemplate operations
@@ -337,7 +337,7 @@ export class DatabaseStorage implements IStorage {
   
   async deleteEventTemplate(id: number): Promise<boolean> {
     const result = await db.delete(eventTemplates).where(eq(eventTemplates.id, id));
-    return result.rowCount > 0;
+    return result.rowCount ? result.rowCount > 0 : false;
   }
   
   // ServiceProvider operations
@@ -372,7 +372,7 @@ export class DatabaseStorage implements IStorage {
   
   async deleteServiceProvider(id: number): Promise<boolean> {
     const result = await db.delete(serviceProviders).where(eq(serviceProviders.id, id));
-    return result.rowCount > 0;
+    return result.rowCount ? result.rowCount > 0 : false;
   }
   
   // Service operations
@@ -407,7 +407,7 @@ export class DatabaseStorage implements IStorage {
   
   async deleteService(id: number): Promise<boolean> {
     const result = await db.delete(services).where(eq(services.id, id));
-    return result.rowCount > 0;
+    return result.rowCount ? result.rowCount > 0 : false;
   }
   
   // AI Command operations
