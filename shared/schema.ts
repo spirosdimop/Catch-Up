@@ -458,3 +458,63 @@ export type InsertAiCommand = z.infer<typeof insertAiCommandSchema>;
 
 export type AiCommandEffect = typeof aiCommandEffects.$inferSelect;
 export type InsertAiCommandEffect = z.infer<typeof insertAiCommandEffectSchema>;
+
+// User Navigation Tracking
+export const navigationEvents = pgTable("navigation_events", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(), // Using string for userId to support Replit Auth
+  path: text("path").notNull(), // Current path user navigated to
+  fromPath: text("from_path"), // Previous path user was on
+  timestamp: timestamp("timestamp").defaultNow().notNull(),
+  sessionId: text("session_id").notNull(), // Unique identifier for the user's session
+  timeOnPage: integer("time_on_page").default(0), // Time spent on page in seconds
+  clickedElements: text("clicked_elements"), // JSON stringified array of element IDs clicked
+});
+
+// User Preferences
+export const userPreferences = pgTable("user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().unique(), // Using string for userId to support Replit Auth
+  language: text("language").default("en").notNull(), // ISO language code
+  theme: text("theme").default("light").notNull(), // light, dark, system
+  notificationsEnabled: boolean("notifications_enabled").default(true).notNull(),
+  emailNotifications: boolean("email_notifications").default(true).notNull(),
+  calendarIntegration: boolean("calendar_integration").default(false).notNull(),
+  defaultView: text("default_view").default("week").notNull(), // week, day, month
+  weekStartsOn: integer("week_starts_on").default(0).notNull(), // 0 = Sunday, 6 = Saturday
+  hourFormat: integer("hour_format").default(12).notNull(), // 12 or 24
+  timezone: text("timezone").default("UTC").notNull(),
+  automaticTimeTracking: boolean("automatic_time_tracking").default(false).notNull(),
+  lastUpdated: timestamp("last_updated").defaultNow().notNull(),
+});
+
+// Export schemas for navigation and preferences
+export const insertNavigationEventSchema = createInsertSchema(navigationEvents).pick({
+  userId: true,
+  path: true,
+  fromPath: true,
+  timestamp: true,
+  sessionId: true,
+  timeOnPage: true,
+  clickedElements: true,
+});
+
+export const insertUserPreferencesSchema = createInsertSchema(userPreferences).pick({
+  userId: true,
+  language: true,
+  theme: true,
+  notificationsEnabled: true,
+  emailNotifications: true,
+  calendarIntegration: true,
+  defaultView: true,
+  weekStartsOn: true,
+  hourFormat: true,
+  timezone: true,
+  automaticTimeTracking: true,
+});
+
+export type NavigationEvent = typeof navigationEvents.$inferSelect;
+export type InsertNavigationEvent = z.infer<typeof insertNavigationEventSchema>;
+
+export type UserPreferences = typeof userPreferences.$inferSelect;
+export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
