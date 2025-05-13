@@ -26,6 +26,93 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 
+// Helper functions for navigation tracking
+function getDisplayNameForPath(path: string): string {
+  // Convert path to a user-friendly display name
+  const pathMap: Record<string, string> = {
+    '/': 'Home',
+    '/dashboard': 'Dashboard',
+    '/clients': 'Clients',
+    '/projects': 'Projects',
+    '/tasks': 'Tasks',
+    '/invoices': 'Invoices',
+    '/calendar': 'Calendar',
+    '/settings': 'Settings',
+    '/profile': 'Profile',
+  };
+  
+  // Check if we have a direct mapping
+  if (pathMap[path]) {
+    return pathMap[path];
+  }
+  
+  // Handle dynamic paths
+  if (path.startsWith('/clients/')) {
+    return 'Client Details';
+  } else if (path.startsWith('/projects/')) {
+    return 'Project Details';
+  } else if (path.startsWith('/tasks/')) {
+    return 'Task Details';
+  } else if (path.startsWith('/invoices/')) {
+    return 'Invoice Details';
+  }
+  
+  // Default: capitalize and remove slashes
+  return path
+    .split('/')
+    .filter(Boolean)
+    .map(segment => segment.charAt(0).toUpperCase() + segment.slice(1))
+    .join(' ');
+}
+
+function getDisplayNameForElement(elementId: string): string {
+  // Convert element ID to a user-friendly display name
+  const elementMap: Record<string, string> = {
+    'nav-dashboard': 'Dashboard menu item',
+    'nav-clients': 'Clients menu item',
+    'nav-projects': 'Projects menu item',
+    'nav-tasks': 'Tasks menu item',
+    'nav-invoices': 'Invoices menu item',
+    'nav-calendar': 'Calendar menu item',
+    'nav-settings': 'Settings menu item',
+    'create-client-btn': 'Create Client button',
+    'create-project-btn': 'Create Project button',
+    'create-task-btn': 'Create Task button',
+    'create-invoice-btn': 'Create Invoice button',
+    'unified-assistant-btn': 'Assistant button',
+  };
+  
+  // Check if we have a direct mapping
+  if (elementMap[elementId]) {
+    return elementMap[elementId];
+  }
+  
+  // Handle dynamic IDs with common prefixes
+  if (elementId.startsWith('client-')) {
+    return 'Client item';
+  } else if (elementId.startsWith('project-')) {
+    return 'Project item';
+  } else if (elementId.startsWith('task-')) {
+    return 'Task item';
+  } else if (elementId.startsWith('invoice-')) {
+    return 'Invoice item';
+  } else if (elementId.endsWith('-edit-btn')) {
+    return 'Edit button';
+  } else if (elementId.endsWith('-delete-btn')) {
+    return 'Delete button';
+  } else if (elementId.endsWith('-save-btn')) {
+    return 'Save button';
+  } else if (elementId.endsWith('-cancel-btn')) {
+    return 'Cancel button';
+  }
+  
+  // Default: replace hyphens with spaces and capitalize
+  return elementId
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   const apiRouter = Router();
   
@@ -1545,6 +1632,257 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       console.error("Error processing command:", error);
       res.status(500).json({ 
         message: "Failed to process your command",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
+  // Navigation tracking endpoints
+  apiRouter.post("/navigation/track", async (req, res) => {
+    try {
+      const { userId, path, fromPath, sessionId, timeOnPage = null, clickedElements = [] } = req.body;
+      
+      if (!userId || !path || !sessionId) {
+        return res.status(400).json({ 
+          message: "Invalid request. 'userId', 'path', and 'sessionId' are required." 
+        });
+      }
+      
+      const navigationData = {
+        userId,
+        path,
+        fromPath,
+        sessionId,
+        timestamp: new Date(),
+        timeOnPage,
+        clickedElements: clickedElements.length > 0 ? JSON.stringify(clickedElements) : null
+      };
+      
+      const navigationEvent = await storage.createNavigationEvent(navigationData);
+      
+      res.status(201).json({ 
+        message: "Navigation event recorded successfully",
+        id: navigationEvent.id
+      });
+    } catch (error) {
+      console.error("Error recording navigation:", error);
+      res.status(500).json({ 
+        message: "Failed to record navigation",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
+  apiRouter.get("/navigation/patterns/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const navigations = await storage.getNavigationEventsByUser(userId);
+      
+      // Process navigation data to find patterns
+      const patterns: Array<{
+        fromPath: string;
+        toPath: string;
+        frequency: number;
+        avgTimeOnPage: number;
+      }> = [];
+      
+      const pathFrequency: Record<string, number> = {};
+      const fromToMap: Record<string, number> = {};
+      
+      // Count frequency of paths and transitions
+      for (const nav of navigations) {
+        // Count path frequency
+        pathFrequency[nav.path] = (pathFrequency[nav.path] || 0) + 1;
+        
+        // Count path transitions (from -> to)
+        if (nav.fromPath) {
+          const transition = `${nav.fromPath}|${nav.path}`;
+          fromToMap[transition] = (fromToMap[transition] || 0) + 1;
+        }
+      }
+      
+      // Convert to pattern objects
+      for (const transition in fromToMap) {
+        const [fromPath, toPath] = transition.split('|');
+        const frequency = fromToMap[transition];
+        
+        // Calculate average time on page if available
+        const relevantNavs = navigations.filter(nav => 
+          nav.fromPath === fromPath && nav.path === toPath && nav.timeOnPage !== null
+        );
+        
+        let avgTimeOnPage = 0;
+        if (relevantNavs.length > 0) {
+          const sum = relevantNavs.reduce((acc, nav) => acc + (nav.timeOnPage || 0), 0);
+          avgTimeOnPage = sum / relevantNavs.length;
+        }
+        
+        patterns.push({
+          fromPath,
+          toPath,
+          frequency,
+          avgTimeOnPage
+        });
+      }
+      
+      // Sort patterns by frequency (descending)
+      patterns.sort((a, b) => b.frequency - a.frequency);
+      
+      res.json({
+        patterns,
+        pathFrequency
+      });
+    } catch (error) {
+      console.error("Error fetching navigation patterns:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch navigation patterns",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
+  apiRouter.get("/navigation/recommendations/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      const { currentPath } = req.query;
+      
+      if (!userId || !currentPath) {
+        return res.status(400).json({ 
+          message: "User ID and current path are required" 
+        });
+      }
+      
+      // Get all navigation events from this path
+      const navigations = await storage.getNavigationEventsByPathAndUser(
+        currentPath as string, 
+        userId
+      );
+      
+      // Calculate next path recommendations
+      const nextPathCount: Record<string, number> = {};
+      const elementsClickedCount: Record<string, number> = {};
+      
+      for (const nav of navigations) {
+        // Only consider entries where this was the "from" path
+        if (nav.fromPath === currentPath) {
+          nextPathCount[nav.path] = (nextPathCount[nav.path] || 0) + 1;
+        }
+        
+        // Count clicked elements
+        if (nav.clickedElements) {
+          try {
+            const elements = JSON.parse(nav.clickedElements) as string[];
+            elements.forEach((element: string) => {
+              elementsClickedCount[element] = (elementsClickedCount[element] || 0) + 1;
+            });
+          } catch (e) {
+            console.error("Error parsing clicked elements:", e);
+          }
+        }
+      }
+      
+      // Convert to sorted arrays
+      const recommendedPaths = Object.entries(nextPathCount)
+        .map(([path, count]) => ({
+          path,
+          displayName: getDisplayNameForPath(path),
+          confidence: count / navigations.length
+        }))
+        .sort((a, b) => b.confidence - a.confidence);
+      
+      const frequentElements = Object.entries(elementsClickedCount)
+        .map(([element, count]) => ({
+          element,
+          displayName: getDisplayNameForElement(element),
+          frequency: count
+        }))
+        .sort((a, b) => b.frequency - a.frequency);
+      
+      res.json({
+        currentPath,
+        recommendedPaths: recommendedPaths.slice(0, 5),
+        frequentElements: frequentElements.slice(0, 5)
+      });
+    } catch (error) {
+      console.error("Error generating recommendations:", error);
+      res.status(500).json({ 
+        message: "Failed to generate recommendations",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
+  // User preferences endpoints
+  apiRouter.get("/user/preferences/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const preferences = await storage.getUserPreferences(userId);
+      
+      if (!preferences) {
+        return res.status(404).json({ message: "User preferences not found" });
+      }
+      
+      res.json(preferences);
+    } catch (error) {
+      console.error("Error fetching user preferences:", error);
+      res.status(500).json({ 
+        message: "Failed to fetch user preferences",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
+  apiRouter.post("/user/preferences", async (req, res) => {
+    try {
+      const preferencesData = insertUserPreferencesSchema.parse(req.body);
+      const preferences = await storage.createUserPreferences(preferencesData);
+      
+      res.status(201).json(preferences);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid preferences data", errors: error.errors });
+      }
+      console.error("Error creating user preferences:", error);
+      res.status(500).json({ 
+        message: "Failed to create user preferences",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+  
+  apiRouter.put("/user/preferences/:userId", async (req, res) => {
+    try {
+      const { userId } = req.params;
+      
+      if (!userId) {
+        return res.status(400).json({ message: "User ID is required" });
+      }
+      
+      const preferencesData = insertUserPreferencesSchema.partial().parse(req.body);
+      const preferences = await storage.updateUserPreferences(userId, preferencesData);
+      
+      if (!preferences) {
+        return res.status(404).json({ message: "User preferences not found" });
+      }
+      
+      res.json(preferences);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid preferences data", errors: error.errors });
+      }
+      console.error("Error updating user preferences:", error);
+      res.status(500).json({ 
+        message: "Failed to update user preferences",
         error: error instanceof Error ? error.message : String(error)
       });
     }
