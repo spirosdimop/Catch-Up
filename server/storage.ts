@@ -179,6 +179,8 @@ export class MemStorage implements IStorage {
     this.eventTemplateIdCounter = 1;
     this.serviceProviderIdCounter = 1;
     this.serviceIdCounter = 1;
+    this.aiCommandIdCounter = 1;
+    this.aiCommandEffectIdCounter = 1;
 
     // Add a demo user
     this.createUser({
@@ -781,6 +783,65 @@ export class MemStorage implements IStorage {
   async deleteService(id: number): Promise<boolean> {
     return this.services.delete(id);
   }
+
+  // AI Command operations
+  async getAiCommands(userId: string, limit?: number): Promise<AiCommand[]> {
+    const commands = Array.from(this.aiCommands.values())
+      .filter(command => command.userId === userId)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    
+    if (limit && limit > 0) {
+      return commands.slice(0, limit);
+    }
+    
+    return commands;
+  }
+  
+  async getAiCommand(id: number): Promise<AiCommand | undefined> {
+    return this.aiCommands.get(id);
+  }
+  
+  async createAiCommand(command: InsertAiCommand): Promise<AiCommand> {
+    const id = this.aiCommandIdCounter++;
+    const createdAt = new Date();
+    
+    const newCommand: AiCommand = {
+      id,
+      ...command,
+      createdAt
+    };
+    
+    this.aiCommands.set(id, newCommand);
+    return newCommand;
+  }
+  
+  async getAiCommandEffects(commandId: number): Promise<AiCommandEffect[]> {
+    return Array.from(this.aiCommandEffects.values())
+      .filter(effect => effect.commandId === commandId)
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
+  }
+  
+  async createAiCommandEffect(effect: InsertAiCommandEffect): Promise<AiCommandEffect> {
+    const id = this.aiCommandEffectIdCounter++;
+    const createdAt = new Date();
+    
+    const newEffect: AiCommandEffect = {
+      id,
+      ...effect,
+      createdAt
+    };
+    
+    this.aiCommandEffects.set(id, newEffect);
+    return newEffect;
+  }
 }
 
-export const storage = new MemStorage();
+// Import the DatabaseStorage
+import { DatabaseStorage } from "./DatabaseStorage";
+
+// Choose which storage implementation to use
+// When database is available, use DatabaseStorage
+// When not, fall back to MemStorage
+export const storage = process.env.DATABASE_URL 
+  ? new DatabaseStorage() 
+  : new MemStorage();
