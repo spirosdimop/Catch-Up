@@ -345,7 +345,7 @@ export default function UnifiedAssistant() {
     <div className="space-y-6 p-6">
       <div className="page-title">
         <PageTitle 
-          title="Unified Assistant" 
+          title="AI Assistant" 
           description="Ask for anything - settings, calendar events, or auto-responses - in one place" 
           icon={<Bot className="h-6 w-6 text-primary" />}
         />
@@ -354,7 +354,7 @@ export default function UnifiedAssistant() {
       <Card className="h-[calc(100vh-200px)] flex flex-col">
         <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
           <div>
-            <CardTitle>Unified Command Interface</CardTitle>
+            <CardTitle>AI Assistant</CardTitle>
             <CardDescription>
               Use natural language to control settings, create events, or generate responses
             </CardDescription>

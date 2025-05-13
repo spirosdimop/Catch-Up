@@ -26,7 +26,6 @@ import CalendarNew from "@/pages/calendar-new";
 import Profile from "@/pages/profile";
 import ProfileRedesign from "@/pages/profile-redesign";
 import AIAssistant from "@/pages/ai-assistant";
-import UnifiedAssistant from "@/pages/unified-assistant";
 import Signup from "@/pages/signup";
 import LandingPage from "@/pages/landing";
 
@@ -66,7 +65,6 @@ function Router() {
         <Route path="/profile-original" component={Profile} />
         <Route path="/profile" component={ProfileRedesign} />
         <Route path="/ai-assistant" component={AIAssistant} />
-        <Route path="/unified-assistant" component={UnifiedAssistant} />
         <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
       </Switch>

@@ -1,595 +1,343 @@
+import { useState, useEffect } from "react";
 import { PageTitle } from "@/components/ui/page-title";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Bot, Calendar, Send, User, Clock, AlertCircle, Settings, CheckCircle, ExternalLink } from "lucide-react";
+import { Bot, Send, User, Calendar, Settings, MessageSquare, ArrowRight, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useAppSettings } from "@/lib/appSettingsContext";
 
 // Message types
-type Message = {
+type MessageRole = 'user' | 'assistant' | 'system';
+
+interface Message {
   id: number;
   text: string;
-  sender: 'user' | 'ai';
+  role: MessageRole;
   timestamp: Date;
 }
 
-// Response types from OpenAI endpoints
-type SchedulingAction = 'create' | 'reschedule' | 'cancel' | 'suggest_times';
-type SchedulingStatus = 'confirmed' | 'pending' | 'conflict' | 'cancelled';
-
-interface SchedulingResponse {
-  action: SchedulingAction;
-  event_title?: string;
-  start_time?: string;
-  end_time?: string;
-  status: SchedulingStatus;
-  notes: string;
-  event_id?: number;
+interface CommandResult {
+  status: 'success' | 'needs_clarification';
+  ask_user?: string;
+  missing_fields?: string[];
+  settings?: Record<string, any>;
+  settings_error?: string;
+  calendar?: {
+    action: 'create' | 'reschedule' | 'cancel' | 'delete' | 'suggest_times';
+    event_title?: string;
+    start_time?: string;
+    end_time?: string;
+    status: 'confirmed' | 'pending' | 'conflict' | 'cancelled' | 'deleted';
+    notes: string;
+    event_id?: number;
+  };
+  calendar_error?: string;
+  message?: string;
+  message_error?: string;
+  conversation_context?: string; // For maintaining conversation continuity between sessions
 }
 
 export default function AIAssistant() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState("chat");
+  const { updateSettings, applyLanguage } = useAppSettings();
   
-  // General chat state
+  // Message state
   const [inputValue, setInputValue] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      text: "Hi there! I'm your AI assistant. How can I help you with your freelance business today?",
-      sender: 'ai',
-      timestamp: new Date()
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Load messages from localStorage or use default welcome message
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const savedMessages = localStorage.getItem('aiAssistantMessages');
+    if (savedMessages) {
+      try {
+        // Parse stored messages and convert timestamp strings back to Date objects
+        const parsedMessages = JSON.parse(savedMessages);
+        return parsedMessages.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+      } catch (error) {
+        console.error('Failed to parse saved messages:', error);
+        // Return default message if parsing fails
+        return [{
+          id: 1,
+          text: "Welcome to the AI assistant! I can help with settings, calendar events, and auto-response messages. How can I assist you today?",
+          role: 'assistant' as MessageRole,
+          timestamp: new Date()
+        }];
+      }
     }
-  ]);
-  
-  // Scheduling assistant state
-  const [schedulingRequest, setSchedulingRequest] = useState("");
-  const [isProcessingScheduling, setIsProcessingScheduling] = useState(false);
-  const [schedulingResponse, setSchedulingResponse] = useState<SchedulingResponse | null>(null);
-  
-  // Schedule summary state
-  const [timeframe, setTimeframe] = useState("upcoming week");
-  const [isFetchingSummary, setIsFetchingSummary] = useState(false);
-  const [scheduleSummary, setScheduleSummary] = useState("");
-  
-  // App settings state
-  const [settingsInput, setSettingsInput] = useState("");
-  const [isProcessingSettings, setIsProcessingSettings] = useState(false);
-  const [settingsResult, setSettingsResult] = useState<Record<string, any> | null>(null);
-  
-  // Auto-response state
-  const [autoResponseContext, setAutoResponseContext] = useState("missed call");
-  const [isGeneratingAutoResponse, setIsGeneratingAutoResponse] = useState(false);
-  const [autoResponseMessage, setAutoResponseMessage] = useState("");
-  
-  // Fetch user's calendar events for reference
-  const { data: events, isLoading: isLoadingEvents } = useQuery({
-    queryKey: ['/api/events'],
-    refetchOnWindowFocus: false,
+    
+    // Default welcome message for first-time users
+    return [{
+      id: 1,
+      text: "Welcome to the AI assistant! I can help with settings, calendar events, and auto-response messages. How can I assist you today?",
+      role: 'assistant' as MessageRole,
+      timestamp: new Date()
+    }];
   });
-
-  // Handle general chat submission
+  
+  // Conversation context
+  const [inClarificationMode, setInClarificationMode] = useState(false);
+  const [originalMessage, setOriginalMessage] = useState("");
+  
+  // Store conversation context between sessions
+  const [conversationContext, setConversationContext] = useState<string>(() => {
+    // Try to load saved conversation context from localStorage
+    const savedContext = localStorage.getItem('aiAssistantContext');
+    return savedContext || ""; // Return empty string if no context saved
+  });
+  
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    // We need to convert Date objects to strings for JSON serialization
+    const messagesToSave = messages.map(msg => ({
+      ...msg,
+      timestamp: msg.timestamp.toISOString() // Convert Date to ISO string
+    }));
+    
+    localStorage.setItem('aiAssistantMessages', JSON.stringify(messagesToSave));
+  }, [messages]);
+  
+  // Save conversation context to localStorage whenever it changes
+  useEffect(() => {
+    if (conversationContext) {
+      localStorage.setItem('aiAssistantContext', conversationContext);
+    }
+  }, [conversationContext]);
+  
+  // Handle command submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!inputValue.trim()) return;
     
-    // Check if it looks like a scheduling request
-    const schedulingKeywords = ['schedule', 'meeting', 'calendar', 'appointment', 'book'];
-    const isSchedulingRequest = schedulingKeywords.some(keyword => 
-      inputValue.toLowerCase().includes(keyword)
-    );
-    
-    // Check if it looks like a settings request
-    const settingsKeywords = ['settings', 'preferences', 'language', 'status', 'availability'];
-    const isSettingsRequest = settingsKeywords.some(keyword => 
-      inputValue.toLowerCase().includes(keyword)
-    );
-    
-    // If it's a scheduling request, redirect to scheduling tab
-    if (isSchedulingRequest && activeTab === 'chat') {
-      // Add user message
-      const userMessage: Message = {
-        id: messages.length + 1,
-        text: inputValue,
-        sender: 'user',
-        timestamp: new Date()
-      };
-      
-      // Add AI redirect message
-      const redirectMessage: Message = {
-        id: messages.length + 2,
-        text: "I notice you want to schedule something. Let me switch you to the Scheduling Assistant tab to help with that.",
-        sender: 'ai',
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, userMessage, redirectMessage]);
-      setInputValue("");
-      
-      // Switch to scheduling tab and set the input
-      setActiveTab('scheduling');
-      setSchedulingRequest(inputValue);
-      return;
-    }
-    
-    // If it's a settings request, redirect to settings tab
-    if (isSettingsRequest && activeTab === 'chat') {
-      // Add user message
-      const userMessage: Message = {
-        id: messages.length + 1,
-        text: inputValue,
-        sender: 'user',
-        timestamp: new Date()
-      };
-      
-      // Add AI redirect message
-      const redirectMessage: Message = {
-        id: messages.length + 2,
-        text: "I see you want to change your settings. Let me switch you to the App Settings tab to help with that.",
-        sender: 'ai',
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, userMessage, redirectMessage]);
-      setInputValue("");
-      
-      // Switch to settings tab and set the input
-      setActiveTab('settings');
-      setSettingsInput(inputValue);
-      return;
-    }
-    
-    // Add user message for regular chat
+    // Store the user's message
     const userMessage: Message = {
-      id: messages.length + 1,
+      id: Date.now(),
       text: inputValue,
-      sender: 'user',
+      role: 'user',
       timestamp: new Date()
     };
     
     setMessages(prev => [...prev, userMessage]);
+    
+    // If we're in clarification mode, store the follow-up response
+    const messageToSend = inputValue;
+    
+    // Clear input and show loading state
     setInputValue("");
-    
-    // Create a temporary message to show that the AI is typing
-    const tempId = Date.now();
-    const typingMessage: Message = {
-      id: tempId,
-      text: "Thinking...",
-      sender: 'ai',
-      timestamp: new Date()
-    };
-    
-    setMessages(prev => [...prev, typingMessage]);
+    setIsLoading(true);
     
     try {
-      // Call OpenAI API through our backend
-      const response = await fetch('/api/ai/chat', {
+      const response = await fetch('/api/command', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: userMessage.text,
-          history: messages.map(msg => ({
-            role: msg.sender === 'user' ? 'user' : 'assistant',
-            content: msg.text
-          }))
-        })
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: messageToSend,
+          conversationContext: conversationContext // Send the context for better continuity
+        }),
       });
       
       if (!response.ok) {
-        throw new Error('Failed to get AI response');
+        throw new Error('Failed to process command');
       }
       
-      const data = await response.json();
+      const result: CommandResult = await response.json();
       
-      // Remove the temporary typing message
-      setMessages(prev => prev.filter(msg => msg.id !== tempId));
+      // Handle clarification needed
+      if (result.status === 'needs_clarification') {
+        const clarificationMessage: Message = {
+          id: Date.now() + 1,
+          text: result.ask_user || "I need more information. Could you please provide more details?",
+          role: 'assistant',
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, clarificationMessage]);
+        setInClarificationMode(true);
+        
+        // Show what fields are missing
+        if (result.missing_fields && result.missing_fields.length > 0) {
+          const fieldsList = result.missing_fields.join(', ');
+          const missingFieldsMessage: Message = {
+            id: Date.now() + 2,
+            text: `Missing information: ${fieldsList}`,
+            role: 'system',
+            timestamp: new Date()
+          };
+          
+          setMessages(prev => [...prev, missingFieldsMessage]);
+        }
+        
+        // Capture conversation context even in clarification mode
+        if (result.conversation_context) {
+          setConversationContext(result.conversation_context);
+        }
+        
+        return;
+      }
       
-      // Add the real AI response
-      const aiMessage: Message = {
-        id: messages.length + 2,
-        text: data.message || "I'm sorry, I couldn't process that request.",
-        sender: 'ai',
+      // Handle successful command processing
+      let responseText = "I've processed your request:";
+      
+      // Format the response based on what was processed
+      if (result.settings) {
+        // Apply settings using the AppSettingsContext
+        try {
+          // Update settings through the context
+          updateSettings(result.settings);
+          
+          // Ensure language is immediately applied if language was changed
+          if (result.settings.language) {
+            // Apply language change to the document
+            applyLanguage();
+          }
+          
+          console.log('Updated app settings:', result.settings);
+          
+          // Show which settings were updated
+          responseText += `\n\n✓ Settings updated: ${Object.keys(result.settings).join(', ')}`;
+          
+          // Special message for language changes
+          if (result.settings.language) {
+            const languageNames: Record<string, string> = {
+              'en': 'English',
+              'es': 'Spanish',
+              'fr': 'French',
+              'de': 'German',
+              'zh': 'Chinese',
+              'ja': 'Japanese'
+            };
+            
+            const languageName = languageNames[result.settings.language] || result.settings.language;
+            responseText += `\n   Language changed to ${languageName}`;
+          }
+        } catch (error) {
+          console.error('Error updating settings:', error);
+          responseText += `\n\n✓ Settings processed, but there was an error applying them: ${Object.keys(result.settings).join(', ')}`;
+        }
+      } else if (result.settings_error) {
+        responseText += `\n\n⚠️ ${result.settings_error}`;
+      }
+      
+      if (result.calendar) {
+        const calendar = result.calendar;
+        
+        if (calendar.action === 'create') {
+          // Convert time to a human-readable format with 12-hour clock
+          const startTime = new Date(calendar.start_time!);
+          const formattedStartTime = startTime.toLocaleString('en-US', {
+            weekday: 'long', 
+            month: 'long', 
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+          
+          responseText += `\n\n✓ Event created: "${calendar.event_title}" on ${formattedStartTime}`;
+          
+          if (calendar.event_id) {
+            responseText += `\n   Event ID: ${calendar.event_id} (saved in calendar)`;
+            
+            // Add a direct button to view the calendar
+            setTimeout(() => {
+              // After the message is displayed, invalidate the events query to refresh data
+              queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+            }, 500);
+          } else {
+            responseText += `\n   ⚠️ Note: Event may not have been saved to calendar properly`;
+          }
+          
+        } else if (calendar.action === 'reschedule') {
+          responseText += `\n\n✓ Event rescheduled: "${calendar.event_title}"`;
+          setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+          }, 500);
+        } else if (['cancel', 'delete'].includes(calendar.action)) {
+          // Handle both cancel and delete actions the same way
+          const status = calendar.status as 'deleted' | 'conflict' | 'cancelled' | 'confirmed' | 'pending';
+          if (status === 'deleted') {
+            responseText += `\n\n✓ Event deleted: "${calendar.event_title || 'Specified event'}"`;
+            if (calendar.event_id) {
+              responseText += ` (ID: ${calendar.event_id})`;
+            }
+            setTimeout(() => {
+              queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+            }, 500);
+          } else if (status === 'conflict') {
+            responseText += `\n\n⚠️ Could not delete event: ${calendar.notes}`;
+          } else {
+            responseText += `\n\n✓ Event canceled: "${calendar.event_title}"`;
+            setTimeout(() => {
+              queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+            }, 500);
+          }
+        } else if (calendar.action === 'suggest_times') {
+          responseText += `\n\n✓ Schedule suggestions created`;
+        }
+        
+        // Add a button to view the calendar that will appear when rendered
+        responseText += `\n\n✓ [View in Calendar](/calendar)`;
+      } else if (result.calendar_error) {
+        responseText += `\n\n⚠️ ${result.calendar_error}`;
+      }
+      
+      if (result.message) {
+        responseText += `\n\n✓ Auto-response message created: "${result.message}"`;
+      } else if (result.message_error) {
+        responseText += `\n\n⚠️ ${result.message_error}`;
+      }
+      
+      // Add the complete response
+      const assistantMessage: Message = {
+        id: Date.now() + 1,
+        text: responseText,
+        role: 'assistant',
         timestamp: new Date()
       };
       
-      setMessages(prev => [...prev, aiMessage]);
-    } catch (error) {
-      console.error('Error getting AI response:', error);
+      setMessages(prev => [...prev, assistantMessage]);
       
-      // Remove the temporary typing message
-      setMessages(prev => prev.filter(msg => msg.id !== tempId));
+      // Exit clarification mode
+      setInClarificationMode(false);
+      setOriginalMessage("");
+      
+      // Update the conversation context if returned from server
+      if (result.conversation_context) {
+        setConversationContext(result.conversation_context);
+      }
+      
+    } catch (error) {
+      console.error('Error processing command:', error);
       
       // Add error message
       const errorMessage: Message = {
-        id: messages.length + 2,
-        text: "Sorry, I'm having trouble connecting. Please try again later.",
-        sender: 'ai',
+        id: Date.now() + 1,
+        text: "Sorry, I couldn't process your request. Please try again.",
+        role: 'system',
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, errorMessage]);
       
       toast({
-        title: "Connection Error",
-        description: "Failed to get a response from the AI assistant.",
-        variant: "destructive"
-      });
-    }
-  };
-  
-  // Handle scheduling request submission
-  const handleSchedulingRequest = async () => {
-    if (!schedulingRequest.trim()) {
-      toast({
-        title: "Empty request",
-        description: "Please enter a scheduling request to process.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsProcessingScheduling(true);
-    setSchedulingResponse(null);
-    
-    try {
-      const response = await fetch('/api/ai/scheduling', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          request: schedulingRequest,
-          schedule: events, // Pass the user's existing schedule
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to process scheduling request');
-      }
-      
-      const data = await response.json();
-      setSchedulingResponse(data);
-      
-      // Invalidate the events query to refresh calendar data
-      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
-      
-      // Show confirmation toast based on action
-      if (data.action === 'create' && data.status === 'confirmed') {
-        toast({
-          title: "Event Created",
-          description: `Event "${data.event_title}" has been scheduled.`,
-        });
-      }
-    } catch (error) {
-      console.error('Error processing scheduling request:', error);
-      toast({
         title: "Error",
-        description: "Failed to process your scheduling request. Please try again.",
+        description: "Failed to process your command. Please try again.",
         variant: "destructive",
       });
+      
     } finally {
-      setIsProcessingScheduling(false);
-    }
-  };
-  
-  // Handle schedule summary request
-  const handleScheduleSummary = async () => {
-    setIsFetchingSummary(true);
-    setScheduleSummary("");
-    
-    try {
-      const response = await fetch('/api/ai/schedule-summary', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          timeframe: timeframe,
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to generate schedule summary');
-      }
-      
-      const { summary } = await response.json();
-      setScheduleSummary(summary || "No scheduled events found for this timeframe.");
-    } catch (error) {
-      console.error('Error generating schedule summary:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate your schedule summary. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsFetchingSummary(false);
-    }
-  };
-  
-  // Handle auto-response generation
-  const handleAutoResponseGeneration = async () => {
-    if (!autoResponseContext.trim()) {
-      toast({
-        title: "Empty context",
-        description: "Please enter a context for the auto-response message.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsGeneratingAutoResponse(true);
-    setAutoResponseMessage("");
-    
-    try {
-      const response = await fetch('/api/ai/auto-response', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          context: autoResponseContext,
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to generate auto-response message');
-      }
-      
-      const { message } = await response.json();
-      setAutoResponseMessage(message);
-    } catch (error) {
-      console.error('Error generating auto-response:', error);
-      toast({
-        title: "Error",
-        description: "Failed to generate auto-response message. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsGeneratingAutoResponse(false);
-    }
-  };
-  
-  // We'll use local storage directly instead of the context for now
-  
-  // Handle app settings submission
-  const handleAppSettings = async () => {
-    if (!settingsInput.trim()) {
-      toast({
-        title: "Empty request",
-        description: "Please enter instructions for app settings changes.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    setIsProcessingSettings(true);
-    setSettingsResult(null);
-    
-    try {
-      const response = await fetch('/api/ai/app-settings', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: settingsInput
-        }),
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to process app settings');
-      }
-      
-      const result = await response.json();
-      setSettingsResult(result);
-      
-      // Actually apply the settings to the app by storing in localStorage
-      const currentSettings = localStorage.getItem('appSettings') 
-        ? JSON.parse(localStorage.getItem('appSettings') || '{}')
-        : {};
-        
-      const newSettings = {
-        ...currentSettings,
-        ...result
-      };
-      
-      localStorage.setItem('appSettings', JSON.stringify(newSettings));
-      
-      toast({
-        title: "Settings Updated",
-        description: "Your app settings have been successfully applied.",
-      });
-      
-      // If language was changed, show a special message and apply change to this page
-      if (result.language) {
-        const languageNames: Record<string, string> = {
-          'en': 'English',
-          'es': 'Spanish',
-          'fr': 'French',
-          'de': 'German',
-          'it': 'Italian',
-          'pt': 'Portuguese',
-          'ru': 'Russian',
-          'zh': 'Chinese',
-          'ja': 'Japanese',
-          'ko': 'Korean',
-          'ar': 'Arabic',
-          'hi': 'Hindi',
-          'el': 'Greek'
-        };
-        
-        const languageName = languageNames[result.language] || result.language;
-        
-        // Update the page title and description based on language
-        // This demonstrates immediate language change without refresh
-        const titleTextMap: Record<string, string> = {
-          'en': 'AI Assistant',
-          'es': 'Asistente de IA',
-          'fr': 'Assistant IA',
-          'de': 'KI-Assistent',
-          'it': 'Assistente AI',
-          'el': 'Βοηθός AI',
-          'ru': 'ИИ-ассистент',
-          'zh': 'AI助手',
-          'ja': 'AIアシスタント'
-        };
-        
-        const descriptionTextMap: Record<string, string> = {
-          'en': 'Get help and insights for your freelance business',
-          'es': 'Obtenga ayuda e información para su negocio freelance',
-          'fr': 'Obtenez de l\'aide et des informations pour votre activité indépendante',
-          'de': 'Erhalten Sie Hilfe und Einblicke für Ihr Freelance-Geschäft',
-          'it': 'Ottieni aiuto e approfondimenti per la tua attività freelance',
-          'el': 'Λάβετε βοήθεια και πληροφορίες για την επιχείρησή σας ως freelancer',
-          'ru': 'Получите помощь и аналитику для вашего фриланс-бизнеса',
-          'zh': '获取有关自由职业的帮助和见解',
-          'ja': 'フリーランスビジネスのヘルプとインサイトを取得'
-        };
-        
-        // Update the title element with new language text
-        const pageTitleElement = document.querySelector('.page-title h1');
-        if (pageTitleElement) {
-          pageTitleElement.textContent = titleTextMap[result.language] || 'AI Assistant';
-          console.log('Updated page title to:', titleTextMap[result.language]);
-        } else {
-          console.log('Could not find page title element:', document.querySelector('.page-title'));
-        }
-        
-        // Update the description element with new language text
-        const pageDescriptionElement = document.querySelector('.page-title p');
-        if (pageDescriptionElement) {
-          pageDescriptionElement.textContent = descriptionTextMap[result.language] || 'Get help and insights for your freelance business';
-          console.log('Updated page description to:', descriptionTextMap[result.language]);
-        } else {
-          console.log('Could not find page description element');
-        }
-        
-        // Also update the tab labels based on the language
-        const tabLabels: Record<string, Record<string, string>> = {
-          'el': {
-            'chat': 'Γενικός Βοηθός',
-            'scheduling': 'Βοηθός Προγραμματισμού',
-            'summary': 'Σύνοψη Προγράμματος',
-            'settings': 'Ρυθμίσεις'
-          },
-          'es': {
-            'chat': 'Asistente General',
-            'scheduling': 'Asistente de Programación',
-            'summary': 'Resumen de Agenda',
-            'settings': 'Ajustes'
-          }
-        };
-        
-        // Update tab labels if we have translations for this language
-        if (tabLabels[result.language]) {
-          // Radix UI uses a data-state attribute for active tabs
-          const tabs = document.querySelectorAll('[data-radix-collection-item]');
-          console.log('Found tabs:', tabs.length);
-          
-          tabs.forEach((tab: Element) => {
-            const value = tab.getAttribute('data-value');
-            console.log('Tab value:', value);
-            
-            if (value && tabLabels[result.language][value]) {
-              console.log('Updating tab:', value, 'to', tabLabels[result.language][value]);
-              
-              // The tab text is likely inside a span after the icon
-              const spans = tab.querySelectorAll('span');
-              if (spans.length > 0) {
-                spans[spans.length - 1].textContent = tabLabels[result.language][value];
-              } else {
-                // If no spans, try to update the text node
-                const children = Array.from(tab.childNodes);
-                // Find text nodes (nodeType 3)
-                for (const child of children) {
-                  if (child.nodeType === 3 && child.textContent && child.textContent.trim()) {
-                    child.textContent = tabLabels[result.language][value];
-                    break;
-                  }
-                }
-              }
-            }
-          });
-        }
-        
-        // Also update the App Settings UI text
-        const appSettingsTextMap: Record<string, Record<string, string>> = {
-          'el': {
-            'title': 'Ρυθμίσεις Εφαρμογής',
-            'description': 'Ελέγξτε τις ρυθμίσεις της εφαρμογής χρησιμοποιώντας φυσική γλώσσα',
-            'change_settings': 'Αλλαγή Ρυθμίσεων',
-            'supported_settings': 'Υποστηριζόμενες Ρυθμίσεις:',
-            'placeholder': 'Παράδειγμα: "Αλλάξτε τη γλώσσα μου σε αγγλικά και ενεργοποιήστε την αυτόματη απάντηση"',
-            'button_text': 'Ενημέρωση Ρυθμίσεων',
-            'processing': 'Επεξεργασία...',
-            'settings_updated': 'Οι Ρυθμίσεις Ενημερώθηκαν',
-            'changed_settings': 'Αλλαγμένες Ρυθμίσεις:'
-          },
-          'es': {
-            'title': 'Control de Ajustes',
-            'description': 'Controle los ajustes de su aplicación usando lenguaje natural',
-            'change_settings': 'Cambiar Ajustes',
-            'supported_settings': 'Ajustes Compatibles:',
-            'placeholder': 'Ejemplo: "Establece mi estado como ocupado y activa la respuesta automática"',
-            'button_text': 'Actualizar Ajustes',
-            'processing': 'Procesando...',
-            'settings_updated': 'Ajustes Actualizados',
-            'changed_settings': 'Ajustes Cambiados:'
-          }
-        };
-        
-        // Apply translations to the settings page
-        if (appSettingsTextMap[result.language]) {
-          const texts = appSettingsTextMap[result.language];
-          
-          // Find and update settings page elements
-          const settingsElements = {
-            'title': document.querySelector('.ai-settings-title'),
-            'description': document.querySelector('.ai-settings-description'),
-            'change_settings': document.querySelector('.ai-settings-header'),
-            'supported_settings': document.querySelector('.ai-settings-supported'),
-            'button_text': document.querySelector('.ai-settings-button:not(.processing)'),
-            'settings_updated': document.querySelector('.ai-settings-updated-title'),
-            'changed_settings': document.querySelector('.ai-settings-changed')
-          };
-          
-          // Update each element text content if found
-          for (const [key, element] of Object.entries(settingsElements)) {
-            if (element && texts[key]) {
-              element.textContent = texts[key];
-            }
-          }
-          
-          // Update placeholder separately
-          const textarea = document.querySelector('.ai-settings-textarea');
-          if (textarea && texts['placeholder']) {
-            textarea.setAttribute('placeholder', texts['placeholder']);
-          }
-        }
-        
-        toast({
-          title: `Language Changed to ${languageName}`,
-          description: "The page title has been updated. Refresh the page to see all content in the new language.",
-        });
-      }
-    } catch (error) {
-      console.error('Error processing app settings:', error);
-      toast({
-        title: "Error",
-        description: "Failed to process your app settings request. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsProcessingSettings(false);
+      setIsLoading(false);
     }
   };
 
@@ -598,364 +346,184 @@ export default function AIAssistant() {
       <div className="page-title">
         <PageTitle 
           title="AI Assistant" 
-          description="Get help and insights for your freelance business" 
+          description="Ask for anything - settings, calendar events, or auto-responses - in one place" 
           icon={<Bot className="h-6 w-6 text-primary" />}
         />
       </div>
       
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-5 mb-6">
-          <TabsTrigger value="chat">
-            <Bot className="h-4 w-4 mr-2" />
-            General Assistant
-          </TabsTrigger>
-          <TabsTrigger value="scheduling">
-            <Calendar className="h-4 w-4 mr-2" />
-            Scheduling Assistant
-          </TabsTrigger>
-          <TabsTrigger value="summary">
-            <Clock className="h-4 w-4 mr-2" />
-            Schedule Summary
-          </TabsTrigger>
-          <TabsTrigger value="autoresponse">
-            <User className="h-4 w-4 mr-2" />
-            Auto-Response
-          </TabsTrigger>
-          <TabsTrigger value="settings">
-            <Settings className="h-4 w-4 mr-2" />
-            App Settings
-          </TabsTrigger>
-        </TabsList>
+      <Card className="h-[calc(100vh-200px)] flex flex-col">
+        <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div>
+            <CardTitle>AI Assistant</CardTitle>
+            <CardDescription>
+              Use natural language to control settings, create events, or generate responses
+            </CardDescription>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                // Reset conversation but keep in localStorage
+                setMessages([
+                  {
+                    id: Date.now(),
+                    text: "Welcome to the AI assistant! I can help with settings, calendar events, and auto-response messages. How can I assist you today?",
+                    role: 'assistant',
+                    timestamp: new Date()
+                  }
+                ]);
+                // Reset context
+                setConversationContext("");
+                setInClarificationMode(false);
+                setOriginalMessage("");
+              }}
+            >
+              <Bot className="h-4 w-4 mr-1" />
+              New Chat
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Remove from localStorage
+                localStorage.removeItem('aiAssistantMessages');
+                localStorage.removeItem('aiAssistantContext');
+                
+                // Reset to default welcome message
+                setMessages([
+                  {
+                    id: Date.now(),
+                    text: "Welcome to the AI assistant! I can help with settings, calendar events, and auto-response messages. How can I assist you today?",
+                    role: 'assistant',
+                    timestamp: new Date()
+                  }
+                ]);
+                
+                // Reset conversation context
+                setConversationContext("");
+                setInClarificationMode(false);
+                setOriginalMessage("");
+                
+                toast({
+                  title: "Conversation history cleared",
+                  description: "Your conversation history has been removed from local storage.",
+                  duration: 3000,
+                });
+              }}
+            >
+              Clear History
+            </Button>
+          </div>
+        </CardHeader>
         
-        {/* General Chat Tab */}
-        <TabsContent value="chat" className="mt-0">
-          <Card className="h-[calc(100vh-300px)] flex flex-col">
-            <CardHeader>
-              <CardTitle>Virtual Assistant</CardTitle>
-              <CardDescription>
-                Ask for advice, guidance, or information about managing your freelance business
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto space-y-4 pb-0">
-              {messages.map(message => (
-                <div 
-                  key={message.id}
-                  className={`flex items-start gap-3 max-w-[80%] ${message.sender === 'user' ? 'ml-auto flex-row-reverse' : ''}`}
-                >
+        <CardContent className="flex-1 overflow-y-auto space-y-4 pb-4">
+          <div className="space-y-4">
+            {messages.map(message => (
+              <div 
+                key={message.id}
+                className={`flex items-start gap-3 ${message.role === 'user' ? 'ml-auto flex-row-reverse' : ''} ${message.role === 'system' ? 'ml-8' : ''}`}
+              >
+                {message.role !== 'system' && (
                   <Avatar className="h-8 w-8">
-                    <AvatarFallback className={message.sender === 'ai' ? "bg-primary text-primary-foreground" : ""}>
-                      {message.sender === 'ai' ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
+                    <AvatarFallback className={message.role === 'assistant' ? "bg-primary text-primary-foreground" : ""}>
+                      {message.role === 'assistant' ? <Bot className="h-4 w-4" /> : <User className="h-4 w-4" />}
                     </AvatarFallback>
                   </Avatar>
-                  <div className={`p-3 rounded-lg ${message.sender === 'ai' ? 'bg-muted' : 'bg-primary text-primary-foreground'}`}>
-                    <p>{message.text}</p>
-                    <p className={`text-xs mt-1 ${message.sender === 'ai' ? 'text-muted-foreground' : 'text-primary-foreground/70'}`}>
-                      {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                  </div>
+                )}
+                
+                <div 
+                  className={`rounded-lg px-3 py-2 max-w-[85%] break-words ${
+                    message.role === 'user' 
+                      ? 'bg-primary text-primary-foreground' 
+                      : message.role === 'system'
+                        ? 'bg-secondary/50 text-muted-foreground text-sm'
+                        : 'bg-secondary'
+                  }`}
+                >
+                  {/* To make links clickable */}
+                  {message.text.split('\n').map((line, i) => {
+                    if (line.includes('[View in Calendar](/calendar)')) {
+                      return (
+                        <div key={i} className="mt-2">
+                          <Link href="/calendar">
+                            <Button variant="outline" size="sm" className="flex items-center gap-1">
+                              <Calendar className="h-3.5 w-3.5" />
+                              View in Calendar
+                              <ArrowRight className="h-3 w-3 ml-1" />
+                            </Button>
+                          </Link>
+                        </div>
+                      );
+                    }
+                    
+                    // Highlight commands with ✓ prefix
+                    if (line.startsWith('✓')) {
+                      return (
+                        <p key={i} className={`${i > 0 ? 'mt-2' : ''} text-emerald-500 dark:text-emerald-400`}>
+                          {line}
+                        </p>
+                      );
+                    }
+                    
+                    // Highlight warnings with ⚠️ prefix
+                    if (line.includes('⚠️')) {
+                      return (
+                        <p key={i} className={`${i > 0 ? 'mt-2' : ''} text-amber-500 dark:text-amber-400`}>
+                          {line}
+                        </p>
+                      );
+                    }
+                    
+                    return <p key={i} className={i > 0 ? 'mt-2' : ''}>{line}</p>;
+                  })}
                 </div>
-              ))}
-            </CardContent>
+                
+                {message.role !== 'system' && (
+                  <div className="text-xs text-muted-foreground whitespace-nowrap mt-1">
+                    {message.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  </div>
+                )}
+              </div>
+            ))}
             
-            <div className="p-4 mt-auto">
-              <form onSubmit={handleSubmit} className="flex gap-2">
-                <Input 
-                  placeholder="Ask anything about managing your freelance business..." 
-                  value={inputValue}
-                  onChange={(e) => setInputValue(e.target.value)}
-                  className="flex-1"
-                />
-                <Button type="submit">
-                  <Send className="h-4 w-4 mr-2" />
-                  Send
-                </Button>
-              </form>
-            </div>
-          </Card>
-        </TabsContent>
-        
-        {/* Scheduling Assistant Tab */}
-        <TabsContent value="scheduling" className="mt-0">
-          <Card className="h-[calc(100vh-300px)] flex flex-col">
-            <CardHeader>
-              <CardTitle>Scheduling Assistant</CardTitle>
-              <CardDescription>
-                Let AI help you schedule meetings and appointments by analyzing your calendar
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto">
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">Create Calendar Event</h3>
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md mb-4">
-                  <p className="text-sm text-yellow-800 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-2" />
-                    Enter meeting details below to create a calendar event. Be specific about who, when, and what the meeting is about.
-                  </p>
-                </div>
-                <Textarea 
-                  placeholder="Example: 'Schedule a meeting with George tomorrow at 2pm to discuss project progress'"
-                  value={schedulingRequest}
-                  onChange={(e) => setSchedulingRequest(e.target.value)}
-                  className="h-32 mb-4"
-                />
-                <Button 
-                  onClick={handleSchedulingRequest} 
-                  className="w-full"
-                  disabled={isProcessingScheduling || !schedulingRequest.trim()}
-                >
-                  {isProcessingScheduling ? "Creating Event..." : "Add to Calendar"}
-                </Button>
-              </div>
-              
-              {schedulingResponse && (
-                <div className="border rounded-lg p-4 mt-4">
-                  <h3 className="text-lg font-semibold mb-2 flex items-center">
-                    {schedulingResponse.action === 'create' && (
-                      <>
-                        <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs mr-2">
-                          Event Created
-                        </span>
-                        <span>{schedulingResponse.event_title}</span>
-                      </>
-                    )}
-                    {schedulingResponse.action === 'suggest_times' && (
-                      <>
-                        <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs mr-2">
-                          Suggestions
-                        </span>
-                        <span>Available Time Slots</span>
-                      </>
-                    )}
-                    {schedulingResponse.action === 'reschedule' && (
-                      <>
-                        <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs mr-2">
-                          Rescheduled
-                        </span>
-                        <span>{schedulingResponse.event_title}</span>
-                      </>
-                    )}
-                    {schedulingResponse.action === 'cancel' && (
-                      <>
-                        <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs mr-2">
-                          Cancelled
-                        </span>
-                        <span>{schedulingResponse.event_title}</span>
-                      </>
-                    )}
-                  </h3>
-                  
-                  {(schedulingResponse.start_time && schedulingResponse.end_time) && (
-                    <div className="flex items-center text-sm text-muted-foreground mb-2">
-                      <Calendar className="h-4 w-4 mr-1" />
-                      <span>
-                        {new Date(schedulingResponse.start_time).toLocaleDateString()} | 
-                        {new Date(schedulingResponse.start_time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})} - 
-                        {new Date(schedulingResponse.end_time).toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'})}
-                      </span>
-                    </div>
-                  )}
-                  
-                  <div className="text-sm mt-3">
-                    <p>{schedulingResponse.notes}</p>
-                  </div>
-                  
-                  {schedulingResponse.action === 'create' && schedulingResponse.event_id && (
-                    <div className="mt-4 pt-3 border-t">
-                      <Link href="/calendar" className="inline-flex items-center text-primary hover:text-primary/80">
-                        <Button variant="outline" size="sm" className="gap-2">
-                          <Calendar className="h-4 w-4" />
-                          View in Calendar
-                          <ExternalLink className="h-3 w-3" />
-                        </Button>
-                      </Link>
-                    </div>
-                  )}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* Schedule Summary Tab */}
-        <TabsContent value="summary" className="mt-0">
-          <Card className="h-[calc(100vh-300px)] flex flex-col">
-            <CardHeader>
-              <CardTitle>Schedule Summary</CardTitle>
-              <CardDescription>
-                Get a summary and insights about your upcoming schedule
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto">
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">Select Timeframe</h3>
-                <div className="flex gap-2 mb-4">
-                  <Input 
-                    placeholder="e.g., today, this week, next month"
-                    value={timeframe}
-                    onChange={(e) => setTimeframe(e.target.value)}
-                    className="flex-1"
-                  />
-                  <Button 
-                    onClick={handleScheduleSummary} 
-                    disabled={isFetchingSummary || !timeframe.trim()}
-                  >
-                    {isFetchingSummary ? "Generating..." : "Generate Summary"}
-                  </Button>
+            {isLoading && (
+              <div className="flex items-start gap-3">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback className="bg-primary text-primary-foreground">
+                    <Bot className="h-4 w-4" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="bg-secondary text-secondary-foreground rounded-lg px-4 py-3 flex items-center">
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  <span>Processing...</span>
                 </div>
               </div>
-              
-              {isLoadingEvents && (
-                <div className="text-center py-8 text-muted-foreground">
-                  Loading your calendar data...
-                </div>
-              )}
-              
-              {scheduleSummary && (
-                <div className="border rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-2 flex items-center">
-                    <Calendar className="h-5 w-5 mr-2 text-primary" />
-                    Schedule Summary for {timeframe}
-                  </h3>
-                  <div className="mt-2 whitespace-pre-line">
-                    {scheduleSummary}
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
+            )}
+          </div>
+        </CardContent>
         
-        {/* Auto-Response Tab */}
-        <TabsContent value="autoresponse" className="mt-0">
-          <Card className="h-[calc(100vh-300px)] flex flex-col">
-            <CardHeader>
-              <CardTitle>Auto-Response Generator</CardTitle>
-              <CardDescription>
-                Create professional, personalized away messages for missed calls or when you're unavailable
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto">
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">Generate Away Message</h3>
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md mb-4">
-                  <p className="text-sm text-yellow-800 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-2" />
-                    Provide context about why you're unavailable. The AI will generate a polite, professional message under 300 characters.
-                  </p>
-                </div>
-                <Textarea 
-                  placeholder="Example: 'I'm in a client meeting' or 'I'm on vacation until July 15'"
-                  value={autoResponseContext}
-                  onChange={(e) => setAutoResponseContext(e.target.value)}
-                  className="h-32 mb-4"
-                />
-                <Button 
-                  onClick={handleAutoResponseGeneration} 
-                  className="w-full"
-                  disabled={isGeneratingAutoResponse || !autoResponseContext.trim()}
-                >
-                  {isGeneratingAutoResponse ? "Generating..." : "Generate Message"}
-                </Button>
-              </div>
-              
-              {autoResponseMessage && (
-                <div className="border rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-2 flex items-center">
-                    <CheckCircle className="h-5 w-5 mr-2 text-green-600" />
-                    Auto-Response Message
-                  </h3>
-                  <div className="bg-muted p-4 rounded-md mt-2 relative">
-                    <p className="text-md font-medium">{autoResponseMessage}</p>
-                    <div className="mt-4 flex justify-between items-center">
-                      <p className="text-xs text-muted-foreground">
-                        {autoResponseMessage.length} characters
-                      </p>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => {
-                          navigator.clipboard.writeText(autoResponseMessage);
-                          toast({
-                            title: "Copied!",
-                            description: "Message copied to clipboard",
-                          });
-                        }}
-                      >
-                        Copy Message
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        {/* App Settings Tab */}
-        <TabsContent value="settings" className="mt-0">
-          <Card className="h-[calc(100vh-300px)] flex flex-col">
-            <CardHeader>
-              <CardTitle className="ai-settings-title">App Settings Control</CardTitle>
-              <CardDescription className="ai-settings-description">
-                Control your app settings using natural language
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 overflow-y-auto">
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2 ai-settings-header">Change Settings</h3>
-                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md mb-4">
-                  <p className="text-sm text-yellow-800 flex items-center">
-                    <AlertCircle className="h-4 w-4 mr-2" />
-                    Describe the settings you want to change in natural language. The AI will convert your request into the appropriate settings.
-                  </p>
-                </div>
-                
-                <div className="mb-4 space-y-2">
-                  <h4 className="text-sm font-medium ai-settings-supported">Supported Settings:</h4>
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline">availability</Badge>
-                    <Badge variant="outline">auto_reply_enabled</Badge>
-                    <Badge variant="outline">language</Badge>
-                    <Badge variant="outline">preferred_route_type</Badge>
-                    <Badge variant="outline">notification_preferences</Badge>
-                    <Badge variant="outline">default_reply_message</Badge>
-                  </div>
-                </div>
-                
-                <Textarea 
-                  placeholder="Example: 'Set my status to busy and enable auto-reply with the message that I'll be back tomorrow'"
-                  value={settingsInput}
-                  onChange={(e) => setSettingsInput(e.target.value)}
-                  className="h-32 mb-4 ai-settings-textarea"
-                />
-                <Button 
-                  onClick={handleAppSettings} 
-                  className={`w-full ai-settings-button ${isProcessingSettings ? 'processing' : ''}`}
-                  disabled={isProcessingSettings || !settingsInput.trim()}
-                >
-                  {isProcessingSettings ? "Processing..." : "Update Settings"}
-                </Button>
-              </div>
-              
-              {settingsResult && (
-                <div className="border rounded-lg p-4 mt-4">
-                  <h3 className="text-lg font-semibold mb-2 flex items-center ai-settings-updated-title">
-                    <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
-                    Settings Updated
-                  </h3>
-                  
-                  <div className="mt-4 bg-gray-50 p-4 rounded-md">
-                    <h4 className="text-sm font-medium mb-2 ai-settings-changed">Changed Settings:</h4>
-                    <pre className="text-sm bg-black text-white p-4 rounded-md overflow-auto">
-                      {JSON.stringify(settingsResult, null, 2)}
-                    </pre>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        <div className="p-4 border-t">
+          <form onSubmit={handleSubmit} className="flex gap-2">
+            <Input
+              className="flex-1"
+              placeholder={inClarificationMode 
+                ? "Provide the requested information..." 
+                : "Type your command or question..."
+              }
+              value={inputValue}
+              onChange={e => setInputValue(e.target.value)}
+              disabled={isLoading}
+            />
+            <Button type="submit" disabled={isLoading || !inputValue.trim()}>
+              {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+            </Button>
+          </form>
+          <div className="mt-2 text-xs text-muted-foreground">
+            Try: "Change my language to Spanish" or "Schedule a client meeting tomorrow at 3pm"
+          </div>
+        </div>
+      </Card>
     </div>
   );
 }

@@ -5,19 +5,19 @@ import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/lib/utils";
 
-export function UnifiedAssistantFloating() {
+export function AIAssistantFloating() {
   const [isOpen, setIsOpen] = useState(false);
   const [location] = useLocation();
 
   // Don't show on these pages
-  const excludedPages = ["/", "/signup", "/login", "/unified-assistant"];
+  const excludedPages = ["/", "/signup", "/login", "/ai-assistant"];
   if (excludedPages.includes(location)) {
     return null;
   }
 
-  // Create a function to navigate to the unified assistant page
+  // Create a function to navigate to the AI assistant page
   const navigateToAssistant = () => {
-    window.location.href = "/unified-assistant";
+    window.location.href = "/ai-assistant";
   };
 
   return (
@@ -35,4 +35,4 @@ export function UnifiedAssistantFloating() {
   );
 }
 
-export default UnifiedAssistantFloating;
+export default AIAssistantFloating;
