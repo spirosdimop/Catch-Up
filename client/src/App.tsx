@@ -49,8 +49,8 @@ function Router() {
         <Route path="/bookings" component={Bookings} />
         <Route path="/messages" component={Messages} />
         <Route path="/calendar" component={Calendar} />
-        <Route path="/profile" component={Profile} />
-        <Route path="/profile-redesign" component={ProfileRedesign} />
+        <Route path="/profile-original" component={Profile} />
+        <Route path="/profile" component={ProfileRedesign} />
         <Route path="/ai-assistant" component={AIAssistant} />
         <Route path="/unified-assistant" component={UnifiedAssistant} />
         <Route path="/settings" component={Settings} />
