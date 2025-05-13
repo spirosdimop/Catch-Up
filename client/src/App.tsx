@@ -51,7 +51,6 @@ function Router() {
         <Route path="/messages" component={Messages} />
         <Route path="/calendar-original" component={Calendar} />
         <Route path="/calendar" component={CalendarNew} />
-        <Route path="/calendar-redesign" component={CalendarRedesign} />
         <Route path="/profile-original" component={Profile} />
         <Route path="/profile" component={ProfileRedesign} />
         <Route path="/ai-assistant" component={AIAssistant} />
