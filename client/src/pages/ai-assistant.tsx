@@ -1,6 +1,6 @@
 import { PageTitle } from "@/components/ui/page-title";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Bot, Calendar, Send, User, Clock, AlertCircle } from "lucide-react";
+import { Bot, Calendar, Send, User, Clock, AlertCircle, Settings, CheckCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
 import { useQuery } from "@tanstack/react-query";
 
 // Message types
@@ -56,6 +57,11 @@ export default function AIAssistant() {
   const [timeframe, setTimeframe] = useState("upcoming week");
   const [isFetchingSummary, setIsFetchingSummary] = useState(false);
   const [scheduleSummary, setScheduleSummary] = useState("");
+  
+  // App settings state
+  const [settingsInput, setSettingsInput] = useState("");
+  const [isProcessingSettings, setIsProcessingSettings] = useState(false);
+  const [settingsResult, setSettingsResult] = useState<Record<string, any> | null>(null);
   
   // Fetch user's calendar events for reference
   const { data: events, isLoading: isLoadingEvents } = useQuery({
@@ -232,6 +238,54 @@ export default function AIAssistant() {
       setIsFetchingSummary(false);
     }
   };
+  
+  // Handle app settings submission
+  const handleAppSettings = async () => {
+    if (!settingsInput.trim()) {
+      toast({
+        title: "Empty request",
+        description: "Please enter instructions for app settings changes.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsProcessingSettings(true);
+    setSettingsResult(null);
+    
+    try {
+      const response = await fetch('/api/ai/app-settings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: settingsInput
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to process app settings');
+      }
+      
+      const result = await response.json();
+      setSettingsResult(result);
+      
+      toast({
+        title: "Settings Processed",
+        description: "Your app settings have been successfully updated.",
+      });
+    } catch (error) {
+      console.error('Error processing app settings:', error);
+      toast({
+        title: "Error",
+        description: "Failed to process your app settings request. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessingSettings(false);
+    }
+  };
 
   return (
     <div className="space-y-6 p-6">
@@ -242,7 +296,7 @@ export default function AIAssistant() {
       />
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid grid-cols-3 mb-6">
+        <TabsList className="grid grid-cols-4 mb-6">
           <TabsTrigger value="chat">
             <Bot className="h-4 w-4 mr-2" />
             General Assistant
@@ -254,6 +308,10 @@ export default function AIAssistant() {
           <TabsTrigger value="summary">
             <Clock className="h-4 w-4 mr-2" />
             Schedule Summary
+          </TabsTrigger>
+          <TabsTrigger value="settings">
+            <Settings className="h-4 w-4 mr-2" />
+            App Settings
           </TabsTrigger>
         </TabsList>
         
@@ -436,6 +494,71 @@ export default function AIAssistant() {
                   </h3>
                   <div className="mt-2 whitespace-pre-line">
                     {scheduleSummary}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        {/* App Settings Tab */}
+        <TabsContent value="settings" className="mt-0">
+          <Card className="h-[calc(100vh-300px)] flex flex-col">
+            <CardHeader>
+              <CardTitle>App Settings Control</CardTitle>
+              <CardDescription>
+                Control your app settings using natural language
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-2">Change Settings</h3>
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md mb-4">
+                  <p className="text-sm text-yellow-800 flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    Describe the settings you want to change in natural language. The AI will convert your request into the appropriate settings.
+                  </p>
+                </div>
+                
+                <div className="mb-4 space-y-2">
+                  <h4 className="text-sm font-medium">Supported Settings:</h4>
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant="outline">availability</Badge>
+                    <Badge variant="outline">auto_reply_enabled</Badge>
+                    <Badge variant="outline">language</Badge>
+                    <Badge variant="outline">preferred_route_type</Badge>
+                    <Badge variant="outline">notification_preferences</Badge>
+                    <Badge variant="outline">default_reply_message</Badge>
+                  </div>
+                </div>
+                
+                <Textarea 
+                  placeholder="Example: 'Set my status to busy and enable auto-reply with the message that I'll be back tomorrow'"
+                  value={settingsInput}
+                  onChange={(e) => setSettingsInput(e.target.value)}
+                  className="h-32 mb-4"
+                />
+                <Button 
+                  onClick={handleAppSettings} 
+                  className="w-full"
+                  disabled={isProcessingSettings || !settingsInput.trim()}
+                >
+                  {isProcessingSettings ? "Processing..." : "Update Settings"}
+                </Button>
+              </div>
+              
+              {settingsResult && (
+                <div className="border rounded-lg p-4 mt-4">
+                  <h3 className="text-lg font-semibold mb-2 flex items-center">
+                    <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
+                    Settings Updated
+                  </h3>
+                  
+                  <div className="mt-4 bg-gray-50 p-4 rounded-md">
+                    <h4 className="text-sm font-medium mb-2">Changed Settings:</h4>
+                    <pre className="text-sm bg-black text-white p-4 rounded-md overflow-auto">
+                      {JSON.stringify(settingsResult, null, 2)}
+                    </pre>
                   </div>
                 </div>
               )}

@@ -970,6 +970,65 @@ Be thorough and detailed in your responses while organizing your advice into cle
       });
     }
   });
+  
+  // API endpoint for app settings control
+  apiRouter.post("/ai/app-settings", async (req, res) => {
+    try {
+      const { message } = req.body;
+      
+      if (!message || typeof message !== 'string') {
+        return res.status(400).json({ message: "Invalid request. 'message' must be a string." });
+      }
+      
+      // Initialize OpenAI client
+      const openai = new OpenAI({
+        apiKey: process.env.OPENAI_API_KEY,
+      });
+      
+      // System prompt for app settings extraction
+      const systemPrompt = `
+        You are an assistant that controls app settings. Convert the user's message into a JSON object 
+        containing only the settings they want to change. Do not include any values that are not 
+        explicitly mentioned or implied. Format strictly in JSON.
+        
+        Supported settings include:
+        - availability (available, busy, away)
+        - auto_reply_enabled (true/false)
+        - language (e.g., 'en', 'el')
+        - preferred_route_type (fastest, greenest)
+        - notification_preferences (all, important_only, none)
+        - default_reply_message (custom string)
+      `;
+      
+      // Make the API call to OpenAI
+      const response = await openai.chat.completions.create({
+        model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: message }
+        ] as any,
+        temperature: 0.1, // Low temperature for more consistent outputs
+        max_tokens: 300,
+        response_format: { type: "json_object" }
+      });
+      
+      const content = response.choices[0]?.message?.content;
+      if (!content) {
+        throw new Error('No content in response from OpenAI');
+      }
+      
+      // Return the parsed JSON settings
+      const settings = JSON.parse(content);
+      res.json(settings);
+      
+    } catch (error) {
+      console.error("Error processing app settings:", error);
+      res.status(500).json({ 
+        message: "Failed to process app settings request",
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
 
   app.use("/api", apiRouter);
   
