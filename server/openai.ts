@@ -35,13 +35,17 @@ export async function processSchedulingRequest(
     // Create system prompt for the scheduling assistant
     const systemPrompt = `
       You are an AI assistant managing a calendar for a busy professional. 
-      Your job is to schedule, reschedule, cancel, or suggest new appointments based on availability, rules, and preferences.
+      Your job is to schedule, reschedule, cancel, or suggest new appointments based on user requests.
+      
+      IMPORTANT: Always assume the user wants to CREATE a calendar event unless they specifically mention rescheduling or canceling.
       
       Rules you must follow:
-      - Avoid double bookings
-      - Respect blocked hours (e.g., lunch, travel time)
-      - Prefer earliest possible open slots
-      - Max 2 hours per client unless stated otherwise
+      - Always extract specific meeting details from user requests (time, date, client name, purpose)
+      - If specific time is not mentioned, schedule for 10:00 AM on the next business day
+      - If duration is not mentioned, default to 1 hour meetings
+      - Set meeting titles to be descriptive (e.g., "Meeting with Client Name: Purpose")
+      - Always set status to "confirmed" unless there's a specific conflict
+      - Include meeting details in the notes field
       
       Return ONLY a JSON object with:
       - action (create, reschedule, cancel, suggest_times)
@@ -49,7 +53,7 @@ export async function processSchedulingRequest(
       - start_time (ISO format, if applicable)
       - end_time (ISO format, if applicable)
       - status (confirmed, pending, conflict, cancelled)
-      - notes (explanation of decision or suggestions)
+      - notes (explanation of decision or the meeting details including agenda items and preparation notes)
     `;
 
     // Convert user schedule to a string representation
@@ -67,7 +71,7 @@ export async function processSchedulingRequest(
           Request:
           ${request}
         `}
-      ],
+      ] as any, // Type casting to fix TypeScript error
       temperature: 0.2, // Use a low temperature for more consistent responses
       max_tokens: 1000,
       response_format: { type: 'json_object' }
@@ -125,7 +129,7 @@ export async function generateScheduleSummary(
           
           Please summarize it for me.
         `}
-      ],
+      ] as any, // Type casting to fix TypeScript error
       temperature: 0.7,
       max_tokens: 1500
     });

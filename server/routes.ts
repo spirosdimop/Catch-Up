@@ -848,7 +848,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Prepare messages for OpenAI
       const messages = [
-        { role: 'system', content: 'You are a helpful freelancer business assistant. You provide concise, practical advice for freelancers managing their business. Focus on actionable tips about client management, pricing, productivity, and business growth.' },
+        { role: 'system', content: `You are a helpful freelancer business assistant. You provide detailed, practical advice for freelancers managing their business.
+
+When users ask about meeting preparation, provide comprehensive advice covering:
+1. Agenda preparation with key discussion points
+2. Reviewing previous communications
+3. Preparing project status updates with data
+4. Creating questions to understand client needs
+5. Ideas for adding value to the client's business
+6. Preparation for pricing/contract discussions if relevant 
+7. Follow-up plan suggestions
+
+When users mention scheduling, only redirect them to the scheduling tool if they explicitly ask to create a calendar event. Otherwise, provide helpful advice about the topic they're asking about.
+
+Be thorough and detailed in your responses while organizing your advice into clear sections.` },
       ];
       
       // Add conversation history if provided
@@ -864,7 +877,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Make the API call to OpenAI
       const response = await openai.chat.completions.create({
         model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
-        messages,
+        messages: messages as any, // Type casting to fix TypeScript error
         temperature: 0.7,
         max_tokens: 500
       });

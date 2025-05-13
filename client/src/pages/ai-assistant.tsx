@@ -315,9 +315,15 @@ export default function AIAssistant() {
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto">
               <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">What would you like to schedule?</h3>
+                <h3 className="text-lg font-semibold mb-2">Create Calendar Event</h3>
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md mb-4">
+                  <p className="text-sm text-yellow-800 flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    Enter meeting details below to create a calendar event. Be specific about who, when, and what the meeting is about.
+                  </p>
+                </div>
                 <Textarea 
-                  placeholder="e.g., 'Schedule a client meeting with John on Tuesday at 3 PM for 1 hour' or 'Find a time slot for a project review next week'"
+                  placeholder="Example: 'Schedule a meeting with George tomorrow at 2pm to discuss project progress'"
                   value={schedulingRequest}
                   onChange={(e) => setSchedulingRequest(e.target.value)}
                   className="h-32 mb-4"
@@ -327,7 +333,7 @@ export default function AIAssistant() {
                   className="w-full"
                   disabled={isProcessingScheduling || !schedulingRequest.trim()}
                 >
-                  {isProcessingScheduling ? "Processing..." : "Process Scheduling Request"}
+                  {isProcessingScheduling ? "Creating Event..." : "Add to Calendar"}
                 </Button>
               </div>
               
