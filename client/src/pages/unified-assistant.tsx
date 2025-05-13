@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PageTitle } from "@/components/ui/page-title";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Bot, Send, User, Calendar, Settings, MessageSquare, ArrowRight, Loader2 } from "lucide-react";
@@ -49,18 +49,53 @@ export default function UnifiedAssistant() {
   // Message state
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([
-    {
+  
+  // Load messages from localStorage or use default welcome message
+  const [messages, setMessages] = useState<Message[]>(() => {
+    const savedMessages = localStorage.getItem('unifiedAssistantMessages');
+    if (savedMessages) {
+      try {
+        // Parse stored messages and convert timestamp strings back to Date objects
+        const parsedMessages = JSON.parse(savedMessages);
+        return parsedMessages.map((msg: any) => ({
+          ...msg,
+          timestamp: new Date(msg.timestamp)
+        }));
+      } catch (error) {
+        console.error('Failed to parse saved messages:', error);
+        // Return default message if parsing fails
+        return [{
+          id: 1,
+          text: "Welcome to the unified assistant! I can help with settings, calendar events, and auto-response messages. How can I assist you today?",
+          role: 'assistant' as MessageRole,
+          timestamp: new Date()
+        }];
+      }
+    }
+    
+    // Default welcome message for first-time users
+    return [{
       id: 1,
       text: "Welcome to the unified assistant! I can help with settings, calendar events, and auto-response messages. How can I assist you today?",
-      role: 'assistant',
+      role: 'assistant' as MessageRole,
       timestamp: new Date()
-    }
-  ]);
+    }];
+  });
   
   // Conversation context
   const [inClarificationMode, setInClarificationMode] = useState(false);
   const [originalMessage, setOriginalMessage] = useState("");
+  
+  // Save messages to localStorage whenever they change
+  useEffect(() => {
+    // We need to convert Date objects to strings for JSON serialization
+    const messagesToSave = messages.map(msg => ({
+      ...msg,
+      timestamp: msg.timestamp.toISOString() // Convert Date to ISO string
+    }));
+    
+    localStorage.setItem('unifiedAssistantMessages', JSON.stringify(messagesToSave));
+  }, [messages]);
   
   // Handle command submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -271,11 +306,65 @@ export default function UnifiedAssistant() {
       </div>
       
       <Card className="h-[calc(100vh-200px)] flex flex-col">
-        <CardHeader>
-          <CardTitle>Unified Command Interface</CardTitle>
-          <CardDescription>
-            Use natural language to control settings, create events, or generate responses
-          </CardDescription>
+        <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+          <div>
+            <CardTitle>Unified Command Interface</CardTitle>
+            <CardDescription>
+              Use natural language to control settings, create events, or generate responses
+            </CardDescription>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                // Reset conversation but keep in localStorage
+                setMessages([
+                  {
+                    id: Date.now(),
+                    text: "Welcome to the unified assistant! I can help with settings, calendar events, and auto-response messages. How can I assist you today?",
+                    role: 'assistant',
+                    timestamp: new Date()
+                  }
+                ]);
+                setInClarificationMode(false);
+                setOriginalMessage("");
+              }}
+            >
+              <Bot className="h-4 w-4 mr-1" />
+              New Chat
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                // Remove from localStorage
+                localStorage.removeItem('unifiedAssistantMessages');
+                
+                // Reset to default welcome message
+                setMessages([
+                  {
+                    id: Date.now(),
+                    text: "Welcome to the unified assistant! I can help with settings, calendar events, and auto-response messages. How can I assist you today?",
+                    role: 'assistant',
+                    timestamp: new Date()
+                  }
+                ]);
+                
+                // Reset conversation context
+                setInClarificationMode(false);
+                setOriginalMessage("");
+                
+                toast({
+                  title: "Conversation history cleared",
+                  description: "Your conversation history has been removed from local storage.",
+                  duration: 3000,
+                });
+              }}
+            >
+              Clear History
+            </Button>
+          </div>
         </CardHeader>
         
         <CardContent className="flex-1 overflow-y-auto space-y-4 pb-4">
