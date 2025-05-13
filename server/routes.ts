@@ -1174,7 +1174,29 @@ Remember: The most helpful thing you can do is direct users to the specialized t
             
             const settingsContent = settingsResponse.choices[0]?.message?.content;
             if (settingsContent) {
+              // Parse the settings
               const parsedSettings = JSON.parse(settingsContent);
+              
+              // Standardize language names to ISO codes
+              if (parsedSettings.language) {
+                // Convert full language names to ISO codes
+                const languageMap: Record<string, string> = {
+                  'english': 'en',
+                  'spanish': 'es',
+                  'french': 'fr',
+                  'german': 'de',
+                  'chinese': 'zh',
+                  'japanese': 'ja'
+                };
+                
+                // Check if the language value is a full name that needs conversion
+                const lowerCaseLanguage = parsedSettings.language.toLowerCase();
+                if (languageMap[lowerCaseLanguage]) {
+                  console.log(`Converting language name "${parsedSettings.language}" to code "${languageMap[lowerCaseLanguage]}"`);
+                  parsedSettings.language = languageMap[lowerCaseLanguage];
+                }
+              }
+              
               results.settings = parsedSettings;
               
               // Record this effect in the database if we have a command record

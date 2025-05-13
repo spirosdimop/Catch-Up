@@ -294,7 +294,7 @@ function fallbackKeywordRouter(message: string): CommandRoutingResult {
         
         console.log(`Detected language change request to: ${languageCode}`);
         
-        // Add the settings response directly
+        // Add the settings response directly - make sure to use the language code
         result.settings_response = {
           language: languageCode,
           language_name: languageCode === 'en' ? 'English' :
