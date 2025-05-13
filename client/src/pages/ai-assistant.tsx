@@ -403,15 +403,124 @@ export default function AIAssistant() {
         };
         
         // Update the title element with new language text
-        const pageTitleElement = document.querySelector('.page-title h2');
+        const pageTitleElement = document.querySelector('.page-title h1');
         if (pageTitleElement) {
           pageTitleElement.textContent = titleTextMap[result.language] || 'AI Assistant';
+          console.log('Updated page title to:', titleTextMap[result.language]);
+        } else {
+          console.log('Could not find page title element:', document.querySelector('.page-title'));
         }
         
         // Update the description element with new language text
         const pageDescriptionElement = document.querySelector('.page-title p');
         if (pageDescriptionElement) {
           pageDescriptionElement.textContent = descriptionTextMap[result.language] || 'Get help and insights for your freelance business';
+          console.log('Updated page description to:', descriptionTextMap[result.language]);
+        } else {
+          console.log('Could not find page description element');
+        }
+        
+        // Also update the tab labels based on the language
+        const tabLabels: Record<string, Record<string, string>> = {
+          'el': {
+            'chat': 'Γενικός Βοηθός',
+            'scheduling': 'Βοηθός Προγραμματισμού',
+            'summary': 'Σύνοψη Προγράμματος',
+            'settings': 'Ρυθμίσεις'
+          },
+          'es': {
+            'chat': 'Asistente General',
+            'scheduling': 'Asistente de Programación',
+            'summary': 'Resumen de Agenda',
+            'settings': 'Ajustes'
+          }
+        };
+        
+        // Update tab labels if we have translations for this language
+        if (tabLabels[result.language]) {
+          // Radix UI uses a data-state attribute for active tabs
+          const tabs = document.querySelectorAll('[data-radix-collection-item]');
+          console.log('Found tabs:', tabs.length);
+          
+          tabs.forEach((tab: Element) => {
+            const value = tab.getAttribute('data-value');
+            console.log('Tab value:', value);
+            
+            if (value && tabLabels[result.language][value]) {
+              console.log('Updating tab:', value, 'to', tabLabels[result.language][value]);
+              
+              // The tab text is likely inside a span after the icon
+              const spans = tab.querySelectorAll('span');
+              if (spans.length > 0) {
+                spans[spans.length - 1].textContent = tabLabels[result.language][value];
+              } else {
+                // If no spans, try to update the text node
+                const children = Array.from(tab.childNodes);
+                // Find text nodes (nodeType 3)
+                for (const child of children) {
+                  if (child.nodeType === 3 && child.textContent && child.textContent.trim()) {
+                    child.textContent = tabLabels[result.language][value];
+                    break;
+                  }
+                }
+              }
+            }
+          });
+        }
+        
+        // Also update the App Settings UI text
+        const appSettingsTextMap: Record<string, Record<string, string>> = {
+          'el': {
+            'title': 'Ρυθμίσεις Εφαρμογής',
+            'description': 'Ελέγξτε τις ρυθμίσεις της εφαρμογής χρησιμοποιώντας φυσική γλώσσα',
+            'change_settings': 'Αλλαγή Ρυθμίσεων',
+            'supported_settings': 'Υποστηριζόμενες Ρυθμίσεις:',
+            'placeholder': 'Παράδειγμα: "Αλλάξτε τη γλώσσα μου σε αγγλικά και ενεργοποιήστε την αυτόματη απάντηση"',
+            'button_text': 'Ενημέρωση Ρυθμίσεων',
+            'processing': 'Επεξεργασία...',
+            'settings_updated': 'Οι Ρυθμίσεις Ενημερώθηκαν',
+            'changed_settings': 'Αλλαγμένες Ρυθμίσεις:'
+          },
+          'es': {
+            'title': 'Control de Ajustes',
+            'description': 'Controle los ajustes de su aplicación usando lenguaje natural',
+            'change_settings': 'Cambiar Ajustes',
+            'supported_settings': 'Ajustes Compatibles:',
+            'placeholder': 'Ejemplo: "Establece mi estado como ocupado y activa la respuesta automática"',
+            'button_text': 'Actualizar Ajustes',
+            'processing': 'Procesando...',
+            'settings_updated': 'Ajustes Actualizados',
+            'changed_settings': 'Ajustes Cambiados:'
+          }
+        };
+        
+        // Apply translations to the settings page
+        if (appSettingsTextMap[result.language]) {
+          const texts = appSettingsTextMap[result.language];
+          
+          // Find and update settings page elements
+          const settingsElements = {
+            'title': document.querySelector('.ai-settings-title'),
+            'description': document.querySelector('.ai-settings-description'),
+            'change_settings': document.querySelector('.ai-settings-header'),
+            'supported_settings': document.querySelector('.ai-settings-supported'),
+            'button_text': document.querySelector('.ai-settings-button:not(.processing)'),
+            'settings_updated': document.querySelector('.ai-settings-updated-title'),
+            'changed_settings': document.querySelector('.ai-settings-changed')
+          };
+          
+          // Update each element text content if found
+          for (const [key, element] of Object.entries(settingsElements)) {
+            if (element && texts[key]) {
+              element.textContent = texts[key];
+            }
+          }
+          
+          // Update placeholder separately
+          const textarea = document.querySelector('.ai-settings-textarea');
+          if (textarea && texts['placeholder']) {
+            textarea.setAttribute('placeholder', texts['placeholder']);
+          }
         }
         
         toast({
@@ -651,14 +760,14 @@ export default function AIAssistant() {
         <TabsContent value="settings" className="mt-0">
           <Card className="h-[calc(100vh-300px)] flex flex-col">
             <CardHeader>
-              <CardTitle>App Settings Control</CardTitle>
-              <CardDescription>
+              <CardTitle className="ai-settings-title">App Settings Control</CardTitle>
+              <CardDescription className="ai-settings-description">
                 Control your app settings using natural language
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto">
               <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-2">Change Settings</h3>
+                <h3 className="text-lg font-semibold mb-2 ai-settings-header">Change Settings</h3>
                 <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md mb-4">
                   <p className="text-sm text-yellow-800 flex items-center">
                     <AlertCircle className="h-4 w-4 mr-2" />
@@ -667,7 +776,7 @@ export default function AIAssistant() {
                 </div>
                 
                 <div className="mb-4 space-y-2">
-                  <h4 className="text-sm font-medium">Supported Settings:</h4>
+                  <h4 className="text-sm font-medium ai-settings-supported">Supported Settings:</h4>
                   <div className="flex flex-wrap gap-2">
                     <Badge variant="outline">availability</Badge>
                     <Badge variant="outline">auto_reply_enabled</Badge>
@@ -682,11 +791,11 @@ export default function AIAssistant() {
                   placeholder="Example: 'Set my status to busy and enable auto-reply with the message that I'll be back tomorrow'"
                   value={settingsInput}
                   onChange={(e) => setSettingsInput(e.target.value)}
-                  className="h-32 mb-4"
+                  className="h-32 mb-4 ai-settings-textarea"
                 />
                 <Button 
                   onClick={handleAppSettings} 
-                  className="w-full"
+                  className={`w-full ai-settings-button ${isProcessingSettings ? 'processing' : ''}`}
                   disabled={isProcessingSettings || !settingsInput.trim()}
                 >
                   {isProcessingSettings ? "Processing..." : "Update Settings"}
@@ -695,13 +804,13 @@ export default function AIAssistant() {
               
               {settingsResult && (
                 <div className="border rounded-lg p-4 mt-4">
-                  <h3 className="text-lg font-semibold mb-2 flex items-center">
+                  <h3 className="text-lg font-semibold mb-2 flex items-center ai-settings-updated-title">
                     <CheckCircle className="h-5 w-5 mr-2 text-green-500" />
                     Settings Updated
                   </h3>
                   
                   <div className="mt-4 bg-gray-50 p-4 rounded-md">
-                    <h4 className="text-sm font-medium mb-2">Changed Settings:</h4>
+                    <h4 className="text-sm font-medium mb-2 ai-settings-changed">Changed Settings:</h4>
                     <pre className="text-sm bg-black text-white p-4 rounded-md overflow-auto">
                       {JSON.stringify(settingsResult, null, 2)}
                     </pre>
