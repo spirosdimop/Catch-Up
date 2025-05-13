@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Sidebar } from "@/components/ui/sidebar";
 import { MobileSidebar } from "@/components/ui/mobile-sidebar";
 import { Header } from "@/components/layout/header";
-import { AIAssistantFloating } from "@/components/unified-assistant/floating-button";
+import { AIAssistantFloating } from "@/components/ai-assistant/floating-button";
 
 type AppShellProps = {
   children: React.ReactNode;
