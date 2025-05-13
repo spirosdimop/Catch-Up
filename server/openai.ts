@@ -41,13 +41,13 @@ export function getOpenAIClient(assistantType: AssistantType = 'general'): OpenA
 
 // Type for AI scheduling responses
 export interface SchedulingResponse {
-  action: 'create' | 'reschedule' | 'cancel' | 'suggest_times';
+  action: 'create' | 'reschedule' | 'cancel' | 'delete' | 'suggest_times';
   event_title?: string;
   start_time?: string;
   end_time?: string;
-  status: 'confirmed' | 'pending' | 'conflict' | 'cancelled';
+  status: 'confirmed' | 'pending' | 'conflict' | 'cancelled' | 'deleted';
   notes: string;
-  event_id?: number; // Added for when events are created
+  event_id?: number; // Used for referencing existing events
 }
 
 /**
@@ -74,11 +74,11 @@ export async function processSchedulingRequest(
     // Create system prompt for the scheduling assistant
     const systemPrompt = `
       You are an AI assistant managing a calendar for a busy professional. 
-      Your job is to schedule, reschedule, cancel, or suggest new appointments based on user requests.
+      Your job is to schedule, reschedule, cancel, delete, or suggest new appointments based on user requests.
       
       IMPORTANT: Today's date is ${currentDateString} (yyyy-mm-dd format). Keep this in mind when scheduling.
       
-      IMPORTANT: Always assume the user wants to CREATE a calendar event unless they specifically mention rescheduling or canceling.
+      IMPORTANT: Always assume the user wants to CREATE a calendar event unless they specifically mention rescheduling, canceling, or deleting.
       
       Rules you must follow:
       - Always extract specific meeting details from user requests (time, date, client name, purpose)
@@ -92,14 +92,17 @@ export async function processSchedulingRequest(
       - For any dates without a year specified, use the current year or a future date
       - If a meeting is scheduled for a date that has already passed in the current year, schedule it for next year
       - DO NOT schedule meetings in the past - check against today's date (${currentDateString})
+      - When the user wants to delete an event, use action "delete" and set status to "deleted" (set event_id if mentioned)
+      - For delete requests, try to extract the event information from the request (title or ID)
       
       Return ONLY a JSON object with:
-      - action (create, reschedule, cancel, suggest_times)
+      - action (create, reschedule, cancel, delete, suggest_times)
       - event_title (if applicable)
       - start_time (ISO format, if applicable)
       - end_time (ISO format, if applicable)
-      - status (confirmed, pending, conflict, cancelled)
+      - status (confirmed, pending, conflict, cancelled, deleted)
       - notes (explanation of decision or the meeting details including agenda items and preparation notes)
+      - event_id (if referenced in the request or created by the system)
     `;
 
     // Convert user schedule to a string representation

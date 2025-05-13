@@ -260,8 +260,28 @@ export default function UnifiedAssistant() {
           
         } else if (calendar.action === 'reschedule') {
           responseText += `\n\n✓ Event rescheduled: "${calendar.event_title}"`;
-        } else if (calendar.action === 'cancel') {
-          responseText += `\n\n✓ Event canceled: "${calendar.event_title}"`;
+          setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+          }, 500);
+        } else if ((calendar.action === 'cancel' || calendar.action === 'delete') as boolean) {
+          // Handle both cancel and delete actions the same way
+          const status = calendar.status as 'deleted' | 'conflict' | 'cancelled' | 'confirmed' | 'pending';
+          if (status === 'deleted') {
+            responseText += `\n\n✓ Event deleted: "${calendar.event_title || 'Specified event'}"`;
+            if (calendar.event_id) {
+              responseText += ` (ID: ${calendar.event_id})`;
+            }
+            setTimeout(() => {
+              queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+            }, 500);
+          } else if (status === 'conflict') {
+            responseText += `\n\n⚠️ Could not delete event: ${calendar.notes}`;
+          } else {
+            responseText += `\n\n✓ Event canceled: "${calendar.event_title}"`;
+            setTimeout(() => {
+              queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+            }, 500);
+          }
         } else if (calendar.action === 'suggest_times') {
           responseText += `\n\n✓ Schedule suggestions created`;
         }

@@ -1407,7 +1407,7 @@ Remember: The most helpful thing you can do is direct users to the specialized t
             };
           }
           
-          // If action is create, actually create the event
+          // Handle different calendar actions
           if (calendarResponse.action === 'create' && 
               calendarResponse.event_title && 
               calendarResponse.start_time && 
@@ -1448,6 +1448,73 @@ Remember: The most helpful thing you can do is direct users to the specialized t
               }
             } catch (createError) {
               console.error("Error creating event:", createError);
+            }
+          } 
+          // Handle delete events
+          else if (calendarResponse.action === 'delete' || calendarResponse.action === 'cancel') {
+            try {
+              let eventId = calendarResponse.event_id;
+              let eventTitle = calendarResponse.event_title;
+              let deletedEvent = null;
+              
+              // If we have an event ID, use it directly to delete
+              if (eventId) {
+                deletedEvent = await storage.deleteEvent(eventId);
+              } 
+              // If we have a title but no ID, try to find the event by title
+              else if (eventTitle) {
+                // Get all events
+                const allEvents = await storage.getEvents(userId);
+                
+                // Find events with matching title (case insensitive)
+                const matchingEvents = allEvents.filter(event => 
+                  event.title.toLowerCase().includes(eventTitle!.toLowerCase())
+                );
+                
+                // If we found exactly one match, delete it
+                if (matchingEvents.length === 1) {
+                  deletedEvent = await storage.deleteEvent(matchingEvents[0].id);
+                  eventId = matchingEvents[0].id;
+                }
+                // If we found multiple matches, update the response to indicate this
+                else if (matchingEvents.length > 1) {
+                  calendarResponse.status = 'conflict';
+                  calendarResponse.notes = `Found multiple events matching "${eventTitle}". Please specify which one to delete by using a more specific title or mentioning the date.`;
+                }
+                // If no matches, indicate this in the response
+                else {
+                  calendarResponse.status = 'conflict';
+                  calendarResponse.notes = `No events found matching "${eventTitle}". Please check the title and try again.`;
+                }
+              }
+              
+              // If we successfully deleted an event, update the response
+              if (deletedEvent) {
+                calendarResponse.status = 'deleted';
+                
+                // Record this effect in the database if we have a command record
+                if (commandRecord && eventId) {
+                  try {
+                    await storage.createAiCommandEffect({
+                      commandId: commandRecord.id,
+                      effectType: 'delete_event',
+                      targetType: 'event',
+                      targetId: eventId.toString(),
+                      details: JSON.stringify({
+                        title: eventTitle || 'Unknown event'
+                      })
+                    });
+                  } catch (effectError) {
+                    console.error('Error recording delete event effect:', effectError);
+                    // Continue even if we couldn't record the effect
+                  }
+                }
+              }
+            } catch (error) {
+              const deleteError = error as Error;
+              console.error("Error deleting event:", deleteError);
+              calendarResponse.status = 'conflict';
+              calendarResponse.notes = `Error deleting event: ${deleteError.message || String(deleteError)}`;
             }
           }
           
