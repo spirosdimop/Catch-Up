@@ -1093,31 +1093,44 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       // Process settings request if present
       if (routingResult.settings_prompt) {
         try {
-          const settingsClient = getOpenAIClient('settings');
-          
-          const settingsResponse = await settingsClient.chat.completions.create({
-            model: 'gpt-4o',
-            messages: [
-              { 
-                role: 'system', 
-                content: `You are an assistant that controls app settings. Convert the user's message into a JSON object 
-                          containing only the settings they want to change.`
-              },
-              { role: 'user', content: routingResult.settings_prompt }
-            ],
-            temperature: 0.1,
-            max_tokens: 300,
-            response_format: { type: "json_object" }
-          });
-          
-          const settingsContent = settingsResponse.choices[0]?.message?.content;
-          if (settingsContent) {
-            results.settings = JSON.parse(settingsContent);
+          // If we have a direct settings response from the keyword router, use it
+          if (routingResult.settings_response) {
+            console.log('Using direct settings response from keyword router');
+            results.settings = routingResult.settings_response;
+          } else {
+            // Otherwise try to use OpenAI
+            const settingsClient = getOpenAIClient('settings');
+            
+            const settingsResponse = await settingsClient.chat.completions.create({
+              model: 'gpt-4o',
+              messages: [
+                { 
+                  role: 'system', 
+                  content: `You are an assistant that controls app settings. Convert the user's message into a JSON object 
+                            containing only the settings they want to change.`
+                },
+                { role: 'user', content: routingResult.settings_prompt }
+              ],
+              temperature: 0.1,
+              max_tokens: 300,
+              response_format: { type: "json_object" }
+            });
+            
+            const settingsContent = settingsResponse.choices[0]?.message?.content;
+            if (settingsContent) {
+              results.settings = JSON.parse(settingsContent);
+            }
           }
         } catch (settingsError) {
           console.error('Error processing settings:', settingsError);
+          
           // Add error information to the results
-          results.settings_error = "Unable to process settings request";
+          if (routingResult.settings_response) {
+            // If we have a direct response, use it even if OpenAI failed
+            results.settings = routingResult.settings_response;
+          } else {
+            results.settings_error = "Unable to process settings request";
+          }
         }
       }
       
@@ -1155,11 +1168,18 @@ Remember: The most helpful thing you can do is direct users to the specialized t
             // Extract date - look for "tomorrow", "today", or specific date patterns
             const now = new Date();
             let startDate = new Date();
-            startDate.setHours(10, 0, 0, 0); // Default to 10:00 AM
+            
+            // For testing and demonstration, log the user input for debugging
+            console.log(`Parsing date/time from user input: "${userInput}"`);
+            
+            // Default to 10:00 AM
+            startDate.setHours(10, 0, 0, 0);
             
             if (userInput.includes("tomorrow")) {
+              console.log("Found 'tomorrow' in input - setting date to tomorrow");
               startDate.setDate(startDate.getDate() + 1);
             } else if (userInput.includes("today")) {
+              console.log("Found 'today' in input - keeping date as today");
               // Already set to today
             } else {
               // Try to find month names or numbers
@@ -1173,6 +1193,7 @@ Remember: The most helpful thing you can do is direct users to the specialized t
                   if (dayMatch && dayMatch[1]) {
                     const day = parseInt(dayMatch[1], 10);
                     if (day >= 1 && day <= 31) {
+                      console.log(`Found month ${monthNames[i]} and day ${day}`);
                       startDate.setMonth(i);
                       startDate.setDate(day);
                       foundMonth = true;
@@ -1189,19 +1210,29 @@ Remember: The most helpful thing you can do is direct users to the specialized t
                   const month = parseInt(dateMatch[1], 10) - 1; // JavaScript months are 0-based
                   const day = parseInt(dateMatch[2], 10);
                   if (month >= 0 && month < 12 && day >= 1 && day <= 31) {
+                    console.log(`Found date format MM/DD: ${month+1}/${day}`);
                     startDate.setMonth(month);
                     startDate.setDate(day);
                   }
                 }
               }
+              
+              // If we still don't have a specific date, default to tomorrow
+              if (!foundMonth && !userInput.includes("today")) {
+                console.log("No specific date found in input - defaulting to tomorrow");
+                startDate.setDate(startDate.getDate() + 1);
+              }
             }
             
-            // Extract time if present
-            const timeMatch = userInput.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+            // Extract time if present - handle formats like "3pm", "3:30pm", "15:00", etc.
+            let foundTime = false;
+            
+            // Pattern for "X pm/am" or "X:YY pm/am"
+            const timeMatch = userInput.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)/i);
             if (timeMatch) {
               let hour = parseInt(timeMatch[1], 10);
               const minute = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
-              const meridian = timeMatch[3] ? timeMatch[3].toLowerCase() : null;
+              const meridian = timeMatch[3].toLowerCase();
               
               // Adjust hour based on AM/PM
               if (meridian === "pm" && hour < 12) {
@@ -1211,7 +1242,41 @@ Remember: The most helpful thing you can do is direct users to the specialized t
               }
               
               if (hour >= 0 && hour < 24 && minute >= 0 && minute < 60) {
+                console.log(`Found time: ${hour}:${minute} ${meridian}`);
                 startDate.setHours(hour, minute, 0, 0);
+                foundTime = true;
+              }
+            }
+            
+            // Pattern for 24-hour time format "HH:MM"
+            if (!foundTime) {
+              const militaryTimeMatch = userInput.match(/(?<!\d)(\d{1,2}):(\d{2})(?!\s*(am|pm))/i);
+              if (militaryTimeMatch) {
+                const hour = parseInt(militaryTimeMatch[1], 10);
+                const minute = parseInt(militaryTimeMatch[2], 10);
+                
+                if (hour >= 0 && hour < 24 && minute >= 0 && minute < 60) {
+                  console.log(`Found 24-hour time: ${hour}:${minute}`);
+                  startDate.setHours(hour, minute, 0, 0);
+                  foundTime = true;
+                }
+              }
+            }
+            
+            // Look for common time indicators if no specific time format was found
+            if (!foundTime) {
+              if (userInput.includes("morning")) {
+                console.log("Found 'morning' - setting time to 9:00 AM");
+                startDate.setHours(9, 0, 0, 0);
+              } else if (userInput.includes("afternoon")) {
+                console.log("Found 'afternoon' - setting time to 2:00 PM");
+                startDate.setHours(14, 0, 0, 0);
+              } else if (userInput.includes("evening")) {
+                console.log("Found 'evening' - setting time to 6:00 PM");
+                startDate.setHours(18, 0, 0, 0);
+              } else if (userInput.includes("night")) {
+                console.log("Found 'night' - setting time to 8:00 PM");
+                startDate.setHours(20, 0, 0, 0);
               }
             }
             

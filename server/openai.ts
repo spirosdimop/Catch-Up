@@ -232,6 +232,8 @@ export interface CommandRoutingResult {
   message_prompt?: string;
   clarification_prompt?: string;
   missing_fields?: string[];
+  // For direct responses without calling OpenAI (fallback)
+  settings_response?: Record<string, any>;
 }
 
 /**
@@ -254,9 +256,45 @@ function fallbackKeywordRouter(message: string): CommandRoutingResult {
     lowerMessage.includes('notification') ||
     lowerMessage.includes('status') ||
     lowerMessage.includes('availability') ||
-    lowerMessage.includes('profile')
+    lowerMessage.includes('profile') ||
+    lowerMessage.includes('language')
   ) {
     result.settings_prompt = message;
+    
+    // Special handling for language settings
+    if (lowerMessage.includes('language')) {
+      // Check if the message is asking to change language
+      const englishMatch = /\b(english|en)\b/i.test(lowerMessage);
+      const spanishMatch = /\b(spanish|español|espanol|es)\b/i.test(lowerMessage);
+      const frenchMatch = /\b(french|français|francais|fr)\b/i.test(lowerMessage);
+      const germanMatch = /\b(german|deutsch|de)\b/i.test(lowerMessage);
+      const chineseMatch = /\b(chinese|中文|zh)\b/i.test(lowerMessage);
+      const japaneseMatch = /\b(japanese|日本語|ja)\b/i.test(lowerMessage);
+      
+      // Return direct settings JSON if we can detect language
+      if (englishMatch || spanishMatch || frenchMatch || germanMatch || chineseMatch || japaneseMatch) {
+        let languageCode = 'en';
+        
+        if (spanishMatch) languageCode = 'es';
+        else if (frenchMatch) languageCode = 'fr';
+        else if (germanMatch) languageCode = 'de';
+        else if (chineseMatch) languageCode = 'zh';
+        else if (japaneseMatch) languageCode = 'ja';
+        
+        console.log(`Detected language change request to: ${languageCode}`);
+        
+        // Add the settings response directly
+        result.settings_response = {
+          language: languageCode,
+          language_name: languageCode === 'en' ? 'English' :
+                         languageCode === 'es' ? 'Spanish' :
+                         languageCode === 'fr' ? 'French' :
+                         languageCode === 'de' ? 'German' :
+                         languageCode === 'zh' ? 'Chinese' :
+                         languageCode === 'ja' ? 'Japanese' : 'English'
+        };
+      }
+    }
   }
   
   // Check for calendar-related keywords

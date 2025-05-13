@@ -8,6 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "wouter";
 
 // Message types
 type MessageRole = 'user' | 'assistant' | 'system';
@@ -141,16 +142,31 @@ export default function UnifiedAssistant() {
         const calendar = result.calendar;
         
         if (calendar.action === 'create') {
-          responseText += `\n\n✓ Event created: "${calendar.event_title}" at ${new Date(calendar.start_time!).toLocaleString()}`;
+          // Convert time to a human-readable format with 12-hour clock
+          const startTime = new Date(calendar.start_time!);
+          const formattedStartTime = startTime.toLocaleString('en-US', {
+            weekday: 'long', 
+            month: 'long', 
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          });
+          
+          responseText += `\n\n✓ Event created: "${calendar.event_title}" on ${formattedStartTime}`;
           
           if (calendar.event_id) {
             responseText += `\n   Event ID: ${calendar.event_id} (saved in calendar)`;
+            
+            // Add a direct button to view the calendar
+            setTimeout(() => {
+              // After the message is displayed, invalidate the events query to refresh data
+              queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+            }, 500);
           } else {
             responseText += `\n   ⚠️ Note: Event may not have been saved to calendar properly`;
           }
           
-          // If a calendar event was created, invalidate the events query
-          queryClient.invalidateQueries({ queryKey: ['/api/events'] });
         } else if (calendar.action === 'reschedule') {
           responseText += `\n\n✓ Event rescheduled: "${calendar.event_title}"`;
         } else if (calendar.action === 'cancel') {
@@ -159,8 +175,8 @@ export default function UnifiedAssistant() {
           responseText += `\n\n✓ Schedule suggestions created`;
         }
         
-        // Add a link to view the calendar
-        responseText += `\n\n[Click here to view in Calendar](/calendar)`;
+        // Add a button to view the calendar that will appear when rendered
+        responseText += `\n\n✓ [View in Calendar](/calendar)`;
       } else if (result.calendar_error) {
         responseText += `\n\n⚠️ ${result.calendar_error}`;
       }
@@ -251,7 +267,23 @@ export default function UnifiedAssistant() {
                         : 'bg-yellow-100 text-yellow-800 text-sm'
                   }`}
                 >
-                  <div className="whitespace-pre-line">{message.text}</div>
+                  <div className="whitespace-pre-line">
+                    {/* Process message text to convert markdown-style links to actual links */}
+                    {message.text.split(/(\[.*?\]\(.*?\))/).map((part, i) => {
+                      // Check if this part is a markdown link [text](url)
+                      const linkMatch = part.match(/\[(.*?)\]\((.*?)\)/);
+                      if (linkMatch) {
+                        const [_, text, url] = linkMatch;
+                        return (
+                          <Link key={i} href={url} className="text-blue-500 hover:underline hover:text-blue-700">
+                            {text}
+                          </Link>
+                        );
+                      }
+                      // Otherwise just return the text
+                      return part;
+                    })}
+                  </div>
                   
                   {/* Add badges to indicate what was processed */}
                   {message.role === 'assistant' && message.text.includes('processed your request') && (
