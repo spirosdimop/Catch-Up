@@ -26,7 +26,6 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { registerBookingRoutes } from "./routes/bookings";
-import imagesRouter from "./routes/images";
 
 // Helper functions for navigation tracking
 function getDisplayNameForPath(path: string): string {
@@ -1894,9 +1893,6 @@ Remember: The most helpful thing you can do is direct users to the specialized t
   
   // Register booking routes for client appointment scheduling
   registerBookingRoutes(app);
-  
-  // Register image generation routes
-  app.use("/api/images", imagesRouter);
   
   const httpServer = createServer(app);
   return httpServer;

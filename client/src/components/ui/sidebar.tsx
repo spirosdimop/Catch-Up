@@ -10,8 +10,7 @@ import {
   Settings,
   UserCircle,
   Cog,
-  LogOut,
-  Palette
+  LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -59,11 +58,6 @@ const navItems: SidebarNavItem[] = [
     title: "AI Assistant",
     href: "/ai-assistant",
     icon: <Bot className="w-5 h-5 mr-2 text-primary" />,
-  },
-  {
-    title: "Landing Designer",
-    href: "/landing-generator",
-    icon: <Palette className="w-5 h-5 mr-2" />,
   },
   {
     title: "Settings",
