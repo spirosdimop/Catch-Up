@@ -12,7 +12,7 @@ import { Download, Copy, Save } from "lucide-react";
 const SAMPLE_PROMPTS = [
   {
     title: "Modern Landing Page",
-    prompt: "A modern, high-conversion landing page UI for a productivity assistant app, designed in minimalist flat style with a deep navy blue background and crisp white and cobalt blue highlights. The hero section features a bold headline (\"Your Work. Fully Backed.\") and multiple call-to-action buttons across the layout, styled identically with different labels. Below the CTA buttons, display a carousel of diverse user avatars with names or roles. Add subtle animated effects for engagement. The layout uses sharp typography, soft shadows, and clean spacing."
+    prompt: "A modern, high-conversion landing page UI for a productivity assistant app, designed in minimalist flat style with a deep navy blue background and crisp white and cobalt blue highlights. The hero section features a bold headline (\"Your Work. Fully Backed.\") and multiple call-to-action buttons across the layout: \"Join as a Freelancer,\" \"Sign Up as a Manager,\" \"Start as a Team,\" \"Book Your Assistant,\" each styled identically with different labels but performing the same function. Below the CTA buttons, display a live \"People using Catch Up\" section — a horizontal scrolling carousel of diverse user avatars with names or roles (e.g., \"Sarah – Designer\", \"Tom – Sales Lead\", \"Nia – Startup Founder\"). Add subtle animated effects (like glowing buttons or floating avatars) for engagement. The layout uses sharp typography, soft shadows, and clean spacing to create a modern and trustworthy vibe."
   },
   {
     title: "Freelancer Portfolio",

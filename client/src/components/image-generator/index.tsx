@@ -36,18 +36,25 @@ export function ImageGenerator({
 
     setIsGenerating(true);
     try {
-      const response = await apiRequest<{ url: string }>('/api/images/generate', {
+      const response = await fetch('/api/images/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ prompt }),
+        credentials: 'include'
       });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to generate image: ${response.status}`);
+      }
+      
+      const data = await response.json();
 
-      if (response && response.url) {
-        setImageUrl(response.url);
+      if (data && data.url) {
+        setImageUrl(data.url);
         if (onImageGenerated) {
-          onImageGenerated(response.url);
+          onImageGenerated(data.url);
         }
         toast({
           title: "Image generated",
