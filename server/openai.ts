@@ -245,6 +245,8 @@ export interface CommandRoutingResult {
   missing_fields?: string[];
   // For direct responses without calling OpenAI (fallback)
   settings_response?: Record<string, any>;
+  // For maintaining conversation context
+  conversation_context?: string;
 }
 
 /**
@@ -348,9 +350,10 @@ function fallbackKeywordRouter(message: string): CommandRoutingResult {
 /**
  * Routes a user input message to the appropriate specialized API
  * @param message The user's natural language input message
+ * @param conversationContext Optional previous conversation context to maintain continuity
  * @returns An object containing prompts for each API or clarification requests
  */
-export async function routeInputToApis(message: string): Promise<CommandRoutingResult> {
+export async function routeInputToApis(message: string, conversationContext?: string): Promise<CommandRoutingResult> {
   try {
     // Get OpenAI client specifically for routing (using the general client)
     const routingClient = getOpenAIClient('general');
