@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { ArrowRight, CheckCircle, Clock, Globe, Users } from "lucide-react";
+import { ArrowRight, Bot, CheckCircle, Clock, Globe, Users } from "lucide-react";
 
 export default function LandingPage() {
   return (
@@ -8,7 +8,7 @@ export default function LandingPage() {
       {/* Header/Navigation */}
       <header className="px-4 lg:px-6 h-16 flex items-center justify-between border-b bg-background">
         <div className="flex items-center gap-2">
-          <Clock className="h-6 w-6 text-primary" />
+          <Bot className="h-6 w-6 text-primary" />
           <span className="text-xl font-bold">FreelanceFlow</span>
         </div>
         <nav className="hidden md:flex gap-6">
@@ -38,39 +38,40 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-background to-muted">
+      <section className="w-full py-12 md:py-24 lg:py-32 bg-gradient-to-b from-[#0F1D3A] to-[#172B52] text-white">
         <div className="container px-4 md:px-6 space-y-10 md:space-y-16">
           <div className="flex flex-col items-center space-y-4 text-center">
-            <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm text-primary">
+            <div className="inline-block rounded-lg bg-[#1E3A70] px-3 py-1 text-sm text-white">
               Freelancer Management Platform
             </div>
-            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tighter bg-gradient-to-r from-primary to-indigo-500 bg-clip-text text-transparent">
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold tracking-tighter bg-gradient-to-r from-white to-blue-200 bg-clip-text text-transparent">
               Everything You Need to Manage Your Freelance Business
             </h1>
-            <p className="max-w-[700px] text-muted-foreground md:text-xl">
+            <p className="max-w-[700px] text-blue-200 md:text-xl">
               Streamline client management, project tracking, invoicing, and scheduling with our all-in-one platform designed for freelancers.
             </p>
             <div className="flex flex-col md:flex-row gap-4">
               <Link href="/signup">
-                <Button size="lg" className="px-8">
+                <Button size="lg" className="px-8 bg-white text-[#0F1D3A] hover:bg-blue-100">
                   Get Started for Free
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <a href="#features">
-                <Button variant="outline" size="lg" className="px-8">
+                <Button variant="outline" size="lg" className="px-8 text-white border-white hover:bg-[#1E3A70]">
                   Explore Features
                 </Button>
               </a>
             </div>
           </div>
           <div className="mx-auto flex justify-center">
-            <div className="relative w-full max-w-5xl overflow-hidden rounded-xl border bg-background shadow-xl">
-              <div className="aspect-[16/9] bg-gradient-to-br from-indigo-100 to-indigo-50 flex items-center justify-center">
-                <div className="p-8 text-center text-gray-500">
-                  <Clock className="w-32 h-32 mx-auto text-primary mb-4" />
-                  <p className="text-xl font-semibold">Dashboard Preview</p>
-                </div>
+            <div className="relative w-full max-w-5xl overflow-hidden rounded-xl border border-[#1E3A70] bg-[#0F1D3A] shadow-xl">
+              <div className="aspect-[16/9] flex items-center justify-center">
+                <img 
+                  src="/attached_assets/Screenshot 2025-05-13 at 9.24.26 AM.png" 
+                  alt="Dashboard Preview" 
+                  className="w-full h-full object-cover rounded-md"
+                />
               </div>
             </div>
           </div>
@@ -78,17 +79,17 @@ export default function LandingPage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="w-full py-12 md:py-24 bg-background">
+      <section id="features" className="w-full py-12 md:py-24 bg-white">
         <div className="container px-4 md:px-6">
           <div className="flex flex-col items-center justify-center space-y-4 text-center">
             <div className="space-y-2">
-              <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm text-primary">
+              <div className="inline-block rounded-lg bg-blue-100 px-3 py-1 text-sm text-[#0F1D3A] font-medium">
                 Features
               </div>
-              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl">
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl text-[#0F1D3A]">
                 Everything You Need in One Platform
               </h2>
-              <p className="max-w-[700px] text-muted-foreground md:text-xl">
+              <p className="max-w-[700px] text-gray-600 md:text-xl">
                 Our comprehensive suite of tools helps you manage clients, track time, send invoices, and schedule meetings effortlessly.
               </p>
             </div>
