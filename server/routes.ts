@@ -1122,6 +1122,22 @@ Remember: The most helpful thing you can do is direct users to the specialized t
           if (routingResult.settings_response) {
             console.log('Using direct settings response from keyword router');
             results.settings = routingResult.settings_response;
+            
+            // Record this effect in the database if we have a command record
+            if (commandRecord) {
+              try {
+                await storage.createAiCommandEffect({
+                  commandId: commandRecord.id,
+                  effectType: 'update_settings',
+                  targetType: 'settings',
+                  targetId: null,
+                  details: JSON.stringify(routingResult.settings_response)
+                });
+              } catch (effectError) {
+                console.error('Error recording settings effect:', effectError);
+                // Continue even if we couldn't record the effect
+              }
+            }
           } else {
             // Otherwise try to use OpenAI
             const settingsClient = getOpenAIClient('settings');
@@ -1143,7 +1159,24 @@ Remember: The most helpful thing you can do is direct users to the specialized t
             
             const settingsContent = settingsResponse.choices[0]?.message?.content;
             if (settingsContent) {
-              results.settings = JSON.parse(settingsContent);
+              const parsedSettings = JSON.parse(settingsContent);
+              results.settings = parsedSettings;
+              
+              // Record this effect in the database if we have a command record
+              if (commandRecord) {
+                try {
+                  await storage.createAiCommandEffect({
+                    commandId: commandRecord.id,
+                    effectType: 'update_settings',
+                    targetType: 'settings',
+                    targetId: null,
+                    details: settingsContent
+                  });
+                } catch (effectError) {
+                  console.error('Error recording OpenAI settings effect:', effectError);
+                  // Continue even if we couldn't record the effect
+                }
+              }
             }
           }
         } catch (settingsError) {
