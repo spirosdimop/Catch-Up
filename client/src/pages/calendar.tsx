@@ -720,7 +720,7 @@ export default function CalendarPage() {
                       <FormControl>
                         <SelectTrigger>
                           <SelectValue placeholder="Select event type">
-                            {field.value || "Busy"}
+                            {field.value ? field.value.replace('_', ' ').charAt(0).toUpperCase() + field.value.replace('_', ' ').slice(1) : "Busy"}
                           </SelectValue>
                         </SelectTrigger>
                       </FormControl>
