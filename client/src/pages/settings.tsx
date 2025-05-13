@@ -295,6 +295,58 @@ export default function Settings() {
             </CardContent>
           </Card>
         </TabsContent>
+        
+        <TabsContent value="language" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Language Settings</CardTitle>
+              <CardDescription>
+                Choose your preferred language for the application
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="language">Application Language</Label>
+                  <Select 
+                    defaultValue={settings.language}
+                    onValueChange={(value) => {
+                      updateSettings({ language: value });
+                      toast({
+                        title: "Language updated",
+                        description: "Your language preference has been updated.",
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select a language" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="en">English</SelectItem>
+                      <SelectItem value="es">Spanish (Español)</SelectItem>
+                      <SelectItem value="fr">French (Français)</SelectItem>
+                      <SelectItem value="de">German (Deutsch)</SelectItem>
+                      <SelectItem value="zh">Chinese (中文)</SelectItem>
+                      <SelectItem value="ja">Japanese (日本語)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-sm text-muted-foreground">
+                    This will change the language throughout the application
+                  </p>
+                </div>
+                
+                <div className="pt-4">
+                  <p className="text-sm text-muted-foreground mb-2">
+                    You can also change the language using the AI Assistant with commands like:
+                  </p>
+                  <div className="bg-muted p-3 rounded-md text-sm font-mono">
+                    "Change language to Spanish"
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </div>
   );

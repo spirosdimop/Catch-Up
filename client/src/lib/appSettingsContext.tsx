@@ -22,13 +22,25 @@ interface AppSettingsContextType {
   settings: AppSettings;
   updateSettings: (newSettings: Partial<AppSettings>) => void;
   resetSettings: () => void;
+  applyLanguage: () => void;
 }
 
 const AppSettingsContext = createContext<AppSettingsContextType>({
   settings: defaultSettings,
   updateSettings: () => {},
   resetSettings: () => {},
+  applyLanguage: () => {},
 });
+
+// Helper function to apply language setting to the HTML document
+const applyLanguageToDocument = (language: string) => {
+  // Apply language code to HTML document for accessibility and localization
+  document.documentElement.lang = language;
+  console.log(`Applied language: ${language} to document`);
+  
+  // You might also want to update other language-specific elements here
+  // like date formats, currency symbols, or loading translations
+};
 
 export function useAppSettings() {
   return useContext(AppSettingsContext);
@@ -42,22 +54,33 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
     const storedSettings = localStorage.getItem('appSettings');
     if (storedSettings) {
       try {
-        setSettings({
+        const parsedSettings = {
           ...defaultSettings,
           ...JSON.parse(storedSettings)
-        });
+        };
+        setSettings(parsedSettings);
+        
+        // Apply language on initial load
+        applyLanguageToDocument(parsedSettings.language);
       } catch (error) {
         console.error('Failed to parse app settings', error);
       }
+    } else {
+      // Apply default language if no stored settings
+      applyLanguageToDocument(defaultSettings.language);
     }
   }, []);
 
   // Save settings to localStorage when they change
   useEffect(() => {
     localStorage.setItem('appSettings', JSON.stringify(settings));
+    
+    // Apply language setting whenever language changes
+    applyLanguageToDocument(settings.language);
   }, [settings]);
 
   const updateSettings = (newSettings: Partial<AppSettings>) => {
+    console.log('Updating settings:', newSettings);
     setSettings(prev => ({
       ...prev,
       ...newSettings
@@ -68,9 +91,13 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
     setSettings(defaultSettings);
     localStorage.removeItem('appSettings');
   };
+  
+  const applyLanguage = () => {
+    applyLanguageToDocument(settings.language);
+  };
 
   return (
-    <AppSettingsContext.Provider value={{ settings, updateSettings, resetSettings }}>
+    <AppSettingsContext.Provider value={{ settings, updateSettings, resetSettings, applyLanguage }}>
       {children}
     </AppSettingsContext.Provider>
   );

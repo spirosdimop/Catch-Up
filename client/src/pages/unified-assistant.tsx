@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
+import { useAppSettings } from "@/lib/appSettingsContext";
 
 // Message types
 type MessageRole = 'user' | 'assistant' | 'system';
@@ -43,6 +44,7 @@ interface CommandResult {
 export default function UnifiedAssistant() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { updateSettings, applyLanguage } = useAppSettings();
   
   // Message state
   const [inputValue, setInputValue] = useState("");
@@ -133,19 +135,18 @@ export default function UnifiedAssistant() {
       
       // Format the response based on what was processed
       if (result.settings) {
-        // Apply settings to localStorage
+        // Apply settings using the AppSettingsContext
         try {
-          const currentSettings = localStorage.getItem('appSettings') 
-            ? JSON.parse(localStorage.getItem('appSettings') || '{}')
-            : {};
-            
-          const newSettings = {
-            ...currentSettings,
-            ...result.settings
-          };
+          // Update settings through the context
+          updateSettings(result.settings);
           
-          localStorage.setItem('appSettings', JSON.stringify(newSettings));
-          console.log('Updated app settings in localStorage:', newSettings);
+          // Ensure language is immediately applied if language was changed
+          if (result.settings.language) {
+            // Apply language change to the document
+            applyLanguage();
+          }
+          
+          console.log('Updated app settings:', result.settings);
           
           // Show which settings were updated
           responseText += `\n\n✓ Settings updated: ${Object.keys(result.settings).join(', ')}`;
@@ -165,8 +166,8 @@ export default function UnifiedAssistant() {
             responseText += `\n   Language changed to ${languageName}`;
           }
         } catch (error) {
-          console.error('Error updating settings in localStorage:', error);
-          responseText += `\n\n✓ Settings processed, but there was an error saving them locally: ${Object.keys(result.settings).join(', ')}`;
+          console.error('Error updating settings:', error);
+          responseText += `\n\n✓ Settings processed, but there was an error applying them: ${Object.keys(result.settings).join(', ')}`;
         }
       } else if (result.settings_error) {
         responseText += `\n\n⚠️ ${result.settings_error}`;
