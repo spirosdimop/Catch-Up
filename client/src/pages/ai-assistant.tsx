@@ -825,6 +825,72 @@ export default function AIAssistant() {
           </Card>
         </TabsContent>
         
+        {/* Auto-Response Tab */}
+        <TabsContent value="autoresponse" className="mt-0">
+          <Card className="h-[calc(100vh-300px)] flex flex-col">
+            <CardHeader>
+              <CardTitle>Auto-Response Generator</CardTitle>
+              <CardDescription>
+                Create professional, personalized away messages for missed calls or when you're unavailable
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex-1 overflow-y-auto">
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-2">Generate Away Message</h3>
+                <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md mb-4">
+                  <p className="text-sm text-yellow-800 flex items-center">
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    Provide context about why you're unavailable. The AI will generate a polite, professional message under 300 characters.
+                  </p>
+                </div>
+                <Textarea 
+                  placeholder="Example: 'I'm in a client meeting' or 'I'm on vacation until July 15'"
+                  value={autoResponseContext}
+                  onChange={(e) => setAutoResponseContext(e.target.value)}
+                  className="h-32 mb-4"
+                />
+                <Button 
+                  onClick={handleAutoResponseGeneration} 
+                  className="w-full"
+                  disabled={isGeneratingAutoResponse || !autoResponseContext.trim()}
+                >
+                  {isGeneratingAutoResponse ? "Generating..." : "Generate Message"}
+                </Button>
+              </div>
+              
+              {autoResponseMessage && (
+                <div className="border rounded-lg p-4">
+                  <h3 className="text-lg font-semibold mb-2 flex items-center">
+                    <CheckCircle className="h-5 w-5 mr-2 text-green-600" />
+                    Auto-Response Message
+                  </h3>
+                  <div className="bg-muted p-4 rounded-md mt-2 relative">
+                    <p className="text-md font-medium">{autoResponseMessage}</p>
+                    <div className="mt-4 flex justify-between items-center">
+                      <p className="text-xs text-muted-foreground">
+                        {autoResponseMessage.length} characters
+                      </p>
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={() => {
+                          navigator.clipboard.writeText(autoResponseMessage);
+                          toast({
+                            title: "Copied!",
+                            description: "Message copied to clipboard",
+                          });
+                        }}
+                      >
+                        Copy Message
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
         {/* App Settings Tab */}
         <TabsContent value="settings" className="mt-0">
           <Card className="h-[calc(100vh-300px)] flex flex-col">
