@@ -178,6 +178,11 @@ export default function UnifiedAssistant() {
           setMessages(prev => [...prev, missingFieldsMessage]);
         }
         
+        // Capture conversation context even in clarification mode
+        if (result.conversation_context) {
+          setConversationContext(result.conversation_context);
+        }
+        
         return;
       }
       
@@ -348,6 +353,8 @@ export default function UnifiedAssistant() {
                     timestamp: new Date()
                   }
                 ]);
+                // Reset context
+                setConversationContext("");
                 setInClarificationMode(false);
                 setOriginalMessage("");
               }}
@@ -361,6 +368,7 @@ export default function UnifiedAssistant() {
               onClick={() => {
                 // Remove from localStorage
                 localStorage.removeItem('unifiedAssistantMessages');
+                localStorage.removeItem('unifiedAssistantContext');
                 
                 // Reset to default welcome message
                 setMessages([
@@ -373,6 +381,7 @@ export default function UnifiedAssistant() {
                 ]);
                 
                 // Reset conversation context
+                setConversationContext("");
                 setInClarificationMode(false);
                 setOriginalMessage("");
                 
