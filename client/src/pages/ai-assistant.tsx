@@ -9,7 +9,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { useAppSettings } from "@/lib/appSettingsContext";
 import { useQuery } from "@tanstack/react-query";
 
 // Message types
@@ -306,8 +305,7 @@ export default function AIAssistant() {
     }
   };
   
-  // Import the useAppSettings hook for accessing and updating app settings
-  const { updateSettings } = useAppSettings();
+  // We'll use local storage directly instead of the context for now
   
   // Handle app settings submission
   const handleAppSettings = async () => {
@@ -341,15 +339,24 @@ export default function AIAssistant() {
       const result = await response.json();
       setSettingsResult(result);
       
-      // Actually apply the settings to the app
-      updateSettings(result);
+      // Actually apply the settings to the app by storing in localStorage
+      const currentSettings = localStorage.getItem('appSettings') 
+        ? JSON.parse(localStorage.getItem('appSettings') || '{}')
+        : {};
+        
+      const newSettings = {
+        ...currentSettings,
+        ...result
+      };
+      
+      localStorage.setItem('appSettings', JSON.stringify(newSettings));
       
       toast({
         title: "Settings Updated",
         description: "Your app settings have been successfully applied.",
       });
       
-      // If language was changed, show a special message
+      // If language was changed, show a special message and apply change to this page
       if (result.language) {
         const languageNames: Record<string, string> = {
           'en': 'English',
@@ -369,9 +376,47 @@ export default function AIAssistant() {
         
         const languageName = languageNames[result.language] || result.language;
         
+        // Update the page title and description based on language
+        // This demonstrates immediate language change without refresh
+        const titleTextMap: Record<string, string> = {
+          'en': 'AI Assistant',
+          'es': 'Asistente de IA',
+          'fr': 'Assistant IA',
+          'de': 'KI-Assistent',
+          'it': 'Assistente AI',
+          'el': 'Βοηθός AI',
+          'ru': 'ИИ-ассистент',
+          'zh': 'AI助手',
+          'ja': 'AIアシスタント'
+        };
+        
+        const descriptionTextMap: Record<string, string> = {
+          'en': 'Get help and insights for your freelance business',
+          'es': 'Obtenga ayuda e información para su negocio freelance',
+          'fr': 'Obtenez de l\'aide et des informations pour votre activité indépendante',
+          'de': 'Erhalten Sie Hilfe und Einblicke für Ihr Freelance-Geschäft',
+          'it': 'Ottieni aiuto e approfondimenti per la tua attività freelance',
+          'el': 'Λάβετε βοήθεια και πληροφορίες για την επιχείρησή σας ως freelancer',
+          'ru': 'Получите помощь и аналитику для вашего фриланс-бизнеса',
+          'zh': '获取有关自由职业的帮助和见解',
+          'ja': 'フリーランスビジネスのヘルプとインサイトを取得'
+        };
+        
+        // Update the title element with new language text
+        const pageTitleElement = document.querySelector('.page-title h2');
+        if (pageTitleElement) {
+          pageTitleElement.textContent = titleTextMap[result.language] || 'AI Assistant';
+        }
+        
+        // Update the description element with new language text
+        const pageDescriptionElement = document.querySelector('.page-title p');
+        if (pageDescriptionElement) {
+          pageDescriptionElement.textContent = descriptionTextMap[result.language] || 'Get help and insights for your freelance business';
+        }
+        
         toast({
           title: `Language Changed to ${languageName}`,
-          description: "Refresh the page to see all content in the new language",
+          description: "The page title has been updated. Refresh the page to see all content in the new language.",
         });
       }
     } catch (error) {
@@ -388,11 +433,13 @@ export default function AIAssistant() {
 
   return (
     <div className="space-y-6 p-6">
-      <PageTitle 
-        title="AI Assistant" 
-        description="Get help and insights for your freelance business" 
-        icon={<Bot className="h-6 w-6 text-primary" />}
-      />
+      <div className="page-title">
+        <PageTitle 
+          title="AI Assistant" 
+          description="Get help and insights for your freelance business" 
+          icon={<Bot className="h-6 w-6 text-primary" />}
+        />
+      </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid grid-cols-4 mb-6">
