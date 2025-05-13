@@ -472,53 +472,57 @@ export default function LandingPage() {
                 </li>
               </ul>
             </div>
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">Resources</h4>
-              <ul className="space-y-2">
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-white">Resources</h4>
+              <ul className="space-y-3">
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:underline">
+                  <a href="#" className="text-sm text-blue-200 hover:text-white transition-colors">
                     Help Center
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:underline">
+                  <a href="#" className="text-sm text-blue-200 hover:text-white transition-colors">
                     Guides
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:underline">
+                  <a href="#" className="text-sm text-blue-200 hover:text-white transition-colors">
                     Documentation
                   </a>
                 </li>
               </ul>
             </div>
-            <div className="space-y-3">
-              <h4 className="text-sm font-medium">Legal</h4>
-              <ul className="space-y-2">
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold text-white">Legal</h4>
+              <ul className="space-y-3">
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:underline">
+                  <a href="#" className="text-sm text-blue-200 hover:text-white transition-colors">
                     Privacy
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:underline">
+                  <a href="#" className="text-sm text-blue-200 hover:text-white transition-colors">
                     Terms
                   </a>
                 </li>
                 <li>
-                  <a href="#" className="text-sm text-muted-foreground hover:underline">
+                  <a href="#" className="text-sm text-blue-200 hover:text-white transition-colors">
                     Cookie Policy
                   </a>
                 </li>
               </ul>
             </div>
           </div>
-          <div className="mt-8 flex justify-between items-center border-t pt-8">
-            <p className="text-xs text-muted-foreground">
+          <div className="mt-12 flex flex-col md:flex-row justify-between items-center border-t border-blue-800 pt-8">
+            <div className="flex items-center mb-4 md:mb-0">
+              <Bot className="h-6 w-6 text-white mr-2" />
+              <span className="text-xl font-bold text-white">FreelanceFlow</span>
+            </div>
+            <p className="text-sm text-blue-200 mb-4 md:mb-0">
               © 2025 FreelanceFlow. All rights reserved.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-muted-foreground hover:text-foreground">
+            <div className="flex space-x-6">
+              <a href="#" className="text-blue-200 hover:text-white transition-colors">
                 <svg
                   className="h-5 w-5"
                   fill="currentColor"
@@ -532,7 +536,7 @@ export default function LandingPage() {
                   />
                 </svg>
               </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground">
+              <a href="#" className="text-blue-200 hover:text-white transition-colors">
                 <svg
                   className="h-5 w-5"
                   fill="currentColor"
@@ -546,7 +550,7 @@ export default function LandingPage() {
                   />
                 </svg>
               </a>
-              <a href="#" className="text-muted-foreground hover:text-foreground">
+              <a href="#" className="text-blue-200 hover:text-white transition-colors">
                 <svg
                   className="h-5 w-5"
                   fill="currentColor"
