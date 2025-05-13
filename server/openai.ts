@@ -64,23 +64,34 @@ export async function processSchedulingRequest(
     // Get OpenAI client specifically for scheduling
     const schedulingClient = getOpenAIClient('scheduling');
     
+    // Get current date information
+    const currentDate = new Date();
+    const currentDay = currentDate.getDate();
+    const currentMonth = currentDate.getMonth() + 1; // JavaScript months are 0-indexed
+    const currentYear = currentDate.getFullYear();
+    const currentDateString = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${currentDay.toString().padStart(2, '0')}`;
+    
     // Create system prompt for the scheduling assistant
     const systemPrompt = `
       You are an AI assistant managing a calendar for a busy professional. 
       Your job is to schedule, reschedule, cancel, or suggest new appointments based on user requests.
       
+      IMPORTANT: Today's date is ${currentDateString} (yyyy-mm-dd format). Keep this in mind when scheduling.
+      
       IMPORTANT: Always assume the user wants to CREATE a calendar event unless they specifically mention rescheduling or canceling.
       
       Rules you must follow:
       - Always extract specific meeting details from user requests (time, date, client name, purpose)
+      - When user says "tomorrow", that means ${new Date(currentDate.getTime() + 86400000).toISOString().split('T')[0]}
       - If specific time is not mentioned, schedule for 10:00 AM on the next business day
       - If duration is not mentioned, default to 1 hour meetings
       - Set meeting titles to be descriptive (e.g., "Meeting with Client Name: Purpose")
       - Always set status to "confirmed" unless there's a specific conflict
       - Include meeting details in the notes field
-      - ALWAYS use the current year (${new Date().getFullYear()}) for dates unless explicitly specified otherwise
+      - ALWAYS use the current year (${currentYear}) for dates unless explicitly specified otherwise
       - For any dates without a year specified, use the current year or a future date
       - If a meeting is scheduled for a date that has already passed in the current year, schedule it for next year
+      - DO NOT schedule meetings in the past - check against today's date (${currentDateString})
       
       Return ONLY a JSON object with:
       - action (create, reschedule, cancel, suggest_times)

@@ -1226,6 +1226,7 @@ Remember: The most helpful thing you can do is direct users to the specialized t
             // Extract date - look for "tomorrow", "today", or specific date patterns
             const now = new Date();
             let startDate = new Date();
+            startDate.setHours(10, 0, 0, 0); // Default to 10:00 AM
             
             // For testing and demonstration, log the user input for debugging
             console.log(`Parsing date/time from user input: "${userInput}"`);
