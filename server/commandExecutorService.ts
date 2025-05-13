@@ -463,7 +463,6 @@ async function recordCommandEffect(
     effectType,
     targetType,
     details,
-    targetId,
-    createdAt: new Date()
+    targetId
   });
 }
