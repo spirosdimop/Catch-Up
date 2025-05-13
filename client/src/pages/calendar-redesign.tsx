@@ -260,9 +260,10 @@ const CalendarRedesign = () => {
     queryKey: ['/api/events'],
     queryFn: async () => {
       try {
-        const response = await apiRequest('/api/events');
+        const response = await apiRequest("GET", '/api/events');
+        const data = await response.json();
         // Convert date strings to Date objects if needed
-        return Array.isArray(response) ? response.map(event => ({
+        return Array.isArray(data) ? data.map((event: any) => ({
           ...event,
           start: new Date(event.start),
           end: new Date(event.end)
@@ -312,9 +313,10 @@ const CalendarRedesign = () => {
     queryKey: ['/api/tasks'],
     queryFn: async () => {
       try {
-        const response = await apiRequest('/api/tasks', {});
+        const response = await apiRequest("GET", '/api/tasks');
+        const data = await response.json();
         // Convert date strings to Date objects if needed
-        return Array.isArray(response) ? response.map(task => ({
+        return Array.isArray(data) ? data.map((task: any) => ({
           ...task,
           dueDate: new Date(task.dueDate)
         })) : [];
