@@ -113,7 +113,13 @@ export default function Profile() {
   });
   
   // Services editing state
-  const [services, setServices] = useState<{ name: string; duration: number; price: number; }[]>([]);
+  const [services, setServices] = useState<{ 
+    name: string; 
+    duration: number; 
+    price: number; 
+    locationType?: string;
+    description?: string;
+  }[]>([]);
   
   // Initialize services from user data
   useEffect(() => {
@@ -414,7 +420,13 @@ export default function Profile() {
                 onClick={() => {
                   setServices([
                     ...services,
-                    { name: "", duration: 30, price: 0 }
+                    { 
+                      name: "", 
+                      duration: 30, 
+                      price: 0,
+                      locationType: "office",
+                      description: ""
+                    }
                   ]);
                 }}
               >
@@ -432,7 +444,13 @@ export default function Profile() {
                   variant="default"
                   onClick={() => {
                     setServices([
-                      { name: "", duration: 30, price: 0 }
+                      { 
+                        name: "", 
+                        duration: 30, 
+                        price: 0,
+                        locationType: "office",
+                        description: ""
+                      }
                     ]);
                   }}
                 >
@@ -455,52 +473,93 @@ export default function Profile() {
                         <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"></path>
                       </svg>
                     </button>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-2">
-                        <Label htmlFor={`service-name-${index}`}>Service Name</Label>
-                        <Input
-                          id={`service-name-${index}`}
-                          value={service.name}
-                          onChange={(e) => {
-                            const updatedServices = [...services];
-                            updatedServices[index].name = e.target.value;
-                            setServices(updatedServices);
-                          }}
-                          placeholder="e.g., Consultation"
-                          required
-                        />
+                    <div className="grid grid-cols-1 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor={`service-name-${index}`}>Service Name</Label>
+                          <Input
+                            id={`service-name-${index}`}
+                            value={service.name}
+                            onChange={(e) => {
+                              const updatedServices = [...services];
+                              updatedServices[index].name = e.target.value;
+                              setServices(updatedServices);
+                            }}
+                            placeholder="e.g., Consultation"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`service-duration-${index}`}>Duration (minutes)</Label>
+                          <Input
+                            id={`service-duration-${index}`}
+                            type="number"
+                            value={service.duration}
+                            onChange={(e) => {
+                              const updatedServices = [...services];
+                              updatedServices[index].duration = parseInt(e.target.value) || 0;
+                              setServices(updatedServices);
+                            }}
+                            min="5"
+                            step="5"
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor={`service-price-${index}`}>Price ($)</Label>
+                          <Input
+                            id={`service-price-${index}`}
+                            type="number"
+                            value={service.price}
+                            onChange={(e) => {
+                              const updatedServices = [...services];
+                              updatedServices[index].price = parseInt(e.target.value) || 0;
+                              setServices(updatedServices);
+                            }}
+                            min="0"
+                            step="5"
+                            required
+                          />
+                        </div>
                       </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`service-duration-${index}`}>Duration (minutes)</Label>
-                        <Input
-                          id={`service-duration-${index}`}
-                          type="number"
-                          value={service.duration}
-                          onChange={(e) => {
-                            const updatedServices = [...services];
-                            updatedServices[index].duration = parseInt(e.target.value) || 0;
-                            setServices(updatedServices);
-                          }}
-                          min="5"
-                          step="5"
-                          required
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <Label htmlFor={`service-price-${index}`}>Price ($)</Label>
-                        <Input
-                          id={`service-price-${index}`}
-                          type="number"
-                          value={service.price}
-                          onChange={(e) => {
-                            const updatedServices = [...services];
-                            updatedServices[index].price = parseInt(e.target.value) || 0;
-                            setServices(updatedServices);
-                          }}
-                          min="0"
-                          step="5"
-                          required
-                        />
+                      
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <Label htmlFor={`service-location-${index}`}>Service Location</Label>
+                          <Select
+                            value={service.locationType || "office"}
+                            onValueChange={(value) => {
+                              const updatedServices = [...services];
+                              updatedServices[index].locationType = value;
+                              setServices(updatedServices);
+                            }}
+                          >
+                            <SelectTrigger id={`service-location-${index}`}>
+                              <SelectValue placeholder="Select location type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="office">At My Office/Shop</SelectItem>
+                              <SelectItem value="client">At Client's Location</SelectItem>
+                              <SelectItem value="both">Both Options Available</SelectItem>
+                              <SelectItem value="online">Online/Virtual</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <Label htmlFor={`service-description-${index}`}>Description</Label>
+                          <Textarea
+                            id={`service-description-${index}`}
+                            value={service.description || ""}
+                            onChange={(e) => {
+                              const updatedServices = [...services];
+                              updatedServices[index].description = e.target.value;
+                              setServices(updatedServices);
+                            }}
+                            placeholder="Brief description of the service"
+                            className="h-[80px]"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
