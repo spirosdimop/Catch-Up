@@ -10,6 +10,7 @@ import AppShell from "@/components/layout/app-shell";
 import NotFound from "@/pages/not-found";
 // Use lowercase imports for consistency 
 import Dashboard from "./pages/dashboard";
+import DashboardRedesign from "@/pages/dashboard-redesign-fixed";
 import Clients from "./pages/clients";
 import ClientsRedesign from "@/pages/clients-redesign";
 // Import placeholder pages for the new routes
@@ -50,7 +51,8 @@ function Router() {
   return (
     <AppShell>
       <Switch>
-        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/dashboard-original" component={Dashboard} />
+        <Route path="/dashboard" component={DashboardRedesign} />
         <Route path="/clients-original" component={Clients} />
         <Route path="/clients" component={ClientsRedesign} />
         <Route path="/bookings-original" component={Bookings} />
