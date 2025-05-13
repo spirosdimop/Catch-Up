@@ -36,6 +36,7 @@ interface SchedulingResponse {
 
 export default function AIAssistant() {
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState("chat");
   
   // General chat state
@@ -252,6 +253,9 @@ export default function AIAssistant() {
       
       const data = await response.json();
       setSchedulingResponse(data);
+      
+      // Invalidate the events query to refresh calendar data
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
       
       // Show confirmation toast based on action
       if (data.action === 'create' && data.status === 'confirmed') {
@@ -702,6 +706,18 @@ export default function AIAssistant() {
                   <div className="text-sm mt-3">
                     <p>{schedulingResponse.notes}</p>
                   </div>
+                  
+                  {schedulingResponse.action === 'create' && schedulingResponse.event_id && (
+                    <div className="mt-4 pt-3 border-t">
+                      <Link href="/calendar" className="inline-flex items-center text-primary hover:text-primary/80">
+                        <Button variant="outline" size="sm" className="gap-2">
+                          <Calendar className="h-4 w-4" />
+                          View in Calendar
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                      </Link>
+                    </div>
+                  )}
                 </div>
               )}
             </CardContent>
