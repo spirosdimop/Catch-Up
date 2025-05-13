@@ -17,8 +17,10 @@ export interface UserData {
   availabilityHours?: string; // JSON string with availability hours
   services: Array<{
     name: string;
+    description?: string;
     duration: number;
     price: number;
+    locationType?: string;
   }>;
 }
 

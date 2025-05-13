@@ -40,7 +40,7 @@ import {
 } from "lucide-react";
 import { format, addDays } from "date-fns";
 import { useUser } from "@/lib/userContext";
-import { EventTemplate, EventType } from "@shared/schema";
+import { EventTemplate, EventType, ServiceLocationType } from "@shared/schema";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Profile() {
@@ -62,8 +62,27 @@ export default function Profile() {
         serviceArea: "Downtown & Surrounding Areas",
         profileImageUrl: "",
         services: [
-          { name: "Consultation", duration: 60, price: 100 },
-          { name: "Follow-up", duration: 30, price: 50 }
+          { 
+            name: "Consultation", 
+            duration: 60, 
+            price: 100, 
+            locationType: "office", 
+            description: "In-depth analysis of your business needs and strategy planning." 
+          },
+          { 
+            name: "Follow-up Session", 
+            duration: 30, 
+            price: 50, 
+            locationType: "client_location", 
+            description: "Review progress and adjust strategies as needed."
+          },
+          { 
+            name: "Online Coaching", 
+            duration: 45, 
+            price: 75, 
+            locationType: "online", 
+            description: "Virtual coaching session via video conferencing."
+          }
         ]
       });
     }
@@ -677,18 +696,15 @@ export default function Profile() {
                               <span>{service.duration} minutes</span>
                             </div>
                             
-                            {service.locationType && (
-                              <div className="flex items-center">
-                                <MapPin className="h-4 w-4 mr-1" />
-                                <span>{
-                                  service.locationType === 'office' ? 'At my office' :
-                                  service.locationType === 'client' ? 'At client location' :
-                                  service.locationType === 'both' ? 'Office or client location' :
-                                  service.locationType === 'online' ? 'Online/Virtual' : 
-                                  'Location varies'
-                                }</span>
-                              </div>
-                            )}
+                            <div className="flex items-center">
+                              <MapPin className="h-4 w-4 mr-1" />
+                              <span>{
+                                service.locationType === 'office' ? 'At my office' :
+                                service.locationType === 'client_location' ? 'At client location' :
+                                service.locationType === 'online' ? 'Online/Virtual' : 
+                                'Location varies'
+                              }</span>
+                            </div>
                           </div>
                           
                           {service.description && (
