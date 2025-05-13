@@ -35,6 +35,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Profile() {
   const { user, setUser } = useUser();
+  const [activeTab, setActiveTab] = useState("services");
   const [selectedService, setSelectedService] = useState<number | null>(null);
   const [bookingForm, setBookingForm] = useState({
     name: "",
@@ -142,6 +143,10 @@ export default function Profile() {
     }
   };
   
+  const goToAppointmentTab = () => {
+    setActiveTab("appointment");
+  };
+  
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedService === null) {
@@ -230,7 +235,11 @@ export default function Profile() {
       
       {/* Booking Section */}
       <div className="mb-10">
-        <Tabs defaultValue="services" className="w-full">
+        <Tabs 
+          value={activeTab} 
+          onValueChange={setActiveTab} 
+          className="w-full"
+        >
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="services">Select Service</TabsTrigger>
             <TabsTrigger value="appointment" disabled={selectedService === null}>Book Appointment</TabsTrigger>
@@ -272,12 +281,10 @@ export default function Profile() {
                     
                     {selectedService === index && (
                       <div className="mt-4 pt-4 border-t">
-                        <Button className="w-full" onClick={() => {
-                          const element = document.getElementById('appointment-tab');
-                          if (element) {
-                            (element as HTMLElement).click();
-                          }
-                        }}>
+                        <Button 
+                          className="w-full" 
+                          onClick={goToAppointmentTab}
+                        >
                           Continue to Booking
                         </Button>
                       </div>
@@ -289,12 +296,15 @@ export default function Profile() {
             
             {selectedService !== null && (
               <div className="mt-8 flex justify-center">
-                <Button id="appointment-tab" size="lg" onClick={() => {
-                  const element = document.querySelector('[data-value="appointment"]');
-                  if (element) {
-                    (element as HTMLElement).click();
-                  }
-                }}>
+                <Button 
+                  size="lg" 
+                  onClick={() => {
+                    const element = document.querySelector('[data-value="appointment"]');
+                    if (element instanceof HTMLElement) {
+                      element.click();
+                    }
+                  }}
+                >
                   Continue to Appointment
                 </Button>
               </div>
@@ -501,12 +511,14 @@ export default function Profile() {
                 <p className="text-muted-foreground mb-4">
                   Go back to the Services tab to choose a service
                 </p>
-                <Button onClick={() => {
-                  const element = document.querySelector('[data-value="services"]');
-                  if (element) {
-                    (element as HTMLElement).click();
-                  }
-                }}>
+                <Button 
+                  onClick={() => {
+                    const element = document.querySelector('[data-value="services"]');
+                    if (element instanceof HTMLElement) {
+                      element.click();
+                    }
+                  }}
+                >
                   Select a Service
                 </Button>
               </div>
