@@ -20,7 +20,9 @@ import {
   insertInvoiceSchema, 
   insertInvoiceItemSchema,
   insertEventSchema,
-  insertEventTemplateSchema
+  insertEventTemplateSchema,
+  insertNavigationEventSchema,
+  insertUserPreferencesSchema
 } from "@shared/schema";
 import { z } from "zod";
 
