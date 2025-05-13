@@ -24,6 +24,7 @@ interface CommandResult {
   ask_user?: string;
   missing_fields?: string[];
   settings?: Record<string, any>;
+  settings_error?: string;
   calendar?: {
     action: 'create' | 'reschedule' | 'cancel' | 'suggest_times';
     event_title?: string;
@@ -33,7 +34,9 @@ interface CommandResult {
     notes: string;
     event_id?: number;
   };
+  calendar_error?: string;
   message?: string;
+  message_error?: string;
 }
 
 export default function UnifiedAssistant() {
@@ -130,6 +133,8 @@ export default function UnifiedAssistant() {
       // Format the response based on what was processed
       if (result.settings) {
         responseText += `\n\n✓ Settings updated: ${Object.keys(result.settings).join(', ')}`;
+      } else if (result.settings_error) {
+        responseText += `\n\n⚠️ ${result.settings_error}`;
       }
       
       if (result.calendar) {
@@ -137,6 +142,12 @@ export default function UnifiedAssistant() {
         
         if (calendar.action === 'create') {
           responseText += `\n\n✓ Event created: "${calendar.event_title}" at ${new Date(calendar.start_time!).toLocaleString()}`;
+          
+          if (calendar.event_id) {
+            responseText += `\n   Event ID: ${calendar.event_id} (saved in calendar)`;
+          } else {
+            responseText += `\n   ⚠️ Note: Event may not have been saved to calendar properly`;
+          }
           
           // If a calendar event was created, invalidate the events query
           queryClient.invalidateQueries({ queryKey: ['/api/events'] });
@@ -147,10 +158,17 @@ export default function UnifiedAssistant() {
         } else if (calendar.action === 'suggest_times') {
           responseText += `\n\n✓ Schedule suggestions created`;
         }
+        
+        // Add a link to view the calendar
+        responseText += `\n\n[Click here to view in Calendar](/calendar)`;
+      } else if (result.calendar_error) {
+        responseText += `\n\n⚠️ ${result.calendar_error}`;
       }
       
       if (result.message) {
         responseText += `\n\n✓ Auto-response message created: "${result.message}"`;
+      } else if (result.message_error) {
+        responseText += `\n\n⚠️ ${result.message_error}`;
       }
       
       // Add the complete response

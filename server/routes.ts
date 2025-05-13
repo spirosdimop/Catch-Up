@@ -1129,7 +1129,107 @@ Remember: The most helpful thing you can do is direct users to the specialized t
           const schedule = await storage.getEvents(userId);
           
           // Process the scheduling request
-          const calendarResponse = await processSchedulingRequest(schedule, routingResult.calendar_prompt);
+          let calendarResponse;
+          
+          try {
+            calendarResponse = await processSchedulingRequest(schedule, routingResult.calendar_prompt);
+          } catch (e) {
+            console.log("Using fallback calendar processing due to API error");
+            // Fallback calendar processing logic that doesn't require OpenAI
+            const userInput = routingResult.calendar_prompt.toLowerCase();
+            
+            // Extract event title - use everything after "schedule" or "meeting" keyword if found
+            let eventTitle = "New Meeting";
+            if (userInput.includes("meeting with")) {
+              const match = userInput.match(/meeting with\s+([^\s].*?)(?:\s+on|\s+at|\s+tomorrow|$)/i);
+              if (match && match[1]) {
+                eventTitle = `Meeting with ${match[1].trim()}`;
+              }
+            } else if (userInput.includes("schedule")) {
+              const match = userInput.match(/schedule\s+([^\s].*?)(?:\s+on|\s+at|\s+tomorrow|$)/i);
+              if (match && match[1]) {
+                eventTitle = match[1].trim();
+              }
+            }
+            
+            // Extract date - look for "tomorrow", "today", or specific date patterns
+            const now = new Date();
+            let startDate = new Date();
+            startDate.setHours(10, 0, 0, 0); // Default to 10:00 AM
+            
+            if (userInput.includes("tomorrow")) {
+              startDate.setDate(startDate.getDate() + 1);
+            } else if (userInput.includes("today")) {
+              // Already set to today
+            } else {
+              // Try to find month names or numbers
+              const monthNames = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
+              let foundMonth = false;
+              
+              for (let i = 0; i < monthNames.length; i++) {
+                if (userInput.includes(monthNames[i])) {
+                  // Extract day number that appears near month name
+                  const dayMatch = userInput.match(new RegExp(monthNames[i] + "\\s+(\\d+)", "i"));
+                  if (dayMatch && dayMatch[1]) {
+                    const day = parseInt(dayMatch[1], 10);
+                    if (day >= 1 && day <= 31) {
+                      startDate.setMonth(i);
+                      startDate.setDate(day);
+                      foundMonth = true;
+                      break;
+                    }
+                  }
+                }
+              }
+              
+              // If we didn't find a month name, look for date patterns like MM/DD
+              if (!foundMonth) {
+                const dateMatch = userInput.match(/(\d{1,2})[\/\-](\d{1,2})/);
+                if (dateMatch) {
+                  const month = parseInt(dateMatch[1], 10) - 1; // JavaScript months are 0-based
+                  const day = parseInt(dateMatch[2], 10);
+                  if (month >= 0 && month < 12 && day >= 1 && day <= 31) {
+                    startDate.setMonth(month);
+                    startDate.setDate(day);
+                  }
+                }
+              }
+            }
+            
+            // Extract time if present
+            const timeMatch = userInput.match(/(\d{1,2})(?::(\d{2}))?\s*(am|pm)?/i);
+            if (timeMatch) {
+              let hour = parseInt(timeMatch[1], 10);
+              const minute = timeMatch[2] ? parseInt(timeMatch[2], 10) : 0;
+              const meridian = timeMatch[3] ? timeMatch[3].toLowerCase() : null;
+              
+              // Adjust hour based on AM/PM
+              if (meridian === "pm" && hour < 12) {
+                hour += 12;
+              } else if (meridian === "am" && hour === 12) {
+                hour = 0;
+              }
+              
+              if (hour >= 0 && hour < 24 && minute >= 0 && minute < 60) {
+                startDate.setHours(hour, minute, 0, 0);
+              }
+            }
+            
+            // Create end time (1 hour after start time)
+            const endDate = new Date(startDate);
+            endDate.setHours(endDate.getHours() + 1);
+            
+            // Create calendar response object
+            calendarResponse = {
+              action: 'create',
+              event_title: eventTitle,
+              start_time: startDate.toISOString(),
+              end_time: endDate.toISOString(),
+              status: 'confirmed',
+              notes: `Created from user request: "${routingResult.calendar_prompt}"`,
+              event_id: undefined // Add this to match the SchedulingResponse interface
+            };
+          }
           
           // If action is create, actually create the event
           if (calendarResponse.action === 'create' && 
