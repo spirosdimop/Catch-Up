@@ -1,6 +1,6 @@
 import { PageTitle } from "@/components/ui/page-title";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Bot, Calendar, Send, User, Clock, AlertCircle, Settings, CheckCircle } from "lucide-react";
+import { Bot, Calendar, Send, User, Clock, AlertCircle, Settings, CheckCircle, ExternalLink } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -9,7 +9,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "wouter";
 
 // Message types
 type Message = {
