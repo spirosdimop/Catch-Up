@@ -443,7 +443,7 @@ export default function Profile() {
                       name: "", 
                       duration: 30, 
                       price: 0,
-                      locationType: "office",
+                      locationType: ServiceLocationType.OFFICE,
                       description: ""
                     }
                   ]);
@@ -467,7 +467,7 @@ export default function Profile() {
                         name: "", 
                         duration: 30, 
                         price: 0,
-                        locationType: "office",
+                        locationType: ServiceLocationType.OFFICE,
                         description: ""
                       }
                     ]);
@@ -557,10 +557,9 @@ export default function Profile() {
                               <SelectValue placeholder="Select location type" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="office">At My Office/Shop</SelectItem>
-                              <SelectItem value="client">At Client's Location</SelectItem>
-                              <SelectItem value="both">Both Options Available</SelectItem>
-                              <SelectItem value="online">Online/Virtual</SelectItem>
+                              <SelectItem value={ServiceLocationType.OFFICE}>At My Office/Shop</SelectItem>
+                              <SelectItem value={ServiceLocationType.CLIENT_LOCATION}>At Client's Location</SelectItem>
+                              <SelectItem value={ServiceLocationType.ONLINE}>Online/Virtual</SelectItem>
                             </SelectContent>
                           </Select>
                         </div>
@@ -699,9 +698,9 @@ export default function Profile() {
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 mr-1" />
                               <span>{
-                                service.locationType === 'office' ? 'At my office' :
-                                service.locationType === 'client_location' ? 'At client location' :
-                                service.locationType === 'online' ? 'Online/Virtual' : 
+                                service.locationType === ServiceLocationType.OFFICE ? 'At my office' :
+                                service.locationType === ServiceLocationType.CLIENT_LOCATION ? 'At client location' :
+                                service.locationType === ServiceLocationType.ONLINE ? 'Online/Virtual' : 
                                 'Location varies'
                               }</span>
                             </div>
