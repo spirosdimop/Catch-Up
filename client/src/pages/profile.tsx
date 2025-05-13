@@ -147,6 +147,10 @@ export default function Profile() {
     setActiveTab("appointment");
   };
   
+  const goToServicesTab = () => {
+    setActiveTab("services");
+  };
+  
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedService === null) {
@@ -298,12 +302,7 @@ export default function Profile() {
               <div className="mt-8 flex justify-center">
                 <Button 
                   size="lg" 
-                  onClick={() => {
-                    const element = document.querySelector('[data-value="appointment"]');
-                    if (element instanceof HTMLElement) {
-                      element.click();
-                    }
-                  }}
+                  onClick={goToAppointmentTab}
                 >
                   Continue to Appointment
                 </Button>
@@ -334,7 +333,10 @@ export default function Profile() {
                         <Button 
                           variant="ghost" 
                           className="mt-3 text-sm h-8 px-2" 
-                          onClick={() => setSelectedService(null)}
+                          onClick={() => {
+                            setSelectedService(null);
+                            goToServicesTab();
+                          }}
                         >
                           Change Selection
                         </Button>
@@ -512,12 +514,7 @@ export default function Profile() {
                   Go back to the Services tab to choose a service
                 </p>
                 <Button 
-                  onClick={() => {
-                    const element = document.querySelector('[data-value="services"]');
-                    if (element instanceof HTMLElement) {
-                      element.click();
-                    }
-                  }}
+                  onClick={goToServicesTab}
                 >
                   Select a Service
                 </Button>
