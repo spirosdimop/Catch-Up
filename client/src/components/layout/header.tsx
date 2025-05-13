@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,8 +15,10 @@ import {
   Bell,
   Menu,
   Search,
-  Bot
+  Bot,
+  Globe
 } from "lucide-react";
+import { useAppSettings, languageCodeToName } from "@/lib/appSettingsContext";
 
 type HeaderProps = {
   onMenuToggle: () => void;
@@ -28,6 +31,22 @@ export function Header({ onMenuToggle }: HeaderProps) {
     email: "alex@example.com",
     avatarUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
   };
+
+  // Get current language from app settings
+  const { settings } = useAppSettings();
+  const [currentLanguageDisplay, setCurrentLanguageDisplay] = useState('');
+
+  // Effect to update language display when settings change
+  useEffect(() => {
+    const lang = settings.language || 'en';
+    const displayName = languageCodeToName[lang] || lang;
+    setCurrentLanguageDisplay(displayName);
+    
+    // Log current language for debugging
+    console.log('Current language (header):', lang);
+    console.log('Language display (header):', displayName);
+    console.log('Full settings (header):', settings);
+  }, [settings.language]);
 
   return (
     <header className="bg-white shadow-sm z-10">
@@ -57,6 +76,12 @@ export function Header({ onMenuToggle }: HeaderProps) {
           </div>
 
           <div className="flex items-center">
+            {/* Language indicator */}
+            <Badge variant="outline" className="mr-2 bg-blue-50 text-blue-700 hidden md:flex">
+              <Globe className="h-3 w-3 mr-1" />
+              {currentLanguageDisplay}
+            </Badge>
+            
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5 text-gray-400" />
               <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-amber-500"></span>

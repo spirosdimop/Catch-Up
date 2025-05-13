@@ -32,11 +32,54 @@ const AppSettingsContext = createContext<AppSettingsContextType>({
   applyLanguage: () => {},
 });
 
+// Map full language names to ISO codes
+const languageNameToCode: Record<string, string> = {
+  'english': 'en',
+  'spanish': 'es',
+  'french': 'fr',
+  'german': 'de',
+  'chinese': 'zh',
+  'japanese': 'ja'
+};
+
+// Map ISO codes to full language names
+export const languageCodeToName: Record<string, string> = {
+  'en': 'English',
+  'es': 'Español',
+  'fr': 'Français', 
+  'de': 'Deutsch',
+  'zh': '中文',
+  'ja': '日本語'
+};
+
+// Helper function to normalize language codes (handle full names, case insensitivity)
+const normalizeLanguageCode = (language: string): string => {
+  // If it's already a supported ISO code, return it
+  if (Object.keys(languageCodeToName).includes(language.toLowerCase())) {
+    return language.toLowerCase();
+  }
+  
+  // Check if it's a full language name and convert to code
+  const lowerCaseLang = language.toLowerCase();
+  if (languageNameToCode[lowerCaseLang]) {
+    return languageNameToCode[lowerCaseLang];
+  }
+  
+  // Default to English if not recognized
+  console.warn(`Unrecognized language: ${language}, defaulting to English`);
+  return 'en';
+};
+
 // Helper function to apply language setting to the HTML document
 const applyLanguageToDocument = (language: string) => {
+  // Normalize the language code
+  const normalizedCode = normalizeLanguageCode(language);
+  
   // Apply language code to HTML document for accessibility and localization
-  document.documentElement.lang = language;
-  console.log(`Applied language: ${language} to document`);
+  document.documentElement.lang = normalizedCode;
+  document.documentElement.setAttribute('data-language', normalizedCode);
+  
+  console.log(`Applied language: ${normalizedCode} to document`);
   
   // You might also want to update other language-specific elements here
   // like date formats, currency symbols, or loading translations
@@ -81,9 +124,20 @@ export function AppSettingsProvider({ children }: { children: ReactNode }) {
 
   const updateSettings = (newSettings: Partial<AppSettings>) => {
     console.log('Updating settings:', newSettings);
+    
+    // Create a copy of the new settings to normalize values
+    const normalizedSettings = { ...newSettings };
+    
+    // If language is being updated, normalize it to a proper ISO code
+    if (normalizedSettings.language) {
+      const originalLang = normalizedSettings.language;
+      normalizedSettings.language = normalizeLanguageCode(normalizedSettings.language);
+      console.log(`Normalized language from "${originalLang}" to "${normalizedSettings.language}"`);
+    }
+    
     setSettings(prev => ({
       ...prev,
-      ...newSettings
+      ...normalizedSettings
     }));
   };
 
