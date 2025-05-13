@@ -1,10 +1,26 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { format, addDays } from 'date-fns';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { format, addDays, subDays, isSameDay, parseISO } from 'date-fns';
+import { 
+  Calendar as CalendarIcon,
+  Filter,
+  Plus,
+  ChevronLeft,
+  ChevronRight,
+  Clock,
+  Users,
+  MoreHorizontal,
+  Calendar,
+  Grid,
+  List,
+  Check,
+  X,
+  CalendarDays,
+  Settings
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { Calendar } from '@/components/ui/calendar';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import {
   Card,
   CardContent,
@@ -90,12 +106,57 @@ const bookingSchema = z.object({
 
 type BookingFormValues = z.infer<typeof bookingSchema>;
 
+// Booking management interfaces
+interface Booking {
+  id: number;
+  date: string;
+  time: string;
+  duration: number;
+  type: 'call' | 'meeting' | 'followup' | 'consultation';
+  status: 'confirmed' | 'rescheduled' | 'canceled' | 'emergency';
+  client: {
+    name: string;
+    email: string;
+    avatar?: string;
+  };
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// View enum
+enum ViewMode {
+  List = 'list',
+  Grid = 'grid',
+  Calendar = 'calendar'
+}
+
 const BookingsRedesign = () => {
+  // Shared state
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  
+  // Booking form state
   const [step, setStep] = useState(1);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTimeSlot, setSelectedTimeSlot] = useState<string | undefined>(undefined);
-  const { toast } = useToast();
-  const queryClient = useQueryClient();
+  
+  // Booking management state
+  const [viewMode, setViewMode] = useState<ViewMode>(ViewMode.Grid);
+  const [managementSelectedDate, setManagementSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [selectedType, setSelectedType] = useState<string>('all');
+  const [dateRange, setDateRange] = useState<{ from: Date; to: Date }>({
+    from: subDays(new Date(), 7),
+    to: addDays(new Date(), 30)
+  });
+  const [detailsBooking, setDetailsBooking] = useState<Booking | null>(null);
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
+
+  // Determine if we're in booking form or management view  
+  const [activeTab, setActiveTab] = useState<string>("create");
+  
 
   // Default values for the form
   const defaultValues: Partial<BookingFormValues> = {
