@@ -29,7 +29,11 @@ import {
   AiCommand,
   InsertAiCommand,
   AiCommandEffect,
-  InsertAiCommandEffect
+  InsertAiCommandEffect,
+  NavigationEvent,
+  InsertNavigationEvent,
+  UserPreferences,
+  InsertUserPreferences
 } from "@shared/schema";
 
 export interface IStorage {
@@ -123,6 +127,16 @@ export interface IStorage {
   updateAiCommand(id: number, command: Partial<InsertAiCommand>): Promise<AiCommand | undefined>;
   getAiCommandEffects(commandId: number): Promise<AiCommandEffect[]>;
   createAiCommandEffect(effect: InsertAiCommandEffect): Promise<AiCommandEffect>;
+  
+  // Navigation tracking operations
+  createNavigationEvent(event: InsertNavigationEvent): Promise<NavigationEvent>;
+  getNavigationEventsByUser(userId: string): Promise<NavigationEvent[]>;
+  getNavigationEventsByPathAndUser(userId: string, path: string): Promise<NavigationEvent[]>;
+  
+  // User preferences operations
+  getUserPreferences(userId: string): Promise<UserPreferences | undefined>;
+  createUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences>;
+  updateUserPreferences(userId: string, preferences: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined>;
 }
 
 export class MemStorage implements IStorage {
