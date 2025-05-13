@@ -1055,12 +1055,27 @@ Remember: The most helpful thing you can do is direct users to the specialized t
   // Unified command API endpoint
   apiRouter.post("/command", async (req, res) => {
     try {
-      const { message } = req.body;
+      const { message, userId = "user-1" } = req.body;
       
       if (!message || typeof message !== 'string') {
         return res.status(400).json({ 
           message: "Invalid request. 'message' must be a string." 
         });
+      }
+      
+      // Create a record of the command in the database
+      let commandRecord;
+      try {
+        commandRecord = await storage.createAiCommand({
+          userId,
+          userPrompt: message,
+          commandType: 'unified',
+          status: 'success'
+        });
+        console.log('Created AI command record:', commandRecord.id);
+      } catch (dbError) {
+        console.error('Error creating AI command record:', dbError);
+        // Continue even if we couldn't record the command
       }
       
       // First, route the message to determine which APIs to call
@@ -1069,6 +1084,16 @@ Remember: The most helpful thing you can do is direct users to the specialized t
         routingResult = await routeInputToApis(message);
       } catch (routingError) {
         console.error('Error during API routing:', routingError);
+        
+        // Update command status if we have a command record
+        if (commandRecord) {
+          try {
+            await storage.updateAiCommand(commandRecord.id, { status: 'error' });
+          } catch (updateError) {
+            console.error('Error updating AI command status:', updateError);
+          }
+        }
+        
         // Return a friendly error message if the routing fails (likely due to API key issues)
         return res.json({
           status: "needs_clarification",
@@ -1315,6 +1340,26 @@ Remember: The most helpful thing you can do is direct users to the specialized t
               
               // Add the created event ID to the response
               calendarResponse.event_id = newEvent.id;
+              
+              // Record this effect in the database if we have a command record
+              if (commandRecord) {
+                try {
+                  await storage.createAiCommandEffect({
+                    commandId: commandRecord.id,
+                    effectType: 'create_event',
+                    targetType: 'event',
+                    targetId: newEvent.id.toString(),
+                    details: JSON.stringify({
+                      title: newEvent.title,
+                      start: newEvent.startTime,
+                      end: newEvent.endTime
+                    })
+                  });
+                } catch (effectError) {
+                  console.error('Error recording AI command effect:', effectError);
+                  // Continue even if we couldn't record the effect
+                }
+              }
             } catch (createError) {
               console.error("Error creating event:", createError);
             }

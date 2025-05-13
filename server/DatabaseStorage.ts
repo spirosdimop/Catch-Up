@@ -439,6 +439,14 @@ export class DatabaseStorage implements IStorage {
     return result;
   }
   
+  async updateAiCommand(id: number, command: Partial<InsertAiCommand>): Promise<AiCommand | undefined> {
+    const [result] = await db.update(aiCommands)
+      .set(command)
+      .where(eq(aiCommands.id, id))
+      .returning();
+    return result;
+  }
+  
   async getAiCommandEffects(commandId: number): Promise<AiCommandEffect[]> {
     return await db.select()
       .from(aiCommandEffects)

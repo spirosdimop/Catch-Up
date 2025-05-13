@@ -120,6 +120,7 @@ export interface IStorage {
   getAiCommands(userId: string, limit?: number): Promise<AiCommand[]>;
   getAiCommand(id: number): Promise<AiCommand | undefined>;
   createAiCommand(command: InsertAiCommand): Promise<AiCommand>;
+  updateAiCommand(id: number, command: Partial<InsertAiCommand>): Promise<AiCommand | undefined>;
   getAiCommandEffects(commandId: number): Promise<AiCommandEffect[]>;
   createAiCommandEffect(effect: InsertAiCommandEffect): Promise<AiCommandEffect>;
 }
@@ -813,6 +814,22 @@ export class MemStorage implements IStorage {
     
     this.aiCommands.set(id, newCommand);
     return newCommand;
+  }
+  
+  async updateAiCommand(id: number, command: Partial<InsertAiCommand>): Promise<AiCommand | undefined> {
+    const existingCommand = this.aiCommands.get(id);
+    
+    if (!existingCommand) {
+      return undefined;
+    }
+    
+    const updatedCommand: AiCommand = {
+      ...existingCommand,
+      ...command
+    };
+    
+    this.aiCommands.set(id, updatedCommand);
+    return updatedCommand;
   }
   
   async getAiCommandEffects(commandId: number): Promise<AiCommandEffect[]> {
