@@ -506,7 +506,7 @@ const DashboardRedesign = () => {
             </CardHeader>
             <CardContent className="pb-4">
               <div className="space-y-1">
-                {dashboardData.todaysEvents.length === 0 ? (
+                {dashboardData && dashboardData.todaysEvents && dashboardData.todaysEvents.length === 0 ? (
                   <div className="text-center py-6 text-gray-400">
                     <CalendarIcon className="h-12 w-12 mx-auto mb-3 opacity-50" />
                     <p className="text-lg font-medium">No events scheduled for today</p>
@@ -520,7 +520,7 @@ const DashboardRedesign = () => {
                   </div>
                 ) : (
                   <div className="divide-y divide-[#2a4d7d]">
-                    {dashboardData.todaysEvents.map((event) => (
+                    {dashboardData && dashboardData.todaysEvents && dashboardData.todaysEvents.map((event) => (
                       <div 
                         key={event.id} 
                         className={cn(
@@ -585,7 +585,7 @@ const DashboardRedesign = () => {
               </div>
             </CardContent>
             <CardFooter className="pt-0">
-              {dashboardData.upcomingEvents.length > 0 && (
+              {dashboardData && dashboardData.upcomingEvents && dashboardData.upcomingEvents.length > 0 && (
                 <div className="w-full">
                   <Separator className="mb-3 bg-[#2a4d7d]" />
                   <div className="flex justify-between items-center">
@@ -595,7 +595,7 @@ const DashboardRedesign = () => {
                     </span>
                   </div>
                   <div className="mt-2 space-y-1">
-                    {dashboardData.upcomingEvents.slice(0, 2).map((event) => (
+                    {dashboardData && dashboardData.upcomingEvents && dashboardData.upcomingEvents.slice(0, 2).map((event) => (
                       <div key={event.id} className="text-sm flex justify-between">
                         <div className="flex items-center">
                           <CalendarIcon className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
@@ -630,23 +630,27 @@ const DashboardRedesign = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-end">
                     <div>
-                      <span className="text-3xl font-bold">{dashboardData.weeklyPerformance.tasksCompleted}</span>
-                      <span className="text-gray-400 ml-1.5">/ {dashboardData.weeklyPerformance.totalTasks}</span>
+                      <span className="text-3xl font-bold">
+                        {dashboardData?.weeklyPerformance?.tasksCompleted || 0}
+                      </span>
+                      <span className="text-gray-400 ml-1.5">
+                        / {dashboardData?.weeklyPerformance?.totalTasks || 0}
+                      </span>
                     </div>
                     <div className="flex items-center">
-                      {getTrendIcon(dashboardData.weeklyPerformance.trend)}
+                      {dashboardData?.weeklyPerformance && getTrendIcon(dashboardData.weeklyPerformance.trend)}
                       <span className={cn(
                         "ml-1 text-sm",
-                        dashboardData.weeklyPerformance.trend === 'up' ? 'text-green-500' : 'text-red-500'
+                        dashboardData?.weeklyPerformance?.trend === 'up' ? 'text-green-500' : 'text-red-500'
                       )}>
-                        {dashboardData.weeklyPerformance.trendPercentage}%
+                        {dashboardData?.weeklyPerformance?.trendPercentage || 0}%
                       </span>
                     </div>
                   </div>
                   <div className="text-sm text-gray-400">Tasks completed this week</div>
                   <div className="pt-2">
                     <Progress 
-                      value={dashboardData.weeklyPerformance.progress} 
+                      value={dashboardData?.weeklyPerformance?.progress || 0} 
                       className="h-2.5 bg-[#0a2342]" 
                     />
                   </div>

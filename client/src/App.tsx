@@ -10,7 +10,7 @@ import AppShell from "@/components/layout/app-shell";
 import NotFound from "@/pages/not-found";
 // Use lowercase imports for consistency 
 import Dashboard from "./pages/dashboard";
-import DashboardRedesign from "@/pages/dashboard-redesign-fixed";
+import DashboardRedesign from "@/pages/dashboard-simple";
 import Clients from "./pages/clients";
 import ClientsRedesign from "@/pages/clients-redesign";
 // Import placeholder pages for the new routes
