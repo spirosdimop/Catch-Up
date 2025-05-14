@@ -29,11 +29,32 @@ import AIAssistant from "@/pages/ai-assistant";
 import Signup from "@/pages/signup";
 import LandingPage from "@/pages/landing";
 
+// Catch Up App Pages
+import CatchUpDashboard from "@/pages/catchup";
+import CatchUpTasks from "@/pages/catchup/tasks";
+import CatchUpCalendar from "@/pages/catchup/calendar";
+import CatchUpTime from "@/pages/catchup/time";
+import CatchUpMessages from "@/pages/catchup/messages";
+import CatchUpSettings from "@/pages/catchup/settings";
+
 function Router() {
   const [location] = useLocation();
   
   // Pages that don't use the main application shell
   const noAppShellPages = ["/signup", "/", "/login"];
+  
+  // Catch Up app pages (these use their own layout)
+  const catchUpPages = [
+    "/catchup", 
+    "/catchup/tasks", 
+    "/catchup/calendar", 
+    "/catchup/time", 
+    "/catchup/messages", 
+    "/catchup/settings"
+  ];
+  
+  // Check if current location is a Catch Up page
+  const isCatchUpPage = catchUpPages.some(page => location === page || location.startsWith(`${page}/`));
   
   // Check if current location should not use AppShell
   if (noAppShellPages.includes(location)) {
@@ -42,6 +63,21 @@ function Router() {
         <Route path="/" component={LandingPage} />
         <Route path="/signup" component={Signup} />
         <Route path="/login" component={Signup} /> {/* Reusing Signup component for login, update if you have a separate Login component */}
+      </Switch>
+    );
+  }
+  
+  // Catch Up app pages
+  if (isCatchUpPage) {
+    return (
+      <Switch>
+        <Route path="/catchup" component={CatchUpDashboard} />
+        <Route path="/catchup/tasks" component={CatchUpTasks} />
+        <Route path="/catchup/calendar" component={CatchUpCalendar} />
+        <Route path="/catchup/time" component={CatchUpTime} />
+        <Route path="/catchup/messages" component={CatchUpMessages} />
+        <Route path="/catchup/settings" component={CatchUpSettings} />
+        <Route component={NotFound} />
       </Switch>
     );
   }
