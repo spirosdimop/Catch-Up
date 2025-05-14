@@ -111,11 +111,22 @@ export default function Projects() {
   });
 
   // Handle project form submission
-  const handleSubmit = (data: InsertProject) => {
+  const handleSubmit = (data: any) => {
+    // Convert form data to InsertProject format
+    const projectData: InsertProject = {
+      name: data.name,
+      clientId: data.clientId,
+      description: data.description,
+      status: data.status, 
+      startDate: data.startDate,
+      endDate: data.endDate,
+      budget: data.budget
+    };
+    
     if (selectedProject) {
-      updateProjectMutation.mutate({ id: selectedProject.id, project: data });
+      updateProjectMutation.mutate({ id: selectedProject.id, project: projectData });
     } else {
-      createProjectMutation.mutate(data);
+      createProjectMutation.mutate(projectData);
     }
   };
 

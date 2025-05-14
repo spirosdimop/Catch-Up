@@ -69,8 +69,8 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
     defaultValues: defaultValues 
       ? {
           ...defaultValues,
-          startDate: new Date(defaultValues.startDate),
-          endDate: defaultValues.endDate ? new Date(defaultValues.endDate) : undefined,
+          startDate: defaultValues.startDate ? new Date(defaultValues.startDate) : null,
+          endDate: defaultValues.endDate ? new Date(defaultValues.endDate) : null,
           budget: defaultValues.budget ? Number(defaultValues.budget) : undefined,
         }
       : {
@@ -176,8 +176,8 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
+                      selected={field.value || undefined}
+                      onSelect={(date) => field.onChange(date)}
                       initialFocus
                     />
                   </PopoverContent>
@@ -216,10 +216,11 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
                     <Calendar
                       mode="single"
                       selected={field.value || undefined}
-                      onSelect={field.onChange}
+                      onSelect={(date) => field.onChange(date)}
                       initialFocus
                       disabled={(date) => 
-                        date < form.getValues().startDate || date < new Date("1900-01-01")
+                        (form.getValues().startDate && date < form.getValues().startDate) || 
+                        date < new Date("1900-01-01")
                       }
                     />
                   </PopoverContent>
