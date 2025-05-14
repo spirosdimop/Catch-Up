@@ -317,8 +317,21 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return result;
   }
-  async updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined> { return undefined; }
-  async deleteClient(id: number): Promise<boolean> { return false; }
+  async updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined> { 
+    const [result] = await db
+      .update(schema.clients)
+      .set(client)
+      .where(eq(schema.clients.id, id))
+      .returning();
+    return result;
+  }
+  
+  async deleteClient(id: number): Promise<boolean> { 
+    const result = await db
+      .delete(schema.clients)
+      .where(eq(schema.clients.id, id));
+    return result.rowCount > 0;
+  }
   
   async getProjects(): Promise<Project[]> { 
     return await db.select().from(schema.projects);
