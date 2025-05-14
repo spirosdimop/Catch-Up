@@ -60,24 +60,15 @@ export const projects = pgTable("projects", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertProjectSchema = createInsertSchema(projects)
-  .pick({
-    name: true,
-    description: true,
-    clientId: true,
-    status: true,
-    startDate: true,
-    endDate: true,
-    budget: true,
-  })
-  .transform((data) => {
-    // Convert string dates to Date objects for the database
-    return {
-      ...data,
-      startDate: data.startDate ? new Date(data.startDate) : null,
-      endDate: data.endDate ? new Date(data.endDate) : null,
-    };
-  });
+export const insertProjectSchema = createInsertSchema(projects).pick({
+  name: true,
+  description: true,
+  clientId: true,
+  status: true,
+  startDate: true,
+  endDate: true,
+  budget: true,
+});
 
 // Task status enum
 export const taskStatusEnum = pgEnum("task_status", [

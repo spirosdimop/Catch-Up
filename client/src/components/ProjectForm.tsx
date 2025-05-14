@@ -51,6 +51,13 @@ const projectFormSchema = z.object({
   ], {
     required_error: "Status is required",
   }),
+}).transform(data => {
+  // This ensures the form delivers the data in the format the server expects
+  return {
+    ...data,
+    startDate: data.startDate ? data.startDate.toISOString() : null,
+    endDate: data.endDate ? data.endDate.toISOString() : null,
+  };
 });
 
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
