@@ -50,11 +50,23 @@ interface Task {
   createdAt: Date;
 }
 
+interface NewTask {
+  title: string;
+  description?: string;
+  dueDate?: Date | null;
+  priority?: PriorityType;
+  status?: StatusType;
+  category?: string;
+  assignedTo?: string;
+  assignedImage?: string;
+  isFlagged?: boolean;
+}
+
 export default function TasksPage() {
   // State for tasks
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isNewTaskDialogOpen, setIsNewTaskDialogOpen] = useState(false);
-  const [newTask, setNewTask] = useState<Partial<Task>>({
+  const [newTask, setNewTask] = useState<NewTask>({
     title: "",
     description: "",
     dueDate: null,
@@ -208,7 +220,7 @@ export default function TasksPage() {
       id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
       title: newTask.title || "",
       description: newTask.description || "",
-      dueDate: newTask.dueDate,
+      dueDate: newTask.dueDate || null,
       priority: newTask.priority as PriorityType || "normal",
       status: newTask.status as StatusType || "todo",
       category: newTask.category || "Work",
@@ -232,7 +244,7 @@ export default function TasksPage() {
   };
 
   // Get unique categories for filter
-  const categories = ["all", ...new Set(tasks.map(task => task.category))];
+  const categories = ["all", ...Array.from(new Set(tasks.map(task => task.category)))];
 
   // Task card component
   const TaskCard = ({ task }: { task: Task }) => (
