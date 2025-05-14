@@ -35,22 +35,48 @@ export default function Projects() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   // Fetch projects and clients
-  const { data: projects, isLoading: isLoadingProjects } = useQuery<Project[]>({
+  const { data: projects, isLoading: isLoadingProjects, refetch: refetchProjects } = useQuery<Project[]>({
     queryKey: ['/api/projects'],
+    onSuccess: (data) => {
+      console.log("Projects loaded successfully:", data);
+    },
+    onError: (error) => {
+      console.error("Error loading projects:", error);
+    },
+    staleTime: 0, // Always fetch fresh data
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true // Refetch when window regains focus
   });
 
   const { data: clients } = useQuery<Client[]>({
     queryKey: ['/api/clients'],
+    onSuccess: (data) => {
+      console.log("Clients loaded successfully:", data);
+    },
+    onError: (error) => {
+      console.error("Error loading clients:", error);
+    },
+    staleTime: 0 // Always fetch fresh data
   });
 
   // Create project mutation
   const createProjectMutation = useMutation({
     mutationFn: async (project: InsertProject) => {
+      console.log("Creating project:", project);
       const res = await apiRequest("POST", "/api/projects", project);
-      return res.json();
+      const newProject = await res.json();
+      console.log("Project created:", newProject);
+      return newProject;
     },
     onSuccess: () => {
+      console.log("Project created successfully, invalidating queries");
+      
+      // Properly invalidate the cache
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      
+      // Explicitly refetch to ensure fresh data
+      refetchProjects();
+      
       setIsAddDialogOpen(false);
       toast({
         title: "Project created",
@@ -58,6 +84,7 @@ export default function Projects() {
       });
     },
     onError: (error) => {
+      console.error("Error creating project:", error);
       toast({
         title: "Error creating project",
         description: error.message,

@@ -19,14 +19,17 @@ export default function Clients() {
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
 
   // Fetch clients
-  const { data: clients, isLoading } = useQuery<Client[]>({
+  const { data: clients, isLoading, refetch } = useQuery<Client[]>({
     queryKey: ['/api/clients'],
     onSuccess: (data) => {
       console.log("Clients loaded successfully:", data);
     },
     onError: (error) => {
       console.error("Error loading clients:", error);
-    }
+    },
+    staleTime: 0, // Always fetch fresh data
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true // Refetch when window regains focus
   });
 
   // Create client mutation
@@ -40,7 +43,13 @@ export default function Clients() {
     },
     onSuccess: (data) => {
       console.log("Client created successfully, invalidating queries");
+      
+      // Properly invalidate the cache
       queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
+      
+      // Explicitly refetch to ensure fresh data
+      refetch();
+      
       setIsAddDialogOpen(false);
       toast({
         title: "Client created",
@@ -60,11 +69,21 @@ export default function Clients() {
   // Update client mutation
   const updateClientMutation = useMutation({
     mutationFn: async ({ id, client }: { id: number; client: Partial<InsertClient> }) => {
+      console.log("Updating client:", id, client);
       const res = await apiRequest("PATCH", `/api/clients/${id}`, client);
-      return res.json();
+      const updatedClient = await res.json();
+      console.log("Client updated:", updatedClient);
+      return updatedClient;
     },
     onSuccess: () => {
+      console.log("Client updated successfully, invalidating queries");
+      
+      // Properly invalidate the cache
       queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
+      
+      // Explicitly refetch to ensure fresh data
+      refetch();
+      
       setIsEditDialogOpen(false);
       toast({
         title: "Client updated",
@@ -72,6 +91,7 @@ export default function Clients() {
       });
     },
     onError: (error) => {
+      console.error("Error updating client:", error);
       toast({
         title: "Error updating client",
         description: error.message,
@@ -83,16 +103,27 @@ export default function Clients() {
   // Delete client mutation
   const deleteClientMutation = useMutation({
     mutationFn: async (id: number) => {
+      console.log("Deleting client:", id);
       await apiRequest("DELETE", `/api/clients/${id}`);
+      console.log("Client deleted successfully");
+      return id;
     },
     onSuccess: () => {
+      console.log("Client deleted, invalidating queries");
+      
+      // Properly invalidate the cache
       queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
+      
+      // Explicitly refetch to ensure fresh data
+      refetch();
+      
       toast({
         title: "Client deleted",
         description: "The client has been deleted successfully.",
       });
     },
     onError: (error) => {
+      console.error("Error deleting client:", error);
       toast({
         title: "Error deleting client",
         description: error.message,
