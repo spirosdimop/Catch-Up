@@ -117,11 +117,14 @@ export default function Projects() {
       name: data.name,
       clientId: data.clientId,
       description: data.description,
-      status: data.status, 
-      startDate: data.startDate,
-      endDate: data.endDate,
+      status: data.status,
+      // Ensure dates are properly formatted for the API
+      startDate: data.startDate ? data.startDate.toISOString() : null,
+      endDate: data.endDate ? data.endDate.toISOString() : null,
       budget: data.budget
     };
+    
+    console.log("Submitting project data:", projectData);
     
     if (selectedProject) {
       updateProjectMutation.mutate({ id: selectedProject.id, project: projectData });
