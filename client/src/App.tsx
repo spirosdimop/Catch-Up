@@ -8,10 +8,10 @@ import { UserProvider } from "@/lib/userContext";
 import { AppSettingsProvider } from "@/lib/appSettingsContext";
 import AppShell from "@/components/layout/app-shell";
 import NotFound from "@/pages/not-found";
-// Use lowercase imports for consistency 
-import Dashboard from "./pages/dashboard";
+// Import pages with correct casing
+import Dashboard from "@/pages/Dashboard";
 import DashboardRedesign from "@/pages/dashboard-simple";
-import Clients from "./pages/clients";
+import Clients from "@/pages/Clients";
 import ClientsRedesign from "@/pages/clients-redesign";
 // Import placeholder pages for the new routes
 import Settings from "@/pages/settings";
@@ -26,7 +26,7 @@ import CalendarNew from "@/pages/calendar-new";
 import Profile from "@/pages/profile";
 import ProfileRedesign from "@/pages/profile-redesign";
 import AIAssistant from "@/pages/ai-assistant";
-import Tasks from "@/pages/tasks";
+import Tasks from "@/pages/Tasks";
 import Signup from "@/pages/signup";
 import LandingPage from "@/pages/landing";
 
@@ -115,12 +115,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider defaultTheme="light" storageKey="freelance-flow-theme">
         <UserProvider>
-          <AppSettingsProvider>
-            <TooltipProvider>
-              <Toaster />
-              <Router />
-            </TooltipProvider>
-          </AppSettingsProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Router />
+          </TooltipProvider>
         </UserProvider>
       </ThemeProvider>
     </QueryClientProvider>
