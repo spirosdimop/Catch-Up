@@ -320,11 +320,32 @@ export class DatabaseStorage implements IStorage {
   async updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined> { return undefined; }
   async deleteClient(id: number): Promise<boolean> { return false; }
   
-  async getProjects(): Promise<Project[]> { return []; }
-  async getProjectsByClient(clientId: number): Promise<Project[]> { return []; }
-  async getProject(id: number): Promise<Project | undefined> { return undefined; }
+  async getProjects(): Promise<Project[]> { 
+    return await db.select().from(schema.projects);
+  }
+  async getProjectsByClient(clientId: number): Promise<Project[]> { 
+    return await db
+      .select()
+      .from(schema.projects)
+      .where(eq(schema.projects.clientId, clientId));
+  }
+  
+  async getProject(id: number): Promise<Project | undefined> { 
+    const result = await db
+      .select()
+      .from(schema.projects)
+      .where(eq(schema.projects.id, id));
+    return result[0];
+  }
   async createProject(project: InsertProject): Promise<Project> { 
-    return {} as Project; 
+    const [result] = await db
+      .insert(schema.projects)
+      .values({
+        ...project,
+        createdAt: new Date()
+      })
+      .returning();
+    return result;
   }
   async updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined> { return undefined; }
   async deleteProject(id: number): Promise<boolean> { return false; }
@@ -332,8 +353,20 @@ export class DatabaseStorage implements IStorage {
   async getTasks(): Promise<Task[]> { 
     return await db.select().from(schema.tasks);
   }
-  async getTasksByProject(projectId: number): Promise<Task[]> { return []; }
-  async getTask(id: number): Promise<Task | undefined> { return undefined; }
+  async getTasksByProject(projectId: number): Promise<Task[]> { 
+    return await db
+      .select()
+      .from(schema.tasks)
+      .where(eq(schema.tasks.projectId, projectId));
+  }
+  
+  async getTask(id: number): Promise<Task | undefined> { 
+    const result = await db
+      .select()
+      .from(schema.tasks)
+      .where(eq(schema.tasks.id, id));
+    return result[0];
+  }
   async createTask(task: InsertTask): Promise<Task> { 
     const [result] = await db
       .insert(schema.tasks)
