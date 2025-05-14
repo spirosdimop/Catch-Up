@@ -22,15 +22,25 @@ export default function Clients() {
   // Fetch clients
   const { data: clients, isLoading } = useQuery<Client[]>({
     queryKey: ['/api/clients'],
+    onSuccess: (data) => {
+      console.log("Clients loaded successfully:", data);
+    },
+    onError: (error) => {
+      console.error("Error loading clients:", error);
+    }
   });
 
   // Create client mutation
   const createClientMutation = useMutation({
     mutationFn: async (client: InsertClient) => {
+      console.log("Creating client:", client);
       const res = await apiRequest("POST", "/api/clients", client);
-      return res.json();
+      const newClient = await res.json();
+      console.log("Client created:", newClient);
+      return newClient;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      console.log("Client created successfully, invalidating queries");
       queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
       setIsAddDialogOpen(false);
       toast({
@@ -39,6 +49,7 @@ export default function Clients() {
       });
     },
     onError: (error) => {
+      console.error("Error creating client:", error);
       toast({
         title: "Error creating client",
         description: error.message,
