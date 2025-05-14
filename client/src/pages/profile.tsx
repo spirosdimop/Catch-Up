@@ -37,9 +37,11 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 export default function Profile() {
   console.log("Loading UPDATED profile component with reviews and hours!");
-  const { user, setUser } = useUser();
+  const { user, setUser, updateUser } = useUser();
+  const { toast } = useToast();
   const [selectedService, setSelectedService] = useState<number | null>(null);
-  const [activeSection, setActiveSection] = useState("book"); // book, reviews, hours
+  const [activeSection, setActiveSection] = useState("book"); // book, reviews, hours, edit
+  const [isEditMode, setIsEditMode] = useState(false);
   const [reviewForm, setReviewForm] = useState({ name: "", rating: 5, comment: "" });
   const [bookingForm, setBookingForm] = useState({
     name: "",
@@ -49,6 +51,16 @@ export default function Profile() {
     time: "",
     notes: "",
   });
+  const [profileFormData, setProfileFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    businessName: "",
+    profession: "",
+    serviceArea: ""
+  });
+  const [isSubmittingProfile, setIsSubmittingProfile] = useState(false);
   
   const { 
     selectedDate, 
@@ -160,12 +172,58 @@ export default function Profile() {
     }
   }, [user, setUser]);
   
+  // Initialize profile form data when user data changes
+  useEffect(() => {
+    if (user) {
+      setProfileFormData({
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        email: user.email || "",
+        phone: user.phone || "",
+        businessName: user.businessName || "",
+        profession: user.profession || "",
+        serviceArea: user.serviceArea || ""
+      });
+    }
+  }, [user]);
+  
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setBookingForm(prev => ({
       ...prev,
       [name]: value
     }));
+  };
+  
+  const handleProfileInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setProfileFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+  
+  const handleSaveProfile = () => {
+    setIsSubmittingProfile(true);
+    
+    // Simulate API call delay
+    setTimeout(() => {
+      // Update user context with new profile data
+      if (user) {
+        updateUser({
+          ...profileFormData
+        });
+      }
+      
+      toast({
+        title: "Profile updated",
+        description: "Your profile information has been updated successfully.",
+        variant: "default",
+      });
+      
+      setIsSubmittingProfile(false);
+      setIsEditMode(false); // Exit edit mode after saving
+    }, 800);
   };
   
   // Add effect to update selectedDate when booking form date changes
