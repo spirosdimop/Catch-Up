@@ -287,6 +287,20 @@ export default function Profile() {
   
   return (
     <div className="container max-w-6xl py-8">
+      {/* Edit Profile Button in top right */}
+      {!isEditMode && (
+        <div className="flex justify-end mb-4">
+          <Button 
+            variant="outline" 
+            className="flex items-center gap-2" 
+            onClick={() => setIsEditMode(true)}
+          >
+            <UserCircle className="h-4 w-4" />
+            Edit Profile
+          </Button>
+        </div>
+      )}
+      
       {/* Professional Profile Header */}
       <div className="mb-10">
         <Card>
@@ -305,16 +319,8 @@ export default function Profile() {
                 </Avatar>
                 
                 <div className="flex-1 text-center md:text-left">
-                  <div className="flex items-center justify-between mb-2">
+                  <div className="mb-2">
                     <h1 className="text-3xl font-bold">{user.firstName} {user.lastName}</h1>
-                    <Button 
-                      variant="outline" 
-                      className="flex items-center gap-2" 
-                      onClick={() => setIsEditMode(true)}
-                    >
-                      <UserCircle className="h-4 w-4" />
-                      Edit Profile
-                    </Button>
                   </div>
                   <p className="text-xl text-muted-foreground mb-4">{user.businessName}</p>
                   
