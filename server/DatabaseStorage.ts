@@ -297,10 +297,25 @@ export class DatabaseStorage implements IStorage {
 
   // Implementing methods as needed for the remaining operations
   // We'll implement stubs for the required interface methods
-  async getClients(): Promise<Client[]> { return []; }
-  async getClient(id: number): Promise<Client | undefined> { return undefined; }
+  async getClients(): Promise<Client[]> { 
+    return await db.select().from(schema.clients);
+  }
+  async getClient(id: number): Promise<Client | undefined> { 
+    const result = await db
+      .select()
+      .from(schema.clients)
+      .where(eq(schema.clients.id, id));
+    return result[0];
+  }
   async createClient(client: InsertClient): Promise<Client> { 
-    return {} as Client; 
+    const [result] = await db
+      .insert(schema.clients)
+      .values({
+        ...client,
+        createdAt: new Date()
+      })
+      .returning();
+    return result;
   }
   async updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined> { return undefined; }
   async deleteClient(id: number): Promise<boolean> { return false; }
@@ -314,11 +329,20 @@ export class DatabaseStorage implements IStorage {
   async updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined> { return undefined; }
   async deleteProject(id: number): Promise<boolean> { return false; }
   
-  async getTasks(): Promise<Task[]> { return []; }
+  async getTasks(): Promise<Task[]> { 
+    return await db.select().from(schema.tasks);
+  }
   async getTasksByProject(projectId: number): Promise<Task[]> { return []; }
   async getTask(id: number): Promise<Task | undefined> { return undefined; }
   async createTask(task: InsertTask): Promise<Task> { 
-    return {} as Task; 
+    const [result] = await db
+      .insert(schema.tasks)
+      .values({
+        ...task,
+        createdAt: new Date()
+      })
+      .returning();
+    return result;
   }
   async updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined> { return undefined; }
   async deleteTask(id: number): Promise<boolean> { return false; }
