@@ -1942,7 +1942,7 @@ Remember: The most helpful thing you can do is direct users to the specialized t
   registerBookingRoutes(app);
   
   // Register AI routes
-  app.use(aiRoutes);
+  app.use("/api/ai", aiRoutes);
   
   const httpServer = createServer(app);
   return httpServer;

@@ -26,7 +26,7 @@ export async function chatWithLLM(
     });
 
     return response.choices[0].message.content || "No response generated";
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error calling OpenAI API:", error);
     throw new Error(`Failed to communicate with AI service: ${error.message}`);
   }
@@ -77,7 +77,7 @@ Format your response as a valid JSON array only.`;
       : (parsedContent.tasks || parsedContent.suggestions || []);
     
     return suggestions;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating task suggestions:", error);
     return [];
   }
@@ -108,7 +108,7 @@ Keep your response under 250 words and focus on actionable insights.`;
   try {
     const summaryText = await chatWithLLM(prompt, "gpt-4o", 0.5, 350);
     return summaryText;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error generating task summary:", error);
     return "Unable to generate task summary at this time.";
   }
@@ -150,7 +150,7 @@ Respond with JSON in this format:
 
     const content = response.choices[0].message.content;
     return JSON.parse(content || "{}");
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error suggesting task prioritization:", error);
     return { error: "Unable to suggest prioritization at this time" };
   }
@@ -261,7 +261,7 @@ Only include the relevant fields based on the identified action. If action is "u
     }
     
     return parsedResponse;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error processing command:", error);
     return { 
       success: false, 
