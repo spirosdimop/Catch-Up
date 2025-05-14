@@ -38,10 +38,8 @@ const projectFormSchema = z.object({
     required_error: "Client is required",
     invalid_type_error: "Client is required",
   }),
-  startDate: z.date({
-    required_error: "Start date is required",
-  }).nullable().optional(),
-  endDate: z.date().nullable().optional(),
+  startDate: z.union([z.date(), z.string(), z.null()]).optional(),
+  endDate: z.union([z.date(), z.string(), z.null()]).optional(),
   budget: z.coerce.number().nullable().optional(),
   status: z.enum([
     ProjectStatus.NOT_STARTED,
@@ -53,10 +51,16 @@ const projectFormSchema = z.object({
   }),
 }).transform(data => {
   // This ensures the form delivers the data in the format the server expects
+  const formatDate = (date: Date | string | null | undefined) => {
+    if (!date) return null;
+    if (date instanceof Date) return date.toISOString();
+    return date; // If it's already a string, return as is
+  };
+
   return {
     ...data,
-    startDate: data.startDate ? data.startDate.toISOString() : null,
-    endDate: data.endDate ? data.endDate.toISOString() : null,
+    startDate: formatDate(data.startDate),
+    endDate: formatDate(data.endDate),
   };
 });
 
@@ -77,16 +81,25 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
     defaultValues: defaultValues 
       ? {
           ...defaultValues,
-          startDate: defaultValues.startDate ? new Date(defaultValues.startDate) : null,
-          endDate: defaultValues.endDate ? new Date(defaultValues.endDate) : null,
+          // Convert date strings or Date objects to the format expected by the form
+          startDate: defaultValues.startDate 
+            ? (typeof defaultValues.startDate === 'string' 
+                ? defaultValues.startDate 
+                : defaultValues.startDate.toISOString())
+            : null,
+          endDate: defaultValues.endDate 
+            ? (typeof defaultValues.endDate === 'string'
+                ? defaultValues.endDate
+                : defaultValues.endDate.toISOString())
+            : null,
           budget: defaultValues.budget ? Number(defaultValues.budget) : undefined,
         }
       : {
           name: "",
           description: "",
           clientId: undefined as any,
-          startDate: new Date(),
-          endDate: undefined,
+          startDate: new Date().toISOString(), // Use ISO string format for consistency
+          endDate: null,
           budget: undefined,
           status: ProjectStatus.IN_PROGRESS,
         },

@@ -96,11 +96,21 @@ export default function Projects() {
   // Update project mutation
   const updateProjectMutation = useMutation({
     mutationFn: async ({ id, project }: { id: number; project: Partial<InsertProject> }) => {
+      console.log("Updating project:", id, project);
       const res = await apiRequest("PATCH", `/api/projects/${id}`, project);
-      return res.json();
+      const updatedProject = await res.json();
+      console.log("Project updated:", updatedProject);
+      return updatedProject;
     },
     onSuccess: () => {
+      console.log("Project updated successfully, invalidating queries");
+      
+      // Properly invalidate the cache
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      
+      // Explicitly refetch to ensure fresh data
+      refetchProjects();
+      
       setIsEditDialogOpen(false);
       toast({
         title: "Project updated",
@@ -108,6 +118,7 @@ export default function Projects() {
       });
     },
     onError: (error) => {
+      console.error("Error updating project:", error);
       toast({
         title: "Error updating project",
         description: error.message,
@@ -119,16 +130,27 @@ export default function Projects() {
   // Delete project mutation
   const deleteProjectMutation = useMutation({
     mutationFn: async (id: number) => {
+      console.log("Deleting project:", id);
       await apiRequest("DELETE", `/api/projects/${id}`);
+      console.log("Project deleted successfully");
+      return id;
     },
     onSuccess: () => {
+      console.log("Project deleted, invalidating queries");
+      
+      // Properly invalidate the cache
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      
+      // Explicitly refetch to ensure fresh data
+      refetchProjects();
+      
       toast({
         title: "Project deleted",
         description: "The project has been deleted successfully.",
       });
     },
     onError: (error) => {
+      console.error("Error deleting project:", error);
       toast({
         title: "Error deleting project",
         description: error.message,
