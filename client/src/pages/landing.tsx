@@ -122,6 +122,11 @@ export default function LandingPage() {
           </a>
         </nav>
         <div className="flex items-center gap-4">
+          <Link href="/catchup">
+            <Button variant="outline" size="sm" className="bg-blue-50 text-[#0F1D3A] hover:bg-blue-100">
+              Try Catch Up
+            </Button>
+          </Link>
           <Link href="/signup">
             <Button variant="outline" size="sm">
               Log in
