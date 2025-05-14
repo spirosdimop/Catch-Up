@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { Project, Client, Task, Invoice, TimeEntry } from "@shared/schema";
-import { calculateInvoiceSummary, calculateWeeklySummary } from "@/lib/utils";
+import { Project, Client, Task, TimeEntry } from "@shared/schema";
+import { calculateWeeklySummary } from "@/lib/utils";
 import { useState } from "react";
 import { Link } from "wouter";
 import { PlusIcon, DownloadIcon } from "lucide-react";
@@ -9,7 +9,7 @@ import StatCard from "@/components/StatCard";
 import ProjectTable from "@/components/ProjectTable";
 import TaskList from "@/components/TaskList";
 import TimeTrackingWidget from "@/components/TimeTrackingWidget";
-import InvoiceSummary from "@/components/InvoiceSummary";
+import ReminderSummary from "@/components/InvoiceSummary"; // Component was renamed but file name remains the same
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {
@@ -30,12 +30,8 @@ export default function Dashboard() {
     queryKey: ['/api/time-entries'],
   });
 
-  const { data: invoices, isLoading: isLoadingInvoices } = useQuery<Invoice[]>({
-    queryKey: ['/api/invoices'],
-  });
-
   // Calculate statistics
-  const activeProjectsCount = projects?.filter(p => p.status === 'Active').length || 0;
+  const activeProjectsCount = projects?.filter(p => p.status === 'in_progress').length || 0;
   const projectsDueThisWeek = projects?.filter(p => {
     if (!p.endDate) return false;
     const endDate = new Date(p.endDate);
@@ -56,23 +52,23 @@ export default function Dashboard() {
     ? Math.round((completedTasksCount / totalTasksCount) * 100) 
     : 0;
 
-  const invoiceSummary = invoices ? calculateInvoiceSummary(invoices) : { paid: 0, pending: 0, overdue: 0, total: 0 };
-  const weeklySummary = timeEntries ? calculateWeeklySummary(timeEntries) : [];
+  // Generate weekly summary for time tracking
+  const weeklySummary = calculateWeeklySummary(new Date());
 
   // Map projects with client data
-  const projectsWithClients = projects?.map(project => {
+  const projectsWithClients = projects ? projects.map(project => {
     const client = clients?.find(c => c.id === project.clientId);
     return { ...project, client };
-  });
+  }) : [];
 
   // Map tasks with project data
-  const tasksWithProjects = tasks?.map(task => {
+  const tasksWithProjects = tasks ? tasks.map(task => {
     const project = projects?.find(p => p.id === task.projectId);
     return { ...task, project };
-  });
+  }) : [];
   
   // Recent time entries for today
-  const todayEntries = timeEntries?.filter(entry => {
+  const todayEntries = timeEntries ? timeEntries.filter(entry => {
     const entryDate = new Date(entry.startTime);
     const today = new Date();
     return entryDate.toDateString() === today.toDateString();
@@ -80,7 +76,7 @@ export default function Dashboard() {
     const task = tasks?.find(t => t.id === entry.taskId);
     const project = task ? projects?.find(p => p.id === task.projectId) : undefined;
     return { ...entry, task, project };
-  });
+  }) : [];
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -104,16 +100,7 @@ export default function Dashboard() {
       </div>
 
       {/* Stats overview */}
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4 mb-6">
-        <StatCard 
-          title="Monthly Earnings"
-          value={`$${(invoiceSummary.paid || 0).toLocaleString()}`}
-          color="primary"
-          icon="dollar-sign"
-          change="12% from last month"
-          changeType="increase"
-        />
-        
+      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 mb-6">
         <StatCard 
           title="Active Projects"
           value={activeProjectsCount.toString()}
@@ -190,19 +177,10 @@ export default function Dashboard() {
           </div>
         )}
 
-        {/* Invoices Summary Card */}
-        {isLoadingInvoices ? (
-          <div className="bg-white shadow rounded-lg p-5 space-y-4">
-            <Skeleton className="h-8 w-72" />
-            <Skeleton className="h-80 w-full" />
-          </div>
-        ) : (
-          <InvoiceSummary 
-            invoices={invoices || []} 
-            clients={clients || []}
-            summary={invoiceSummary}
-          />
-        )}
+        {/* Reminders Card */}
+        <div>
+          <ReminderSummary />
+        </div>
       </div>
     </div>
   );

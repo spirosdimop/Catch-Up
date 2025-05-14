@@ -95,53 +95,42 @@ export function formatTimeBetween(startTime: string | Date, endTime: string | Da
   return `${formatTime(start)} - ${formatTime(end)}`;
 }
 
-export function formatCurrency(amount: number, currency: string = 'USD'): string {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(amount);
+export function calculateWeeklySummary(date: Date): { day: string; hours: number; label: string }[] {
+  const startOfWeek = new Date(date);
+  const dayOfWeek = startOfWeek.getDay();
+  startOfWeek.setDate(startOfWeek.getDate() - dayOfWeek);
+  
+  const summary = [];
+  
+  for (let i = 0; i < 7; i++) {
+    const currentDate = new Date(startOfWeek);
+    currentDate.setDate(startOfWeek.getDate() + i);
+    
+    const day = ['S', 'M', 'T', 'W', 'T', 'F', 'S'][i];
+    
+    // Generate a random number of hours for demo purposes
+    // In a real app, this would come from actual time entry data
+    const hours = Math.random() * 8;
+    
+    summary.push({
+      day,
+      hours,
+      label: day
+    });
+  }
+  
+  return summary;
 }
 
-interface InvoiceItem {
-  id?: number;
-  description: string;
-  quantity: number;
-  rate: number;
-  amount?: number;
-}
-
-interface InvoiceSummary {
-  subtotal: number;
-  taxAmount: number;
-  totalAmount: number;
-  items: Array<InvoiceItem & { amount: number }>;
-}
-
-export function calculateInvoiceSummary(
-  items: InvoiceItem[], 
-  taxRate: number = 0
-): InvoiceSummary {
-  // Calculate amount for each item
-  const processedItems = items.map(item => ({
-    ...item,
-    amount: (item.amount !== undefined) ? item.amount : item.quantity * item.rate
-  }));
-  
-  // Calculate subtotal
-  const subtotal = processedItems.reduce((sum, item) => sum + item.amount, 0);
-  
-  // Calculate tax amount
-  const taxAmount = subtotal * (taxRate / 100);
-  
-  // Calculate total
-  const totalAmount = subtotal + taxAmount;
-  
-  return {
-    subtotal,
-    taxAmount,
-    totalAmount,
-    items: processedItems
-  };
+export function getPriorityColor(priority: string): string {
+  switch (priority.toLowerCase()) {
+    case 'high':
+      return 'bg-red-100 text-red-800';
+    case 'medium':
+      return 'bg-yellow-100 text-yellow-800';
+    case 'low':
+      return 'bg-green-100 text-green-800';
+    default:
+      return 'bg-blue-100 text-blue-800';
+  }
 }
