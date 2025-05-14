@@ -60,18 +60,19 @@ const projectFormSchema = z.object({
   };
 });
 
+// Type with dates as strings for form submission
 type ProjectFormValues = z.infer<typeof projectFormSchema>;
 
 interface ProjectFormProps {
   clients: Client[];
   defaultValues?: Project;
-  onSubmit: (data: ProjectFormValues) => void;
+  onSubmit: (data: any) => void; // Use any to work around type transformations
   isSubmitting: boolean;
 }
 
 export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmitting }: ProjectFormProps) {
   // Create form with validation
-  const form = useForm<ProjectFormValues>({
+  const form = useForm<z.infer<typeof projectFormSchema>>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: defaultValues 
       ? {
@@ -83,7 +84,7 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
       : {
           name: "",
           description: "",
-          clientId: undefined,
+          clientId: undefined as any,
           startDate: new Date(),
           endDate: undefined,
           budget: undefined,

@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Project, Client, InsertProject, ProjectStatus } from "@shared/schema";
-import { queryClient } from "@/lib/queryClient";
-import { apiRequest, formatDate, getStatusColor } from "@/lib/utils";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { formatDate, getStatusColor } from "@/lib/utils";
 import { PlusIcon, SearchIcon, TrashIcon, PencilIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
