@@ -168,8 +168,8 @@ export default function Projects() {
       description: data.description,
       status: data.status,
       // Ensure dates are properly formatted for the API
-      startDate: data.startDate ? data.startDate.toISOString() : null,
-      endDate: data.endDate ? data.endDate.toISOString() : null,
+      startDate: data.startDate ? (typeof data.startDate === 'string' ? data.startDate : data.startDate.toISOString()) : null,
+      endDate: data.endDate ? (typeof data.endDate === 'string' ? data.endDate : data.endDate.toISOString()) : null,
       budget: data.budget
     };
     
