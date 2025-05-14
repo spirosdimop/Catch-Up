@@ -186,7 +186,12 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "MMM d, yyyy")
+                          format(
+                            typeof field.value === 'string' 
+                              ? new Date(field.value) 
+                              : field.value, 
+                            "MMM d, yyyy"
+                          )
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -197,8 +202,14 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={field.value || undefined}
-                      onSelect={(date) => field.onChange(date)}
+                      selected={
+                        field.value 
+                          ? (typeof field.value === 'string'
+                              ? new Date(field.value)
+                              : field.value)
+                          : undefined
+                      }
+                      onSelect={(date) => field.onChange(date ? date.toISOString() : null)}
                       initialFocus
                     />
                   </PopoverContent>
@@ -225,7 +236,12 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
                         )}
                       >
                         {field.value ? (
-                          format(field.value, "MMM d, yyyy")
+                          format(
+                            typeof field.value === 'string' 
+                              ? new Date(field.value) 
+                              : field.value, 
+                            "MMM d, yyyy"
+                          )
                         ) : (
                           <span>Pick a date</span>
                         )}
@@ -236,13 +252,27 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
                   <PopoverContent className="w-auto p-0" align="start">
                     <Calendar
                       mode="single"
-                      selected={field.value || undefined}
-                      onSelect={(date) => field.onChange(date)}
-                      initialFocus
-                      disabled={(date) => 
-                        (form.getValues().startDate && date < form.getValues().startDate) || 
-                        date < new Date("1900-01-01")
+                      selected={
+                        field.value 
+                          ? (typeof field.value === 'string'
+                              ? new Date(field.value)
+                              : field.value)
+                          : undefined
                       }
+                      onSelect={(date) => field.onChange(date ? date.toISOString() : null)}
+                      initialFocus
+                      disabled={(date) => {
+                        const startDate = form.getValues().startDate;
+                        // Handle different date formats
+                        const compareDate = startDate 
+                          ? typeof startDate === 'string'
+                              ? new Date(startDate)
+                              : startDate
+                          : null;
+                          
+                        return (compareDate && date < compareDate) || 
+                          date < new Date("1900-01-01");
+                      }}
                     />
                   </PopoverContent>
                 </Popover>
