@@ -49,9 +49,30 @@ export default function LandingPage() {
     setIsSubmitting(true);
     
     try {
-      // In a real app, you'd make an API call here
-      // For now, just simulate a successful signup
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Send registration request to backend
+      const response = await fetch('/api/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username: formData.email, // Use email as username
+          email: formData.email,
+          password: formData.password,
+          fullName: formData.fullName,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        // Handle validation errors
+        if (data.errors) {
+          const errorMessage = data.errors.map((err: any) => err.message).join(', ');
+          throw new Error(errorMessage || data.message || 'Registration failed');
+        }
+        throw new Error(data.message || 'Registration failed');
+      }
       
       toast({
         title: "Success!",
@@ -66,10 +87,15 @@ export default function LandingPage() {
         password: ""
       });
       
-    } catch (error) {
+      // Redirect to login or dashboard after a delay
+      setTimeout(() => {
+        window.location.href = '/login'; // Redirect to login page
+      }, 1500);
+      
+    } catch (error: any) {
       toast({
-        title: "Something went wrong",
-        description: "Please try again later",
+        title: "Registration failed",
+        description: error.message || "Please try again later",
         variant: "destructive"
       });
     } finally {
