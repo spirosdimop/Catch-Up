@@ -28,7 +28,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
-import { Client, Project } from "@shared/schema";
+import { Client, Project, ProjectStatus } from "@shared/schema";
 
 // Create a schema for project form
 const projectFormSchema = z.object({
@@ -75,7 +75,7 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
           startDate: new Date(),
           endDate: undefined,
           budget: undefined,
-          status: "Active",
+          status: ProjectStatus.IN_PROGRESS,
         },
   });
 
@@ -258,10 +258,10 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Active">Active</SelectItem>
-                    <SelectItem value="Completed">Completed</SelectItem>
-                    <SelectItem value="On Hold">On Hold</SelectItem>
-                    <SelectItem value="Cancelled">Cancelled</SelectItem>
+                    <SelectItem value={ProjectStatus.NOT_STARTED}>Not Started</SelectItem>
+                    <SelectItem value={ProjectStatus.IN_PROGRESS}>In Progress</SelectItem>
+                    <SelectItem value={ProjectStatus.ON_HOLD}>On Hold</SelectItem>
+                    <SelectItem value={ProjectStatus.COMPLETED}>Completed</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
