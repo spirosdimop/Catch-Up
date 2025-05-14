@@ -17,7 +17,10 @@ import {
   insertProjectSchema, 
   insertTaskSchema, 
   insertTimeEntrySchema, 
-  insertInvoiceSchema, 
+  insertInvoiceSchema,
+  ProjectStatus,
+  TaskStatus,
+  TaskPriority,
   insertInvoiceItemSchema,
   insertEventSchema,
   insertEventTemplateSchema,
@@ -287,7 +290,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const projectData = insertProjectSchema.partial().parse(req.body);
+      // Parse the request body with the original schema but make everything optional
+      const projectData = z.object({
+        name: z.string().optional(),
+        description: z.string().nullable().optional(),
+        clientId: z.number().optional(),
+        status: z.enum([
+          ProjectStatus.NOT_STARTED,
+          ProjectStatus.IN_PROGRESS,
+          ProjectStatus.ON_HOLD,
+          ProjectStatus.COMPLETED
+        ]).optional(),
+        startDate: z.string().nullable().optional().transform(val => val ? new Date(val) : null),
+        endDate: z.string().nullable().optional().transform(val => val ? new Date(val) : null),
+        budget: z.number().nullable().optional()
+      }).parse(req.body);
+      
+      console.log("Updating project with data:", projectData);
+      
       const project = await storage.updateProject(id, projectData);
       if (!project) {
         return res.status(404).json({ message: "Project not found" });
@@ -365,7 +385,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      const taskData = insertTaskSchema.partial().parse(req.body);
+      // Parse the request body with a custom schema for task updates
+      const taskData = z.object({
+        title: z.string().optional(),
+        description: z.string().nullable().optional(),
+        projectId: z.number().optional(),
+        status: z.enum([
+          TaskStatus.TO_DO,
+          TaskStatus.IN_PROGRESS,
+          TaskStatus.REVIEW,
+          TaskStatus.COMPLETED
+        ]).optional(),
+        priority: z.enum([
+          TaskPriority.LOW,
+          TaskPriority.MEDIUM,
+          TaskPriority.HIGH,
+          TaskPriority.URGENT
+        ]).optional(),
+        deadline: z.string().nullable().optional().transform(val => val ? new Date(val) : null),
+        completed: z.boolean().optional()
+      }).parse(req.body);
       const task = await storage.updateTask(id, taskData);
       if (!task) {
         return res.status(404).json({ message: "Task not found" });

@@ -60,15 +60,24 @@ export const projects = pgTable("projects", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertProjectSchema = createInsertSchema(projects).pick({
-  name: true,
-  description: true,
-  clientId: true,
-  status: true,
-  startDate: true,
-  endDate: true,
-  budget: true,
-});
+export const insertProjectSchema = createInsertSchema(projects)
+  .pick({
+    name: true,
+    description: true,
+    clientId: true,
+    status: true,
+    startDate: true,
+    endDate: true,
+    budget: true,
+  })
+  .transform((data) => {
+    // Convert string dates to Date objects for the database
+    return {
+      ...data,
+      startDate: data.startDate ? new Date(data.startDate) : null,
+      endDate: data.endDate ? new Date(data.endDate) : null,
+    };
+  });
 
 // Task status enum
 export const taskStatusEnum = pgEnum("task_status", [
@@ -99,15 +108,23 @@ export const tasks = pgTable("tasks", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
-export const insertTaskSchema = createInsertSchema(tasks).pick({
-  title: true,
-  description: true,
-  projectId: true,
-  status: true,
-  priority: true,
-  deadline: true,
-  completed: true,
-});
+export const insertTaskSchema = createInsertSchema(tasks)
+  .pick({
+    title: true,
+    description: true,
+    projectId: true,
+    status: true,
+    priority: true,
+    deadline: true,
+    completed: true,
+  })
+  .transform((data) => {
+    // Convert string dates to Date objects for the database
+    return {
+      ...data,
+      deadline: data.deadline ? new Date(data.deadline) : null,
+    };
+  });
 
 // Time entry schema
 export const timeEntries = pgTable("time_entries", {
