@@ -421,6 +421,10 @@ export default function TasksPage() {
                 <Calendar className="h-4 w-4 mr-2" />
                 Calendar View
               </TabsTrigger>
+              <TabsTrigger value="ai" className="tasks-tab flex items-center data-[state=active]:bg-opacity-10 data-[state=active]:border-[#1d4ed8] data-[state=active]:text-white">
+                <Sparkles className="h-4 w-4 mr-2" />
+                AI Assistant
+              </TabsTrigger>
             </TabsList>
             
             <TabsContent value="list">
@@ -458,6 +462,31 @@ export default function TasksPage() {
                 <Calendar className="h-12 w-12 mx-auto mb-4 text-[#1d4ed8]" />
                 <h3 className="text-lg font-medium text-white">Calendar View Coming Soon</h3>
                 <p>We're working on a beautiful calendar view for your tasks.</p>
+              </div>
+            </TabsContent>
+            
+            <TabsContent value="ai">
+              <div className="grid grid-cols-1 gap-6">
+                <AiSuggestions 
+                  tasks={tasks} 
+                  onAddTask={(task) => {
+                    const createdTask: Task = {
+                      id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
+                      title: task.title,
+                      description: task.description,
+                      dueDate: task.dueDate,
+                      priority: task.priority,
+                      category: task.category,
+                      assignedTo: task.assignedTo,
+                      assignedImage: task.assignedImage,
+                      status: "todo",
+                      isFlagged: false,
+                      createdAt: new Date()
+                    };
+                    
+                    setTasks([...tasks, createdTask]);
+                  }}
+                />
               </div>
             </TabsContent>
           </Tabs>
