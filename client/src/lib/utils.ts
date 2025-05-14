@@ -8,7 +8,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-export function formatDate(date: Date): string {
+export function formatDate(date: Date | null | undefined): string {
+  if (!date) return "—";
   return new Intl.DateTimeFormat("en-US", {
     month: "long",
     day: "numeric",
@@ -132,5 +133,20 @@ export function getPriorityColor(priority: string): string {
       return 'bg-green-100 text-green-800';
     default:
       return 'bg-blue-100 text-blue-800';
+  }
+}
+
+export function getStatusColor(status: string): string {
+  switch (status.toLowerCase()) {
+    case 'not_started':
+      return 'gray';
+    case 'in_progress':
+      return 'blue';
+    case 'on_hold':
+      return 'yellow';
+    case 'completed':
+      return 'green';
+    default:
+      return 'gray';
   }
 }

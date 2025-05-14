@@ -33,17 +33,22 @@ import { Client, Project, ProjectStatus } from "@shared/schema";
 // Create a schema for project form
 const projectFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
-  description: z.string().optional(),
+  description: z.string().nullable().optional(),
   clientId: z.coerce.number({
     required_error: "Client is required",
     invalid_type_error: "Client is required",
   }),
   startDate: z.date({
     required_error: "Start date is required",
-  }),
-  endDate: z.date().optional(),
-  budget: z.coerce.number().optional(),
-  status: z.string({
+  }).nullable().optional(),
+  endDate: z.date().nullable().optional(),
+  budget: z.coerce.number().nullable().optional(),
+  status: z.enum([
+    ProjectStatus.NOT_STARTED,
+    ProjectStatus.IN_PROGRESS,
+    ProjectStatus.ON_HOLD,
+    ProjectStatus.COMPLETED
+  ], {
     required_error: "Status is required",
   }),
 });

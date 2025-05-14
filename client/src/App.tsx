@@ -27,7 +27,7 @@ import Profile from "@/pages/profile";
 import ProfileRedesign from "@/pages/profile-redesign";
 import AIAssistant from "@/pages/ai-assistant";
 import Tasks from "@/pages/Tasks";
-import Projects from "@/pages/projects";
+import Projects from "@/pages/Projects";
 import Signup from "@/pages/signup";
 import LandingPage from "@/pages/landing";
 

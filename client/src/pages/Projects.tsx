@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Project, Client, InsertProject } from "@shared/schema";
+import { Project, Client, InsertProject, ProjectStatus } from "@shared/schema";
 import { queryClient } from "@/lib/queryClient";
 import { apiRequest, formatDate, getStatusColor } from "@/lib/utils";
 import { PlusIcon, SearchIcon, TrashIcon, PencilIcon } from "lucide-react";
@@ -182,10 +182,10 @@ export default function Projects() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="">All Statuses</SelectItem>
-                  <SelectItem value="Active">Active</SelectItem>
-                  <SelectItem value="Completed">Completed</SelectItem>
-                  <SelectItem value="On Hold">On Hold</SelectItem>
-                  <SelectItem value="Cancelled">Cancelled</SelectItem>
+                  <SelectItem value={ProjectStatus.NOT_STARTED}>Not Started</SelectItem>
+                  <SelectItem value={ProjectStatus.IN_PROGRESS}>In Progress</SelectItem>
+                  <SelectItem value={ProjectStatus.ON_HOLD}>On Hold</SelectItem>
+                  <SelectItem value={ProjectStatus.COMPLETED}>Completed</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -229,7 +229,11 @@ export default function Projects() {
                       <TableCell>${Number(project.budget).toLocaleString()}</TableCell>
                       <TableCell>
                         <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-${getStatusColor(project.status)}-100 text-${getStatusColor(project.status)}-800`}>
-                          {project.status}
+                          {project.status === ProjectStatus.NOT_STARTED ? "Not Started" :
+                           project.status === ProjectStatus.IN_PROGRESS ? "In Progress" :
+                           project.status === ProjectStatus.ON_HOLD ? "On Hold" :
+                           project.status === ProjectStatus.COMPLETED ? "Completed" : 
+                           project.status}
                         </span>
                       </TableCell>
                       <TableCell className="text-right">
