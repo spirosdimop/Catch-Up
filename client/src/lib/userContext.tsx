@@ -15,6 +15,20 @@ export interface UserData {
   voicemailMessage?: string;
   smsFollowUpMessage?: string;
   availabilityHours?: string; // JSON string with availability hours
+  // Additional properties for UI demo
+  businessHours?: Array<{
+    day: string;
+    opens: string;
+    closes: string;
+  }>;
+  reviews?: Array<{
+    id: number;
+    name: string;
+    rating: number;
+    date: string;
+    comment: string;
+  }>;
+  cancellationPolicy?: string;
   services: Array<{
     name: string;
     description?: string;

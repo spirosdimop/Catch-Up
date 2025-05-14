@@ -291,45 +291,166 @@ export default function Profile() {
       <div className="mb-10">
         <Card>
           <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
-              <Avatar className="w-32 h-32 border-4 border-primary/20">
-                {user?.profileImageUrl ? (
-                  <AvatarImage src={user.profileImageUrl} alt={`${user.firstName} ${user.lastName}`} />
-                ) : (
-                  <AvatarFallback className="text-2xl bg-primary/10">
-                    {user?.firstName?.[0]}{user?.lastName?.[0]}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-              
-              <div className="flex-1 text-center md:text-left">
-                <h1 className="text-3xl font-bold">{user.firstName} {user.lastName}</h1>
-                <p className="text-xl text-muted-foreground mb-4">{user.businessName}</p>
+            {!isEditMode ? (
+              // Display Mode
+              <div className="flex flex-col md:flex-row gap-8 items-center md:items-start">
+                <Avatar className="w-32 h-32 border-4 border-primary/20">
+                  {user?.profileImageUrl ? (
+                    <AvatarImage src={user.profileImageUrl} alt={`${user.firstName} ${user.lastName}`} />
+                  ) : (
+                    <AvatarFallback className="text-2xl bg-primary/10">
+                      {user?.firstName?.[0]}{user?.lastName?.[0]}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
                 
-                <div className="flex flex-wrap gap-3 justify-center md:justify-start mb-4">
-                  <Badge variant="secondary" className="px-3 py-1">
-                    <UserCircle className="h-4 w-4 mr-1" />
-                    <span className="capitalize">{user.profession}</span>
-                  </Badge>
-                  
-                  <Badge variant="outline" className="px-3 py-1">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    <span>{user.serviceArea}</span>
-                  </Badge>
-                </div>
-                
-                <div className="flex flex-col md:flex-row gap-4 text-sm">
-                  <div className="flex items-center">
-                    <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span>{user.email}</span>
+                <div className="flex-1 text-center md:text-left">
+                  <div className="flex items-center justify-between mb-2">
+                    <h1 className="text-3xl font-bold">{user.firstName} {user.lastName}</h1>
+                    <Button 
+                      variant="outline" 
+                      className="flex items-center gap-2" 
+                      onClick={() => setIsEditMode(true)}
+                    >
+                      <UserCircle className="h-4 w-4" />
+                      Edit Profile
+                    </Button>
                   </div>
-                  <div className="flex items-center">
-                    <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
-                    <span>{user.phone}</span>
+                  <p className="text-xl text-muted-foreground mb-4">{user.businessName}</p>
+                  
+                  <div className="flex flex-wrap gap-3 justify-center md:justify-start mb-4">
+                    <Badge variant="secondary" className="px-3 py-1">
+                      <UserCircle className="h-4 w-4 mr-1" />
+                      <span className="capitalize">{user.profession}</span>
+                    </Badge>
+                    
+                    <Badge variant="outline" className="px-3 py-1">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span>{user.serviceArea}</span>
+                    </Badge>
+                  </div>
+                  
+                  <div className="flex flex-col md:flex-row gap-4 text-sm">
+                    <div className="flex items-center">
+                      <Mail className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span>{user.email}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Phone className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <span>{user.phone}</span>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              // Edit Mode
+              <div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-bold">Edit Profile</h2>
+                  <div className="flex gap-2">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => {
+                        setIsEditMode(false);
+                        // Reset form to current user values
+                        if (user) {
+                          setProfileFormData({
+                            firstName: user.firstName || "",
+                            lastName: user.lastName || "",
+                            email: user.email || "",
+                            phone: user.phone || "",
+                            businessName: user.businessName || "",
+                            profession: user.profession || "",
+                            serviceArea: user.serviceArea || ""
+                          });
+                        }
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      onClick={handleSaveProfile}
+                      disabled={isSubmittingProfile}
+                    >
+                      {isSubmittingProfile ? "Saving..." : "Save Changes"}
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input 
+                      id="firstName"
+                      name="firstName"
+                      value={profileFormData.firstName}
+                      onChange={handleProfileInputChange}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input 
+                      id="lastName"
+                      name="lastName"
+                      value={profileFormData.lastName}
+                      onChange={handleProfileInputChange}
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2 mb-4">
+                  <Label htmlFor="email">Email</Label>
+                  <Input 
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={profileFormData.email}
+                    onChange={handleProfileInputChange}
+                  />
+                </div>
+                
+                <div className="space-y-2 mb-4">
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input 
+                    id="phone"
+                    name="phone"
+                    type="tel"
+                    value={profileFormData.phone}
+                    onChange={handleProfileInputChange}
+                  />
+                </div>
+                
+                <div className="space-y-2 mb-4">
+                  <Label htmlFor="businessName">Business Name</Label>
+                  <Input 
+                    id="businessName"
+                    name="businessName"
+                    value={profileFormData.businessName}
+                    onChange={handleProfileInputChange}
+                  />
+                </div>
+                
+                <div className="space-y-2 mb-4">
+                  <Label htmlFor="profession">Profession</Label>
+                  <Input 
+                    id="profession"
+                    name="profession"
+                    value={profileFormData.profession}
+                    onChange={handleProfileInputChange}
+                  />
+                </div>
+                
+                <div className="space-y-2 mb-4">
+                  <Label htmlFor="serviceArea">Service Area</Label>
+                  <Input 
+                    id="serviceArea"
+                    name="serviceArea"
+                    value={profileFormData.serviceArea}
+                    onChange={handleProfileInputChange}
+                  />
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -620,7 +741,13 @@ export default function Profile() {
               <h2 className="text-2xl font-bold mb-6">Client Reviews</h2>
               
               <div className="space-y-6">
-                {user.reviews?.map((review) => (
+                {user.reviews?.map((review: {
+                  id: number;
+                  name: string;
+                  rating: number;
+                  date: string;
+                  comment: string;
+                }) => (
                   <Card key={review.id}>
                     <CardContent className="p-6">
                       <div className="flex justify-between mb-2">
@@ -722,7 +849,11 @@ export default function Profile() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  {user.businessHours?.map((hours, index) => (
+                  {user.businessHours?.map((hours: {
+                    day: string;
+                    opens: string;
+                    closes: string;
+                  }, index: number) => (
                     <div key={index} className="flex justify-between py-2 border-b last:border-0">
                       <span className="font-medium">{hours.day}</span>
                       <span className="text-muted-foreground">
