@@ -111,7 +111,6 @@ export default function TaskList({ tasks }: TaskListProps) {
       <div className="p-5 border-b border-gray-200">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-800">Tasks Overview</h3>
-          <Link to="/tasks" className="text-sm font-medium text-primary hover:text-primary-700">View all</Link>
         </div>
       </div>
       <div className="p-5">
