@@ -330,7 +330,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(schema.clients)
       .where(eq(schema.clients.id, id));
-    return result.rowCount > 0;
+    return result.rowCount ? result.rowCount > 0 : false;
   }
   
   async getProjects(): Promise<Project[]> { 
@@ -360,8 +360,21 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return result;
   }
-  async updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined> { return undefined; }
-  async deleteProject(id: number): Promise<boolean> { return false; }
+  async updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined> { 
+    const [result] = await db
+      .update(schema.projects)
+      .set(project)
+      .where(eq(schema.projects.id, id))
+      .returning();
+    return result;
+  }
+  
+  async deleteProject(id: number): Promise<boolean> { 
+    const result = await db
+      .delete(schema.projects)
+      .where(eq(schema.projects.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
   
   async getTasks(): Promise<Task[]> { 
     return await db.select().from(schema.tasks);
@@ -390,8 +403,21 @@ export class DatabaseStorage implements IStorage {
       .returning();
     return result;
   }
-  async updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined> { return undefined; }
-  async deleteTask(id: number): Promise<boolean> { return false; }
+  async updateTask(id: number, task: Partial<InsertTask>): Promise<Task | undefined> { 
+    const [result] = await db
+      .update(schema.tasks)
+      .set(task)
+      .where(eq(schema.tasks.id, id))
+      .returning();
+    return result;
+  }
+  
+  async deleteTask(id: number): Promise<boolean> { 
+    const result = await db
+      .delete(schema.tasks)
+      .where(eq(schema.tasks.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
   
   async getTimeEntries(): Promise<TimeEntry[]> { return []; }
   async getTimeEntriesByProject(projectId: number): Promise<TimeEntry[]> { return []; }
