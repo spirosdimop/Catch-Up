@@ -1,8 +1,81 @@
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
-import { ArrowRight, Bot, CheckCircle, Clock, Globe, Users } from "lucide-react";
+import { ArrowRight, Bot, CheckCircle, Clock, Globe, Mail, User, Users } from "lucide-react";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function LandingPage() {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    password: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id === "full-name" ? "fullName" : id]: value
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Basic validation
+    if (!formData.fullName || !formData.email || !formData.password) {
+      toast({
+        title: "Error",
+        description: "Please fill in all fields",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    if (formData.password.length < 8) {
+      toast({
+        title: "Error",
+        description: "Password must be at least 8 characters long",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      // In a real app, you'd make an API call here
+      // For now, just simulate a successful signup
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      toast({
+        title: "Success!",
+        description: "Your account has been created. Welcome to FreelanceFlow!",
+        variant: "default"
+      });
+      
+      // Clear the form
+      setFormData({
+        fullName: "",
+        email: "",
+        password: ""
+      });
+      
+    } catch (error) {
+      toast({
+        title: "Something went wrong",
+        description: "Please try again later",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <div className="flex flex-col min-h-screen">
       {/* Header/Navigation */}
@@ -399,6 +472,103 @@ export default function LandingPage() {
                   <p className="text-xs text-gray-500">Consultant</p>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Sign Up Section */}
+      <section className="w-full py-16 bg-[#F0F5FF]">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
+            <div className="w-full lg:w-1/2 space-y-4">
+              <div className="inline-block rounded-lg bg-blue-100 px-3 py-1 text-sm text-[#0F1D3A] font-medium">
+                Join our community
+              </div>
+              <h2 className="text-3xl font-bold tracking-tighter md:text-4xl text-[#0F1D3A]">
+                Sign Up Today and Transform Your Freelance Business
+              </h2>
+              <p className="text-gray-600 md:text-lg">
+                Create your account in seconds and start managing your freelance business more efficiently. Our platform helps you save time, stay organized, and focus on what you do best.
+              </p>
+              <ul className="space-y-2">
+                <li className="flex items-center text-gray-600">
+                  <CheckCircle className="mr-2 h-5 w-5 text-blue-500" />
+                  <span>Free 14-day trial, no credit card required</span>
+                </li>
+                <li className="flex items-center text-gray-600">
+                  <CheckCircle className="mr-2 h-5 w-5 text-blue-500" />
+                  <span>Quick and easy setup process</span>
+                </li>
+                <li className="flex items-center text-gray-600">
+                  <CheckCircle className="mr-2 h-5 w-5 text-blue-500" />
+                  <span>Access to all features during trial</span>
+                </li>
+              </ul>
+            </div>
+            <div className="w-full lg:w-1/2">
+              <Card className="p-6 shadow-lg border-2 border-blue-100">
+                <form className="space-y-5" onSubmit={handleSubmit}>
+                  <div className="space-y-1">
+                    <Label htmlFor="full-name">Full Name</Label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input 
+                        id="full-name" 
+                        placeholder="John Doe" 
+                        className="pl-10"
+                        value={formData.fullName}
+                        onChange={handleChange}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="email">Email Address</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        placeholder="you@example.com" 
+                        className="pl-10"
+                        value={formData.email}
+                        onChange={handleChange}
+                        disabled={isSubmitting}
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="password">Password</Label>
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      placeholder="••••••••" 
+                      value={formData.password}
+                      onChange={handleChange}
+                      disabled={isSubmitting}
+                    />
+                    <p className="text-xs text-gray-500">Password must be at least 8 characters long</p>
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full bg-[#0F1D3A] hover:bg-[#172B52] text-white"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? (
+                      "Creating your account..."
+                    ) : (
+                      <>
+                        Create Free Account
+                        <ArrowRight className="ml-2 h-4 w-4" />
+                      </>
+                    )}
+                  </Button>
+                  <p className="text-center text-xs text-gray-500">
+                    By signing up, you agree to our Terms of Service and Privacy Policy
+                  </p>
+                </form>
+              </Card>
             </div>
           </div>
         </div>
