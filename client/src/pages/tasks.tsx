@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AiSuggestions } from "@/components/tasks/ai-suggestions";
 import { 
   CheckCircle2, 
   Clock, 
@@ -18,7 +19,8 @@ import {
   ArrowRight,
   Search,
   Tag,
-  Filter
+  Filter,
+  Sparkles
 } from "lucide-react";
 // Import our custom styles
 import "../styles/tasks.css";
