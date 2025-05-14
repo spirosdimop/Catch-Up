@@ -7,6 +7,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AiSuggestions } from "@/components/tasks/ai-suggestions";
 import { CommandProcessor } from "@/components/ai-command/command-processor";
+import { TestApi } from "@/components/ai-command/test-api";
 import { 
   CheckCircle2, 
   Clock, 
@@ -467,19 +468,41 @@ export default function TasksPage() {
             </TabsContent>
             
             <TabsContent value="ai">
-              <div className="grid grid-cols-1 gap-6">
-                <AiSuggestions 
-                  tasks={tasks} 
-                  onAddTask={(task) => {
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-6">
+                  <AiSuggestions 
+                    tasks={tasks} 
+                    onAddTask={(task) => {
+                      const createdTask: Task = {
+                        id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
+                        title: task.title,
+                        description: task.description,
+                        dueDate: task.dueDate,
+                        priority: task.priority,
+                        category: task.category,
+                        assignedTo: task.assignedTo,
+                        assignedImage: task.assignedImage,
+                        status: "todo",
+                        isFlagged: false,
+                        createdAt: new Date()
+                      };
+                      
+                      setTasks([...tasks, createdTask]);
+                    }}
+                  />
+                  
+                  <TestApi />
+                </div>
+                
+                <CommandProcessor 
+                  onTaskCreated={(taskData) => {
                     const createdTask: Task = {
                       id: tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1,
-                      title: task.title,
-                      description: task.description,
-                      dueDate: task.dueDate,
-                      priority: task.priority,
-                      category: task.category,
-                      assignedTo: task.assignedTo,
-                      assignedImage: task.assignedImage,
+                      title: taskData.title,
+                      description: taskData.description || "",
+                      dueDate: null,
+                      priority: taskData.priority as PriorityType || "normal",
+                      category: taskData.category || "Work",
                       status: "todo",
                       isFlagged: false,
                       createdAt: new Date()
