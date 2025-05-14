@@ -1,0 +1,208 @@
+/* Custom styles for Tasks page */
+.tasks-page {
+  background-color: #0a2342;
+  min-height: 100vh;
+  color: #ffffff;
+}
+
+.tasks-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.tasks-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.tasks-title {
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.tasks-controls {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.tasks-search {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #ffffff;
+}
+
+.tasks-search::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.tasks-section {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.tasks-section-header {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.tasks-section-content {
+  padding: 1rem;
+}
+
+.task-card {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.task-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.task-card-urgent {
+  border-left-color: #f43f5e;
+}
+
+.task-card-high {
+  border-left-color: #f59e0b;
+}
+
+.task-card-normal {
+  border-left-color: #3b82f6;
+}
+
+.task-card-title {
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.task-card-description {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.task-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.task-priority-badge {
+  font-size: 0.7rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+}
+
+.task-priority-urgent {
+  background-color: rgba(244, 63, 94, 0.2);
+  color: #f43f5e;
+}
+
+.task-priority-high {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+}
+
+.task-priority-normal {
+  background-color: rgba(59, 130, 246, 0.2);
+  color: #3b82f6;
+}
+
+.task-add-button {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background-color: #1d4ed8;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.task-add-button:hover {
+  background-color: #1e40af;
+  transform: scale(1.05);
+}
+
+/* Tabs customization */
+.tasks-tabs {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 1.5rem;
+}
+
+.tasks-tab {
+  padding: 0.75rem 1.25rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tasks-tab.active {
+  color: #ffffff;
+  border-bottom-color: #1d4ed8;
+}
+
+.tasks-tab:hover:not(.active) {
+  color: rgba(255, 255, 255, 0.9);
+  border-bottom-color: rgba(29, 78, 216, 0.5);
+}
+
+/* Dialog customization for dark theme */
+.task-dialog {
+  background-color: #0f2a4a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.task-dialog-header {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.task-dialog-input {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.task-dialog-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.task-dialog-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+}
