@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AiSuggestions } from "@/components/tasks/ai-suggestions";
+import { CommandProcessor } from "@/components/ai-command/command-processor";
 import { 
   CheckCircle2, 
   Clock, 

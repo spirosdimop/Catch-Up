@@ -4,6 +4,35 @@ import OpenAI from "openai";
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 /**
+ * Basic LLM chat function that sends a prompt to the OpenAI API
+ * @param prompt The prompt to send to the LLM
+ * @param model The model to use (default is gpt-4o)
+ * @param temperature Controls randomness (default is 0.7)
+ * @param max_tokens Maximum tokens to generate (default is 500)
+ * @returns The generated response text
+ */
+export async function chatWithLLM(
+  prompt: string,
+  model: string = "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+  temperature: number = 0.7,
+  max_tokens: number = 500
+): Promise<string> {
+  try {
+    const response = await openai.chat.completions.create({
+      model,
+      messages: [{ role: "user", content: prompt }],
+      temperature,
+      max_tokens
+    });
+
+    return response.choices[0].message.content || "No response generated";
+  } catch (error) {
+    console.error("Error in LLM chat:", error);
+    return `An error occurred: ${error}`;
+  }
+}
+
+/**
  * Generate task suggestions based on the user's existing tasks and priorities
  * @param userTasks Array of existing user tasks
  * @param context Additional context about the user's priorities
@@ -36,7 +65,7 @@ export async function generateTaskSuggestions(
     `;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
       messages: [
         { role: "system", content: "You are an AI assistant that helps users manage their tasks and productivity." },
         { role: "user", content: prompt }
@@ -90,7 +119,7 @@ export async function generateTaskSummary(userTasks: any[]): Promise<string> {
     `;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
       messages: [
         { 
           role: "system", 
@@ -100,7 +129,7 @@ export async function generateTaskSummary(userTasks: any[]): Promise<string> {
       ]
     });
 
-    return response.choices[0].message.content;
+    return response.choices[0].message.content || "No insights generated.";
   } catch (error) {
     console.error("Error generating task summary:", error);
     return "Unable to generate task summary at this time.";
@@ -135,7 +164,7 @@ export async function suggestTaskPrioritization(tasks: any[]): Promise<any> {
     `;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
       messages: [
         { 
           role: "system", 
@@ -146,12 +175,112 @@ export async function suggestTaskPrioritization(tasks: any[]): Promise<any> {
       response_format: { type: "json_object" }
     });
 
-    return JSON.parse(response.choices[0].message.content);
+    if (response.choices[0].message.content) {
+      return JSON.parse(response.choices[0].message.content);
+    }
+    return {
+      prioritizedTasks: [],
+      explanation: "No prioritization data generated."
+    };
   } catch (error) {
     console.error("Error generating task prioritization:", error);
     return {
       prioritizedTasks: [],
       explanation: "Unable to generate task prioritization at this time."
+    };
+  }
+}
+
+// Settings management functionality
+export async function updateSettings(settingName: string, value: any): Promise<string> {
+  try {
+    // In a real application, this would update a database or configuration file
+    console.log(`Updating setting '${settingName}' to '${value}'`);
+    return `Setting '${settingName}' updated to '${value}'.`;
+  } catch (error) {
+    console.error("Error updating settings:", error);
+    return `Failed to update setting: ${error}`;
+  }
+}
+
+// Message creation functionality
+export async function createMessage(toAddress: string, subject: string, body: string): Promise<string> {
+  try {
+    // In a real application, this would connect to an email service or messaging API
+    console.log(`Creating message to '${toAddress}' with subject '${subject}'`);
+    return `Message created and ready to send to ${toAddress}.`;
+  } catch (error) {
+    console.error("Error creating message:", error);
+    return `Failed to create message: ${error}`;
+  }
+}
+
+// Command interpretation
+export async function processCommand(command: string): Promise<any> {
+  try {
+    // Send the command to OpenAI for interpretation
+    const prompt = `
+      Parse the following command and determine the action and parameters.
+      Return a JSON object with 'action' and 'parameters' fields.
+      Possible actions: update_settings, create_message, create_task, suggest_tasks
+      
+      Command: "${command}"
+    `;
+    
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+      messages: [
+        { role: "system", content: "You are an assistant that helps parse user commands into structured actions." },
+        { role: "user", content: prompt }
+      ],
+      response_format: { type: "json_object" }
+    });
+    
+    if (response.choices[0].message.content) {
+      const result = JSON.parse(response.choices[0].message.content);
+      
+      // Execute the appropriate action based on the parsed command
+      const action = result.action;
+      const params = result.parameters || {};
+      
+      if (action === "update_settings") {
+        return {
+          success: true,
+          result: await updateSettings(params.setting_name, params.value)
+        };
+      } else if (action === "create_message") {
+        return {
+          success: true,
+          result: await createMessage(params.to_address, params.subject, params.body)
+        };
+      } else if (action === "create_task") {
+        return {
+          success: true,
+          action: "create_task",
+          task: {
+            title: params.title,
+            description: params.description || "",
+            priority: params.priority || "normal",
+            category: params.category || "Work"
+          }
+        };
+      } else {
+        return {
+          success: false,
+          result: "Unknown action or not implemented yet."
+        };
+      }
+    }
+    
+    return {
+      success: false,
+      result: "Failed to parse command."
+    };
+  } catch (error) {
+    console.error("Error processing command:", error);
+    return {
+      success: false,
+      result: `Error processing command: ${error}`
     };
   }
 }

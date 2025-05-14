@@ -1,5 +1,13 @@
 import { Router } from "express";
-import { generateTaskSuggestions, generateTaskSummary, suggestTaskPrioritization } from "../ai";
+import { 
+  generateTaskSuggestions, 
+  generateTaskSummary, 
+  suggestTaskPrioritization,
+  chatWithLLM,
+  processCommand,
+  updateSettings,
+  createMessage
+} from "../ai";
 
 const router = Router();
 
@@ -51,6 +59,83 @@ router.post("/api/ai/prioritize-tasks", async (req, res) => {
   } catch (error) {
     console.error("Error in task prioritization endpoint:", error);
     return res.status(500).json({ error: "Failed to generate task prioritization" });
+  }
+});
+
+// General purpose LLM chat endpoint
+router.post("/api/ai/chat", async (req, res) => {
+  try {
+    const { prompt, model, temperature, max_tokens } = req.body;
+    
+    if (!prompt || typeof prompt !== "string") {
+      return res.status(400).json({ error: "Prompt is required" });
+    }
+    
+    const response = await chatWithLLM(
+      prompt, 
+      model || "gpt-4o", 
+      temperature || 0.7, 
+      max_tokens || 500
+    );
+    
+    return res.json({ response });
+  } catch (error) {
+    console.error("Error in chat endpoint:", error);
+    return res.status(500).json({ error: "Failed to generate response" });
+  }
+});
+
+// Process natural language commands
+router.post("/api/ai/process-command", async (req, res) => {
+  try {
+    const { command } = req.body;
+    
+    if (!command || typeof command !== "string") {
+      return res.status(400).json({ error: "Command is required" });
+    }
+    
+    const result = await processCommand(command);
+    return res.json(result);
+  } catch (error) {
+    console.error("Error in process command endpoint:", error);
+    return res.status(500).json({ error: "Failed to process command" });
+  }
+});
+
+// Update settings endpoint
+router.post("/api/ai/update-settings", async (req, res) => {
+  try {
+    const { settingName, value } = req.body;
+    
+    if (!settingName) {
+      return res.status(400).json({ error: "Setting name is required" });
+    }
+    
+    const result = await updateSettings(settingName, value);
+    return res.json({ success: true, message: result });
+  } catch (error) {
+    console.error("Error in update settings endpoint:", error);
+    return res.status(500).json({ error: "Failed to update settings" });
+  }
+});
+
+// Create message endpoint
+router.post("/api/ai/create-message", async (req, res) => {
+  try {
+    const { toAddress, subject, body } = req.body;
+    
+    if (!toAddress || !subject) {
+      return res.status(400).json({ 
+        error: "Missing required fields", 
+        required: ["toAddress", "subject"]
+      });
+    }
+    
+    const result = await createMessage(toAddress, subject, body || "");
+    return res.json({ success: true, message: result });
+  } catch (error) {
+    console.error("Error in create message endpoint:", error);
+    return res.status(500).json({ error: "Failed to create message" });
   }
 });
 
