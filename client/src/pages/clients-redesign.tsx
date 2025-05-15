@@ -395,13 +395,13 @@ const ClientsRedesign = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredClients.map((client) => (
-          <Card key={client.id} className="bg-[#173561] border-[#2a4d7d] shadow-sm overflow-hidden">
+          <Card key={client.id} className="bg-white border-gray-200 shadow-sm overflow-hidden">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-start">
                 <div className="flex items-center space-x-3">
-                  <Avatar className="h-12 w-12 border-2 border-[#2a4d7d]">
+                  <Avatar className="h-12 w-12 border-2 border-gray-200">
                     <AvatarImage src={client.avatar} />
-                    <AvatarFallback className="bg-[#1d4ed8] text-white">
+                    <AvatarFallback className="bg-[#0A2540] text-white">
                       {getInitials(client.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -429,7 +429,7 @@ const ClientsRedesign = () => {
                     )}
                   </div>
                   <div>
-                    <Badge variant="outline" className="bg-[#0a2342] border-[#2a4d7d] text-white">
+                    <Badge variant="outline" className="bg-[#F8FAFC] border-gray-200 text-[#0A2540]">
                       {client.totalBookings} bookings
                     </Badge>
                   </div>
@@ -438,7 +438,7 @@ const ClientsRedesign = () => {
                   {getLoyaltyBadge(client.loyalty)}
                 </div>
                 {client.notes && (
-                  <div className="text-sm text-gray-300 line-clamp-2 pt-1 border-t border-[#2a4d7d] mt-1">
+                  <div className="text-sm text-gray-500 line-clamp-2 pt-1 border-t border-gray-200 mt-1">
                     {client.notes}
                   </div>
                 )}
@@ -447,25 +447,25 @@ const ClientsRedesign = () => {
             <CardFooter className="pt-0 pb-3 flex justify-between gap-2">
               <Button 
                 variant="ghost" 
-                className="flex-1 p-0 h-9 text-white hover:bg-[#0a2342]"
+                className="flex-1 p-0 h-9 text-[#0A2540] hover:bg-gray-100"
                 onClick={() => handleSendMessage(client)}
               >
                 <MessageSquare className="h-4 w-4 mr-1" />
                 Message
               </Button>
-              <Separator orientation="vertical" className="h-9 bg-[#2a4d7d]" />
+              <Separator orientation="vertical" className="h-9 bg-gray-200" />
               <Button 
                 variant="ghost" 
-                className="flex-1 p-0 h-9 text-white hover:bg-[#0a2342]"
+                className="flex-1 p-0 h-9 text-[#0A2540] hover:bg-gray-100"
                 onClick={() => handleScheduleAppointment(client)}
               >
                 <Calendar className="h-4 w-4 mr-1" />
                 Schedule
               </Button>
-              <Separator orientation="vertical" className="h-9 bg-[#2a4d7d]" />
+              <Separator orientation="vertical" className="h-9 bg-gray-200" />
               <Button 
                 variant="ghost" 
-                className="flex-1 p-0 h-9 text-white hover:bg-[#0a2342]"
+                className="flex-1 p-0 h-9 text-[#0A2540] hover:bg-gray-100"
                 onClick={() => handleViewDetails(client)}
               >
                 <History className="h-4 w-4 mr-1" />
