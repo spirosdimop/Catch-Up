@@ -309,15 +309,15 @@ const BookingManagement = () => {
                   
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white hover:bg-[#0a2342]">
+                      <Button variant="ghost" size="icon" className="text-gray-500 hover:text-[#0A2540] hover:bg-gray-100">
                         <MoreHorizontal className="h-5 w-5" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56 bg-[#173561] border-[#2a4d7d] text-white">
+                    <DropdownMenuContent className="w-56 bg-white border-gray-200 text-[#0A2540]">
                       <DropdownMenuLabel>Booking Actions</DropdownMenuLabel>
-                      <DropdownMenuSeparator className="bg-[#2a4d7d]" />
+                      <DropdownMenuSeparator className="bg-gray-200" />
                       <DropdownMenuItem 
-                        className="hover:bg-[#0a2342] cursor-pointer"
+                        className="hover:bg-gray-100 cursor-pointer"
                         onClick={() => handleViewDetails(booking)}
                       >
                         View Details
@@ -325,13 +325,13 @@ const BookingManagement = () => {
                       {booking.status !== 'canceled' && (
                         <>
                           <DropdownMenuItem 
-                            className="hover:bg-[#0a2342] cursor-pointer"
+                            className="hover:bg-gray-100 cursor-pointer"
                             onClick={() => handleOpenReschedule(booking)}
                           >
                             Reschedule
                           </DropdownMenuItem>
                           <DropdownMenuItem 
-                            className="text-red-400 hover:text-red-300 hover:bg-[#0a2342] cursor-pointer"
+                            className="text-red-500 hover:text-red-600 hover:bg-gray-100 cursor-pointer"
                             onClick={() => handleCancelBooking(booking.id)}
                           >
                             Cancel Booking
