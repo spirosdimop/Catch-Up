@@ -749,8 +749,8 @@ const ClientsRedesign = () => {
               </Avatar>
               <span className="text-[#0A2540]">{selectedClient.name}</span>
               <div className="ml-3 flex space-x-2">
-                {getStatusBadge(selectedClient.status)}
-                {getLoyaltyBadge(selectedClient.loyalty)}
+                {selectedClient.status && getStatusBadge(selectedClient.status)}
+                {selectedClient.loyalty && getLoyaltyBadge(selectedClient.loyalty)}
               </div>
             </DialogTitle>
             <DialogDescription className="text-gray-500">
@@ -830,7 +830,7 @@ const ClientsRedesign = () => {
                       <div className="bg-[#0a2342] p-3 rounded-md border border-[#2a4d7d]">
                         <div className="flex justify-between items-center">
                           <span className="text-gray-400">Total Bookings</span>
-                          <span className="text-xl font-bold">{selectedClient.totalBookings}</span>
+                          <span className="text-xl font-bold">{selectedClient.totalBookings || 0}</span>
                         </div>
                       </div>
                       <div className="grid grid-cols-2 gap-4">
@@ -839,7 +839,7 @@ const ClientsRedesign = () => {
                             <span className="text-gray-400 text-sm">Last Booking</span>
                             <span className="font-medium">
                               {selectedClient.lastBooking 
-                                ? format(new Date(selectedClient.lastBooking), 'MMM d, yyyy')
+                                ? format(new Date(selectedClient.lastBooking.replace(/-/g, '/')), 'MMM d, yyyy')
                                 : "Never"
                               }
                             </span>
@@ -849,7 +849,7 @@ const ClientsRedesign = () => {
                           <div className="flex flex-col">
                             <span className="text-gray-400 text-sm">Loyalty Status</span>
                             <span className="font-medium capitalize">
-                              {selectedClient.loyalty.replace('-', ' ')}
+                              {selectedClient.loyalty ? selectedClient.loyalty.replace('-', ' ') : 'N/A'}
                             </span>
                           </div>
                         </div>
@@ -888,7 +888,7 @@ const ClientsRedesign = () => {
               <div className="text-center py-8 text-gray-400">
                 <Clock className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <h3 className="text-lg font-medium mb-2">Booking History</h3>
-                <p>This client has {selectedClient.totalBookings} booking(s).</p>
+                <p>This client has {selectedClient.totalBookings || 0} booking(s).</p>
                 <p className="mt-4 mb-6">Detailed booking history will be displayed here.</p>
                 <Button 
                   className="bg-[#0A2540] hover:bg-[#081c30] text-white"
@@ -1067,7 +1067,7 @@ const ClientsRedesign = () => {
           <DialogHeader>
             <DialogTitle className="text-[#0A2540]">Send Message</DialogTitle>
             <DialogDescription className="text-gray-500">
-              Send a message to {selectedClient.name}.
+              Send a message to {selectedClient?.name || 'this client'}.
             </DialogDescription>
           </DialogHeader>
           
