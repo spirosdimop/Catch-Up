@@ -133,41 +133,41 @@ const DashboardSimple = () => {
             </CardHeader>
             <CardContent className="pb-4">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="bg-[#0a2342] rounded-md border border-[#2a4d7d] p-4">
+                <div className="bg-white rounded-md border border-gray-200 shadow-sm p-4">
                   <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-400">Active Projects</div>
-                    <div className="bg-blue-500/20 rounded-full p-2">
-                      <Users className="h-4 w-4 text-blue-400" />
+                    <div className="text-sm text-gray-600">Active Projects</div>
+                    <div className="bg-blue-50 rounded-full p-2">
+                      <Users className="h-4 w-4 text-blue-600" />
                     </div>
                   </div>
-                  <div className="text-2xl font-semibold mt-2">{dashboardData.activeProjects}</div>
-                  <div className="mt-3 text-xs text-gray-400">
+                  <div className="text-2xl font-semibold mt-2 text-[#0A2540]">{dashboardData.activeProjects}</div>
+                  <div className="mt-3 text-xs text-gray-500">
                     {dashboardData.recentProjects.length} recent {dashboardData.recentProjects.length === 1 ? 'project' : 'projects'}
                   </div>
                 </div>
                 
-                <div className="bg-[#0a2342] rounded-md border border-[#2a4d7d] p-4">
+                <div className="bg-white rounded-md border border-gray-200 shadow-sm p-4">
                   <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-400">Hours Tracked</div>
-                    <div className="bg-green-500/20 rounded-full p-2">
-                      <Timer className="h-4 w-4 text-green-400" />
+                    <div className="text-sm text-gray-600">Hours Tracked</div>
+                    <div className="bg-green-50 rounded-full p-2">
+                      <Timer className="h-4 w-4 text-green-600" />
                     </div>
                   </div>
-                  <div className="text-2xl font-semibold mt-2">{dashboardData.hoursTracked}</div>
-                  <div className="mt-3 text-xs text-gray-400">
+                  <div className="text-2xl font-semibold mt-2 text-[#0A2540]">{dashboardData.hoursTracked}</div>
+                  <div className="mt-3 text-xs text-gray-500">
                     {dashboardData.recentTimeEntries.length} recent {dashboardData.recentTimeEntries.length === 1 ? 'entry' : 'entries'}
                   </div>
                 </div>
                 
-                <div className="bg-[#0a2342] rounded-md border border-[#2a4d7d] p-4">
+                <div className="bg-white rounded-md border border-gray-200 shadow-sm p-4">
                   <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-400">Task Completion</div>
-                    <div className="bg-purple-500/20 rounded-full p-2">
-                      <CheckCircle2 className="h-4 w-4 text-purple-400" />
+                    <div className="text-sm text-gray-600">Task Completion</div>
+                    <div className="bg-purple-50 rounded-full p-2">
+                      <CheckCircle2 className="h-4 w-4 text-purple-600" />
                     </div>
                   </div>
-                  <div className="text-2xl font-semibold mt-2">{dashboardData.tasksCompleted}</div>
-                  <div className="mt-3 text-xs text-gray-400">
+                  <div className="text-2xl font-semibold mt-2 text-[#0A2540]">{dashboardData.tasksCompleted}</div>
+                  <div className="mt-3 text-xs text-gray-500">
                     {dashboardData.tasksCompletionRate}% completion rate
                   </div>
                 </div>
@@ -175,21 +175,21 @@ const DashboardSimple = () => {
               
               <div className="mt-6">
                 <div className="flex justify-between items-center">
-                  <h3 className="text-sm font-medium text-gray-400">Today's Schedule</h3>
+                  <h3 className="text-sm font-medium text-[#0A2540]">Today's Schedule</h3>
                   <Link href="/calendar">
-                    <Button variant="ghost" className="text-gray-400 hover:text-white p-0 h-8">
+                    <Button variant="ghost" className="text-[#0A2540] hover:text-[#0A2540]/80 p-0 h-8">
                       View Calendar
                       <ChevronRight className="ml-1 h-4 w-4" />
                     </Button>
                   </Link>
                 </div>
                 
-                <div className="mt-3 bg-[#0a2342] rounded-md border border-[#2a4d7d] p-4 text-center">
+                <div className="mt-3 bg-white rounded-md border border-gray-200 shadow-sm p-4 text-center">
                   <Clock className="h-10 w-10 mx-auto mb-2 opacity-50 text-gray-400" />
-                  <p className="text-lg font-medium">Your schedule is clear</p>
-                  <p className="mt-1 mb-4 text-gray-400">No events scheduled for today</p>
+                  <p className="text-lg font-medium text-[#0A2540]">Your schedule is clear</p>
+                  <p className="mt-1 mb-4 text-gray-500">No events scheduled for today</p>
                   <Link href="/bookings">
-                    <Button className="bg-[#1d4ed8] hover:bg-blue-600 text-white">
+                    <Button className="bg-[#0A2540] hover:bg-[#0A2540]/90 text-white">
                       Schedule New Event
                     </Button>
                   </Link>
@@ -199,10 +199,10 @@ const DashboardSimple = () => {
           </Card>
           
           {/* Task Progress */}
-          <Card className="md:col-span-4 bg-[#173561] border-[#2a4d7d] shadow-md">
+          <Card className="md:col-span-4 bg-white border-gray-200 shadow-sm">
             <CardHeader>
-              <CardTitle className="text-xl flex items-center">
-                <CheckCircle2 className="mr-3 h-5 w-5 text-[#1d4ed8]" />
+              <CardTitle className="text-xl flex items-center text-[#0A2540]">
+                <CheckCircle2 className="mr-3 h-5 w-5 text-[#0A2540]" />
                 Task Progress
               </CardTitle>
             </CardHeader>
@@ -211,7 +211,7 @@ const DashboardSimple = () => {
                 <div className="space-y-2">
                   <div className="flex justify-between items-end">
                     <div>
-                      <span className="text-3xl font-bold">{dashboardData.tasksCompleted}</span>
+                      <span className="text-3xl font-bold text-[#0A2540]">{dashboardData.tasksCompleted}</span>
                     </div>
                     <div className="flex items-center">
                       <Badge variant="outline" className="border-green-500 text-green-500">
@@ -219,28 +219,28 @@ const DashboardSimple = () => {
                       </Badge>
                     </div>
                   </div>
-                  <div className="text-sm text-gray-400">Tasks completed this week</div>
+                  <div className="text-sm text-gray-600">Tasks completed this week</div>
                   <div className="pt-2">
                     <Progress 
                       value={dashboardData.tasksCompletionRate} 
-                      className="h-2.5 bg-[#0a2342]" 
+                      className="h-2.5 bg-gray-100" 
                     />
                   </div>
                 </div>
                 
                 <div>
-                  <h3 className="text-sm font-medium text-gray-400 mb-2">Recent Tasks</h3>
+                  <h3 className="text-sm font-medium text-[#0A2540] mb-2">Recent Tasks</h3>
                   
                   {dashboardData.recentTasks.length === 0 ? (
-                    <div className="bg-[#0a2342] rounded-md border border-[#2a4d7d] p-4 text-center">
-                      <p className="text-gray-400">No recent tasks</p>
+                    <div className="bg-white rounded-md border border-gray-200 shadow-sm p-4 text-center">
+                      <p className="text-gray-600">No recent tasks</p>
                     </div>
                   ) : (
                     <div className="space-y-3">
                       {dashboardData.recentTasks.map((task, index) => (
-                        <div key={index} className="bg-[#0a2342] rounded-md border border-[#2a4d7d] p-3">
-                          <div className="font-medium">{task.title || "Untitled Task"}</div>
-                          <div className="text-sm text-gray-400 mt-1">{task.project || "No project"}</div>
+                        <div key={index} className="bg-white rounded-md border border-gray-200 shadow-sm p-3">
+                          <div className="font-medium text-[#0A2540]">{task.title || "Untitled Task"}</div>
+                          <div className="text-sm text-gray-600 mt-1">{task.project || "No project"}</div>
                         </div>
                       ))}
                     </div>
