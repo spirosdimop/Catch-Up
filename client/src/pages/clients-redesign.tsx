@@ -383,7 +383,7 @@ const ClientsRedesign = () => {
           <p className="mb-4">Try adjusting your filters or adding a new client.</p>
           <Button 
             onClick={() => setIsAddClientOpen(true)}
-            className="bg-[#1d4ed8] hover:bg-blue-600 text-white"
+            className="bg-[#0A2540] hover:bg-[#081c30] text-white"
           >
             <UserPlus className="mr-2 h-4 w-4" />
             Add New Client
@@ -500,7 +500,7 @@ const ClientsRedesign = () => {
           <p className="mb-4">Try adjusting your filters or adding a new client.</p>
           <Button 
             onClick={() => setIsAddClientOpen(true)}
-            className="bg-[#1d4ed8] hover:bg-blue-600 text-white"
+            className="bg-[#0A2540] hover:bg-[#081c30] text-white"
           >
             <UserPlus className="mr-2 h-4 w-4" />
             Add New Client
@@ -651,7 +651,7 @@ const ClientsRedesign = () => {
             <DialogTitle className="flex items-center">
               <Avatar className="h-10 w-10 border-2 border-[#2a4d7d] mr-3">
                 <AvatarImage src={selectedClient.avatar} />
-                <AvatarFallback className="bg-[#1d4ed8] text-white">
+                <AvatarFallback className="bg-[#0A2540] text-white">
                   {getInitials(selectedClient.name)}
                 </AvatarFallback>
               </Avatar>
@@ -670,25 +670,25 @@ const ClientsRedesign = () => {
             <TabsList className="bg-[#0a2342] border-[#2a4d7d]">
               <TabsTrigger 
                 value="info" 
-                className="data-[state=active]:bg-[#1d4ed8] data-[state=active]:text-white"
+                className="data-[state=active]:bg-[#0A2540] data-[state=active]:text-white"
               >
                 Information
               </TabsTrigger>
               <TabsTrigger 
                 value="history" 
-                className="data-[state=active]:bg-[#1d4ed8] data-[state=active]:text-white"
+                className="data-[state=active]:bg-[#0A2540] data-[state=active]:text-white"
               >
                 Booking History
               </TabsTrigger>
               <TabsTrigger 
                 value="projects" 
-                className="data-[state=active]:bg-[#1d4ed8] data-[state=active]:text-white"
+                className="data-[state=active]:bg-[#0A2540] data-[state=active]:text-white"
               >
                 Projects
               </TabsTrigger>
               <TabsTrigger 
                 value="invoices" 
-                className="data-[state=active]:bg-[#1d4ed8] data-[state=active]:text-white"
+                className="data-[state=active]:bg-[#0A2540] data-[state=active]:text-white"
               >
                 Invoices
               </TabsTrigger>
@@ -765,7 +765,7 @@ const ClientsRedesign = () => {
                   
                   <div className="flex flex-col space-y-2 mt-4">
                     <Button 
-                      className="bg-[#1d4ed8] hover:bg-blue-600 text-white"
+                      className="bg-[#0A2540] hover:bg-[#081c30] text-white"
                       onClick={() => {
                         setIsDetailsOpen(false);
                         handleScheduleAppointment(selectedClient);
@@ -797,7 +797,7 @@ const ClientsRedesign = () => {
                 <p>This client has {selectedClient.totalBookings} booking(s).</p>
                 <p className="mt-4 mb-6">Detailed booking history will be displayed here.</p>
                 <Button 
-                  className="bg-[#1d4ed8] hover:bg-blue-600 text-white"
+                  className="bg-[#0A2540] hover:bg-[#081c30] text-white"
                   onClick={() => {
                     setIsDetailsOpen(false);
                     handleScheduleAppointment(selectedClient);
@@ -816,7 +816,7 @@ const ClientsRedesign = () => {
                 <p>You currently have no projects with this client.</p>
                 <p className="mt-4 mb-6">Projects that you work on with this client will appear here.</p>
                 <Button 
-                  className="bg-[#1d4ed8] hover:bg-blue-600 text-white"
+                  className="bg-[#0A2540] hover:bg-[#081c30] text-white"
                 >
                   Create New Project
                 </Button>
@@ -830,7 +830,7 @@ const ClientsRedesign = () => {
                 <p>You currently have no invoices for this client.</p>
                 <p className="mt-4 mb-6">Invoices for this client will appear here.</p>
                 <Button 
-                  className="bg-[#1d4ed8] hover:bg-blue-600 text-white"
+                  className="bg-[#0A2540] hover:bg-[#081c30] text-white"
                 >
                   Create New Invoice
                 </Button>
@@ -847,7 +847,7 @@ const ClientsRedesign = () => {
               Close
             </Button>
             <Button 
-              className="bg-[#1d4ed8] hover:bg-blue-600 text-white"
+              className="bg-[#0A2540] hover:bg-[#081c30] text-white"
             >
               Edit Client
             </Button>
@@ -921,7 +921,7 @@ const ClientsRedesign = () => {
               </div>
               
               <div className="flex items-center space-x-2 pt-2">
-                <Checkbox id="send-welcome" className="border-[#2a4d7d] data-[state=checked]:bg-[#1d4ed8]" />
+                <Checkbox id="send-welcome" className="border-[#2a4d7d] data-[state=checked]:bg-[#0A2540]" />
                 <Label
                   htmlFor="send-welcome"
                   className="text-sm font-normal"
@@ -942,7 +942,7 @@ const ClientsRedesign = () => {
               </Button>
               <Button 
                 type="submit"
-                className="bg-[#1d4ed8] hover:bg-blue-600 text-white"
+                className="bg-[#0A2540] hover:bg-[#081c30] text-white"
               >
                 <UserPlus className="mr-2 h-4 w-4" />
                 Add Client
@@ -990,7 +990,7 @@ const ClientsRedesign = () => {
             </div>
             
             <div className="flex items-center space-x-2">
-              <Checkbox id="high-priority" className="border-[#2a4d7d] data-[state=checked]:bg-[#1d4ed8]" />
+              <Checkbox id="high-priority" className="border-[#2a4d7d] data-[state=checked]:bg-[#0A2540]" />
               <Label
                 htmlFor="high-priority"
                 className="text-sm font-normal"
@@ -1010,7 +1010,7 @@ const ClientsRedesign = () => {
               </Button>
               <Button 
                 type="submit"
-                className="bg-[#1d4ed8] hover:bg-blue-600 text-white"
+                className="bg-[#0A2540] hover:bg-[#081c30] text-white"
               >
                 <MessageSquare className="mr-2 h-4 w-4" />
                 Send Message
@@ -1023,16 +1023,16 @@ const ClientsRedesign = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a2342] text-white p-4 md:p-6">
+    <div className="min-h-screen bg-white text-[#0A2540] p-4 md:p-6">
       <div className="max-w-[1200px] mx-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
           <div>
             <h1 className="text-2xl font-bold">Clients</h1>
-            <p className="text-gray-400 mt-1">Manage your client relationships</p>
+            <p className="text-gray-500 mt-1">Manage your client relationships</p>
           </div>
           
           <Button
-            className="bg-[#1d4ed8] hover:bg-blue-600 text-white"
+            className="bg-[#0A2540] hover:bg-[#081c30] text-white"
             onClick={() => setIsAddClientOpen(true)}
           >
             <UserPlus className="mr-2 h-4 w-4" />
@@ -1150,7 +1150,7 @@ const ClientsRedesign = () => {
               </span>
               <div className="flex flex-wrap gap-2">
                 {filters.status !== 'all' && (
-                  <Badge className="bg-[#1d4ed8] hover:bg-blue-700 px-2.5 py-1 flex items-center">
+                  <Badge className="bg-[#0A2540] hover:bg-blue-700 px-2.5 py-1 flex items-center">
                     Status: {filters.status}
                     <Button
                       variant="ghost"
@@ -1162,7 +1162,7 @@ const ClientsRedesign = () => {
                   </Badge>
                 )}
                 {filters.loyalty !== 'all' && (
-                  <Badge className="bg-[#1d4ed8] hover:bg-blue-700 px-2.5 py-1 flex items-center">
+                  <Badge className="bg-[#0A2540] hover:bg-blue-700 px-2.5 py-1 flex items-center">
                     Loyalty: {filters.loyalty}
                     <Button
                       variant="ghost"
@@ -1174,7 +1174,7 @@ const ClientsRedesign = () => {
                   </Badge>
                 )}
                 {filters.searchQuery && (
-                  <Badge className="bg-[#1d4ed8] hover:bg-blue-700 px-2.5 py-1 flex items-center">
+                  <Badge className="bg-[#0A2540] hover:bg-blue-700 px-2.5 py-1 flex items-center">
                     Search: {filters.searchQuery}
                     <Button
                       variant="ghost"
@@ -1187,7 +1187,7 @@ const ClientsRedesign = () => {
                 )}
                 <Button
                   variant="link"
-                  className="text-gray-400 hover:text-white p-0 h-auto text-sm"
+                  className="text-gray-400 hover:text-[#081c30] p-0 h-auto text-sm"
                   onClick={() => setFilters({
                     status: 'all',
                     loyalty: 'all',
