@@ -15,7 +15,9 @@ import {
   Star,
   ChevronDown,
   Pencil,
-  X
+  X,
+  Trash2,
+  AlertTriangle
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -434,6 +436,36 @@ const ClientsRedesign = () => {
       toast({
         title: "Error",
         description: "Failed to update client. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
+  // Delete client handling
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  
+  const handleDeleteClient = async () => {
+    if (!selectedClient) return;
+    
+    try {
+      const response = await apiRequest("DELETE", `/api/clients/${selectedClient.id}`);
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
+        toast({
+          title: "Client deleted successfully",
+          description: "The client has been permanently removed.",
+        });
+        setIsDeleteConfirmOpen(false);
+        setIsDetailsOpen(false);
+      } else {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to delete client');
+      }
+    } catch (error) {
+      console.error('Error deleting client:', error);
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Failed to delete client. Please try again.",
         variant: "destructive",
       });
     }
@@ -878,6 +910,14 @@ const ClientsRedesign = () => {
                     >
                       <MessageSquare className="mr-2 h-4 w-4" />
                       Send Message
+                    </Button>
+                    <Button 
+                      variant="outline"
+                      className="border-red-700 text-red-500 hover:bg-red-100 hover:text-red-700"
+                      onClick={() => setIsDeleteConfirmOpen(true)}
+                    >
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Delete Client
                     </Button>
                   </div>
                 </div>
