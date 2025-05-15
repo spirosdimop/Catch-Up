@@ -1336,27 +1336,28 @@ const ClientsRedesign = () => {
                 </Button>
                 <Button 
                   type="submit"
-                  className="bg-[#0A2540] hover:bg-[#081c30] text-white"
+                  size="lg"
+                  className="bg-[#0A2540] hover:bg-[#081c30] text-white font-semibold px-8"
                 >
-                  <Pencil className="mr-2 h-4 w-4" />
-                  Update Client
+                  <Pencil className="mr-2 h-5 w-5" />
+                  UPDATE CLIENT
                 </Button>
               </DialogFooter>
               
-              <div className="pt-6 border-t border-gray-200 mt-6">
+              <div className="pt-6 border-t border-gray-200 mt-6 flex justify-center">
                 <Button 
                   type="button"
                   variant="destructive"
-                  size="lg"
-                  className="bg-red-600 hover:bg-red-700 text-white font-semibold w-full"
+                  size="sm"
+                  className="bg-red-600 hover:bg-red-700 text-white"
                   onClick={() => {
                     console.log('Edit Form Delete button clicked');
                     setIsEditClientOpen(false);
                     setIsDeleteConfirmOpen(true);
                   }}
                 >
-                  <Trash2 className="mr-2 h-5 w-5" />
-                  DELETE THIS CLIENT
+                  <Trash2 className="mr-1 h-4 w-4" />
+                  Delete Client
                 </Button>
               </div>
             </form>
