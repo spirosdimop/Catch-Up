@@ -81,7 +81,7 @@ export function AppShell({
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-white">
       {/* Sidebar for desktop */}
       <aside className="hidden md:flex flex-col w-64 bg-[#0A2540] shadow-md">
         {/* Logo */}
@@ -255,19 +255,19 @@ export function AppShell({
       {/* Main content area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
-        <header className="bg-white px-4 py-3 border-b border-gray-200 shadow-sm z-10">
+        <header className="bg-[#0A2540] px-4 py-3 border-b border-[#1A2E4A] shadow-sm z-10">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               {/* Mobile menu button */}
               <button 
                 onClick={toggleSidebar}
-                className="md:hidden h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-100"
+                className="md:hidden h-10 w-10 flex items-center justify-center rounded-full hover:bg-[#1F2A40]"
               >
-                <Menu className="h-5 w-5 text-[#0A2540]" />
+                <Menu className="h-5 w-5 text-white" />
               </button>
               
               {/* Page title */}
-              <h1 className="text-xl font-semibold text-[#0A2540]">
+              <h1 className="text-xl font-semibold text-white">
                 {title || "Dashboard"}
               </h1>
             </div>
@@ -275,8 +275,8 @@ export function AppShell({
             {/* Right header content */}
             <div className="flex items-center gap-4">
               {/* Notifications */}
-              <button className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-100 relative">
-                <Bell className="h-5 w-5 text-gray-600" />
+              <button className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-[#1F2A40] relative">
+                <Bell className="h-5 w-5 text-white" />
                 <span className="absolute top-1 right-1 h-4 w-4 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
                   8
                 </span>
@@ -284,25 +284,25 @@ export function AppShell({
               
               {/* AI assistant button */}
               <Link href="/ai-assistant">
-                <div className="hidden sm:flex h-10 w-10 rounded-full bg-indigo-100 hover:bg-indigo-200 items-center justify-center transition-colors">
-                  <Bot className="h-5 w-5 text-indigo-600" />
+                <div className="hidden sm:flex h-10 w-10 rounded-full bg-[#1F2A40] hover:bg-[#24344D] items-center justify-center transition-colors">
+                  <Bot className="h-5 w-5 text-white" />
                 </div>
               </Link>
               
               {/* User profile mini widget */}
-              <div className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer">
+              <div className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-full bg-[#1F2A40] hover:bg-[#24344D] transition-colors cursor-pointer">
                 <div className="text-right text-xs">
-                  <p className="font-semibold text-gray-800">Alex</p>
-                  <p className="text-gray-500">Online</p>
+                  <p className="font-semibold text-white">Alex</p>
+                  <p className="text-gray-300">Online</p>
                 </div>
-                <div className="h-8 w-8 bg-[#0A2540] text-white rounded-full flex items-center justify-center">
+                <div className="h-8 w-8 bg-white text-[#0A2540] rounded-full flex items-center justify-center">
                   <span className="text-xs font-semibold">AL</span>
                 </div>
               </div>
               
               {/* User profile for mobile */}
               <Link href="/profile">
-                <div className="md:hidden h-10 w-10 rounded-full bg-[#0A2540] text-white flex items-center justify-center">
+                <div className="md:hidden h-10 w-10 rounded-full bg-white text-[#0A2540] flex items-center justify-center">
                   <span className="text-xs font-semibold">AL</span>
                 </div>
               </Link>
