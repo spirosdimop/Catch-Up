@@ -104,6 +104,7 @@ const ClientsRedesign = () => {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isAddClientOpen, setIsAddClientOpen] = useState(false);
   const [isSendMessageOpen, setIsSendMessageOpen] = useState(false);
+  const [isEditClientOpen, setIsEditClientOpen] = useState(false);
   const [filters, setFilters] = useState<Filters>({
     status: 'all',
     loyalty: 'all',
@@ -329,6 +330,12 @@ const ClientsRedesign = () => {
   const handleSendMessage = (client: Client) => {
     setSelectedClient(client);
     setIsSendMessageOpen(true);
+  };
+  
+  // Handle edit client
+  const handleEditClient = (client: Client) => {
+    setSelectedClient(client);
+    setIsEditClientOpen(true);
   };
   
   // Handle scheduling
