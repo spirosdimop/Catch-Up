@@ -260,7 +260,7 @@ const BookingManagement = () => {
     if (isLoading) {
       return (
         <div className="flex justify-center py-8">
-          <div className="animate-pulse h-6 w-24 bg-[#1a3a68] rounded"></div>
+          <div className="animate-pulse h-6 w-24 bg-gray-200 rounded"></div>
         </div>
       );
     }
@@ -278,7 +278,7 @@ const BookingManagement = () => {
     return (
       <div className="space-y-4">
         {filteredBookings.map((booking) => (
-          <Card key={booking.id} className="bg-[#173561] border-[#2a4d7d] shadow-sm">
+          <Card key={booking.id} className="bg-white border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -288,7 +288,7 @@ const BookingManagement = () => {
                       <Badge className={getStatusColor(booking.status)} variant="secondary">
                         {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                       </Badge>
-                      <Badge variant="outline" className="bg-[#0a2342] text-white">
+                      <Badge variant="outline" className="bg-gray-100 text-[#0A2540]">
                         {getTypeLabel(booking.type)}
                       </Badge>
                     </div>
@@ -297,11 +297,11 @@ const BookingManagement = () => {
                 
                 <div className="flex items-center space-x-4">
                   <div className="text-right">
-                    <div className="flex items-center justify-end space-x-1 text-gray-300">
+                    <div className="flex items-center justify-end space-x-1 text-gray-600">
                       <CalendarIcon className="h-4 w-4" />
                       <span>{format(parseISO(booking.date), 'MMM d, yyyy')}</span>
                     </div>
-                    <div className="flex items-center justify-end space-x-1 text-gray-300 mt-1">
+                    <div className="flex items-center justify-end space-x-1 text-gray-600 mt-1">
                       <Clock className="h-4 w-4" />
                       <span>{booking.time} ({booking.duration} min)</span>
                     </div>
@@ -344,7 +344,7 @@ const BookingManagement = () => {
               </div>
               
               {booking.notes && (
-                <div className="mt-4 pl-4 border-l-2 border-[#2a4d7d] text-gray-300 text-sm">
+                <div className="mt-4 pl-4 border-l-2 border-gray-200 text-gray-600 text-sm">
                   {booking.notes}
                 </div>
               )}
@@ -353,7 +353,7 @@ const BookingManagement = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+                  className="border-gray-200 text-[#0A2540] hover:bg-gray-100"
                   onClick={() => handleViewDetails(booking)}
                 >
                   View Details
@@ -363,7 +363,7 @@ const BookingManagement = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+                      className="border-gray-200 text-[#0A2540] hover:bg-gray-100"
                       onClick={() => handleOpenReschedule(booking)}
                     >
                       Reschedule
@@ -390,7 +390,7 @@ const BookingManagement = () => {
     if (isLoading) {
       return (
         <div className="flex justify-center py-8">
-          <div className="animate-pulse h-6 w-24 bg-[#1a3a68] rounded"></div>
+          <div className="animate-pulse h-6 w-24 bg-gray-200 rounded"></div>
         </div>
       );
     }
@@ -408,7 +408,7 @@ const BookingManagement = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredBookings.map((booking) => (
-          <Card key={booking.id} className="bg-[#173561] border-[#2a4d7d] shadow-sm">
+          <Card key={booking.id} className="bg-white border-gray-200 shadow-sm">
             <CardHeader className="pb-2 flex flex-row items-start justify-between">
               <div>
                 <CardTitle className="text-base">{booking.client.name}</CardTitle>
@@ -430,12 +430,12 @@ const BookingManagement = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Type:</span>
-                  <Badge variant="outline" className="bg-[#0a2342] text-white">
+                  <Badge variant="outline" className="bg-gray-100 text-[#0A2540]">
                     {getTypeLabel(booking.type)}
                   </Badge>
                 </div>
                 {booking.notes && (
-                  <div className="mt-2 text-gray-300 text-xs border-t border-[#2a4d7d] pt-2">
+                  <div className="mt-2 text-gray-600 text-xs border-t border-gray-200 pt-2">
                     <span className="text-gray-400 block mb-1">Notes:</span>
                     <p className="line-clamp-2">{booking.notes}</p>
                   </div>
@@ -446,7 +446,7 @@ const BookingManagement = () => {
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="text-white hover:bg-[#0a2342]"
+                className="text-[#0A2540] hover:bg-gray-100"
                 onClick={() => handleViewDetails(booking)}
               >
                 View Details
@@ -457,20 +457,20 @@ const BookingManagement = () => {
                     <Button 
                       variant="ghost" 
                       size="sm"
-                      className="text-white hover:bg-[#0a2342]"
+                      className="text-[#0A2540] hover:bg-gray-100"
                     >
                       Actions
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-40 bg-[#173561] border-[#2a4d7d] text-white">
+                  <DropdownMenuContent className="w-40 bg-white border-gray-200 text-[#0A2540]">
                     <DropdownMenuItem 
-                      className="hover:bg-[#0a2342] cursor-pointer"
+                      className="hover:bg-gray-100 cursor-pointer"
                       onClick={() => handleOpenReschedule(booking)}
                     >
                       Reschedule
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className="text-red-400 hover:text-red-300 hover:bg-[#0a2342] cursor-pointer"
+                      className="text-red-400 hover:text-red-300 hover:bg-gray-100 cursor-pointer"
                       onClick={() => handleCancelBooking(booking.id)}
                     >
                       Cancel
@@ -491,7 +491,7 @@ const BookingManagement = () => {
     const daysWithBookings = Object.keys(bookingsByDate);
     
     return (
-      <div className="bg-[#173561] border border-[#2a4d7d] rounded-lg p-4">
+      <div className="bg-[#173561] border border-gray-200 rounded-lg p-4">
         <div className="flex justify-between items-center mb-4">
           <h3 className="font-medium">
             {format(selectedDate || today, 'MMMM yyyy')}
@@ -500,7 +500,7 @@ const BookingManagement = () => {
             <Button 
               variant="outline" 
               size="icon"
-              className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+              className="border-gray-200 text-[#0A2540] hover:bg-gray-100"
               onClick={() => setSelectedDate(subDays(selectedDate || today, 30))}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -508,7 +508,7 @@ const BookingManagement = () => {
             <Button 
               variant="outline" 
               size="icon"
-              className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+              className="border-gray-200 text-[#0A2540] hover:bg-gray-100"
               onClick={() => setSelectedDate(addDays(selectedDate || today, 30))}
             >
               <ChevronRight className="h-4 w-4" />
@@ -520,7 +520,7 @@ const BookingManagement = () => {
           mode="single"
           selected={selectedDate}
           onSelect={setSelectedDate}
-          className="bg-[#173561] text-white border-[#2a4d7d] rounded-lg"
+          className="bg-[#173561] text-[#0A2540] border-gray-200 rounded-lg"
           modifiers={{
             booked: (date) => daysWithBookings.some(d => 
               isSameDay(parseISO(d), date)
@@ -548,7 +548,7 @@ const BookingManagement = () => {
                           {dayBookings.length}
                         </span>
                       </TooltipTrigger>
-                      <TooltipContent className="bg-[#0a2342] border-[#2a4d7d] text-white">
+                      <TooltipContent className="bg-white border-gray-200 text-[#0A2540]">
                         {dayBookings.length} booking{dayBookings.length !== 1 ? 's' : ''}
                       </TooltipContent>
                     </Tooltip>
@@ -568,7 +568,7 @@ const BookingManagement = () => {
             {bookingsByDate[format(selectedDate, 'yyyy-MM-dd')] ? (
               <div className="space-y-3">
                 {bookingsByDate[format(selectedDate, 'yyyy-MM-dd')].map((booking) => (
-                  <Card key={booking.id} className="bg-[#0a2342] border-[#2a4d7d]">
+                  <Card key={booking.id} className="bg-white border-gray-200">
                     <CardContent className="p-3">
                       <div className="flex justify-between items-center">
                         <div>
@@ -585,7 +585,7 @@ const BookingManagement = () => {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            className="text-white hover:bg-[#173561]"
+                            className="text-[#0A2540] hover:bg-[#173561]"
                             onClick={() => handleViewDetails(booking)}
                           >
                             Details
@@ -613,7 +613,7 @@ const BookingManagement = () => {
     
     return (
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="bg-[#173561] border-[#2a4d7d] text-white">
+        <DialogContent className="bg-white border-gray-200 text-[#0A2540]">
           <DialogHeader>
             <DialogTitle>Booking Details</DialogTitle>
           </DialogHeader>
@@ -668,7 +668,7 @@ const BookingManagement = () => {
             <Button 
               variant="outline" 
               onClick={() => setIsDetailsOpen(false)}
-              className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+              className="border-gray-200 text-[#0A2540] hover:bg-gray-100"
             >
               Close
             </Button>
@@ -680,7 +680,7 @@ const BookingManagement = () => {
                     setIsDetailsOpen(false);
                     handleOpenReschedule(detailsBooking);
                   }}
-                  className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+                  className="border-gray-200 text-[#0A2540] hover:bg-gray-100"
                 >
                   Reschedule
                 </Button>
@@ -727,7 +727,7 @@ const BookingManagement = () => {
     
     return (
       <Dialog open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
-        <DialogContent className="bg-[#173561] border-[#2a4d7d] text-white">
+        <DialogContent className="bg-white border-gray-200 text-[#0A2540]">
           <DialogHeader>
             <DialogTitle>Reschedule Booking</DialogTitle>
           </DialogHeader>
@@ -753,7 +753,7 @@ const BookingManagement = () => {
                       id="reschedule-date"
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal bg-[#0a2342] border-[#2a4d7d] text-white",
+                        "w-full justify-start text-left font-normal bg-white border-gray-200 text-[#0A2540]",
                         !rescheduleDate && "text-gray-400"
                       )}
                     >
@@ -761,14 +761,14 @@ const BookingManagement = () => {
                       {rescheduleDate ? format(rescheduleDate, 'PPP') : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-[#173561] border-[#2a4d7d]">
+                  <PopoverContent className="w-auto p-0 bg-white border-gray-200">
                     <CalendarComponent
                       mode="single"
                       selected={rescheduleDate}
                       onSelect={setRescheduleDate}
                       initialFocus
                       disabled={(date) => date < subDays(new Date(), 1)}
-                      className="bg-[#173561] text-white"
+                      className="bg-[#173561] text-[#0A2540]"
                     />
                   </PopoverContent>
                 </Popover>
@@ -780,10 +780,10 @@ const BookingManagement = () => {
                   value={rescheduleTime}
                   onValueChange={setRescheduleTime}
                 >
-                  <SelectTrigger id="reschedule-time" className="bg-[#0a2342] border-[#2a4d7d] text-white">
+                  <SelectTrigger id="reschedule-time" className="bg-white border-gray-200 text-[#0A2540]">
                     <SelectValue placeholder="Select a time slot" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#173561] border-[#2a4d7d] text-white">
+                  <SelectContent className="bg-white border-gray-200 text-[#0A2540]">
                     <SelectItem value="09:00 AM">09:00 AM</SelectItem>
                     <SelectItem value="10:00 AM">10:00 AM</SelectItem>
                     <SelectItem value="11:00 AM">11:00 AM</SelectItem>
@@ -801,13 +801,13 @@ const BookingManagement = () => {
             <Button 
               variant="outline" 
               onClick={() => setIsRescheduleOpen(false)}
-              className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+              className="border-gray-200 text-[#0A2540] hover:bg-gray-100"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleReschedule}
-              className="bg-[#1d4ed8] hover:bg-blue-600 text-white"
+              className="bg-[#1d4ed8] hover:bg-blue-600 text-[#0A2540]"
               disabled={!rescheduleDate || !rescheduleTime || rescheduleBookingMutation.isPending}
             >
               {rescheduleBookingMutation.isPending ? "Processing..." : "Confirm Reschedule"}
@@ -828,7 +828,7 @@ const BookingManagement = () => {
           </div>
           
           <Button
-            className="bg-[#1d4ed8] hover:bg-blue-600 text-white"
+            className="bg-[#1d4ed8] hover:bg-blue-600 text-[#0A2540]"
             onClick={() => window.location.href = '/bookings'}
           >
             <Plus className="mr-2 h-4 w-4" />
@@ -855,7 +855,7 @@ const BookingManagement = () => {
                 <p className="text-2xl font-bold mt-1 text-[#0A2540]">{statusCounts.confirmed || 0}</p>
               </div>
               <div className="h-8 w-8 rounded-full bg-green-500 opacity-75 flex items-center justify-center">
-                <Check className="h-5 w-5 text-white" />
+                <Check className="h-5 w-5 text-[#0A2540]" />
               </div>
             </CardContent>
           </Card>
@@ -867,7 +867,7 @@ const BookingManagement = () => {
                 <p className="text-2xl font-bold mt-1 text-[#0A2540]">{statusCounts.rescheduled || 0}</p>
               </div>
               <div className="h-8 w-8 rounded-full bg-amber-500 opacity-75 flex items-center justify-center">
-                <Clock className="h-5 w-5 text-white" />
+                <Clock className="h-5 w-5 text-[#0A2540]" />
               </div>
             </CardContent>
           </Card>
@@ -879,7 +879,7 @@ const BookingManagement = () => {
                 <p className="text-2xl font-bold mt-1 text-[#0A2540]">{statusCounts.canceled || 0}</p>
               </div>
               <div className="h-8 w-8 rounded-full bg-red-500 opacity-75 flex items-center justify-center">
-                <X className="h-5 w-5 text-white" />
+                <X className="h-5 w-5 text-[#0A2540]" />
               </div>
             </CardContent>
           </Card>
