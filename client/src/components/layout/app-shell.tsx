@@ -50,9 +50,9 @@ export function AppShell({
     },
     {
       icon: <Phone className="h-5 w-5" />,
-      label: "Calls",
+      label: "Appointments",
       href: "/bookings",
-      badge: 3 // New calls notification
+      badge: 3 // New appointments notification
     },
     {
       icon: <MessageSquare className="h-5 w-5" />,

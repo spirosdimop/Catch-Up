@@ -149,8 +149,8 @@ const BookingsTab = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Tab state
-  const [activeTab, setActiveTab] = useState<string>("create");
+  // Tab state - set "manage" as the default tab
+  const [activeTab, setActiveTab] = useState<string>("manage");
   
   // Booking form state
   const [step, setStep] = useState(1);
@@ -996,16 +996,6 @@ const BookingsTab = () => {
           </div>
           
           <div className="flex space-x-4">
-            <Button
-              variant={activeTab === "create" ? "default" : "outline"}
-              onClick={() => setActiveTab("create")}
-              className={activeTab === "create" 
-                ? "bg-[#0A2540] hover:bg-[#081c30]" 
-                : "border-gray-200 text-[#0A2540] hover:bg-gray-100"}
-            >
-              <CalendarDays className="mr-2 h-4 w-4" />
-              Book Appointment
-            </Button>
             <Button
               variant={activeTab === "manage" ? "default" : "outline"}
               onClick={() => setActiveTab("manage")}
