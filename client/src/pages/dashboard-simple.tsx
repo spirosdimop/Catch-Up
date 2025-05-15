@@ -248,16 +248,16 @@ const DashboardSimple = () => {
                 </div>
                 
                 <div>
-                  <h3 className="text-sm font-medium text-gray-400 mb-2">Upcoming Activity</h3>
-                  <div className="bg-[#0a2342] rounded-md border border-[#2a4d7d] p-4 text-center">
-                    <CalendarIcon className="h-10 w-10 mx-auto mb-2 opacity-50 text-gray-400" />
-                    <p className="text-sm font-medium">Your schedule for the week</p>
-                    <p className="mt-1 mb-2 text-gray-400 text-xs">Plan ahead for your appointments</p>
+                  <h3 className="text-sm font-medium text-[#0A2540] mb-2">Upcoming Activity</h3>
+                  <div className="bg-white rounded-md border border-gray-200 shadow-sm p-4 text-center">
+                    <CalendarIcon className="h-10 w-10 mx-auto mb-2 opacity-50 text-gray-500" />
+                    <p className="text-sm font-medium text-[#0A2540]">Your schedule for the week</p>
+                    <p className="mt-1 mb-2 text-gray-500 text-xs">Plan ahead for your appointments</p>
                     <Link href="/calendar">
                       <Button 
                         variant="outline" 
                         size="sm" 
-                        className="mt-2 border-[#2a4d7d] hover:bg-[#0a2342] text-white"
+                        className="mt-2 border-gray-300 hover:bg-gray-50 text-[#0A2540]"
                       >
                         View Calendar
                         <ChevronRight className="ml-1 h-3 w-3" />
@@ -270,10 +270,10 @@ const DashboardSimple = () => {
           </Card>
           
           {/* Quick Access */}
-          <Card className="md:col-span-12 bg-[#173561] border-[#2a4d7d] shadow-md">
+          <Card className="md:col-span-12 bg-white border-gray-200 shadow-sm">
             <CardHeader className="pb-3">
-              <CardTitle className="text-xl flex items-center">
-                <Bell className="mr-3 h-5 w-5 text-[#1d4ed8]" />
+              <CardTitle className="text-xl flex items-center text-[#0A2540]">
+                <Bell className="mr-3 h-5 w-5 text-[#0A2540]" />
                 Quick Access
               </CardTitle>
             </CardHeader>
@@ -281,37 +281,37 @@ const DashboardSimple = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                 <Button 
                   variant="outline" 
-                  className="h-auto py-4 flex-col border-[#2a4d7d] hover:bg-[#0a2342] text-white"
+                  className="h-auto py-4 flex-col border-gray-200 hover:bg-gray-50 text-[#0A2540]"
                   onClick={() => window.location.href = '/clients'}
                 >
-                  <Users className="h-10 w-10 mb-2 text-[#1d4ed8]" />
+                  <Users className="h-10 w-10 mb-2 text-[#0A2540]" />
                   <span className="text-base font-medium">Manage Clients</span>
                 </Button>
                 
                 <Button 
                   variant="outline" 
-                  className="h-auto py-4 flex-col border-[#2a4d7d] hover:bg-[#0a2342] text-white"
+                  className="h-auto py-4 flex-col border-gray-200 hover:bg-gray-50 text-[#0A2540]"
                   onClick={() => window.location.href = '/bookings'}
                 >
-                  <CalendarIcon className="h-10 w-10 mb-2 text-[#1d4ed8]" />
+                  <CalendarIcon className="h-10 w-10 mb-2 text-[#0A2540]" />
                   <span className="text-base font-medium">Create Booking</span>
                 </Button>
                 
                 <Button 
                   variant="outline" 
-                  className="h-auto py-4 flex-col border-[#2a4d7d] hover:bg-[#0a2342] text-white"
+                  className="h-auto py-4 flex-col border-gray-200 hover:bg-gray-50 text-[#0A2540]"
                   onClick={() => window.location.href = '/calendar'}
                 >
-                  <Clock className="h-10 w-10 mb-2 text-[#1d4ed8]" />
+                  <Clock className="h-10 w-10 mb-2 text-[#0A2540]" />
                   <span className="text-base font-medium">View Schedule</span>
                 </Button>
                 
                 <Button 
                   variant="outline" 
-                  className="h-auto py-4 flex-col border-[#2a4d7d] hover:bg-[#0a2342] text-white"
+                  className="h-auto py-4 flex-col border-gray-200 hover:bg-gray-50 text-[#0A2540]"
                   onClick={() => window.location.href = '/messages'}
                 >
-                  <MessageSquare className="h-10 w-10 mb-2 text-[#1d4ed8]" />
+                  <MessageSquare className="h-10 w-10 mb-2 text-[#0A2540]" />
                   <span className="text-base font-medium">Messages</span>
                 </Button>
               </div>
