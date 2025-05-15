@@ -149,8 +149,8 @@ const BookingsTab = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Tab state - "manage" is the default tab to show manage bookings by default
-  const [activeTab, setActiveTab] = useState<string>("manage");
+  // Modal state for new booking dialog
+  const [isNewBookingOpen, setIsNewBookingOpen] = useState(false);
   
   // Booking form state
   const [step, setStep] = useState(1);
