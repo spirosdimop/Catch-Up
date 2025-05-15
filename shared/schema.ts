@@ -575,3 +575,26 @@ export type InsertNavigationEvent = z.infer<typeof insertNavigationEventSchema>;
 
 export type UserPreferences = typeof userPreferences.$inferSelect;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
+
+// Auto Response Templates schema
+export const autoResponses = pgTable("auto_responses", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull(), // Using string for userId to support Replit Auth
+  name: text("name").notNull(), // Name of the template
+  type: messageTypeEnum("type").default("general").notNull(), // Type of message
+  content: text("content").notNull(), // Template content
+  isDefault: boolean("is_default").default(false).notNull(), // Whether this is the default template for this type
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertAutoResponseSchema = createInsertSchema(autoResponses).pick({
+  userId: true,
+  name: true,
+  type: true, 
+  content: true,
+  isDefault: true,
+});
+
+export type AutoResponse = typeof autoResponses.$inferSelect;
+export type InsertAutoResponse = z.infer<typeof insertAutoResponseSchema>;

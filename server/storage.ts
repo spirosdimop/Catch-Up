@@ -33,7 +33,9 @@ import {
   NavigationEvent,
   InsertNavigationEvent,
   UserPreferences,
-  InsertUserPreferences
+  InsertUserPreferences,
+  AutoResponse,
+  InsertAutoResponse
 } from "@shared/schema";
 
 export interface IStorage {
@@ -137,6 +139,15 @@ export interface IStorage {
   getUserPreferences(userId: string): Promise<UserPreferences | undefined>;
   createUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences>;
   updateUserPreferences(userId: string, preferences: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined>;
+  
+  // Auto response operations
+  getAutoResponses(userId: string): Promise<AutoResponse[]>;
+  getAutoResponsesByType(userId: string, type: string): Promise<AutoResponse[]>;
+  getAutoResponse(id: number): Promise<AutoResponse | undefined>;
+  getDefaultAutoResponse(userId: string, type: string): Promise<AutoResponse | undefined>;
+  createAutoResponse(response: InsertAutoResponse): Promise<AutoResponse>;
+  updateAutoResponse(id: number, response: Partial<InsertAutoResponse>): Promise<AutoResponse | undefined>;
+  deleteAutoResponse(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -153,6 +164,7 @@ export class MemStorage implements IStorage {
   private services: Map<number, Service>;
   private aiCommands: Map<number, AiCommand>;
   private aiCommandEffects: Map<number, AiCommandEffect>;
+  private autoResponses: Map<number, AutoResponse>;
 
   private userIdCounter: number;
   private clientIdCounter: number;
@@ -167,6 +179,7 @@ export class MemStorage implements IStorage {
   private serviceIdCounter: number;
   private aiCommandIdCounter: number;
   private aiCommandEffectIdCounter: number;
+  private autoResponseIdCounter: number;
 
   constructor() {
     this.users = new Map();
@@ -182,6 +195,7 @@ export class MemStorage implements IStorage {
     this.services = new Map();
     this.aiCommands = new Map();
     this.aiCommandEffects = new Map();
+    this.autoResponses = new Map();
 
     this.userIdCounter = 1;
     this.clientIdCounter = 1;
@@ -196,6 +210,7 @@ export class MemStorage implements IStorage {
     this.serviceIdCounter = 1;
     this.aiCommandIdCounter = 1;
     this.aiCommandEffectIdCounter = 1;
+    this.autoResponseIdCounter = 1;
 
     // Add a demo user
     this.createUser({
