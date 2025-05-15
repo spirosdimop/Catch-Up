@@ -40,8 +40,11 @@ import CatchUpMessages from "@/pages/catchup/messages";
 import CatchUpSettings from "@/pages/catchup/settings";
 
 // New Catch Up App pages
-import { CatchUpLandingPage } from "@/pages/catch-up/landing";
+import CatchUpLandingPage from "@/pages/catch-up/landing";
+import { CatchUpSignupPage } from "@/pages/catch-up/signup";
 import { CatchUpLoginPage } from "@/pages/catch-up/login";
+import CatchUpDashboardPage from "@/pages/catch-up/dashboard";
+import CatchUpCalendarPage from "@/pages/catch-up/calendar";
 
 function Router() {
   const [location] = useLocation();
@@ -64,7 +67,14 @@ function Router() {
     "/catch-up",
     "/catch-up/login",
     "/catch-up/signup",
-    "/catch-up/dashboard"
+    "/catch-up/dashboard",
+    "/catch-up/calendar",
+    "/catch-up/clients",
+    "/catch-up/calls",
+    "/catch-up/messages",
+    "/catch-up/profile",
+    "/catch-up/settings",
+    "/catch-up/ai-assistant"
   ];
   
   // Check if current location is a Catch Up page
@@ -90,6 +100,9 @@ function Router() {
       <Switch>
         <Route path="/catch-up" component={CatchUpLandingPage} />
         <Route path="/catch-up/login" component={CatchUpLoginPage} />
+        <Route path="/catch-up/signup" component={CatchUpSignupPage} />
+        <Route path="/catch-up/dashboard" component={CatchUpDashboardPage} />
+        <Route path="/catch-up/calendar" component={CatchUpCalendarPage} />
         <Route component={NotFound} />
       </Switch>
     );
