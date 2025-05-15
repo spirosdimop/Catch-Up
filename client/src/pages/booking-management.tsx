@@ -886,19 +886,19 @@ const BookingManagement = () => {
         </div>
         
         {/* Filter and View Controls */}
-        <div className="bg-[#173561] border border-[#2a4d7d] rounded-lg p-4 mb-6">
+        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
             <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
               <div>
-                <Label htmlFor="filter-status" className="mb-1 block text-sm">Status</Label>
+                <Label htmlFor="filter-status" className="mb-1 block text-sm text-gray-600">Status</Label>
                 <Select
                   value={selectedStatus}
                   onValueChange={setSelectedStatus}
                 >
-                  <SelectTrigger id="filter-status" className="w-40 bg-[#0a2342] border-[#2a4d7d] text-white">
+                  <SelectTrigger id="filter-status" className="w-40 bg-white border-gray-200 text-[#0A2540]">
                     <SelectValue placeholder="Filter status" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#173561] border-[#2a4d7d] text-white">
+                  <SelectContent className="bg-white border-gray-200 text-[#0A2540]">
                     <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="confirmed">Confirmed</SelectItem>
                     <SelectItem value="rescheduled">Rescheduled</SelectItem>
@@ -909,15 +909,15 @@ const BookingManagement = () => {
               </div>
               
               <div>
-                <Label htmlFor="filter-type" className="mb-1 block text-sm">Type</Label>
+                <Label htmlFor="filter-type" className="mb-1 block text-sm text-gray-600">Type</Label>
                 <Select
                   value={selectedType}
                   onValueChange={setSelectedType}
                 >
-                  <SelectTrigger id="filter-type" className="w-40 bg-[#0a2342] border-[#2a4d7d] text-white">
+                  <SelectTrigger id="filter-type" className="w-40 bg-white border-gray-200 text-[#0A2540]">
                     <SelectValue placeholder="Filter type" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#173561] border-[#2a4d7d] text-white">
+                  <SelectContent className="bg-white border-gray-200 text-[#0A2540]">
                     <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="call">Call</SelectItem>
                     <SelectItem value="meeting">Meeting</SelectItem>
@@ -928,13 +928,13 @@ const BookingManagement = () => {
               </div>
               
               <div>
-                <Label htmlFor="date-range" className="mb-1 block text-sm">Date Range</Label>
+                <Label htmlFor="date-range" className="mb-1 block text-sm text-gray-600">Date Range</Label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       id="date-range"
                       variant="outline"
-                      className="w-[240px] justify-start text-left font-normal bg-[#0a2342] border-[#2a4d7d] text-white"
+                      className="w-[240px] justify-start text-left font-normal bg-white border-gray-200 text-[#0A2540]"
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {dateRange.from ? (
@@ -950,7 +950,7 @@ const BookingManagement = () => {
                       )}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-[#173561] border-[#2a4d7d]">
+                  <PopoverContent className="w-auto p-0 bg-white border-gray-200">
                     <div className="p-3">
                       <CalendarComponent
                         initialFocus
