@@ -104,6 +104,12 @@ const bookingSchema = z.object({
   service: z.string({
     required_error: "Please select a service type.",
   }),
+  clientId: z.number({
+    required_error: "Please select a client.",
+  }),
+  location: z.string().min(2, {
+    message: "Location must be at least 2 characters.",
+  }),
   priority: z.enum(["normal", "emergency"], {
     required_error: "Please select a priority level.",
   }),
@@ -998,7 +1004,7 @@ const BookingsTab = () => {
           <div className="flex justify-end">
             <Button
               variant="default"
-              onClick={() => setActiveTab("create")}
+              onClick={() => setIsNewBookingOpen(true)}
               className="bg-[#0A2540] hover:bg-[#081c30]"
             >
               <CalendarDays className="mr-2 h-4 w-4" />
