@@ -512,28 +512,28 @@ const ClientsRedesign = () => {
     return (
       <div className="space-y-3">
         {filteredClients.map((client) => (
-          <Card key={client.id} className="bg-[#173561] border-[#2a4d7d] shadow-sm">
+          <Card key={client.id} className="bg-white border-gray-200 shadow-sm">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <Avatar className="h-10 w-10 border-2 border-[#2a4d7d]">
+                  <Avatar className="h-10 w-10 border-2 border-gray-200">
                     <AvatarImage src={client.avatar} />
-                    <AvatarFallback className="bg-[#1d4ed8] text-white">
+                    <AvatarFallback className="bg-[#0A2540] text-white">
                       {getInitials(client.name)}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="text-base font-medium flex items-center">
+                    <div className="text-base font-medium text-[#0A2540] flex items-center">
                       {client.name}
                       <div className="ml-2">
                         {getStatusBadge(client.status)}
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2 text-sm text-gray-400">
+                    <div className="flex items-center space-x-2 text-sm text-gray-500">
                       {client.company && (
                         <>
                           <span>{client.company}</span>
-                          <span className="text-[#2a4d7d]">•</span>
+                          <span className="text-gray-300">•</span>
                         </>
                       )}
                       <span>{client.email}</span>
@@ -543,12 +543,12 @@ const ClientsRedesign = () => {
                 
                 <div className="flex items-center space-x-4">
                   <div className="hidden md:flex flex-col items-end space-y-1 mr-2">
-                    <div className="flex items-center text-sm text-gray-400">
+                    <div className="flex items-center text-sm text-gray-500">
                       <Clock className="h-3.5 w-3.5 mr-1" />
                       {client.lastBooking ? format(new Date(client.lastBooking), 'MMM d, yyyy') : 'Never'}
                     </div>
                     <div className="flex space-x-2">
-                      <Badge variant="outline" className="bg-[#0a2342] border-[#2a4d7d] text-white">
+                      <Badge variant="outline" className="bg-[#F8FAFC] border-gray-200 text-[#0A2540]">
                         {client.totalBookings} bookings
                       </Badge>
                       {getLoyaltyBadge(client.loyalty)}
