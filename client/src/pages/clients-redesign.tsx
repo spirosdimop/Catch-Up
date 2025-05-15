@@ -1321,8 +1321,137 @@ const ClientsRedesign = () => {
       {/* Dialogs */}
       <ClientDetailsDialog />
       <AddClientDialog />
+      <EditClientDialog />
       <SendMessageDialog />
     </div>
+  );
+};
+
+// Edit Client Dialog
+const EditClientDialog = () => {
+  return (
+    <Dialog open={isEditClientOpen} onOpenChange={setIsEditClientOpen}>
+      <DialogContent className="bg-white border-gray-200 text-[#0A2540]">
+        <DialogHeader>
+          <DialogTitle className="text-[#0A2540]">Edit Client</DialogTitle>
+          <DialogDescription className="text-gray-500">
+            Make changes to the client information below.
+          </DialogDescription>
+        </DialogHeader>
+        
+        {selectedClient && (
+          <form onSubmit={handleEditClientSubmit} className="space-y-4 py-2">
+            <div className="grid grid-cols-1 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Name</Label>
+                <Input 
+                  id="name"
+                  name="name"
+                  placeholder="John Doe" 
+                  className="bg-white border-gray-200 text-[#0A2540]"
+                  defaultValue={selectedClient.name}
+                  required 
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input 
+                    id="email"
+                    name="email"
+                    type="email" 
+                    placeholder="john@example.com" 
+                    className="bg-white border-gray-200 text-[#0A2540]"
+                    defaultValue={selectedClient.email}
+                    required 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone (Optional)</Label>
+                  <Input 
+                    id="phone"
+                    name="phone"
+                    placeholder="+1 555-123-4567" 
+                    className="bg-white border-gray-200 text-[#0A2540]"
+                    defaultValue={selectedClient.phone || ''}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="company">Company (Optional)</Label>
+                <Input 
+                  id="company"
+                  name="company"
+                  placeholder="ACME Corporation" 
+                  className="bg-white border-gray-200 text-[#0A2540]"
+                  defaultValue={selectedClient.company || ''}
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="status">Client Status</Label>
+                  <Select defaultValue={selectedClient.status} name="status">
+                    <SelectTrigger className="bg-white border-gray-200 text-[#0A2540]">
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200 text-[#0A2540]">
+                      <SelectItem value="new">New</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="loyalty">Loyalty Level</Label>
+                  <Select defaultValue={selectedClient.loyalty} name="loyalty">
+                    <SelectTrigger className="bg-white border-gray-200 text-[#0A2540]">
+                      <SelectValue placeholder="Select loyalty" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200 text-[#0A2540]">
+                      <SelectItem value="one-time">One-time</SelectItem>
+                      <SelectItem value="regular">Regular</SelectItem>
+                      <SelectItem value="loyal">Loyal</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes (Optional)</Label>
+                <Textarea 
+                  id="notes"
+                  name="notes"
+                  placeholder="Any additional information about this client..."
+                  className="bg-white border-gray-200 text-[#0A2540] resize-none min-h-[100px]"
+                  defaultValue={selectedClient.notes || ''}
+                />
+              </div>
+            </div>
+            
+            <DialogFooter className="pt-2">
+              <Button 
+                type="button"
+                variant="outline" 
+                onClick={() => setIsEditClientOpen(false)}
+                className="border-gray-300 text-[#0A2540] hover:bg-gray-100"
+              >
+                Cancel
+              </Button>
+              <Button 
+                type="submit"
+                className="bg-[#0A2540] hover:bg-[#081c30] text-white"
+              >
+                <Pencil className="mr-2 h-4 w-4" />
+                Update Client
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
   );
 };
 
