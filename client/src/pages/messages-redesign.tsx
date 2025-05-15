@@ -600,10 +600,10 @@ const MessagesRedesign = () => {
         </div>
       )}
       
-      {/* Auto-responses section */}
+      {/* Auto-responses section - Simplified with just the input form */}
       {activeSection === 'autoResponses' && (
-        <div className="space-y-6">
-          {/* Add/Edit Form */}
+        <div className="max-w-3xl mx-auto">
+          {/* Add/Edit Form - Simplified and focused */}
           <Card className="bg-white border-gray-200 shadow-sm">
             <CardHeader className="pb-3">
               <CardTitle className="text-[#0A2540]">
@@ -716,84 +716,46 @@ const MessagesRedesign = () => {
             </CardContent>
           </Card>
           
-          {/* Existing Auto-Response Templates */}
-          {Object.entries(responsesByType).map(([type, responses]) => {
-            if (responses.length === 0) return null;
-            
-            const { title, bgColor } = getSectionInfo(type);
-            
-            return (
-              <div key={type}>
-                <h3 className="text-lg font-medium text-[#0A2540] mb-3 flex items-center">
-                  <MessageSquare className={`mr-2 h-5 w-5 ${getIconColor(type)}`} />
-                  {title}
-                </h3>
-                <div className={`rounded-lg p-4 ${bgColor}`}>
-                  {responses.map(response => (
-                    <Card key={response.id} className="bg-white border-gray-200 shadow-sm mb-3">
-                      <CardHeader className="pb-2">
-                        <div className="flex justify-between items-start">
-                          <div className="flex items-center">
-                            <CardTitle className="text-[#0A2540] text-base">{response.name}</CardTitle>
-                            {response.isDefault && (
-                              <Badge className="ml-2 bg-green-100 text-green-800 hover:bg-green-200">Default</Badge>
-                            )}
-                          </div>
-                          <div className="flex space-x-2">
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0 text-gray-500 hover:text-[#0A2540]"
-                              onClick={() => handleEdit(response)}
-                            >
-                              <Pen className="h-4 w-4" />
-                              <span className="sr-only">Edit</span>
-                            </Button>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
-                              className="h-8 w-8 p-0 text-gray-500 hover:text-red-600"
-                              onClick={() => handleDelete(response.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              <span className="sr-only">Delete</span>
-                            </Button>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-gray-600">{response.content}</p>
-                      </CardContent>
-                      {!response.isDefault && (
-                        <CardFooter className="pt-0">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            className="ml-auto text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50"
-                            onClick={() => handleSetAsDefault(response.id, response.type)}
-                          >
-                            Set as default
-                          </Button>
-                        </CardFooter>
-                      )}
-                    </Card>
-                  ))}
-                </div>
+          {/* Just a simple list of existing responses */}
+          {Object.values(responsesByType).some(responses => responses.length > 0) && (
+            <div className="mt-6 bg-white border border-gray-200 rounded-lg shadow-sm p-4">
+              <h3 className="font-medium text-[#0A2540] mb-3">Your Saved Responses</h3>
+              <div className="space-y-2">
+                {Object.entries(responsesByType).flatMap(([type, responses]) => 
+                  responses.map(response => (
+                    <div key={response.id} className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <div>
+                        <p className="font-medium text-[#0A2540]">{response.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {response.type.charAt(0).toUpperCase() + response.type.slice(1).replace('_', ' ')}
+                          {response.isDefault && " (Default)"}
+                        </p>
+                      </div>
+                      <div className="flex space-x-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 w-8 p-0 text-gray-500"
+                          onClick={() => handleEdit(response)}
+                        >
+                          <Pen className="h-4 w-4" />
+                          <span className="sr-only">Edit</span>
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="h-8 w-8 p-0 text-gray-500"
+                          onClick={() => handleDelete(response.id)}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete</span>
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
-            );
-          })}
-          
-          {/* Show "No templates" message if there are no templates */}
-          {Object.values(responsesByType).every(responses => responses.length === 0) && (
-            <Card className="bg-white border-gray-200 shadow-sm">
-              <CardContent className="text-center p-8">
-                <MessageSquare className="mx-auto h-12 w-12 mb-4 text-gray-300" />
-                <h3 className="text-lg font-medium text-gray-700 mb-2">No Auto-Response Templates</h3>
-                <p className="text-gray-500 max-w-md mx-auto mb-4">
-                  You haven't created any auto-response templates yet. Create your first template above.
-                </p>
-              </CardContent>
-            </Card>
+            </div>
           )}
         </div>
       )}
