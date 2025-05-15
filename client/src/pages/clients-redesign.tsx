@@ -14,6 +14,7 @@ import {
   Clock,
   Star,
   ChevronDown,
+  Pencil,
   X
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -509,6 +510,15 @@ const ClientsRedesign = () => {
                 <History className="h-4 w-4 mr-1" />
                 History
               </Button>
+              <Separator orientation="vertical" className="h-9 bg-gray-200" />
+              <Button 
+                variant="ghost" 
+                className="flex-1 p-0 h-9 text-[#0A2540] hover:bg-gray-100"
+                onClick={() => handleEditClient(client)}
+              >
+                <Pencil className="h-4 w-4 mr-1" />
+                Edit
+              </Button>
             </CardFooter>
           </Card>
         ))}
@@ -634,7 +644,10 @@ const ClientsRedesign = () => {
                       <DropdownMenuContent className="bg-white border-gray-200 text-[#0A2540]">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-gray-200" />
-                        <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">
+                        <DropdownMenuItem 
+                          className="hover:bg-gray-100 cursor-pointer"
+                          onClick={() => handleEditClient(client)}
+                        >
                           Edit Client
                         </DropdownMenuItem>
                         <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">
