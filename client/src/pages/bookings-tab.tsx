@@ -149,8 +149,8 @@ const BookingsTab = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  // Tab state - "manage" is the default tab, but "Add Booking" button shows "create" tab
-  const [activeTab, setActiveTab] = useState<string>("manage");
+  // Tab state - "create" is the default tab to let users create their own bookings
+  const [activeTab, setActiveTab] = useState<string>("create");
   
   // Booking form state
   const [step, setStep] = useState(1);
@@ -997,24 +997,12 @@ const BookingsTab = () => {
           
           <div className="flex space-x-4">
             <Button
-              variant={activeTab === "create" ? "default" : "outline"}
+              variant="default"
               onClick={() => setActiveTab("create")}
-              className={activeTab === "create" 
-                ? "bg-[#0A2540] hover:bg-[#081c30]" 
-                : "border-gray-200 text-[#0A2540] hover:bg-gray-100"}
+              className="bg-[#0A2540] hover:bg-[#081c30]"
             >
               <CalendarDays className="mr-2 h-4 w-4" />
-              Add Booking
-            </Button>
-            <Button
-              variant={activeTab === "manage" ? "default" : "outline"}
-              onClick={() => setActiveTab("manage")}
-              className={activeTab === "manage" 
-                ? "bg-[#0A2540] hover:bg-[#081c30]" 
-                : "border-gray-200 text-[#0A2540] hover:bg-gray-100"}
-            >
-              <Settings className="mr-2 h-4 w-4" />
-              Manage Bookings
+              Create Booking
             </Button>
           </div>
         </div>
