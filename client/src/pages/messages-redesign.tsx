@@ -146,7 +146,7 @@ const MessagesRedesign = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a2342] text-[#0A2540] p-4 md:p-6">
+    <div className="min-h-screen bg-white text-[#0A2540] p-4 md:p-6">
       <h1 className="text-2xl font-bold mb-6">Message Center</h1>
       
       {/* Search and filters */}
