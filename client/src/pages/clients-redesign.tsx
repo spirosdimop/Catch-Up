@@ -65,7 +65,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest, queryClient } from '@/lib/queryClient';
 
 // Client interface
 interface Client {
@@ -338,14 +338,45 @@ const ClientsRedesign = () => {
   };
   
   // Handle add new client
-  const handleAddClient = (e: React.FormEvent) => {
+  const handleAddClient = async (e: React.FormEvent) => {
     e.preventDefault();
-    // In a real application, we would submit the form data to the API
-    toast({
-      title: "Client added successfully",
-      description: "The new client has been added to your list.",
-    });
-    setIsAddClientOpen(false);
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+    
+    const newClient = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string || null,
+      company: formData.get('company') as string || null,
+      notes: formData.get('notes') as string || null,
+      status: 'new',
+      loyalty: 'one-time',
+      dateAdded: new Date().toISOString().split('T')[0],
+      totalBookings: 0
+    };
+    
+    try {
+      const response = await apiRequest("POST", "/api/clients", newClient);
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
+        toast({
+          title: "Client added successfully",
+          description: "The new client has been added to your list.",
+        });
+        form.reset();
+        setIsAddClientOpen(false);
+      } else {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to add client');
+      }
+    } catch (error) {
+      console.error('Error adding client:', error);
+      toast({
+        title: "Error adding client",
+        description: error instanceof Error ? error.message : 'An unexpected error occurred',
+        variant: "destructive"
+      });
+    }
   };
   
   // Handle send message
