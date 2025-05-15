@@ -819,7 +819,7 @@ const BookingManagement = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a2342] text-white p-4 md:p-6">
+    <div className="min-h-screen bg-white text-[#0A2540] p-4 md:p-6">
       <div className="max-w-[1400px] mx-auto">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div>
@@ -838,21 +838,21 @@ const BookingManagement = () => {
         
         {/* Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="bg-[#173561] border-[#2a4d7d] shadow-sm">
+          <Card className="bg-white border-gray-200 shadow-sm">
             <CardContent className="p-4 flex justify-between items-center">
               <div>
-                <p className="text-gray-400 text-sm">Total Bookings</p>
-                <p className="text-2xl font-bold mt-1">{totalBookings}</p>
+                <p className="text-gray-500 text-sm">Total Bookings</p>
+                <p className="text-2xl font-bold mt-1 text-[#0A2540]">{totalBookings}</p>
               </div>
-              <Calendar className="h-8 w-8 text-[#1d4ed8] opacity-75" />
+              <Calendar className="h-8 w-8 text-[#0A2540] opacity-75" />
             </CardContent>
           </Card>
           
-          <Card className="bg-[#173561] border-[#2a4d7d] shadow-sm">
+          <Card className="bg-white border-gray-200 shadow-sm">
             <CardContent className="p-4 flex justify-between items-center">
               <div>
-                <p className="text-gray-400 text-sm">Confirmed</p>
-                <p className="text-2xl font-bold mt-1">{statusCounts.confirmed || 0}</p>
+                <p className="text-gray-500 text-sm">Confirmed</p>
+                <p className="text-2xl font-bold mt-1 text-[#0A2540]">{statusCounts.confirmed || 0}</p>
               </div>
               <div className="h-8 w-8 rounded-full bg-green-500 opacity-75 flex items-center justify-center">
                 <Check className="h-5 w-5 text-white" />
@@ -860,11 +860,11 @@ const BookingManagement = () => {
             </CardContent>
           </Card>
           
-          <Card className="bg-[#173561] border-[#2a4d7d] shadow-sm">
+          <Card className="bg-white border-gray-200 shadow-sm">
             <CardContent className="p-4 flex justify-between items-center">
               <div>
-                <p className="text-gray-400 text-sm">Rescheduled</p>
-                <p className="text-2xl font-bold mt-1">{statusCounts.rescheduled || 0}</p>
+                <p className="text-gray-500 text-sm">Rescheduled</p>
+                <p className="text-2xl font-bold mt-1 text-[#0A2540]">{statusCounts.rescheduled || 0}</p>
               </div>
               <div className="h-8 w-8 rounded-full bg-amber-500 opacity-75 flex items-center justify-center">
                 <Clock className="h-5 w-5 text-white" />
@@ -872,11 +872,11 @@ const BookingManagement = () => {
             </CardContent>
           </Card>
           
-          <Card className="bg-[#173561] border-[#2a4d7d] shadow-sm">
+          <Card className="bg-white border-gray-200 shadow-sm">
             <CardContent className="p-4 flex justify-between items-center">
               <div>
-                <p className="text-gray-400 text-sm">Canceled</p>
-                <p className="text-2xl font-bold mt-1">{statusCounts.canceled || 0}</p>
+                <p className="text-gray-500 text-sm">Canceled</p>
+                <p className="text-2xl font-bold mt-1 text-[#0A2540]">{statusCounts.canceled || 0}</p>
               </div>
               <div className="h-8 w-8 rounded-full bg-red-500 opacity-75 flex items-center justify-center">
                 <X className="h-5 w-5 text-white" />
