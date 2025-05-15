@@ -398,6 +398,47 @@ const ClientsRedesign = () => {
     setIsSendMessageOpen(false);
   };
   
+  // Handle edit client submit
+  const handleEditClientSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedClient) return;
+    
+    const form = e.target as HTMLFormElement;
+    const formData = new FormData(form);
+    
+    const updatedClient = {
+      name: formData.get('name') as string,
+      email: formData.get('email') as string,
+      phone: formData.get('phone') as string || null,
+      company: formData.get('company') as string || null,
+      notes: formData.get('notes') as string || null,
+      status: formData.get('status') as 'active' | 'inactive' | 'new',
+      loyalty: formData.get('loyalty') as 'one-time' | 'regular' | 'loyal',
+    };
+    
+    try {
+      const response = await apiRequest("PATCH", `/api/clients/${selectedClient.id}`, updatedClient);
+      if (response.ok) {
+        queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
+        toast({
+          title: "Client updated successfully",
+          description: "The client information has been updated.",
+        });
+        setIsEditClientOpen(false);
+      } else {
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to update client');
+      }
+    } catch (error) {
+      console.error('Error updating client:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update client. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
   // Render grid view
   const renderGridView = () => {
     if (isLoading) {
