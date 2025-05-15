@@ -59,7 +59,9 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { NewBookingDialog } from '@/components/booking/new-booking-dialog';
+
+// Import our custom booking dialog
+import { NewBookingDialog } from '@/components/booking/new-booking-dialog-simple';
 
 // View enum for booking management
 enum ViewMode {
@@ -87,7 +89,7 @@ interface Booking {
   updatedAt: string;
 }
 
-const BookingsTab = () => {
+export const BookingsFixed = () => {
   // Shared state
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -833,5 +835,6 @@ const BookingsTab = () => {
       </div>
     </div>
   );
-};export default BookingsTab;
+};
 
+export default BookingsFixed;

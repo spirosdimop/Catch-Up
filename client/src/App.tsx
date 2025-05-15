@@ -21,6 +21,8 @@ import Bookings from "@/pages/bookings";
 import BookingsRedesign from "@/pages/bookings-redesign";
 import BookingManagement from "@/pages/booking-management";
 import BookingsTab from "@/pages/bookings-tab";
+import BookingsTabUpdated from "@/pages/bookings-tab-updated";
+import { BookingsFixed } from "@/pages/bookings-fixed";
 import Calendar from "@/pages/calendar";
 import CalendarNew from "@/pages/calendar-new";
 import Profile from "@/pages/profile";
@@ -118,7 +120,8 @@ function Router() {
         <Route path="/dashboard-original" component={Dashboard} />
         <Route path="/clients" component={ClientsRedesign} />
         <Route path="/clients-original" component={Clients} />
-        <Route path="/bookings" component={BookingsTabUpdated} />
+        <Route path="/bookings" component={BookingsFixed} />
+        <Route path="/bookings-new" component={BookingsTabUpdated} />
         <Route path="/bookings-original" component={Bookings} />
         <Route path="/bookings-old" component={BookingsRedesign} />
         <Route path="/booking-management" component={BookingManagement} />

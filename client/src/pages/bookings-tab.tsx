@@ -1384,7 +1384,7 @@ const BookingsTab = () => {
               </form>
             </Form>
           </div>
-        )}
+        
         
         {activeTab === "manage" && (
           <>
