@@ -1225,7 +1225,22 @@ const ClientsRedesign = () => {
       <Dialog open={isEditClientOpen} onOpenChange={setIsEditClientOpen}>
         <DialogContent className="bg-white border-gray-200 text-[#0A2540]">
           <DialogHeader>
-            <DialogTitle className="text-[#0A2540]">Edit Client</DialogTitle>
+            <div className="flex items-center justify-between mb-2">
+              <DialogTitle className="text-[#0A2540]">Edit Client</DialogTitle>
+              <Button 
+                variant="destructive"
+                size="sm"
+                className="bg-red-600 hover:bg-red-700 text-white"
+                onClick={() => {
+                  console.log('Edit modal Delete button clicked');
+                  setIsEditClientOpen(false);
+                  setIsDeleteConfirmOpen(true);
+                }}
+              >
+                <Trash2 className="mr-1 h-4 w-4" />
+                Delete
+              </Button>
+            </div>
             <DialogDescription className="text-gray-500">
               Make changes to the client information below.
             </DialogDescription>
@@ -1321,6 +1336,23 @@ const ClientsRedesign = () => {
                     defaultValue={selectedClient.notes || ''}
                   />
                 </div>
+              </div>
+              
+              <div className="pt-6 border-t border-gray-200 mt-6">
+                <Button 
+                  type="button"
+                  variant="destructive"
+                  size="lg"
+                  className="bg-red-600 hover:bg-red-700 text-white font-semibold w-full mb-4"
+                  onClick={() => {
+                    console.log('Edit Form Delete button clicked');
+                    setIsEditClientOpen(false);
+                    setIsDeleteConfirmOpen(true);
+                  }}
+                >
+                  <Trash2 className="mr-2 h-5 w-5" />
+                  DELETE THIS CLIENT
+                </Button>
               </div>
               
               <DialogFooter className="pt-2">
