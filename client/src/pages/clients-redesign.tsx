@@ -677,28 +677,28 @@ const ClientsRedesign = () => {
     
     return (
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="bg-[#173561] border-[#2a4d7d] text-white max-w-[700px]">
+        <DialogContent className="bg-white border-gray-200 text-[#0A2540] max-w-[700px]">
           <DialogHeader>
             <DialogTitle className="flex items-center">
-              <Avatar className="h-10 w-10 border-2 border-[#2a4d7d] mr-3">
+              <Avatar className="h-10 w-10 border-2 border-gray-200 mr-3">
                 <AvatarImage src={selectedClient.avatar} />
                 <AvatarFallback className="bg-[#0A2540] text-white">
                   {getInitials(selectedClient.name)}
                 </AvatarFallback>
               </Avatar>
-              <span>{selectedClient.name}</span>
+              <span className="text-[#0A2540]">{selectedClient.name}</span>
               <div className="ml-3 flex space-x-2">
                 {getStatusBadge(selectedClient.status)}
                 {getLoyaltyBadge(selectedClient.loyalty)}
               </div>
             </DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogDescription className="text-gray-500">
               Client since {format(new Date(selectedClient.dateAdded), 'MMMM d, yyyy')}
             </DialogDescription>
           </DialogHeader>
           
           <Tabs defaultValue="info" className="mt-2">
-            <TabsList className="bg-[#0a2342] border-[#2a4d7d]">
+            <TabsList className="bg-gray-100 border-gray-200">
               <TabsTrigger 
                 value="info" 
                 className="data-[state=active]:bg-[#0A2540] data-[state=active]:text-white"
@@ -1000,10 +1000,10 @@ const ClientsRedesign = () => {
     
     return (
       <Dialog open={isSendMessageOpen} onOpenChange={setIsSendMessageOpen}>
-        <DialogContent className="bg-[#173561] border-[#2a4d7d] text-white">
+        <DialogContent className="bg-white border-gray-200 text-[#0A2540]">
           <DialogHeader>
-            <DialogTitle>Send Message</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[#0A2540]">Send Message</DialogTitle>
+            <DialogDescription className="text-gray-500">
               Send a message to {selectedClient.name}.
             </DialogDescription>
           </DialogHeader>
@@ -1012,9 +1012,10 @@ const ClientsRedesign = () => {
             <div className="space-y-2">
               <Label htmlFor="subject">Subject</Label>
               <Input 
-                id="subject" 
+                id="subject"
+                name="subject"
                 placeholder="Message subject" 
-                className="bg-[#0a2342] border-[#2a4d7d] text-white"
+                className="bg-white border-gray-200 text-[#0A2540]"
                 required 
               />
             </div>
@@ -1022,18 +1023,23 @@ const ClientsRedesign = () => {
             <div className="space-y-2">
               <Label htmlFor="message">Message</Label>
               <Textarea 
-                id="message" 
+                id="message"
+                name="message"
                 placeholder="Type your message here..."
-                className="bg-[#0a2342] border-[#2a4d7d] text-white resize-none min-h-[200px]"
+                className="bg-white border-gray-200 text-[#0A2540] resize-none min-h-[200px]"
                 required
               />
             </div>
             
             <div className="flex items-center space-x-2">
-              <Checkbox id="high-priority" className="border-[#2a4d7d] data-[state=checked]:bg-[#0A2540]" />
+              <Checkbox 
+                id="high-priority"
+                name="high-priority"
+                className="border-gray-300 data-[state=checked]:bg-[#0A2540]" 
+              />
               <Label
                 htmlFor="high-priority"
-                className="text-sm font-normal"
+                className="text-sm font-normal text-[#0A2540]"
               >
                 Mark as high priority
               </Label>
@@ -1044,7 +1050,7 @@ const ClientsRedesign = () => {
                 type="button"
                 variant="outline" 
                 onClick={() => setIsSendMessageOpen(false)}
-                className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+                className="border-gray-300 text-[#0A2540] hover:bg-gray-100"
               >
                 Cancel
               </Button>
