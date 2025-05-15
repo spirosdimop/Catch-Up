@@ -61,6 +61,10 @@ const bookingSchema = z.object({
     required_error: "Please select a priority level.",
   }),
   notes: z.string().optional(),
+  // These will be added during submission
+  type: z.string().optional(),
+  status: z.string().optional(),
+  duration: z.number().optional(),
 });
 
 type BookingFormValues = z.infer<typeof bookingSchema>;
@@ -156,12 +160,21 @@ export function NewBookingDialog({ open, onOpenChange }: NewBookingDialogProps) 
   // Create booking mutation
   const createBookingMutation = useMutation({
     mutationFn: async (data: BookingFormValues) => {
-      // Format the date to string for the API
+      // Get selected service to determine duration
+      const selectedService = services.find(s => s.id === data.service);
+      
+      // Format the data to match the API expectations
       const formattedData = {
-        ...data,
         date: format(data.date, 'yyyy-MM-dd'),
-        // Ensure clientId is a number
-        clientId: Number(data.clientId)
+        time: data.timeSlot,
+        clientId: Number(data.clientId),
+        serviceId: data.service,
+        location: data.location,
+        priority: data.priority,
+        notes: data.notes || "",
+        type: "meeting", // Default type
+        status: "confirmed", // Default status
+        duration: selectedService?.duration || 60 // Get duration from service or default to 60 minutes
       };
       
       console.log('Submitting booking data:', formattedData);
