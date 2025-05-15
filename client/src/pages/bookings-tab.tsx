@@ -987,7 +987,7 @@ const BookingsTab = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a2342] text-white p-4 md:p-6">
+    <div className="min-h-screen bg-white text-[#0A2540] p-4 md:p-6">
       <div className="max-w-[1200px] mx-auto">
         <div className="flex flex-col md:flex-row gap-4 md:items-center justify-between mb-6">
           <div>

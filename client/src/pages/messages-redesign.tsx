@@ -146,7 +146,7 @@ const MessagesRedesign = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a2342] text-white p-4 md:p-6">
+    <div className="min-h-screen bg-[#0a2342] text-[#0A2540] p-4 md:p-6">
       <h1 className="text-2xl font-bold mb-6">Message Center</h1>
       
       {/* Search and filters */}
@@ -157,7 +157,7 @@ const MessagesRedesign = () => {
             placeholder="Search messages..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-[#173561] border-[#2a4d7d] text-white placeholder:text-gray-400"
+            className="pl-10 bg-[#173561] border-[#2a4d7d] text-[#0A2540] placeholder:text-gray-400"
           />
         </div>
         <Tabs 
@@ -178,9 +178,9 @@ const MessagesRedesign = () => {
       {/* Message categories */}
       <div className="grid grid-cols-1 gap-6">
         {/* Missed Calls Section */}
-        <Card className="bg-[#173561] border-[#2a4d7d] shadow-lg">
+        <Card className="bg-white border-gray-200 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-white flex items-center">
+            <CardTitle className="text-[#0A2540] flex items-center">
               <Phone className="mr-2 h-5 w-5 text-blue-400" />
               Missed Calls
               {messagesByType.missed_call.length > 0 && (
@@ -201,9 +201,9 @@ const MessagesRedesign = () => {
         </Card>
         
         {/* Reschedule Requests Section */}
-        <Card className="bg-[#173561] border-[#2a4d7d] shadow-lg">
+        <Card className="bg-white border-gray-200 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-white flex items-center">
+            <CardTitle className="text-[#0A2540] flex items-center">
               <Calendar className="mr-2 h-5 w-5 text-purple-400" />
               Reschedule Requests
               {messagesByType.reschedule.length > 0 && (
@@ -224,9 +224,9 @@ const MessagesRedesign = () => {
         </Card>
         
         {/* Cancellations Section */}
-        <Card className="bg-[#173561] border-[#2a4d7d] shadow-lg">
+        <Card className="bg-white border-gray-200 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-white flex items-center">
+            <CardTitle className="text-[#0A2540] flex items-center">
               <X className="mr-2 h-5 w-5 text-red-400" />
               Cancellations
               {messagesByType.cancellation.length > 0 && (
@@ -247,9 +247,9 @@ const MessagesRedesign = () => {
         </Card>
         
         {/* Confirmations Section */}
-        <Card className="bg-[#173561] border-[#2a4d7d] shadow-lg">
+        <Card className="bg-white border-gray-200 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-white flex items-center">
+            <CardTitle className="text-[#0A2540] flex items-center">
               <Check className="mr-2 h-5 w-5 text-green-400" />
               Confirmations
               {messagesByType.confirmation.length > 0 && (
@@ -270,9 +270,9 @@ const MessagesRedesign = () => {
         </Card>
         
         {/* Emergency Alerts Section */}
-        <Card className="bg-[#173561] border-[#2a4d7d] shadow-lg">
+        <Card className="bg-white border-gray-200 shadow-sm">
           <CardHeader className="pb-3">
-            <CardTitle className="text-white flex items-center">
+            <CardTitle className="text-[#0A2540] flex items-center">
               <AlertTriangle className="mr-2 h-5 w-5 text-amber-400" />
               Emergency Alerts
               {messagesByType.emergency.length > 0 && (
