@@ -102,40 +102,14 @@ const DashboardSimple = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[#0a2342] text-white p-4 md:p-6">
+    <div className="min-h-screen bg-white text-[#0A2540] p-4 md:p-6">
       <div className="max-w-[1400px] mx-auto">
-        {/* Top Navigation Links */}
-        <div className="flex justify-end items-center mb-8 gap-2">
-          <Link href="/messages">
-            <Button variant="ghost" className="text-white hover:bg-[#173561]">
-              <MessageSquare className="h-5 w-5 mr-2" />
-              Messages
-            </Button>
-          </Link>
-          <Link href="/bookings">
-            <Button variant="ghost" className="text-white hover:bg-[#173561]">
-              <CalendarIcon className="h-5 w-5 mr-2" />
-              Bookings
-            </Button>
-          </Link>
-          <Link href="/clients">
-            <Button variant="ghost" className="text-white hover:bg-[#173561]">
-              <Users className="h-5 w-5 mr-2" />
-              Clients
-            </Button>
-          </Link>
-          <Link href="/calendar">
-            <Button variant="ghost" className="text-white hover:bg-[#173561]">
-              <CalendarIcon className="h-5 w-5 mr-2" />
-              Calendar
-            </Button>
-          </Link>
-        </div>
+        {/* Top Navigation Links - Removed from here since they're now in header */}
         
         {/* Welcome Header */}
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Welcome back, Alex</h1>
-          <p className="text-gray-400 mt-1">
+          <h1 className="text-3xl font-bold text-[#0A2540]">Welcome back, Alex</h1>
+          <p className="text-gray-600 mt-1">
             {new Date().toLocaleDateString('en-US', { 
               weekday: 'long', 
               year: 'numeric', 
