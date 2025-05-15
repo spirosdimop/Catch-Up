@@ -26,7 +26,8 @@ import {
   insertEventTemplateSchema,
   insertNavigationEventSchema,
   insertUserPreferencesSchema,
-  insertUserSchema
+  insertUserSchema,
+  insertAutoResponseSchema
 } from "@shared/schema";
 import { z } from "zod";
 import { registerBookingRoutes } from "./routes/bookings";
@@ -1972,6 +1973,114 @@ Remember: The most helpful thing you can do is direct users to the specialized t
         message: "Failed to update user preferences",
         error: error instanceof Error ? error.message : String(error)
       });
+    }
+  });
+  
+  // Auto response endpoints
+  apiRouter.get("/auto-responses", async (req, res) => {
+    // Default to demo user if no userId is provided
+    const userId = req.query.userId as string || "demo";
+    const type = req.query.type as string;
+    
+    try {
+      let responses;
+      if (type) {
+        responses = await storage.getAutoResponsesByType(userId, type);
+      } else {
+        responses = await storage.getAutoResponses(userId);
+      }
+      res.json(responses);
+    } catch (error) {
+      console.error("Error getting auto responses:", error);
+      res.status(500).json({ message: "Failed to get auto responses" });
+    }
+  });
+
+  apiRouter.get("/auto-responses/default/:type", async (req, res) => {
+    const userId = req.query.userId as string || "demo";
+    const type = req.params.type;
+    
+    try {
+      const response = await storage.getDefaultAutoResponse(userId, type);
+      if (!response) {
+        return res.status(404).json({ message: "Default auto response not found" });
+      }
+      res.json(response);
+    } catch (error) {
+      console.error("Error getting default auto response:", error);
+      res.status(500).json({ message: "Failed to get default auto response" });
+    }
+  });
+
+  apiRouter.get("/auto-responses/:id([0-9]+)", async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid auto response ID" });
+    }
+    
+    try {
+      const response = await storage.getAutoResponse(id);
+      if (!response) {
+        return res.status(404).json({ message: "Auto response not found" });
+      }
+      res.json(response);
+    } catch (error) {
+      console.error("Error getting auto response:", error);
+      res.status(500).json({ message: "Failed to get auto response" });
+    }
+  });
+
+  apiRouter.post("/auto-responses", async (req, res) => {
+    try {
+      const responseData = insertAutoResponseSchema.parse(req.body);
+      const response = await storage.createAutoResponse(responseData);
+      res.status(201).json(response);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid auto response data", errors: error.errors });
+      }
+      console.error("Error creating auto response:", error);
+      res.status(500).json({ message: "Failed to create auto response" });
+    }
+  });
+
+  apiRouter.patch("/auto-responses/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid auto response ID" });
+    }
+    
+    try {
+      const responseData = insertAutoResponseSchema.partial().parse(req.body);
+      const response = await storage.updateAutoResponse(id, responseData);
+      if (!response) {
+        return res.status(404).json({ message: "Auto response not found" });
+      }
+      res.json(response);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid auto response data", errors: error.errors });
+      }
+      console.error("Error updating auto response:", error);
+      res.status(500).json({ message: "Failed to update auto response" });
+    }
+  });
+
+  apiRouter.delete("/auto-responses/:id", async (req, res) => {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid auto response ID" });
+    }
+    
+    try {
+      const deleted = await storage.deleteAutoResponse(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Auto response not found" });
+      }
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting auto response:", error);
+      res.status(500).json({ message: "Failed to delete auto response" });
     }
   });
 
