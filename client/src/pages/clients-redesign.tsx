@@ -455,6 +455,9 @@ const ClientsRedesign = () => {
   // Delete client handling
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   
+  // Debug delete dialog state
+  console.log('isDeleteConfirmOpen:', isDeleteConfirmOpen);
+  
   const handleDeleteClient = async () => {
     if (!selectedClient) return;
     
@@ -783,19 +786,34 @@ const ClientsRedesign = () => {
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <DialogContent className="bg-white border-gray-200 text-[#0A2540] max-w-[700px]">
           <DialogHeader>
-            <DialogTitle className="flex items-center">
-              <Avatar className="h-10 w-10 border-2 border-gray-200 mr-3">
-                <AvatarImage src={selectedClient.avatar} />
-                <AvatarFallback className="bg-[#0A2540] text-white">
-                  {getInitials(selectedClient.name)}
-                </AvatarFallback>
-              </Avatar>
-              <span className="text-[#0A2540]">{selectedClient.name}</span>
-              <div className="ml-3 flex space-x-2">
-                {selectedClient.status && getStatusBadge(selectedClient.status)}
-                {selectedClient.loyalty && getLoyaltyBadge(selectedClient.loyalty)}
-              </div>
-            </DialogTitle>
+            <div className="flex justify-between items-start">
+              <DialogTitle className="flex items-center">
+                <Avatar className="h-10 w-10 border-2 border-gray-200 mr-3">
+                  <AvatarImage src={selectedClient.avatar} />
+                  <AvatarFallback className="bg-[#0A2540] text-white">
+                    {getInitials(selectedClient.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <span className="text-[#0A2540]">{selectedClient.name}</span>
+                <div className="ml-3 flex space-x-2">
+                  {selectedClient.status && getStatusBadge(selectedClient.status)}
+                  {selectedClient.loyalty && getLoyaltyBadge(selectedClient.loyalty)}
+                </div>
+              </DialogTitle>
+              
+              <Button 
+                variant="outline"
+                size="sm"
+                className="border-red-700 text-red-500 hover:bg-red-100 hover:text-red-700"
+                onClick={() => {
+                  console.log('Header Delete button clicked');
+                  setIsDeleteConfirmOpen(true);
+                }}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </Button>
+            </div>
             <DialogDescription className="text-gray-500">
               Client since {selectedClient.dateAdded ? 
                 format(new Date(selectedClient.dateAdded.replace(/-/g, '/')), 'MMMM d, yyyy') : 
@@ -1315,7 +1333,12 @@ const ClientsRedesign = () => {
 
   // Delete Confirmation Dialog
   const DeleteConfirmDialog = () => {
-    if (!selectedClient) return null;
+    console.log('Rendering DeleteConfirmDialog, open state:', isDeleteConfirmOpen);
+    
+    if (!selectedClient) {
+      console.log('No selected client for delete dialog');
+      return null;
+    }
     
     return (
       <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
@@ -1331,7 +1354,10 @@ const ClientsRedesign = () => {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleDeleteClient}
+              onClick={() => {
+                console.log('Confirm delete clicked');
+                handleDeleteClient();
+              }}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               Delete Client
