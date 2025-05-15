@@ -921,7 +921,7 @@ const ClientsRedesign = () => {
                     name="email"
                     type="email" 
                     placeholder="john@example.com" 
-                    className="bg-[#0a2342] border-[#2a4d7d] text-white"
+                    className="bg-white border-gray-200 text-[#0A2540]"
                     required 
                   />
                 </div>
@@ -931,7 +931,7 @@ const ClientsRedesign = () => {
                     id="phone"
                     name="phone"
                     placeholder="+1 555-123-4567" 
-                    className="bg-[#0a2342] border-[#2a4d7d] text-white"
+                    className="bg-white border-gray-200 text-[#0A2540]"
                   />
                 </div>
               </div>
@@ -942,7 +942,7 @@ const ClientsRedesign = () => {
                   id="company"
                   name="company"
                   placeholder="ACME Corporation" 
-                  className="bg-[#0a2342] border-[#2a4d7d] text-white"
+                  className="bg-white border-gray-200 text-[#0A2540]"
                 />
               </div>
               
@@ -952,15 +952,19 @@ const ClientsRedesign = () => {
                   id="notes"
                   name="notes"
                   placeholder="Any additional information about this client..."
-                  className="bg-[#0a2342] border-[#2a4d7d] text-white resize-none min-h-[100px]"
+                  className="bg-white border-gray-200 text-[#0A2540] resize-none min-h-[100px]"
                 />
               </div>
               
               <div className="flex items-center space-x-2 pt-2">
-                <Checkbox id="send-welcome" className="border-[#2a4d7d] data-[state=checked]:bg-[#0A2540]" />
+                <Checkbox 
+                  id="send-welcome" 
+                  name="send-welcome"
+                  className="border-gray-300 data-[state=checked]:bg-[#0A2540]" 
+                />
                 <Label
                   htmlFor="send-welcome"
-                  className="text-sm font-normal"
+                  className="text-sm font-normal text-[#0A2540]"
                 >
                   Send welcome email to this client
                 </Label>
@@ -972,7 +976,7 @@ const ClientsRedesign = () => {
                 type="button"
                 variant="outline" 
                 onClick={() => setIsAddClientOpen(false)}
-                className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+                className="border-gray-300 text-[#0A2540] hover:bg-gray-100"
               >
                 Cancel
               </Button>
