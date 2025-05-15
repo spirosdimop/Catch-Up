@@ -1,18 +1,6 @@
-import React, { useState, createContext, useContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, addDays, subDays, isSameDay, parseISO } from 'date-fns';
-
-// Define the BookingContext type 
-interface BookingContextType {
-  isNewBookingOpen: boolean;
-  setIsNewBookingOpen: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-// Create the context with a default value
-const BookingContext = createContext<BookingContextType>({
-  isNewBookingOpen: false,
-  setIsNewBookingOpen: () => {},
-});
 import { 
   Calendar as CalendarIcon,
   Filter,
