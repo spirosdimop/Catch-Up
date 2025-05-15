@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
-import { Clock, MapPin, DollarSign, Calendar } from "lucide-react";
-import { AppCard, AppCardBody, AppCardFooter, AppCardHeader } from "./app-card";
+import { Clock, MapPin } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { AppCard, AppCardBody, AppCardFooter } from "./app-card";
 import { AppButton } from "./app-button";
 
 interface ServiceCardProps {
@@ -29,75 +30,89 @@ export function ServiceCard({
   onDetails,
   className,
 }: ServiceCardProps) {
-  // Format duration from minutes to readable format
-  const formatDuration = (minutes: number) => {
-    if (minutes < 60) {
-      return `${minutes} min`;
-    } else {
-      const hours = Math.floor(minutes / 60);
-      const mins = minutes % 60;
-      return mins > 0 ? `${hours} hr ${mins} min` : `${hours} hr`;
-    }
-  };
-  
-  // Format price to readable format
-  const formatPrice = (amount: number) => {
+  // Format price
+  const formatPrice = (price: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-    }).format(amount);
+    }).format(price);
   };
-
+  
+  // Format duration 
+  const formatDuration = (minutes: number) => {
+    if (minutes < 60) {
+      return `${minutes} min`;
+    }
+    
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    
+    if (remainingMinutes === 0) {
+      return `${hours} hr`;
+    }
+    
+    return `${hours} hr ${remainingMinutes} min`;
+  };
+  
   return (
-    <AppCard className={className}>
-      <AppCardHeader
-        title={name}
-        icon={icon || <Calendar className="h-5 w-5" />}
-      />
+    <AppCard className={cn(className)}>
       <AppCardBody>
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center text-catchup-text-secondary">
-              <Clock className="mr-2 h-4 w-4" />
-              <span>{formatDuration(duration)}</span>
+        <div className="flex items-start gap-3">
+          {icon && (
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-catchup-primary/10">
+              <div className="text-catchup-primary">{icon}</div>
+            </div>
+          )}
+          
+          <div className="flex-1">
+            <div className="flex items-start justify-between">
+              <div>
+                <h3 className="font-semibold text-catchup-primary">{name}</h3>
+                <div className="flex items-center gap-1 text-xs text-catchup-text-secondary mt-1">
+                  <Clock className="h-3 w-3" />
+                  <span>{formatDuration(duration)}</span>
+                </div>
+                
+                {location && (
+                  <div className="flex items-center gap-1 text-xs text-catchup-text-secondary mt-1">
+                    <MapPin className="h-3 w-3" />
+                    <span>{location}</span>
+                  </div>
+                )}
+              </div>
+              
+              <div className="text-lg font-semibold text-catchup-primary">
+                {formatPrice(price)}
+              </div>
             </div>
             
-            <div className="flex items-center text-catchup-primary font-semibold">
-              <DollarSign className="h-4 w-4" />
-              <span>{formatPrice(price)}</span>
-            </div>
+            {description && (
+              <p className="mt-3 text-sm text-catchup-text-secondary">{description}</p>
+            )}
           </div>
-          
-          {location && (
-            <div className="flex items-center text-catchup-text-secondary">
-              <MapPin className="mr-2 h-4 w-4" />
-              <span>{location}</span>
-            </div>
-          )}
-          
-          {description && (
-            <p className="text-sm text-catchup-text-secondary mt-2">
-              {description}
-            </p>
-          )}
         </div>
       </AppCardBody>
-      <AppCardFooter>
-        <div className="flex gap-2">
+      
+      <AppCardFooter className="flex items-center justify-between">
+        {onDetails && (
+          <AppButton 
+            variant="text" 
+            size="sm"
+            onClick={onDetails}
+          >
+            View Details
+          </AppButton>
+        )}
+        
+        {onBook && (
           <AppButton
             variant="filled"
+            size="sm"
             onClick={onBook}
-            fullWidth
           >
             Book Now
           </AppButton>
-          <AppButton
-            variant="ghost"
-            onClick={onDetails}
-          >
-            Details
-          </AppButton>
-        </div>
+        )}
       </AppCardFooter>
     </AppCard>
   );

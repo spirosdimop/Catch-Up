@@ -1,69 +1,89 @@
-import { ReactNode } from "react";
-import { Button } from "@/components/ui/button";
+import { ButtonHTMLAttributes, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-interface AppButtonProps {
+interface AppButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   children: ReactNode;
-  className?: string;
-  onClick?: () => void;
-  disabled?: boolean;
-  variant?: "filled" | "outlined" | "ghost" | "text" | "accent";
+  variant?: "filled" | "outlined" | "text" | "accent";
   size?: "sm" | "md" | "lg";
+  fullWidth?: boolean;
   icon?: ReactNode;
   iconPosition?: "left" | "right";
-  fullWidth?: boolean;
-  type?: "button" | "submit" | "reset";
+  loading?: boolean;
 }
 
 /**
- * AppButton - Consistent button component for Catch Up
- * Provides different variants to match the design system
+ * AppButton - Custom button component for Catch Up app
  */
 export function AppButton({
   children,
-  className,
-  onClick,
-  disabled = false,
   variant = "filled",
   size = "md",
+  fullWidth = false,
   icon,
   iconPosition = "left",
-  fullWidth = false,
+  loading = false,
+  className,
+  disabled,
   type = "button",
+  ...props
 }: AppButtonProps) {
-  // Generate class based on variant
-  const variantClasses = {
-    filled: "bg-catchup-primary text-white hover:bg-catchup-primary/90",
-    outlined: "border-2 border-catchup-primary text-catchup-primary hover:bg-catchup-primary/10",
-    ghost: "text-catchup-primary hover:bg-catchup-primary/10",
-    text: "text-catchup-primary hover:underline",
-    accent: "bg-catchup-accent text-catchup-primary hover:bg-catchup-accent/90",
+  
+  // Base styles
+  const baseStyles = "inline-flex items-center justify-center rounded-full font-medium transition-colors";
+  
+  // Get variant styles
+  const variantStyles = {
+    filled: "bg-catchup-primary text-white hover:bg-catchup-primary/90 focus:ring-2 focus:ring-offset-2 focus:ring-catchup-primary/40",
+    outlined: "bg-transparent border-2 border-catchup-primary text-catchup-primary hover:bg-catchup-primary/10",
+    text: "bg-transparent text-catchup-primary hover:bg-catchup-primary/10",
+    accent: "bg-catchup-accent text-catchup-primary hover:bg-catchup-accent/90 focus:ring-2 focus:ring-offset-2 focus:ring-catchup-accent/40"
   };
-
-  // Generate class based on size
-  const sizeClasses = {
-    sm: "text-xs px-3 py-1.5 gap-1",
+  
+  // Get size styles
+  const sizeStyles = {
+    sm: "text-xs px-3 py-1.5 gap-1.5",
     md: "text-sm px-4 py-2 gap-2",
-    lg: "text-base px-6 py-3 gap-3",
+    lg: "text-base px-5 py-2.5 gap-2"
   };
-
+  
+  // Disabled state
+  const disabledStyles = (disabled || loading) 
+    ? "opacity-60 cursor-not-allowed pointer-events-none" 
+    : "";
+  
+  // Full width
+  const widthStyles = fullWidth ? "w-full" : "";
+  
   return (
-    <Button
+    <button
       type={type}
+      disabled={disabled || loading}
       className={cn(
-        "font-medium rounded-lg transition-colors",
-        variantClasses[variant],
-        sizeClasses[size],
-        fullWidth && "w-full",
-        disabled && "opacity-50 cursor-not-allowed",
+        baseStyles,
+        variantStyles[variant],
+        sizeStyles[size],
+        widthStyles,
+        disabledStyles,
         className
       )}
-      onClick={onClick}
-      disabled={disabled}
+      {...props}
     >
-      {icon && iconPosition === "left" && <span className="inline-block">{icon}</span>}
-      {children}
-      {icon && iconPosition === "right" && <span className="inline-block">{icon}</span>}
-    </Button>
+      {loading ? (
+        <>
+          <span className="animate-spin mr-2 h-4 w-4 border-2 border-current border-t-transparent rounded-full" />
+          <span>Loading...</span>
+        </>
+      ) : (
+        <>
+          {icon && iconPosition === "left" && (
+            <span className="inline-flex">{icon}</span>
+          )}
+          <span>{children}</span>
+          {icon && iconPosition === "right" && (
+            <span className="inline-flex">{icon}</span>
+          )}
+        </>
+      )}
+    </button>
   );
 }

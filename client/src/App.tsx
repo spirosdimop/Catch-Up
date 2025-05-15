@@ -39,6 +39,10 @@ import CatchUpTime from "@/pages/catchup/time";
 import CatchUpMessages from "@/pages/catchup/messages";
 import CatchUpSettings from "@/pages/catchup/settings";
 
+// New Catch Up App pages
+import { CatchUpLandingPage } from "@/pages/catch-up/landing";
+import { CatchUpLoginPage } from "@/pages/catch-up/login";
+
 function Router() {
   const [location] = useLocation();
   
@@ -55,8 +59,19 @@ function Router() {
     "/catchup/settings"
   ];
   
+  // New Catch Up pages (with new design)
+  const newCatchUpPages = [
+    "/catch-up",
+    "/catch-up/login",
+    "/catch-up/signup",
+    "/catch-up/dashboard"
+  ];
+  
   // Check if current location is a Catch Up page
   const isCatchUpPage = catchUpPages.some(page => location === page || location.startsWith(`${page}/`));
+  
+  // Check if current location is a new Catch Up page
+  const isNewCatchUpPage = newCatchUpPages.some(page => location === page || location.startsWith(`${page}/`));
   
   // Check if current location should not use AppShell
   if (noAppShellPages.includes(location)) {
@@ -69,7 +84,18 @@ function Router() {
     );
   }
   
-  // Catch Up app pages
+  // New Catch Up app pages
+  if (isNewCatchUpPage) {
+    return (
+      <Switch>
+        <Route path="/catch-up" component={CatchUpLandingPage} />
+        <Route path="/catch-up/login" component={CatchUpLoginPage} />
+        <Route component={NotFound} />
+      </Switch>
+    );
+  }
+  
+  // Original Catch Up app pages
   if (isCatchUpPage) {
     return (
       <Switch>

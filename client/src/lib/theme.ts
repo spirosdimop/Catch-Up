@@ -1,118 +1,85 @@
 /**
- * Catch Up Theme Configuration
- * A modern, clean, minimal theme using a dark blue + white color palette
+ * Catch Up App Theme Configuration
+ * 
+ * This file contains the color palette and theme variables
+ * for the Catch Up application.
  */
 
-export const theme = {
+export const catchUpTheme = {
   colors: {
-    primary: '#0A2540',     // Dark blue
-    secondary: '#00C2D1',   // Teal accent
-    accent: '#FFC700',      // Yellow accent
-    background: '#FFFFFF',  // White background
-    card: '#FFFFFF',        // White card background
+    // Primary brand color
+    primary: '#0A2540',
+    primaryLight: '#1A3550',
+    primaryDark: '#051C30',
+    
+    // Accent colors
+    accent: '#FFC700', // Yellow accent
+    accentAlt: '#00C2D1', // Teal accent
+    
+    // UI colors
+    background: '#FFFFFF',
+    backgroundAlt: '#F7F9FC',
+    card: '#FFFFFF',
+    
+    // Text colors
     text: {
-      primary: '#0A2540',   // Dark blue text
-      secondary: '#64748B', // Slate gray text
-      light: '#FFFFFF',     // White text (for dark backgrounds)
-      muted: '#94A3B8',     // Muted text
+      primary: '#0A2540', 
+      secondary: '#64748B',
+      inverted: '#FFFFFF',
+      muted: '#94A3B8'
     },
-    border: '#E2E8F0',      // Light border color
-    success: '#10B981',     // Green
-    warning: '#FBBF24',     // Amber
-    error: '#EF4444',       // Red
+    
+    // Status colors
+    status: {
+      success: '#10B981',
+      warning: '#F59E0B',
+      error: '#EF4444',
+      info: '#3B82F6'
+    },
   },
   
-  // Border radius for components
-  borderRadius: {
-    sm: '10px',
-    md: '16px',
-    lg: '20px',
-    xl: '28px',
-    full: '9999px',
-  },
-  
-  // Box shadows
-  shadows: {
-    sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-    md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-    lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-    xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-  },
-  
-  // Spacing
+  // Spacing values (in pixels)
   spacing: {
-    xs: '8px',
-    sm: '12px',
+    xs: '4px',
+    sm: '8px',
     md: '16px',
     lg: '24px',
     xl: '32px',
-    xxl: '48px',
+    xxl: '48px'
   },
   
-  // Typography
+  // Border radius values
+  borderRadius: {
+    sm: '8px',
+    md: '16px',
+    lg: '20px',
+    full: '9999px'
+  },
+  
+  // Typography styles
   typography: {
-    fontFamily: "'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    fontFamily: {
+      main: 'Inter, system-ui, sans-serif',
+      mono: 'ui-monospace, SFMono-Regular, monospace'
+    },
     fontSize: {
-      xs: '0.75rem',    // 12px
-      sm: '0.875rem',   // 14px
-      md: '1rem',       // 16px
-      lg: '1.125rem',   // 18px
-      xl: '1.25rem',    // 20px
-      xxl: '1.5rem',    // 24px
-      xxxl: '2rem',     // 32px
-    },
-    fontWeight: {
-      light: 300,
-      regular: 400,
-      medium: 500,
-      semibold: 600,
-      bold: 700,
-    },
-    lineHeight: {
-      tight: 1.25,
-      normal: 1.5,
-      relaxed: 1.75,
+      xs: '0.75rem',
+      sm: '0.875rem',
+      md: '1rem',
+      lg: '1.125rem',
+      xl: '1.25rem',
+      '2xl': '1.5rem',
+      '3xl': '1.875rem',
+      '4xl': '2.25rem'
     }
   },
   
-  // Z-index values
-  zIndex: {
-    dropdown: 1000,
-    sticky: 1100,
-    fixed: 1200,
-    modalBackdrop: 1300,
-    modal: 1400,
-    popover: 1500,
-    tooltip: 1600,
+  // Shadow values
+  shadows: {
+    sm: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+    md: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+    lg: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)'
   }
 };
 
-// Breakpoints for responsive design
-export const breakpoints = {
-  xs: '480px',
-  sm: '640px',
-  md: '768px',
-  lg: '1024px',
-  xl: '1280px',
-  xxl: '1536px',
-};
-
-// Media queries
-export const media = {
-  xs: `@media (min-width: ${breakpoints.xs})`,
-  sm: `@media (min-width: ${breakpoints.sm})`,
-  md: `@media (min-width: ${breakpoints.md})`,
-  lg: `@media (min-width: ${breakpoints.lg})`,
-  xl: `@media (min-width: ${breakpoints.xl})`,
-  xxl: `@media (min-width: ${breakpoints.xxl})`,
-};
-
-// Device specific media queries
-export const device = {
-  mobile: `@media (max-width: ${breakpoints.sm})`,
-  tablet: `@media (min-width: ${breakpoints.sm}) and (max-width: ${breakpoints.lg})`,
-  desktop: `@media (min-width: ${breakpoints.lg})`,
-  touch: `@media (hover: none) and (pointer: coarse)`,
-};
-
-export default theme;
+export default catchUpTheme;

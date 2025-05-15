@@ -1,32 +1,9 @@
 import { ReactNode } from "react";
-import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface AppCardProps {
   children: ReactNode;
   className?: string;
-  onClick?: () => void;
-  hoverable?: boolean;
-}
-
-/**
- * AppCard - A white, rounded, shadowed content wrapper
- * Consistent card component for all Catch Up UI elements
- */
-export function AppCard({ children, className, onClick, hoverable = false }: AppCardProps) {
-  return (
-    <Card
-      className={cn(
-        "rounded-xl border border-catchup-border bg-white p-4 shadow-sm",
-        hoverable && "transition-transform hover:-translate-y-1 hover:shadow-md",
-        onClick && "cursor-pointer",
-        className
-      )}
-      onClick={onClick}
-    >
-      {children}
-    </Card>
-  );
 }
 
 interface AppCardHeaderProps {
@@ -37,38 +14,9 @@ interface AppCardHeaderProps {
   className?: string;
 }
 
-/**
- * AppCardHeader - Consistent header for AppCard components
- */
-export function AppCardHeader({ title, subtitle, icon, action, className }: AppCardHeaderProps) {
-  return (
-    <div className={cn("mb-4 flex items-center justify-between", className)}>
-      <div className="flex items-center gap-3">
-        {icon && (
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-catchup-primary/10 text-catchup-primary">
-            {icon}
-          </div>
-        )}
-        <div>
-          <h3 className="text-base font-semibold text-catchup-primary">{title}</h3>
-          {subtitle && <p className="text-sm text-catchup-text-secondary">{subtitle}</p>}
-        </div>
-      </div>
-      {action && <div>{action}</div>}
-    </div>
-  );
-}
-
 interface AppCardBodyProps {
   children: ReactNode;
   className?: string;
-}
-
-/**
- * AppCardBody - Consistent body for AppCard components
- */
-export function AppCardBody({ children, className }: AppCardBodyProps) {
-  return <div className={cn("", className)}>{children}</div>;
 }
 
 interface AppCardFooterProps {
@@ -77,11 +25,69 @@ interface AppCardFooterProps {
 }
 
 /**
- * AppCardFooter - Consistent footer for AppCard components
+ * AppCard - Main card component for Catch Up app
+ * Can be used with AppCardHeader, AppCardBody, and AppCardFooter
+ */
+export function AppCard({ children, className }: AppCardProps) {
+  return (
+    <div 
+      className={cn(
+        "bg-white rounded-[20px] shadow-sm border border-gray-100 overflow-hidden",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+/**
+ * AppCardHeader - Header section for AppCard
+ */
+export function AppCardHeader({ 
+  title, 
+  subtitle, 
+  icon, 
+  action,
+  className 
+}: AppCardHeaderProps) {
+  return (
+    <div className={cn("px-6 pt-6 pb-4 flex items-center justify-between", className)}>
+      <div className="flex items-center gap-3">
+        {icon && (
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-catchup-primary/10">
+            <div className="text-catchup-primary">{icon}</div>
+          </div>
+        )}
+        
+        <div>
+          <h3 className="text-lg font-semibold text-catchup-primary">{title}</h3>
+          {subtitle && <p className="text-sm text-catchup-text-secondary">{subtitle}</p>}
+        </div>
+      </div>
+      
+      {action && <div>{action}</div>}
+    </div>
+  );
+}
+
+/**
+ * AppCardBody - Main content area for AppCard
+ */
+export function AppCardBody({ children, className }: AppCardBodyProps) {
+  return (
+    <div className={cn("px-6 py-4", className)}>
+      {children}
+    </div>
+  );
+}
+
+/**
+ * AppCardFooter - Footer section for AppCard
  */
 export function AppCardFooter({ children, className }: AppCardFooterProps) {
   return (
-    <div className={cn("mt-4 flex items-center justify-between", className)}>
+    <div className={cn("px-6 py-4 border-t border-gray-100", className)}>
       {children}
     </div>
   );
