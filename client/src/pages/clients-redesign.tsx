@@ -754,7 +754,9 @@ const ClientsRedesign = () => {
               </div>
             </DialogTitle>
             <DialogDescription className="text-gray-500">
-              Client since {format(new Date(selectedClient.dateAdded), 'MMMM d, yyyy')}
+              Client since {selectedClient.dateAdded ? 
+                format(new Date(selectedClient.dateAdded.replace(/-/g, '/')), 'MMMM d, yyyy') : 
+                'N/A'}
             </DialogDescription>
           </DialogHeader>
           
