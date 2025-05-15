@@ -59,6 +59,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
@@ -1299,6 +1310,35 @@ const ClientsRedesign = () => {
     );
   };
 
+  // Delete Confirmation Dialog
+  const DeleteConfirmDialog = () => {
+    if (!selectedClient) return null;
+    
+    return (
+      <AlertDialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+        <AlertDialogContent className="bg-white border-gray-200 text-[#0A2540]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[#0A2540]">Confirm Deletion</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-500">
+              Are you sure you want to delete {selectedClient.name}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="pt-4">
+            <AlertDialogCancel className="border-gray-300 text-[#0A2540] hover:bg-gray-100">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDeleteClient}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Delete Client
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-white text-[#0A2540] p-4 md:p-6">
       <div className="max-w-[1200px] mx-auto">
@@ -1493,6 +1533,7 @@ const ClientsRedesign = () => {
       <AddClientDialog />
       <EditClientDialog />
       <SendMessageDialog />
+      <DeleteConfirmDialog />
     </div>
   );
 };
