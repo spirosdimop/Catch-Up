@@ -30,6 +30,8 @@ import AIAssistant from "@/pages/ai-assistant";
 import Projects from "@/pages/Projects";
 import Signup from "@/pages/signup";
 import LandingPage from "@/pages/landing";
+// Import new landing page
+import NewLandingPage from "@/pages/new-landing";
 
 // Catch Up App Pages
 import CatchUpDashboard from "@/pages/catchup";
@@ -69,7 +71,7 @@ function Router() {
   if (noAppShellPages.includes(location)) {
     return (
       <Switch>
-        <Route path="/" component={LandingPage} />
+        <Route path="/" component={NewLandingPage} />
         <Route path="/signup" component={Signup} />
         <Route path="/login" component={Signup} /> {/* Reusing Signup component for login */}
       </Switch>
