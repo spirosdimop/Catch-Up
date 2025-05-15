@@ -9,8 +9,28 @@ export default {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
+        xl: "20px",  // Added for Catch Up theme
       },
       colors: {
+        // Catch Up theme colors
+        catchup: {
+          primary: '#0A2540',     // Dark blue
+          secondary: '#00C2D1',   // Teal accent
+          accent: '#FFC700',      // Yellow accent
+          background: '#FFFFFF',  // White background
+          card: '#FFFFFF',        // White card
+          text: {
+            primary: '#0A2540',   // Dark blue text
+            secondary: '#64748B', // Slate gray text
+            light: '#FFFFFF',     // White text
+            muted: '#94A3B8',     // Muted text
+          },
+          border: '#E2E8F0',      // Light border
+          success: '#10B981',     // Green
+          warning: '#FBBF24',     // Amber
+          error: '#EF4444',       // Red
+        },
+        // Original theme colors (keeping for compatibility)
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
