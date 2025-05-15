@@ -1041,13 +1041,13 @@ const ClientsRedesign = () => {
         </div>
         
         {/* Search & Filters */}
-        <div className="bg-[#173561] border border-[#2a4d7d] rounded-lg p-4 mb-6">
+        <div className="bg-white border border-gray-200 rounded-lg p-4 mb-6 shadow-sm">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
             <div className="relative flex-1 max-w-full lg:max-w-[400px]">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
               <Input 
                 placeholder="Search by name, email, or company..." 
-                className="pl-10 bg-[#0a2342] border-[#2a4d7d] text-white"
+                className="pl-10 border-gray-200 text-[#0A2540]"
                 value={filters.searchQuery}
                 onChange={(e) => setFilters({...filters, searchQuery: e.target.value})}
               />
@@ -1068,10 +1068,10 @@ const ClientsRedesign = () => {
                   value={filters.status}
                   onValueChange={(value) => setFilters({...filters, status: value})}
                 >
-                  <SelectTrigger className="w-[130px] bg-[#0a2342] border-[#2a4d7d] text-white">
+                  <SelectTrigger className="w-[130px] border-gray-200 text-[#0A2540]">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#173561] border-[#2a4d7d] text-white">
+                  <SelectContent className="bg-white border-gray-200 text-[#0A2540]">
                     <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="active">Active</SelectItem>
                     <SelectItem value="inactive">Inactive</SelectItem>
@@ -1085,10 +1085,10 @@ const ClientsRedesign = () => {
                   value={filters.loyalty}
                   onValueChange={(value) => setFilters({...filters, loyalty: value})}
                 >
-                  <SelectTrigger className="w-[130px] bg-[#0a2342] border-[#2a4d7d] text-white">
+                  <SelectTrigger className="w-[130px] border-gray-200 text-[#0A2540]">
                     <SelectValue placeholder="Loyalty" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#173561] border-[#2a4d7d] text-white">
+                  <SelectContent className="bg-white border-gray-200 text-[#0A2540]">
                     <SelectItem value="all">All Clients</SelectItem>
                     <SelectItem value="loyal">Loyal Clients</SelectItem>
                     <SelectItem value="regular">Regular Clients</SelectItem>
@@ -1102,10 +1102,10 @@ const ClientsRedesign = () => {
                   value={filters.sortBy}
                   onValueChange={(value) => setFilters({...filters, sortBy: value})}
                 >
-                  <SelectTrigger className="w-[180px] bg-[#0a2342] border-[#2a4d7d] text-white">
+                  <SelectTrigger className="w-[180px] border-gray-200 text-[#0A2540]">
                     <SelectValue placeholder="Sort by" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#173561] border-[#2a4d7d] text-white">
+                  <SelectContent className="bg-white border-gray-200 text-[#0A2540]">
                     <SelectItem value="name">Name (A-Z)</SelectItem>
                     <SelectItem value="newest">Newest First</SelectItem>
                     <SelectItem value="bookings">Most Bookings</SelectItem>
@@ -1119,8 +1119,8 @@ const ClientsRedesign = () => {
                   variant={viewMode === ViewMode.Grid ? "default" : "outline"}
                   size="icon"
                   className={cn(
-                    viewMode !== ViewMode.Grid && "border-[#2a4d7d] text-white hover:bg-[#0a2342]",
-                    viewMode === ViewMode.Grid && "bg-[#1d4ed8] hover:bg-blue-600"
+                    viewMode !== ViewMode.Grid && "border-gray-200 text-[#0A2540] hover:bg-gray-100",
+                    viewMode === ViewMode.Grid && "bg-[#0A2540] hover:bg-[#173561]"
                   )}
                   onClick={() => setViewMode(ViewMode.Grid)}
                 >
@@ -1130,8 +1130,8 @@ const ClientsRedesign = () => {
                   variant={viewMode === ViewMode.List ? "default" : "outline"}
                   size="icon"
                   className={cn(
-                    viewMode !== ViewMode.List && "border-[#2a4d7d] text-white hover:bg-[#0a2342]",
-                    viewMode === ViewMode.List && "bg-[#1d4ed8] hover:bg-blue-600"
+                    viewMode !== ViewMode.List && "border-gray-200 text-[#0A2540] hover:bg-gray-100",
+                    viewMode === ViewMode.List && "bg-[#0A2540] hover:bg-[#173561]"
                   )}
                   onClick={() => setViewMode(ViewMode.List)}
                 >
