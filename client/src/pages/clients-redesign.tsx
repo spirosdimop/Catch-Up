@@ -784,7 +784,7 @@ const ClientsRedesign = () => {
     
     return (
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="bg-white border-gray-200 text-[#0A2540] max-w-[700px]">
+        <DialogContent className="bg-white border-gray-200 text-[#0A2540] max-w-[700px] relative pb-20">
           <DialogHeader>
             <div className="flex justify-between items-start">
               <DialogTitle className="flex items-center">
@@ -802,16 +802,16 @@ const ClientsRedesign = () => {
               </DialogTitle>
               
               <Button 
-                variant="outline"
-                size="sm"
-                className="border-red-700 text-red-500 hover:bg-red-100 hover:text-red-700"
+                variant="destructive"
+                size="default"
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold"
                 onClick={() => {
                   console.log('Header Delete button clicked');
                   setIsDeleteConfirmOpen(true);
                 }}
               >
-                <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                <Trash2 className="mr-2 h-5 w-5" />
+                DELETE CLIENT
               </Button>
             </div>
             <DialogDescription className="text-gray-500">
@@ -1003,6 +1003,22 @@ const ClientsRedesign = () => {
               </div>
             </TabsContent>
           </Tabs>
+          
+          {/* Floating delete button */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 bg-white border-t border-gray-200 flex justify-center">
+            <Button 
+              variant="destructive"
+              size="lg"
+              className="bg-red-600 hover:bg-red-700 text-white font-semibold w-full max-w-xs"
+              onClick={() => {
+                console.log('Floating Delete button clicked');
+                setIsDeleteConfirmOpen(true);
+              }}
+            >
+              <Trash2 className="mr-2 h-5 w-5" />
+              DELETE THIS CLIENT
+            </Button>
+          </div>
           
           <DialogFooter className="flex justify-end gap-2 mt-6">
             <Button 
