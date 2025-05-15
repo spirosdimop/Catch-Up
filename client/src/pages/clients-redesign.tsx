@@ -590,7 +590,7 @@ const ClientsRedesign = () => {
                     <Button 
                       variant="ghost" 
                       size="icon"
-                      className="text-white hover:bg-[#0a2342]"
+                      className="text-[#0A2540] hover:bg-gray-100"
                       onClick={() => handleSendMessage(client)}
                       title="Send Message"
                     >
@@ -599,7 +599,7 @@ const ClientsRedesign = () => {
                     <Button 
                       variant="ghost" 
                       size="icon"
-                      className="text-white hover:bg-[#0a2342]"
+                      className="text-[#0A2540] hover:bg-gray-100"
                       onClick={() => handleScheduleAppointment(client)}
                       title="Schedule Appointment"
                     >
@@ -608,7 +608,7 @@ const ClientsRedesign = () => {
                     <Button 
                       variant="ghost" 
                       size="icon"
-                      className="text-white hover:bg-[#0a2342]"
+                      className="text-[#0A2540] hover:bg-gray-100"
                       onClick={() => handleViewDetails(client)}
                       title="View History"
                     >
@@ -619,25 +619,25 @@ const ClientsRedesign = () => {
                         <Button 
                           variant="ghost" 
                           size="icon"
-                          className="text-white hover:bg-[#0a2342]"
+                          className="text-[#0A2540] hover:bg-gray-100"
                         >
                           <MoreHorizontal className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent className="bg-[#173561] border-[#2a4d7d] text-white">
+                      <DropdownMenuContent className="bg-white border-gray-200 text-[#0A2540]">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-[#2a4d7d]" />
-                        <DropdownMenuItem className="hover:bg-[#0a2342] cursor-pointer">
+                        <DropdownMenuSeparator className="bg-gray-200" />
+                        <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">
                           Edit Client
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="hover:bg-[#0a2342] cursor-pointer">
+                        <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">
                           View Projects
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="hover:bg-[#0a2342] cursor-pointer">
+                        <DropdownMenuItem className="hover:bg-gray-100 cursor-pointer">
                           View Invoices
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-[#2a4d7d]" />
-                        <DropdownMenuItem className="text-red-400 hover:text-red-300 hover:bg-[#0a2342] cursor-pointer">
+                        <DropdownMenuSeparator className="bg-gray-200" />
+                        <DropdownMenuItem className="text-red-500 hover:bg-gray-100 cursor-pointer">
                           Archive Client
                         </DropdownMenuItem>
                       </DropdownMenuContent>
@@ -873,7 +873,7 @@ const ClientsRedesign = () => {
             <Button 
               variant="outline" 
               onClick={() => setIsDetailsOpen(false)}
-              className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+              className="border-gray-300 text-[#0A2540] hover:bg-gray-100"
             >
               Close
             </Button>
