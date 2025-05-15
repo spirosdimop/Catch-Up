@@ -530,6 +530,7 @@ export const userPreferences = pgTable("user_preferences", {
   hourFormat: integer("hour_format").default(12).notNull(), // 12 or 24
   timezone: text("timezone").default("UTC").notNull(),
   automaticTimeTracking: boolean("automatic_time_tracking").default(false).notNull(),
+  assistantName: text("assistant_name").default("Assistant").notNull(), // Customizable name for the AI assistant
   lastUpdated: timestamp("last_updated").defaultNow().notNull(),
 });
 
@@ -556,6 +557,7 @@ export const insertUserPreferencesSchema = createInsertSchema(userPreferences).p
   hourFormat: true,
   timezone: true,
   automaticTimeTracking: true,
+  assistantName: true,
 });
 
 export type NavigationEvent = typeof navigationEvents.$inferSelect;
