@@ -397,15 +397,8 @@ export default function AIAssistant() {
                 localStorage.removeItem('aiAssistantMessages');
                 localStorage.removeItem('aiAssistantContext');
                 
-                // Reset to default welcome message
-                setMessages([
-                  {
-                    id: Date.now(),
-                    text: "Welcome to the AI assistant! I can help with settings, calendar events, and auto-response messages. How can I assist you today?",
-                    role: 'assistant',
-                    timestamp: new Date()
-                  }
-                ]);
+                // Reset to default welcome message with custom name
+                setMessages([createWelcomeMessage(settings.assistantName)]);
                 
                 // Reset conversation context
                 setConversationContext("");
@@ -531,6 +524,59 @@ export default function AIAssistant() {
           </div>
         </div>
       </Card>
+      
+      {/* Assistant Name Dialog */}
+      <Dialog open={nameModalOpen} onOpenChange={setNameModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Name Your Assistant</DialogTitle>
+            <DialogDescription>
+              Give your AI assistant a personalized name. This name will be used in conversations.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="assistant-name" className="text-right">
+                Name
+              </Label>
+              <Input
+                id="assistant-name"
+                value={nameInputValue}
+                onChange={(e) => setNameInputValue(e.target.value)}
+                className="col-span-3"
+                placeholder="Enter assistant name"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => setNameModalOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={() => {
+                // Update the assistant name in settings
+                updateSettings({ assistantName: nameInputValue });
+                
+                // Close the dialog
+                setNameModalOpen(false);
+                
+                // Show a success toast
+                toast({
+                  title: "Assistant Renamed",
+                  description: `Your assistant will now be called '${nameInputValue}'`,
+                  duration: 3000,
+                });
+              }}
+            >
+              <Check className="h-4 w-4 mr-1" />
+              Save Name
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
