@@ -182,17 +182,17 @@ export default function Signup() {
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <Link href="/">
-              <a className="flex items-center space-x-2 group">
+              <div className="flex items-center space-x-2 group cursor-pointer">
                 <Star className="h-6 w-6 text-catchup-primary" />
                 <span className="text-xl font-semibold text-catchup-primary">Catch Up</span>
-              </a>
+              </div>
             </Link>
           </div>
           <Link href="/">
-            <a className="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center">
+            <div className="text-sm font-medium text-gray-600 hover:text-gray-900 flex items-center cursor-pointer">
               <ArrowLeft className="h-4 w-4 mr-1" />
               Back to home
-            </a>
+            </div>
           </Link>
         </div>
       </header>
