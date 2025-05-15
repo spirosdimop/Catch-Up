@@ -925,7 +925,10 @@ const ClientsRedesign = () => {
                     <Button 
                       variant="outline"
                       className="border-red-700 text-red-500 hover:bg-red-100 hover:text-red-700"
-                      onClick={() => setIsDeleteConfirmOpen(true)}
+                      onClick={() => {
+                        console.log('Delete button clicked');
+                        setIsDeleteConfirmOpen(true);
+                      }}
                     >
                       <Trash2 className="mr-2 h-4 w-4" />
                       Delete Client
