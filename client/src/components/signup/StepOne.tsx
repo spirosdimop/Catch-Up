@@ -46,8 +46,8 @@ const StepOne = ({ formData, onNext }: StepOneProps) => {
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h3 className="text-xl font-bold">Create your account</h3>
-        <p className="text-gray-500 mt-1">Enter your details to get started</p>
+        <h3 className="text-xl font-bold text-catchup-primary">Create your account</h3>
+        <p className="text-gray-600 mt-1">Enter your details to get started</p>
       </div>
 
       <Form {...form}>
@@ -58,19 +58,19 @@ const StepOne = ({ formData, onNext }: StepOneProps) => {
               name="firstName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base flex items-center">
-                    <User className="h-4 w-4 mr-1" />
+                  <FormLabel className="text-base flex items-center text-gray-700">
+                    <User className="h-4 w-4 mr-1 text-catchup-primary" />
                     First Name
                   </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter your first name"
-                      className="text-lg p-4 h-12"
+                      className="text-base p-4 h-12 rounded-lg border-gray-300 focus:border-catchup-primary focus:ring-catchup-primary/20"
                       {...field}
                       autoFocus
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -80,17 +80,18 @@ const StepOne = ({ formData, onNext }: StepOneProps) => {
               name="lastName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-base flex items-center">
+                  <FormLabel className="text-base flex items-center text-gray-700">
+                    <User className="h-4 w-4 mr-1 text-catchup-primary opacity-0" />
                     Last Name
                   </FormLabel>
                   <FormControl>
                     <Input
                       placeholder="Enter your last name"
-                      className="text-lg p-4 h-12"
+                      className="text-base p-4 h-12 rounded-lg border-gray-300 focus:border-catchup-primary focus:ring-catchup-primary/20"
                       {...field}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -101,19 +102,19 @@ const StepOne = ({ formData, onNext }: StepOneProps) => {
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base flex items-center">
-                  <Mail className="h-4 w-4 mr-1" />
+                <FormLabel className="text-base flex items-center text-gray-700">
+                  <Mail className="h-4 w-4 mr-1 text-catchup-primary" />
                   Email Address
                 </FormLabel>
                 <FormControl>
                   <Input
                     type="email"
                     placeholder="yourname@example.com"
-                    className="text-lg p-4 h-12"
+                    className="text-base p-4 h-12 rounded-lg border-gray-300 focus:border-catchup-primary focus:ring-catchup-primary/20"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -123,19 +124,19 @@ const StepOne = ({ formData, onNext }: StepOneProps) => {
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-base flex items-center">
-                  <Lock className="h-4 w-4 mr-1" />
+                <FormLabel className="text-base flex items-center text-gray-700">
+                  <Lock className="h-4 w-4 mr-1 text-catchup-primary" />
                   Password
                 </FormLabel>
                 <FormControl>
                   <Input
                     type="password"
                     placeholder="Create a secure password"
-                    className="text-lg p-4 h-12"
+                    className="text-base p-4 h-12 rounded-lg border-gray-300 focus:border-catchup-primary focus:ring-catchup-primary/20"
                     {...field}
                   />
                 </FormControl>
-                <FormMessage className="text-sm text-gray-500" />
+                <FormMessage className="text-red-500" />
                 <p className="text-xs text-gray-500 mt-1">
                   Password must contain at least 8 characters, including uppercase, lowercase, and a number
                 </p>
@@ -145,7 +146,7 @@ const StepOne = ({ formData, onNext }: StepOneProps) => {
 
           <Button 
             type="submit" 
-            className="w-full p-5 h-12 text-lg font-medium mt-4"
+            className="w-full p-5 h-12 text-base font-medium mt-6 bg-catchup-primary hover:bg-catchup-primary/90 text-white rounded-lg transition-all"
             disabled={!form.formState.isValid}
           >
             Continue
