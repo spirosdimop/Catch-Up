@@ -892,10 +892,10 @@ const ClientsRedesign = () => {
   const AddClientDialog = () => {
     return (
       <Dialog open={isAddClientOpen} onOpenChange={setIsAddClientOpen}>
-        <DialogContent className="bg-[#173561] border-[#2a4d7d] text-white">
+        <DialogContent className="bg-white border-gray-200 text-[#0A2540]">
           <DialogHeader>
-            <DialogTitle>Add New Client</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-[#0A2540]">Add New Client</DialogTitle>
+            <DialogDescription className="text-gray-500">
               Enter the details of your new client below.
             </DialogDescription>
           </DialogHeader>
@@ -905,9 +905,10 @@ const ClientsRedesign = () => {
               <div className="space-y-2">
                 <Label htmlFor="name">Name</Label>
                 <Input 
-                  id="name" 
+                  id="name"
+                  name="name"
                   placeholder="John Doe" 
-                  className="bg-[#0a2342] border-[#2a4d7d] text-white"
+                  className="bg-white border-gray-200 text-[#0A2540]"
                   required 
                 />
               </div>
@@ -916,7 +917,8 @@ const ClientsRedesign = () => {
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
                   <Input 
-                    id="email" 
+                    id="email"
+                    name="email"
                     type="email" 
                     placeholder="john@example.com" 
                     className="bg-[#0a2342] border-[#2a4d7d] text-white"
@@ -926,7 +928,8 @@ const ClientsRedesign = () => {
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone (Optional)</Label>
                   <Input 
-                    id="phone" 
+                    id="phone"
+                    name="phone"
                     placeholder="+1 555-123-4567" 
                     className="bg-[#0a2342] border-[#2a4d7d] text-white"
                   />
@@ -936,7 +939,8 @@ const ClientsRedesign = () => {
               <div className="space-y-2">
                 <Label htmlFor="company">Company (Optional)</Label>
                 <Input 
-                  id="company" 
+                  id="company"
+                  name="company"
                   placeholder="ACME Corporation" 
                   className="bg-[#0a2342] border-[#2a4d7d] text-white"
                 />
@@ -945,7 +949,8 @@ const ClientsRedesign = () => {
               <div className="space-y-2">
                 <Label htmlFor="notes">Notes (Optional)</Label>
                 <Textarea 
-                  id="notes" 
+                  id="notes"
+                  name="notes"
                   placeholder="Any additional information about this client..."
                   className="bg-[#0a2342] border-[#2a4d7d] text-white resize-none min-h-[100px]"
                 />
