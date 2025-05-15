@@ -598,3 +598,68 @@ export const insertAutoResponseSchema = createInsertSchema(autoResponses).pick({
 
 export type AutoResponse = typeof autoResponses.$inferSelect;
 export type InsertAutoResponse = z.infer<typeof insertAutoResponseSchema>;
+
+// Booking status enum
+export const bookingStatusEnum = pgEnum("booking_status", [
+  "confirmed",
+  "rescheduled",
+  "canceled",
+  "emergency"
+]);
+
+// Booking type enum
+export const bookingTypeEnum = pgEnum("booking_type", [
+  "call",
+  "meeting",
+  "followup",
+  "consultation"
+]);
+
+// Bookings schema
+export const bookings = pgTable("bookings", {
+  id: serial("id").primaryKey(),
+  date: text("date").notNull(), // Format: 'YYYY-MM-DD'
+  time: text("time").notNull(), // Format: 'HH:MM'
+  duration: integer("duration").default(60).notNull(), // Duration in minutes
+  type: bookingTypeEnum("type").default("meeting").notNull(),
+  status: bookingStatusEnum("status").default("confirmed").notNull(),
+  location: text("location"),
+  notes: text("notes"),
+  clientId: integer("client_id").notNull(),
+  serviceId: text("service_id").notNull(),
+  priority: text("priority").default("normal").notNull(), // 'normal' or 'emergency'
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Booking schema for zod validation
+export const insertBookingSchema = createInsertSchema(bookings).pick({
+  date: true,
+  time: true,
+  duration: true,
+  type: true,
+  status: true,
+  location: true,
+  notes: true,
+  clientId: true,
+  serviceId: true,
+  priority: true,
+});
+
+export type Booking = typeof bookings.$inferSelect;
+export type InsertBooking = z.infer<typeof insertBookingSchema>;
+
+// Helper enums for frontend
+export const BookingStatus = {
+  CONFIRMED: 'confirmed',
+  RESCHEDULED: 'rescheduled',
+  CANCELED: 'canceled',
+  EMERGENCY: 'emergency'
+} as const;
+
+export const BookingType = {
+  CALL: 'call',
+  MEETING: 'meeting',
+  FOLLOWUP: 'followup',
+  CONSULTATION: 'consultation'
+} as const;

@@ -156,16 +156,28 @@ export function NewBookingDialog({ open, onOpenChange }: NewBookingDialogProps) 
   // Create booking mutation
   const createBookingMutation = useMutation({
     mutationFn: async (data: BookingFormValues) => {
+      // Format the date to string for the API
+      const formattedData = {
+        ...data,
+        date: format(data.date, 'yyyy-MM-dd'),
+        // Ensure clientId is a number
+        clientId: Number(data.clientId)
+      };
+      
+      console.log('Submitting booking data:', formattedData);
+      
       const response = await fetch('/api/bookings', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formattedData),
       });
       
       if (!response.ok) {
-        throw new Error('Failed to create booking');
+        const errorData = await response.json();
+        console.error('Booking creation error:', errorData);
+        throw new Error(errorData.message || 'Failed to create booking');
       }
       
       return response.json();
