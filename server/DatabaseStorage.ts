@@ -31,7 +31,9 @@ import {
   NavigationEvent,
   InsertNavigationEvent,
   UserPreferences,
-  InsertUserPreferences
+  InsertUserPreferences,
+  AutoResponse,
+  InsertAutoResponse
 } from '@shared/schema';
 import { IStorage } from './storage';
 
@@ -463,4 +465,124 @@ export class DatabaseStorage implements IStorage {
   }
   async updateService(id: number, service: Partial<InsertService>): Promise<Service | undefined> { return undefined; }
   async deleteService(id: number): Promise<boolean> { return false; }
+  
+  // Auto responses methods
+  async getAutoResponses(userId: string): Promise<AutoResponse[]> {
+    return await db
+      .select()
+      .from(schema.autoResponses)
+      .where(eq(schema.autoResponses.userId, userId))
+      .orderBy(schema.autoResponses.name);
+  }
+
+  async getAutoResponsesByType(userId: string, type: string): Promise<AutoResponse[]> {
+    return await db
+      .select()
+      .from(schema.autoResponses)
+      .where(
+        and(
+          eq(schema.autoResponses.userId, userId),
+          eq(schema.autoResponses.type, type as any)
+        )
+      )
+      .orderBy(schema.autoResponses.name);
+  }
+
+  async getAutoResponse(id: number): Promise<AutoResponse | undefined> {
+    const [result] = await db
+      .select()
+      .from(schema.autoResponses)
+      .where(eq(schema.autoResponses.id, id));
+    return result;
+  }
+
+  async getDefaultAutoResponse(userId: string, type: string): Promise<AutoResponse | undefined> {
+    const [result] = await db
+      .select()
+      .from(schema.autoResponses)
+      .where(
+        and(
+          eq(schema.autoResponses.userId, userId),
+          eq(schema.autoResponses.type, type as any),
+          eq(schema.autoResponses.isDefault, true)
+        )
+      );
+    return result;
+  }
+
+  async createAutoResponse(response: InsertAutoResponse): Promise<AutoResponse> {
+    // If this is set as default, unset any existing defaults for this type
+    if (response.isDefault) {
+      await db
+        .update(schema.autoResponses)
+        .set({ 
+          isDefault: false,
+          updatedAt: new Date()
+        })
+        .where(
+          and(
+            eq(schema.autoResponses.userId, response.userId),
+            eq(schema.autoResponses.type, response.type as any),
+            eq(schema.autoResponses.isDefault, true)
+          )
+        );
+    }
+
+    const [result] = await db
+      .insert(schema.autoResponses)
+      .values({
+        ...response,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    
+    return result;
+  }
+
+  async updateAutoResponse(id: number, response: Partial<InsertAutoResponse>): Promise<AutoResponse | undefined> {
+    // If setting this as default, get the current response first
+    const [existingResponse] = await db
+      .select()
+      .from(schema.autoResponses)
+      .where(eq(schema.autoResponses.id, id));
+    
+    if (!existingResponse) return undefined;
+    
+    // If setting this as default, unset any other defaults of the same type
+    if (response.isDefault && !existingResponse.isDefault) {
+      await db
+        .update(schema.autoResponses)
+        .set({ 
+          isDefault: false,
+          updatedAt: new Date()
+        })
+        .where(
+          and(
+            eq(schema.autoResponses.userId, existingResponse.userId),
+            eq(schema.autoResponses.type, existingResponse.type),
+            eq(schema.autoResponses.isDefault, true),
+            sql`id != ${id}`
+          )
+        );
+    }
+
+    const [result] = await db
+      .update(schema.autoResponses)
+      .set({
+        ...response,
+        updatedAt: new Date()
+      })
+      .where(eq(schema.autoResponses.id, id))
+      .returning();
+    
+    return result;
+  }
+
+  async deleteAutoResponse(id: number): Promise<boolean> {
+    const result = await db
+      .delete(schema.autoResponses)
+      .where(eq(schema.autoResponses.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
 }

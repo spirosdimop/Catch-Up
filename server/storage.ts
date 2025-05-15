@@ -880,6 +880,120 @@ export class MemStorage implements IStorage {
     this.aiCommandEffects.set(id, newEffect);
     return newEffect;
   }
+
+  // Auto responses methods
+  async getAutoResponses(userId: string): Promise<AutoResponse[]> {
+    return Array.from(this.autoResponses.values()).filter(
+      (response) => response.userId === userId
+    );
+  }
+
+  async getAutoResponsesByType(userId: string, type: string): Promise<AutoResponse[]> {
+    return Array.from(this.autoResponses.values()).filter(
+      (response) => response.userId === userId && response.type === type
+    );
+  }
+
+  async getAutoResponse(id: number): Promise<AutoResponse | undefined> {
+    return this.autoResponses.get(id);
+  }
+
+  async getDefaultAutoResponse(userId: string, type: string): Promise<AutoResponse | undefined> {
+    return Array.from(this.autoResponses.values()).find(
+      (response) => response.userId === userId && response.type === type && response.isDefault
+    );
+  }
+
+  async createAutoResponse(response: InsertAutoResponse): Promise<AutoResponse> {
+    const id = this.autoResponseIdCounter++;
+    const createdAt = new Date();
+    const updatedAt = new Date();
+    
+    // If this is set as default, unset any existing defaults for this type
+    if (response.isDefault) {
+      for (const [existingId, existingResponse] of this.autoResponses.entries()) {
+        if (existingResponse.userId === response.userId && 
+            existingResponse.type === response.type && 
+            existingResponse.isDefault) {
+          this.autoResponses.set(existingId, {
+            ...existingResponse,
+            isDefault: false,
+            updatedAt: new Date()
+          });
+        }
+      }
+    }
+
+    const newResponse: AutoResponse = { 
+      id, 
+      createdAt, 
+      updatedAt,
+      ...response 
+    };
+    
+    this.autoResponses.set(id, newResponse);
+    return newResponse;
+  }
+
+  async updateAutoResponse(id: number, response: Partial<InsertAutoResponse>): Promise<AutoResponse | undefined> {
+    const existingResponse = this.autoResponses.get(id);
+    if (!existingResponse) return undefined;
+
+    // If setting this as default, unset any other defaults of the same type
+    if (response.isDefault && !existingResponse.isDefault) {
+      for (const [existingId, existing] of this.autoResponses.entries()) {
+        if (existingId !== id && 
+            existing.userId === existingResponse.userId && 
+            existing.type === existingResponse.type && 
+            existing.isDefault) {
+          this.autoResponses.set(existingId, {
+            ...existing,
+            isDefault: false,
+            updatedAt: new Date()
+          });
+        }
+      }
+    }
+
+    const updatedResponse = { 
+      ...existingResponse, 
+      ...response,
+      updatedAt: new Date() 
+    };
+    
+    this.autoResponses.set(id, updatedResponse);
+    return updatedResponse;
+  }
+
+  async deleteAutoResponse(id: number): Promise<boolean> {
+    return this.autoResponses.delete(id);
+  }
+  
+  // Navigation tracking operations - stub implementations
+  async createNavigationEvent(event: InsertNavigationEvent): Promise<NavigationEvent> {
+    throw new Error("Method not implemented.");
+  }
+  
+  async getNavigationEventsByUser(userId: string): Promise<NavigationEvent[]> {
+    return [];
+  }
+  
+  async getNavigationEventsByPathAndUser(userId: string, path: string): Promise<NavigationEvent[]> {
+    return [];
+  }
+  
+  // User preferences operations - stub implementations
+  async getUserPreferences(userId: string): Promise<UserPreferences | undefined> {
+    return undefined;
+  }
+  
+  async createUserPreferences(preferences: InsertUserPreferences): Promise<UserPreferences> {
+    throw new Error("Method not implemented.");
+  }
+  
+  async updateUserPreferences(userId: string, preferences: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined> {
+    return undefined;
+  }
 }
 
 // Import the DatabaseStorage
