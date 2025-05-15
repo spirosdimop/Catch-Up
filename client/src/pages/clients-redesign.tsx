@@ -1325,40 +1325,39 @@ const ClientsRedesign = () => {
                 </div>
               </div>
               
-              <DialogFooter className="pt-2">
-                <Button 
-                  type="button"
-                  variant="outline" 
-                  onClick={() => setIsEditClientOpen(false)}
-                  className="border-gray-300 text-[#0A2540] hover:bg-gray-100"
-                >
-                  Cancel
-                </Button>
+              <div className="pt-6 space-y-4">
                 <Button 
                   type="submit"
                   size="lg"
-                  className="bg-[#0A2540] hover:bg-[#081c30] text-white font-semibold px-8"
+                  className="bg-[#0A2540] hover:bg-[#081c30] text-white font-semibold w-full"
                 >
                   <Pencil className="mr-2 h-5 w-5" />
                   UPDATE CLIENT
                 </Button>
-              </DialogFooter>
-              
-              <div className="pt-6 border-t border-gray-200 mt-6 flex justify-center">
-                <Button 
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="bg-red-600 hover:bg-red-700 text-white"
-                  onClick={() => {
-                    console.log('Edit Form Delete button clicked');
-                    setIsEditClientOpen(false);
-                    setIsDeleteConfirmOpen(true);
-                  }}
-                >
-                  <Trash2 className="mr-1 h-4 w-4" />
-                  Delete Client
-                </Button>
+                
+                <div className="flex justify-between gap-4">
+                  <Button 
+                    type="button"
+                    variant="outline" 
+                    onClick={() => setIsEditClientOpen(false)}
+                    className="border-gray-300 text-[#0A2540] hover:bg-gray-100 flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button 
+                    type="button"
+                    variant="destructive"
+                    className="bg-red-600 hover:bg-red-700 text-white flex-1"
+                    onClick={() => {
+                      console.log('Edit Form Delete button clicked');
+                      setIsEditClientOpen(false);
+                      setIsDeleteConfirmOpen(true);
+                    }}
+                  >
+                    <Trash2 className="mr-1 h-4 w-4" />
+                    Delete Client
+                  </Button>
+                </div>
               </div>
             </form>
           )}
