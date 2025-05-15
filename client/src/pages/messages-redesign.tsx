@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import ComposeDialog from '@/components/message/compose-dialog';
+import AutoResponses from '@/components/message/auto-responses';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,7 +18,8 @@ import {
   Plus, 
   Search,
   Clock,
-  ArrowRight
+  ArrowRight,
+  Settings
 } from 'lucide-react';
 import { apiRequest } from '@/lib/queryClient';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -35,8 +37,9 @@ interface Message {
 }
 
 const MessagesRedesign = () => {
-  // State for new message dialog
+  // State for dialogs
   const [isComposeOpen, setIsComposeOpen] = useState(false);
+  const [isAutoResponsesOpen, setIsAutoResponsesOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('all');
 
@@ -149,7 +152,7 @@ const MessagesRedesign = () => {
     <div className="min-h-screen bg-white text-[#0A2540] p-4 md:p-6">
       <h1 className="text-2xl font-bold mb-6">Message Center</h1>
       
-      {/* Search and filters */}
+      {/* Search, filters, and auto-responses button */}
       <div className="mb-6 flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
@@ -157,20 +160,30 @@ const MessagesRedesign = () => {
             placeholder="Search messages..." 
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-[#173561] border-[#2a4d7d] text-[#0A2540] placeholder:text-gray-400"
+            className="pl-10 bg-white border-gray-200 text-[#0A2540] placeholder:text-gray-400"
           />
         </div>
+        
+        <Button
+          onClick={() => setIsAutoResponsesOpen(true)}
+          variant="outline"
+          className="bg-white border-gray-200 text-[#0A2540] hover:bg-gray-50"
+        >
+          <Settings className="mr-2 h-4 w-4" />
+          Manage Auto-Responses
+        </Button>
+        
         <Tabs 
           defaultValue="all" 
           value={activeTab} 
           onValueChange={setActiveTab}
           className="w-full md:w-auto"
         >
-          <TabsList className="w-full md:w-auto bg-[#173561]">
-            <TabsTrigger value="all" className="text-sm">All</TabsTrigger>
-            <TabsTrigger value="missed_call" className="text-sm">Calls</TabsTrigger>
-            <TabsTrigger value="reschedule" className="text-sm">Reschedule</TabsTrigger>
-            <TabsTrigger value="emergency" className="text-sm">Emergency</TabsTrigger>
+          <TabsList className="w-full md:w-auto bg-gray-100">
+            <TabsTrigger value="all" className="text-sm data-[state=active]:bg-white">All</TabsTrigger>
+            <TabsTrigger value="missed_call" className="text-sm data-[state=active]:bg-white">Calls</TabsTrigger>
+            <TabsTrigger value="reschedule" className="text-sm data-[state=active]:bg-white">Reschedule</TabsTrigger>
+            <TabsTrigger value="emergency" className="text-sm data-[state=active]:bg-white">Emergency</TabsTrigger>
           </TabsList>
         </Tabs>
       </div>
@@ -306,6 +319,9 @@ const MessagesRedesign = () => {
       
       {/* Compose Message Dialog */}
       <ComposeDialog open={isComposeOpen} onOpenChange={setIsComposeOpen} />
+      
+      {/* Auto Responses Dialog */}
+      <AutoResponses open={isAutoResponsesOpen} onOpenChange={setIsAutoResponsesOpen} />
     </div>
   );
 };

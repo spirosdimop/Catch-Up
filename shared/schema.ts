@@ -445,6 +445,16 @@ export const EventType = {
   TRAINING: 'training'
 } as const;
 
+// Message type enum
+export const messageTypeEnum = pgEnum("message_type", [
+  "general",
+  "missed_call",
+  "reschedule", 
+  "cancellation", 
+  "confirmation", 
+  "emergency"
+]);
+
 // AI command type enum
 export const aiCommandTypeEnum = pgEnum("ai_command_type", [
   "general",
