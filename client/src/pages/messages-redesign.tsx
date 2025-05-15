@@ -600,163 +600,224 @@ const MessagesRedesign = () => {
         </div>
       )}
       
-      {/* Auto-responses section - Simplified with just the input form */}
+      {/* Auto-responses section - One input per category */}
       {activeSection === 'autoResponses' && (
-        <div className="max-w-3xl mx-auto">
-          {/* Add/Edit Form - Simplified and focused */}
+        <div className="grid grid-cols-1 gap-6">
+          {/* Missed Calls Response */}
           <Card className="bg-white border-gray-200 shadow-sm">
             <CardHeader className="pb-3">
-              <CardTitle className="text-[#0A2540]">
-                {editMode ? 'Edit Auto-Response' : 'Create Auto-Response'}
+              <CardTitle className="text-[#0A2540] flex items-center">
+                <Phone className="mr-2 h-5 w-5 text-blue-400" />
+                Missed Calls Auto-Response
               </CardTitle>
-              <CardDescription>
-                Create templates for automatic responses that will be used when sending messages.
-              </CardDescription>
             </CardHeader>
             <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="grid w-full items-center gap-2">
-                  <Label htmlFor="name" className="text-[#0A2540]">
-                    Template Name
-                  </Label>
-                  <Input 
-                    id="name"
-                    value={formState.name}
-                    onChange={(e) => handleFormChange('name', e.target.value)}
-                    placeholder="E.g. Standard Confirmation"
-                    className="bg-white border-gray-200 text-[#0A2540]"
-                    required
-                  />
-                </div>
-                
-                <div className="grid w-full items-center gap-2">
-                  <Label htmlFor="type" className="text-[#0A2540]">
-                    Response Type
-                  </Label>
-                  <Select 
-                    value={formState.type} 
-                    onValueChange={(value) => handleFormChange('type', value)}
-                  >
-                    <SelectTrigger id="type" className="bg-white border-gray-200 text-[#0A2540]">
-                      <SelectValue placeholder="Select response type" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-white border-gray-200 text-[#0A2540]">
-                      <SelectItem value="general">General Message</SelectItem>
-                      <SelectItem value="missed_call">Missed Call</SelectItem>
-                      <SelectItem value="reschedule">Reschedule Request</SelectItem>
-                      <SelectItem value="cancellation">Cancellation</SelectItem>
-                      <SelectItem value="confirmation">Confirmation</SelectItem>
-                      <SelectItem value="emergency">Emergency Alert</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                
-                <div className="grid w-full items-center gap-2">
-                  <Label htmlFor="content" className="text-[#0A2540]">
-                    Message Content
-                  </Label>
-                  <Textarea 
-                    id="content"
-                    value={formState.content}
-                    onChange={(e) => handleFormChange('content', e.target.value)}
-                    placeholder="Type your message template here..."
-                    className="min-h-[150px] bg-white border-gray-200 text-[#0A2540]"
-                    required
-                  />
-                  <p className="text-xs text-gray-500">
-                    Use {'{client}'} to include the client's name, and {'{date}'} to include the appointment date.
-                  </p>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    id="isDefault"
-                    checked={formState.isDefault}
-                    onChange={(e) => handleFormChange('isDefault', e.target.checked)}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <Label 
-                    htmlFor="isDefault" 
-                    className="text-sm text-gray-700 cursor-pointer"
-                  >
-                    Set as default for this message type
-                  </Label>
-                </div>
-                
-                <div className="flex flex-wrap gap-2 justify-end pt-2">
-                  {editMode && (
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={resetForm}
-                      className="bg-white text-gray-600 border-gray-200 hover:bg-gray-100"
-                    >
-                      Cancel
-                    </Button>
-                  )}
-                  <Button 
-                    type="submit"
-                    className="bg-[#0A2540] hover:bg-[#082030] text-white"
-                  >
-                    {editMode ? (
-                      <>
-                        <Save className="mr-2 h-4 w-4" />
-                        Save Changes
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="mr-2 h-4 w-4" />
-                        Add Response
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </form>
+              <div className="space-y-4">
+                <Textarea 
+                  placeholder="Enter your default missed call response here... Use {client} to include the client's name."
+                  className="min-h-[100px] bg-white border-gray-200 text-[#0A2540]"
+                  value={responsesByType.missed_call[0]?.content || ""}
+                  onChange={(e) => {
+                    if (responsesByType.missed_call[0]) {
+                      // Update existing response
+                      updateResponseMutation.mutate({
+                        ...responsesByType.missed_call[0],
+                        content: e.target.value
+                      });
+                    } else {
+                      // Create new response
+                      addResponseMutation.mutate({
+                        name: "Default Missed Call Response",
+                        type: "missed_call",
+                        content: e.target.value,
+                        isDefault: true
+                      });
+                    }
+                  }}
+                />
+              </div>
             </CardContent>
           </Card>
           
-          {/* Just a simple list of existing responses */}
-          {Object.values(responsesByType).some(responses => responses.length > 0) && (
-            <div className="mt-6 bg-white border border-gray-200 rounded-lg shadow-sm p-4">
-              <h3 className="font-medium text-[#0A2540] mb-3">Your Saved Responses</h3>
-              <div className="space-y-2">
-                {Object.entries(responsesByType).flatMap(([type, responses]) => 
-                  responses.map(response => (
-                    <div key={response.id} className="flex justify-between items-center py-2 border-b border-gray-100">
-                      <div>
-                        <p className="font-medium text-[#0A2540]">{response.name}</p>
-                        <p className="text-xs text-gray-500">
-                          {response.type.charAt(0).toUpperCase() + response.type.slice(1).replace('_', ' ')}
-                          {response.isDefault && " (Default)"}
-                        </p>
-                      </div>
-                      <div className="flex space-x-1">
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-8 w-8 p-0 text-gray-500"
-                          onClick={() => handleEdit(response)}
-                        >
-                          <Pen className="h-4 w-4" />
-                          <span className="sr-only">Edit</span>
-                        </Button>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
-                          className="h-8 w-8 p-0 text-gray-500"
-                          onClick={() => handleDelete(response.id)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">Delete</span>
-                        </Button>
-                      </div>
-                    </div>
-                  ))
-                )}
+          {/* Reschedule Request Response */}
+          <Card className="bg-white border-gray-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-[#0A2540] flex items-center">
+                <Calendar className="mr-2 h-5 w-5 text-purple-400" />
+                Reschedule Request Auto-Response
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Textarea 
+                  placeholder="Enter your default reschedule response here... Use {client} and {date} to personalize."
+                  className="min-h-[100px] bg-white border-gray-200 text-[#0A2540]"
+                  value={responsesByType.reschedule[0]?.content || ""}
+                  onChange={(e) => {
+                    if (responsesByType.reschedule[0]) {
+                      // Update existing response
+                      updateResponseMutation.mutate({
+                        ...responsesByType.reschedule[0],
+                        content: e.target.value
+                      });
+                    } else {
+                      // Create new response
+                      addResponseMutation.mutate({
+                        name: "Default Reschedule Response",
+                        type: "reschedule",
+                        content: e.target.value,
+                        isDefault: true
+                      });
+                    }
+                  }}
+                />
               </div>
-            </div>
-          )}
+            </CardContent>
+          </Card>
+          
+          {/* Cancellation Response */}
+          <Card className="bg-white border-gray-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-[#0A2540] flex items-center">
+                <X className="mr-2 h-5 w-5 text-red-400" />
+                Cancellation Auto-Response
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Textarea 
+                  placeholder="Enter your default cancellation response here... Use {client} to include the client's name."
+                  className="min-h-[100px] bg-white border-gray-200 text-[#0A2540]"
+                  value={responsesByType.cancellation[0]?.content || ""}
+                  onChange={(e) => {
+                    if (responsesByType.cancellation[0]) {
+                      // Update existing response
+                      updateResponseMutation.mutate({
+                        ...responsesByType.cancellation[0],
+                        content: e.target.value
+                      });
+                    } else {
+                      // Create new response
+                      addResponseMutation.mutate({
+                        name: "Default Cancellation Response",
+                        type: "cancellation",
+                        content: e.target.value,
+                        isDefault: true
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Confirmation Response */}
+          <Card className="bg-white border-gray-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-[#0A2540] flex items-center">
+                <Check className="mr-2 h-5 w-5 text-green-400" />
+                Confirmation Auto-Response
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Textarea 
+                  placeholder="Enter your default confirmation response here... Use {client} and {date} to personalize."
+                  className="min-h-[100px] bg-white border-gray-200 text-[#0A2540]"
+                  value={responsesByType.confirmation[0]?.content || ""}
+                  onChange={(e) => {
+                    if (responsesByType.confirmation[0]) {
+                      // Update existing response
+                      updateResponseMutation.mutate({
+                        ...responsesByType.confirmation[0],
+                        content: e.target.value
+                      });
+                    } else {
+                      // Create new response
+                      addResponseMutation.mutate({
+                        name: "Default Confirmation Response",
+                        type: "confirmation",
+                        content: e.target.value,
+                        isDefault: true
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* Emergency Response */}
+          <Card className="bg-white border-gray-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-[#0A2540] flex items-center">
+                <AlertTriangle className="mr-2 h-5 w-5 text-amber-400" />
+                Emergency Auto-Response
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Textarea 
+                  placeholder="Enter your default emergency response here... Use {client} to include the client's name."
+                  className="min-h-[100px] bg-white border-gray-200 text-[#0A2540]"
+                  value={responsesByType.emergency[0]?.content || ""}
+                  onChange={(e) => {
+                    if (responsesByType.emergency[0]) {
+                      // Update existing response
+                      updateResponseMutation.mutate({
+                        ...responsesByType.emergency[0],
+                        content: e.target.value
+                      });
+                    } else {
+                      // Create new response
+                      addResponseMutation.mutate({
+                        name: "Default Emergency Response",
+                        type: "emergency",
+                        content: e.target.value,
+                        isDefault: true
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+          
+          {/* General Message Response */}
+          <Card className="bg-white border-gray-200 shadow-sm">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-[#0A2540] flex items-center">
+                <MessageSquare className="mr-2 h-5 w-5 text-gray-400" />
+                General Auto-Response
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <Textarea 
+                  placeholder="Enter your default general message response here... Use {client} to include the client's name."
+                  className="min-h-[100px] bg-white border-gray-200 text-[#0A2540]"
+                  value={responsesByType.general[0]?.content || ""}
+                  onChange={(e) => {
+                    if (responsesByType.general[0]) {
+                      // Update existing response
+                      updateResponseMutation.mutate({
+                        ...responsesByType.general[0],
+                        content: e.target.value
+                      });
+                    } else {
+                      // Create new response
+                      addResponseMutation.mutate({
+                        name: "Default General Response",
+                        type: "general",
+                        content: e.target.value,
+                        isDefault: true
+                      });
+                    }
+                  }}
+                />
+              </div>
+            </CardContent>
+          </Card>
         </div>
       )}
       
