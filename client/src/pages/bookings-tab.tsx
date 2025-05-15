@@ -1,6 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, createContext, useContext, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, addDays, subDays, isSameDay, parseISO } from 'date-fns';
+
+// Define the BookingContext type 
+interface BookingContextType {
+  isNewBookingOpen: boolean;
+  setIsNewBookingOpen: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+// Create the context with a default value
+const BookingContext = createContext<BookingContextType>({
+  isNewBookingOpen: false,
+  setIsNewBookingOpen: () => {},
+});
 import { 
   Calendar as CalendarIcon,
   Filter,
@@ -1578,10 +1590,350 @@ const BookingsTab = () => {
             {/* Dialogs */}
             <BookingDetailsDialog />
             <RescheduleDialog />
+            <NewBookingDialog />
           </>
         )}
       </div>
     </div>
+  );
+};
+
+// New Booking Dialog Component
+const NewBookingDialog = () => {
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+  const { isNewBookingOpen, setIsNewBookingOpen } = React.useContext(BookingContext);
+  
+  // Create a new form instance for the dialog
+  const newBookingForm = useForm<BookingFormValues>({
+    resolver: zodResolver(bookingSchema),
+    defaultValues: {
+      date: undefined,
+      timeSlot: "",
+      service: "",
+      clientId: undefined,
+      location: "",
+      priority: "normal",
+      name: "",
+      email: "",
+      notes: "",
+      isRescheduling: false,
+    },
+  });
+  
+  // Query available services and clients
+  const { data: services = [] } = useQuery<Service[], Error>({
+    queryKey: ['/api/services'],
+  });
+  
+  const { data: clients = [] } = useQuery<any[], Error>({
+    queryKey: ['/api/clients'],
+  });
+  
+  // Get available time slots based on selected date and service
+  const [timeSlots, setTimeSlots] = useState<TimeSlot[]>([]);
+  const selectedDate = newBookingForm.watch("date");
+  const selectedService = newBookingForm.watch("service");
+  
+  useEffect(() => {
+    if (selectedDate && selectedService) {
+      // Generate time slots (this would normally come from an API)
+      const slots = [];
+      const service = services.find(s => s.id === selectedService);
+      const duration = service?.duration || 60;
+      
+      // Generate slots from 9am to 5pm
+      const startTime = 9;
+      const endTime = 17;
+      
+      for (let hour = startTime; hour < endTime; hour++) {
+        for (let minute = 0; minute < 60; minute += 30) {
+          // Skip if the slot doesn't fit in the day
+          if (hour === endTime - 1 && minute + duration > 60) continue;
+          
+          const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+          slots.push({
+            id: time,
+            time,
+            available: Math.random() > 0.3, // Randomly mark some as unavailable
+          });
+        }
+      }
+      
+      setTimeSlots(slots);
+    }
+  }, [selectedDate, selectedService, services]);
+  
+  // Create booking mutation
+  const createBookingMutation = useMutation({
+    mutationFn: async (data: BookingFormValues) => {
+      const response = await fetch('/api/bookings', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to create booking');
+      }
+      
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/bookings'] });
+      setIsNewBookingOpen(false);
+      toast({
+        title: "Booking Created",
+        description: "Your booking has been successfully created.",
+        variant: "default",
+      });
+      newBookingForm.reset();
+    },
+    onError: (error) => {
+      toast({
+        title: "Error",
+        description: `Failed to create booking: ${error.message}`,
+        variant: "destructive",
+      });
+    },
+  });
+  
+  const handleSubmit = (data: BookingFormValues) => {
+    createBookingMutation.mutate(data);
+  };
+  
+  return (
+    <Dialog open={isNewBookingOpen} onOpenChange={setIsNewBookingOpen}>
+      <DialogContent className="bg-white border-gray-200 text-[#0A2540] sm:max-w-[600px]">
+        <DialogHeader>
+          <DialogTitle className="text-xl font-bold">Create New Booking</DialogTitle>
+          <DialogDescription>
+            Fill in the details to create a new booking
+          </DialogDescription>
+        </DialogHeader>
+        
+        <Form {...newBookingForm}>
+          <form onSubmit={newBookingForm.handleSubmit(handleSubmit)} className="space-y-6">
+            {/* Client selection */}
+            <FormField
+              control={newBookingForm.control}
+              name="clientId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Client</FormLabel>
+                  <Select 
+                    onValueChange={(value) => field.onChange(parseInt(value))}
+                    defaultValue={field.value?.toString()}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="border-gray-300">
+                        <SelectValue placeholder="Select a client" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="bg-white">
+                      {clients.map((client) => (
+                        <SelectItem key={client.id} value={client.id.toString()}>
+                          {client.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* Service selection */}
+            <FormField
+              control={newBookingForm.control}
+              name="service"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Service Type</FormLabel>
+                  <Select 
+                    onValueChange={field.onChange} 
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="border-gray-300">
+                        <SelectValue placeholder="Select a service" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent className="bg-white">
+                      {services.map((service) => (
+                        <SelectItem key={service.id} value={service.id}>
+                          {service.name} ({service.duration} min)
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* Location */}
+            <FormField
+              control={newBookingForm.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <Input {...field} className="border-gray-300" placeholder="Enter meeting location" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* Date selection */}
+            <FormField
+              control={newBookingForm.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Date</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "pl-3 text-left font-normal border-gray-300",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Select a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0 bg-white" align="start">
+                      <CalendarComponent
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) => date < new Date()}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* Time slot selection */}
+            {selectedDate && selectedService && (
+              <FormField
+                control={newBookingForm.control}
+                name="timeSlot"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Time Slot</FormLabel>
+                    <div className="grid grid-cols-3 gap-2">
+                      {timeSlots.map((slot) => (
+                        <Button
+                          key={slot.id}
+                          type="button"
+                          onClick={() => field.onChange(slot.id)}
+                          variant={field.value === slot.id ? "default" : "outline"}
+                          disabled={!slot.available}
+                          className={cn(
+                            "h-10",
+                            field.value === slot.id ? "bg-[#0A2540] text-white" : "border-gray-300",
+                            !slot.available && "opacity-50 cursor-not-allowed"
+                          )}
+                        >
+                          {slot.time}
+                        </Button>
+                      ))}
+                    </div>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+            
+            {/* Priority selection */}
+            <FormField
+              control={newBookingForm.control}
+              name="priority"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Priority</FormLabel>
+                  <div className="flex space-x-2">
+                    <Button
+                      type="button"
+                      onClick={() => field.onChange("normal")}
+                      variant={field.value === "normal" ? "default" : "outline"}
+                      className={cn(
+                        field.value === "normal" ? "bg-[#0A2540] text-white" : "border-gray-300"
+                      )}
+                    >
+                      Normal
+                    </Button>
+                    <Button
+                      type="button"
+                      onClick={() => field.onChange("emergency")}
+                      variant={field.value === "emergency" ? "default" : "outline"}
+                      className={cn(
+                        field.value === "emergency" ? "bg-red-600 text-white hover:bg-red-700" : "border-gray-300"
+                      )}
+                    >
+                      Emergency
+                    </Button>
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            {/* Notes */}
+            <FormField
+              control={newBookingForm.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea 
+                      {...field} 
+                      className="border-gray-300 resize-none" 
+                      placeholder="Add any additional details here..."
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </form>
+        </Form>
+        
+        <DialogFooter className="space-x-2 mt-6">
+          <Button
+            variant="outline"
+            onClick={() => setIsNewBookingOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={newBookingForm.handleSubmit(handleSubmit)}
+            className="bg-[#0A2540] hover:bg-[#081c30]"
+            disabled={createBookingMutation.isPending}
+          >
+            {createBookingMutation.isPending ? "Creating..." : "Create Booking"}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
