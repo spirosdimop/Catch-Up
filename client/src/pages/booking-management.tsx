@@ -966,7 +966,7 @@ const BookingManagement = () => {
                           }
                         }}
                         numberOfMonths={2}
-                        className="bg-[#173561] text-white"
+                        className="bg-white text-[#0A2540]"
                       />
                     </div>
                   </PopoverContent>
@@ -975,14 +975,14 @@ const BookingManagement = () => {
             </div>
             
             <div>
-              <Label className="mb-1 block text-sm">View Mode</Label>
+              <Label className="mb-1 block text-sm text-gray-600">View Mode</Label>
               <div className="flex space-x-1">
                 <Button
                   variant={viewMode === ViewMode.Grid ? "default" : "outline"}
                   size="icon"
                   className={cn(
-                    viewMode !== ViewMode.Grid && "border-[#2a4d7d] text-white hover:bg-[#0a2342]",
-                    viewMode === ViewMode.Grid && "bg-[#1d4ed8] hover:bg-blue-600"
+                    viewMode !== ViewMode.Grid && "border-gray-200 text-[#0A2540] hover:bg-gray-50",
+                    viewMode === ViewMode.Grid && "bg-[#0A2540] hover:bg-[#0A2540]/90"
                   )}
                   onClick={() => setViewMode(ViewMode.Grid)}
                 >
@@ -992,8 +992,8 @@ const BookingManagement = () => {
                   variant={viewMode === ViewMode.List ? "default" : "outline"}
                   size="icon"
                   className={cn(
-                    viewMode !== ViewMode.List && "border-[#2a4d7d] text-white hover:bg-[#0a2342]",
-                    viewMode === ViewMode.List && "bg-[#1d4ed8] hover:bg-blue-600"
+                    viewMode !== ViewMode.List && "border-gray-200 text-[#0A2540] hover:bg-gray-50",
+                    viewMode === ViewMode.List && "bg-[#0A2540] hover:bg-[#0A2540]/90"
                   )}
                   onClick={() => setViewMode(ViewMode.List)}
                 >
@@ -1003,8 +1003,8 @@ const BookingManagement = () => {
                   variant={viewMode === ViewMode.Calendar ? "default" : "outline"}
                   size="icon"
                   className={cn(
-                    viewMode !== ViewMode.Calendar && "border-[#2a4d7d] text-white hover:bg-[#0a2342]",
-                    viewMode === ViewMode.Calendar && "bg-[#1d4ed8] hover:bg-blue-600"
+                    viewMode !== ViewMode.Calendar && "border-gray-200 text-[#0A2540] hover:bg-gray-50",
+                    viewMode === ViewMode.Calendar && "bg-[#0A2540] hover:bg-[#0A2540]/90"
                   )}
                   onClick={() => setViewMode(ViewMode.Calendar)}
                 >
