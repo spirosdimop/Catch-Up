@@ -118,7 +118,7 @@ function Router() {
         <Route path="/dashboard-original" component={Dashboard} />
         <Route path="/clients" component={ClientsRedesign} />
         <Route path="/clients-original" component={Clients} />
-        <Route path="/bookings" component={BookingsTab} />
+        <Route path="/bookings" component={BookingsTabUpdated} />
         <Route path="/bookings-original" component={Bookings} />
         <Route path="/bookings-old" component={BookingsRedesign} />
         <Route path="/booking-management" component={BookingManagement} />

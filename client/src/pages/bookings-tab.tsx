@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { format, addDays, subDays, isSameDay, parseISO } from 'date-fns';
+import { NewBookingDialog as NewBookingDialogComponent } from '@/components/booking/new-booking-dialog';
 import { 
   Calendar as CalendarIcon,
   Filter,
@@ -1013,11 +1014,9 @@ const BookingsTab = () => {
           </div>
         </div>
         
-        {activeTab === "create" && (
-          <div className="max-w-[800px] mx-auto">
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(handleBookingSubmit)}>
-                <Card className="bg-white border-gray-200 shadow-md overflow-hidden">
+        {/* Management view is the default */}
+        <div className="grid gap-6">
+            {/* Bookings list/grid view */}
                   <CardHeader className="pb-4">
                     <div className="flex justify-between items-center">
                       <div>
@@ -1578,7 +1577,12 @@ const BookingsTab = () => {
             {/* Dialogs */}
             <BookingDetailsDialog />
             <RescheduleDialog />
-            <NewBookingDialog />
+            
+            {/* Import and use our separate NewBookingDialog component */}
+            <NewBookingDialogComponent 
+              open={isNewBookingOpen}
+              onOpenChange={setIsNewBookingOpen}
+            />
           </>
         )}
       </div>
