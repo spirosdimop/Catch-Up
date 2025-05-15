@@ -52,7 +52,7 @@ function Router() {
   // Pages that don't use the main application shell
   const noAppShellPages = ["/signup", "/", "/login"];
   
-  // Catch Up app pages (these use their own layout)
+  // Catch Up app pages that use their own layout (legacy)
   const catchUpPages = [
     "/catchup", 
     "/catchup/tasks", 
@@ -62,53 +62,38 @@ function Router() {
     "/catchup/settings"
   ];
   
-  // New Catch Up pages (with new design)
-  const newCatchUpPages = [
-    "/catch-up",
-    "/catch-up/login",
-    "/catch-up/signup",
-    "/catch-up/dashboard",
-    "/catch-up/calendar",
-    "/catch-up/clients",
-    "/catch-up/calls",
-    "/catch-up/messages",
-    "/catch-up/profile",
-    "/catch-up/settings",
-    "/catch-up/ai-assistant"
-  ];
-  
-  // Check if current location is a Catch Up page
+  // Check if current location is an old Catch Up page
   const isCatchUpPage = catchUpPages.some(page => location === page || location.startsWith(`${page}/`));
   
-  // Check if current location is a new Catch Up page
-  const isNewCatchUpPage = newCatchUpPages.some(page => location === page || location.startsWith(`${page}/`));
-  
-  // Check if current location should not use AppShell
+  // Landing, Signup, and Login pages - we keep their unique non-app-shell design
   if (noAppShellPages.includes(location)) {
     return (
       <Switch>
         <Route path="/" component={LandingPage} />
         <Route path="/signup" component={Signup} />
-        <Route path="/login" component={Signup} /> {/* Reusing Signup component for login, update if you have a separate Login component */}
+        <Route path="/login" component={Signup} /> {/* Reusing Signup component for login */}
       </Switch>
     );
   }
   
-  // New Catch Up app pages
-  if (isNewCatchUpPage) {
-    return (
-      <Switch>
-        <Route path="/catch-up" component={CatchUpLandingPage} />
-        <Route path="/catch-up/login" component={CatchUpLoginPage} />
-        <Route path="/catch-up/signup" component={CatchUpSignupPage} />
-        <Route path="/catch-up/dashboard" component={CatchUpDashboardPage} />
-        <Route path="/catch-up/calendar" component={CatchUpCalendarPage} />
-        <Route component={NotFound} />
-      </Switch>
-    );
+  // New Catch Up pages with specific URL paths (we'll keep these routes for compatibility)
+  if (location === "/catch-up") {
+    return <CatchUpLandingPage />;
+  }
+  if (location === "/catch-up/login") {
+    return <CatchUpLoginPage />;
+  }
+  if (location === "/catch-up/signup") {
+    return <CatchUpSignupPage />;
+  }
+  if (location === "/catch-up/dashboard") {
+    return <CatchUpDashboardPage />;
+  }
+  if (location === "/catch-up/calendar") {
+    return <CatchUpCalendarPage />;
   }
   
-  // Original Catch Up app pages
+  // Original Catch Up app pages (legacy)
   if (isCatchUpPage) {
     return (
       <Switch>
@@ -123,26 +108,25 @@ function Router() {
     );
   }
   
-  // Main app pages with the AppShell
+  // All other pages use the AppShell with the Catch Up design
   return (
     <AppShell>
       <Switch>
-        <Route path="/dashboard-original" component={Dashboard} />
         <Route path="/dashboard" component={DashboardRedesign} />
-        <Route path="/clients-original" component={Clients} />
+        <Route path="/dashboard-original" component={Dashboard} />
         <Route path="/clients" component={ClientsRedesign} />
+        <Route path="/clients-original" component={Clients} />
+        <Route path="/bookings" component={BookingsTab} />
         <Route path="/bookings-original" component={Bookings} />
         <Route path="/bookings-old" component={BookingsRedesign} />
-        <Route path="/bookings" component={BookingsTab} />
         <Route path="/booking-management" component={BookingManagement} />
-        <Route path="/messages-original" component={Messages} />
         <Route path="/messages" component={MessagesRedesign} />
-        <Route path="/calendar-original" component={Calendar} />
+        <Route path="/messages-original" component={Messages} />
         <Route path="/calendar" component={CalendarNew} />
-        <Route path="/profile-original" component={Profile} />
+        <Route path="/calendar-original" component={Calendar} />
         <Route path="/profile" component={ProfileRedesign} />
+        <Route path="/profile-original" component={Profile} />
         <Route path="/projects" component={Projects} />
-
         <Route path="/ai-assistant" component={AIAssistant} />
         <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
