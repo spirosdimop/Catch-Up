@@ -995,7 +995,16 @@ const BookingsTab = () => {
             <p className="text-gray-500 mt-1">Manage and schedule appointments</p>
           </div>
           
-          {/* No buttons for tab navigation */}
+          <div className="flex justify-end">
+            <Button
+              variant="default"
+              onClick={() => setActiveTab("create")}
+              className="bg-[#0A2540] hover:bg-[#081c30]"
+            >
+              <CalendarDays className="mr-2 h-4 w-4" />
+              Add New Booking
+            </Button>
+          </div>
         </div>
         
         {activeTab === "create" && (
