@@ -444,7 +444,7 @@ const BookingsTab = () => {
     return (
       <div className="space-y-4">
         {filteredBookings.map((booking) => (
-          <Card key={booking.id} className="bg-[#173561] border-[#2a4d7d] shadow-sm">
+          <Card key={booking.id} className="bg-white border-gray-200 shadow-sm">
             <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
@@ -454,7 +454,7 @@ const BookingsTab = () => {
                       <Badge className={getStatusColor(booking.status)} variant="secondary">
                         {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                       </Badge>
-                      <Badge variant="outline" className="bg-[#0a2342] text-white">
+                      <Badge variant="outline" className="bg-white text-[#0A2540]">
                         {getTypeLabel(booking.type)}
                       </Badge>
                     </div>
@@ -475,15 +475,15 @@ const BookingsTab = () => {
                   
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="text-gray-300 hover:text-white hover:bg-[#0a2342]">
+                      <Button variant="ghost" size="icon" className="text-gray-300 hover:text-[#0A2540] hover:bg-white">
                         <MoreHorizontal className="h-5 w-5" />
                       </Button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent className="w-56 bg-[#173561] border-[#2a4d7d] text-white">
+                    <DropdownMenuContent className="w-56 bg-white border-gray-200 text-[#0A2540]">
                       <DropdownMenuLabel>Booking Actions</DropdownMenuLabel>
                       <DropdownMenuSeparator className="bg-[#2a4d7d]" />
                       <DropdownMenuItem 
-                        className="hover:bg-[#0a2342] cursor-pointer"
+                        className="hover:bg-white cursor-pointer"
                         onClick={() => handleViewDetails(booking)}
                       >
                         View Details
@@ -491,13 +491,13 @@ const BookingsTab = () => {
                       {booking.status !== 'canceled' && (
                         <>
                           <DropdownMenuItem 
-                            className="hover:bg-[#0a2342] cursor-pointer"
+                            className="hover:bg-white cursor-pointer"
                             onClick={() => handleOpenReschedule(booking)}
                           >
                             Reschedule
                           </DropdownMenuItem>
                           <DropdownMenuItem 
-                            className="text-red-400 hover:text-red-300 hover:bg-[#0a2342] cursor-pointer"
+                            className="text-red-400 hover:text-red-300 hover:bg-white cursor-pointer"
                             onClick={() => handleCancelBooking(booking.id)}
                           >
                             Cancel Booking
@@ -519,7 +519,7 @@ const BookingsTab = () => {
                 <Button 
                   variant="outline" 
                   size="sm"
-                  className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+                  className="border-[#2a4d7d] text-[#0A2540] hover:bg-white"
                   onClick={() => handleViewDetails(booking)}
                 >
                   View Details
@@ -529,7 +529,7 @@ const BookingsTab = () => {
                     <Button 
                       variant="outline" 
                       size="sm"
-                      className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+                      className="border-[#2a4d7d] text-[#0A2540] hover:bg-white"
                       onClick={() => handleOpenReschedule(booking)}
                     >
                       Reschedule
@@ -574,7 +574,7 @@ const BookingsTab = () => {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredBookings.map((booking) => (
-          <Card key={booking.id} className="bg-[#173561] border-[#2a4d7d] shadow-sm">
+          <Card key={booking.id} className="bg-white border-gray-200 shadow-sm">
             <CardHeader className="pb-2 flex flex-row items-start justify-between">
               <div>
                 <CardTitle className="text-base">{booking.client.name}</CardTitle>
@@ -596,7 +596,7 @@ const BookingsTab = () => {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-400">Type:</span>
-                  <Badge variant="outline" className="bg-[#0a2342] text-white">
+                  <Badge variant="outline" className="bg-white text-[#0A2540]">
                     {getTypeLabel(booking.type)}
                   </Badge>
                 </div>
@@ -612,7 +612,7 @@ const BookingsTab = () => {
               <Button 
                 variant="ghost" 
                 size="sm"
-                className="text-white hover:bg-[#0a2342]"
+                className="text-[#0A2540] hover:bg-white"
                 onClick={() => handleViewDetails(booking)}
               >
                 View Details
@@ -623,20 +623,20 @@ const BookingsTab = () => {
                     <Button 
                       variant="ghost" 
                       size="sm"
-                      className="text-white hover:bg-[#0a2342]"
+                      className="text-[#0A2540] hover:bg-white"
                     >
                       Actions
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-40 bg-[#173561] border-[#2a4d7d] text-white">
+                  <DropdownMenuContent className="w-40 bg-white border-gray-200 text-[#0A2540]">
                     <DropdownMenuItem 
-                      className="hover:bg-[#0a2342] cursor-pointer"
+                      className="hover:bg-white cursor-pointer"
                       onClick={() => handleOpenReschedule(booking)}
                     >
                       Reschedule
                     </DropdownMenuItem>
                     <DropdownMenuItem 
-                      className="text-red-400 hover:text-red-300 hover:bg-[#0a2342] cursor-pointer"
+                      className="text-red-400 hover:text-red-300 hover:bg-white cursor-pointer"
                       onClick={() => handleCancelBooking(booking.id)}
                     >
                       Cancel
@@ -666,7 +666,7 @@ const BookingsTab = () => {
             <Button 
               variant="outline" 
               size="icon"
-              className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+              className="border-[#2a4d7d] text-[#0A2540] hover:bg-white"
               onClick={() => setManagementSelectedDate(subDays(managementSelectedDate || today, 30))}
             >
               <ChevronLeft className="h-4 w-4" />
@@ -674,7 +674,7 @@ const BookingsTab = () => {
             <Button 
               variant="outline" 
               size="icon"
-              className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+              className="border-[#2a4d7d] text-[#0A2540] hover:bg-white"
               onClick={() => setManagementSelectedDate(addDays(managementSelectedDate || today, 30))}
             >
               <ChevronRight className="h-4 w-4" />
@@ -686,7 +686,7 @@ const BookingsTab = () => {
           mode="single"
           selected={managementSelectedDate}
           onSelect={setManagementSelectedDate}
-          className="bg-[#173561] text-white border-[#2a4d7d] rounded-lg"
+          className="bg-white text-[#0A2540] border-[#2a4d7d] rounded-lg"
           modifiers={{
             booked: (date) => daysWithBookings.some(d => 
               isSameDay(parseISO(d), date)
@@ -715,7 +715,7 @@ const BookingsTab = () => {
                             {dayBookings.length}
                           </span>
                         </TooltipTrigger>
-                        <TooltipContent className="bg-[#0a2342] border-[#2a4d7d] text-white">
+                        <TooltipContent className="bg-white border-gray-200 text-[#0A2540]">
                           {dayBookings.length} booking{dayBookings.length !== 1 ? 's' : ''}
                         </TooltipContent>
                       </Tooltip>
@@ -736,7 +736,7 @@ const BookingsTab = () => {
             {bookingsByDate[format(managementSelectedDate, 'yyyy-MM-dd')] ? (
               <div className="space-y-3">
                 {bookingsByDate[format(managementSelectedDate, 'yyyy-MM-dd')].map((booking) => (
-                  <Card key={booking.id} className="bg-[#0a2342] border-[#2a4d7d]">
+                  <Card key={booking.id} className="bg-white border-gray-200">
                     <CardContent className="p-3">
                       <div className="flex justify-between items-center">
                         <div>
@@ -753,7 +753,7 @@ const BookingsTab = () => {
                           <Button 
                             variant="ghost" 
                             size="sm"
-                            className="text-white hover:bg-[#173561]"
+                            className="text-[#0A2540] hover:bg-gray-100"
                             onClick={() => handleViewDetails(booking)}
                           >
                             Details
@@ -781,7 +781,7 @@ const BookingsTab = () => {
     
     return (
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="bg-[#173561] border-[#2a4d7d] text-white">
+        <DialogContent className="bg-white border-gray-200 text-[#0A2540]">
           <DialogHeader>
             <DialogTitle>Booking Details</DialogTitle>
           </DialogHeader>
@@ -836,7 +836,7 @@ const BookingsTab = () => {
             <Button 
               variant="outline" 
               onClick={() => setIsDetailsOpen(false)}
-              className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+              className="border-[#2a4d7d] text-[#0A2540] hover:bg-white"
             >
               Close
             </Button>
@@ -848,7 +848,7 @@ const BookingsTab = () => {
                     setIsDetailsOpen(false);
                     handleOpenReschedule(detailsBooking);
                   }}
-                  className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+                  className="border-[#2a4d7d] text-[#0A2540] hover:bg-white"
                 >
                   Reschedule
                 </Button>
@@ -895,7 +895,7 @@ const BookingsTab = () => {
     
     return (
       <Dialog open={isRescheduleOpen} onOpenChange={setIsRescheduleOpen}>
-        <DialogContent className="bg-[#173561] border-[#2a4d7d] text-white">
+        <DialogContent className="bg-white border-gray-200 text-[#0A2540]">
           <DialogHeader>
             <DialogTitle>Reschedule Booking</DialogTitle>
           </DialogHeader>
@@ -921,7 +921,7 @@ const BookingsTab = () => {
                       id="reschedule-date"
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal bg-[#0a2342] border-[#2a4d7d] text-white",
+                        "w-full justify-start text-left font-normal bg-white border-gray-200 text-[#0A2540]",
                         !rescheduleDate && "text-gray-400"
                       )}
                     >
@@ -929,14 +929,14 @@ const BookingsTab = () => {
                       {rescheduleDate ? format(rescheduleDate, 'PPP') : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0 bg-[#173561] border-[#2a4d7d]">
+                  <PopoverContent className="w-auto p-0 bg-white border-gray-200">
                     <CalendarComponent
                       mode="single"
                       selected={rescheduleDate}
                       onSelect={setRescheduleDate}
                       initialFocus
                       disabled={(date) => date < subDays(new Date(), 1)}
-                      className="bg-[#173561] text-white"
+                      className="bg-white text-[#0A2540]"
                     />
                   </PopoverContent>
                 </Popover>
@@ -948,10 +948,10 @@ const BookingsTab = () => {
                   value={rescheduleTime}
                   onValueChange={setRescheduleTime}
                 >
-                  <SelectTrigger id="reschedule-time" className="bg-[#0a2342] border-[#2a4d7d] text-white">
+                  <SelectTrigger id="reschedule-time" className="bg-white border-gray-200 text-[#0A2540]">
                     <SelectValue placeholder="Select a time slot" />
                   </SelectTrigger>
-                  <SelectContent className="bg-[#173561] border-[#2a4d7d] text-white">
+                  <SelectContent className="bg-white border-gray-200 text-[#0A2540]">
                     <SelectItem value="09:00 AM">09:00 AM</SelectItem>
                     <SelectItem value="10:00 AM">10:00 AM</SelectItem>
                     <SelectItem value="11:00 AM">11:00 AM</SelectItem>
@@ -969,13 +969,13 @@ const BookingsTab = () => {
             <Button 
               variant="outline" 
               onClick={() => setIsRescheduleOpen(false)}
-              className="border-[#2a4d7d] text-white hover:bg-[#0a2342]"
+              className="border-[#2a4d7d] text-[#0A2540] hover:bg-white"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleReschedule}
-              className="bg-[#1d4ed8] hover:bg-blue-600 text-white"
+              className="bg-[#1d4ed8] hover:bg-blue-600 text-[#0A2540]"
               disabled={!rescheduleDate || !rescheduleTime || rescheduleBookingMutation.isPending}
             >
               {rescheduleBookingMutation.isPending ? "Processing..." : "Confirm Reschedule"}
@@ -1001,7 +1001,7 @@ const BookingsTab = () => {
               onClick={() => setActiveTab("create")}
               className={activeTab === "create" 
                 ? "bg-[#1d4ed8] hover:bg-blue-600" 
-                : "border-[#2a4d7d] text-white hover:bg-[#173561]"}
+                : "border-[#2a4d7d] text-[#0A2540] hover:bg-gray-100"}
             >
               <CalendarDays className="mr-2 h-4 w-4" />
               Book Appointment
@@ -1011,7 +1011,7 @@ const BookingsTab = () => {
               onClick={() => setActiveTab("manage")}
               className={activeTab === "manage" 
                 ? "bg-[#1d4ed8] hover:bg-blue-600" 
-                : "border-[#2a4d7d] text-white hover:bg-[#173561]"}
+                : "border-[#2a4d7d] text-[#0A2540] hover:bg-gray-100"}
             >
               <Settings className="mr-2 h-4 w-4" />
               Manage Bookings
@@ -1023,7 +1023,7 @@ const BookingsTab = () => {
           <div className="max-w-[800px] mx-auto">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(handleBookingSubmit)}>
-                <Card className="bg-[#173561] border-[#2a4d7d] shadow-md overflow-hidden">
+                <Card className="bg-white border-gray-200 shadow-md overflow-hidden">
                   <CardHeader className="pb-4">
                     <div className="flex justify-between items-center">
                       <div>
@@ -1077,7 +1077,7 @@ const BookingsTab = () => {
                                         "relative flex w-full cursor-pointer rounded-lg border p-4 focus:outline-none",
                                         field.value === service.id.toString() 
                                           ? "border-[#1d4ed8] bg-[#0f3b85]" 
-                                          : "border-[#2a4d7d] bg-[#0a2342]"
+                                          : "border-[#2a4d7d] bg-white"
                                       )}>
                                         <FormItem className="flex-1">
                                           <FormControl>
@@ -1156,7 +1156,7 @@ const BookingsTab = () => {
                                       <Button
                                         variant="outline"
                                         className={cn(
-                                          "w-full pl-3 text-left font-normal border-[#2a4d7d] bg-[#0a2342] text-white",
+                                          "w-full pl-3 text-left font-normal border-[#2a4d7d] bg-white text-[#0A2540]",
                                           !field.value && "text-gray-400"
                                         )}
                                       >
@@ -1169,7 +1169,7 @@ const BookingsTab = () => {
                                       </Button>
                                     </FormControl>
                                   </PopoverTrigger>
-                                  <PopoverContent className="w-auto p-0 bg-[#173561] border-[#2a4d7d]" align="start">
+                                  <PopoverContent className="w-auto p-0 bg-white border-gray-200" align="start">
                                     <CalendarComponent
                                       mode="single"
                                       selected={field.value}
@@ -1182,7 +1182,7 @@ const BookingsTab = () => {
                                         date > addDays(new Date(), 60)
                                       }
                                       initialFocus
-                                      className="bg-[#173561] text-white border-[#2a4d7d]"
+                                      className="bg-white text-[#0A2540] border-[#2a4d7d]"
                                     />
                                   </PopoverContent>
                                 </Popover>
@@ -1216,8 +1216,8 @@ const BookingsTab = () => {
                                           "w-full py-2 px-3 rounded-md text-center transition-colors",
                                           slot.available
                                             ? field.value === slot.id
-                                              ? "bg-[#1d4ed8] text-white"
-                                              : "bg-[#0a2342] text-white hover:bg-[#173561] border border-[#2a4d7d]"
+                                              ? "bg-[#1d4ed8] text-[#0A2540]"
+                                              : "bg-white text-[#0A2540] hover:bg-gray-100 border border-[#2a4d7d]"
                                             : "bg-gray-800 text-gray-500 cursor-not-allowed opacity-50",
                                         )}
                                         onClick={() => {
@@ -1240,7 +1240,7 @@ const BookingsTab = () => {
                         />
                         
                         {selectedService && selectedDate && selectedTimeSlot && (
-                          <div className="mt-6 p-4 bg-[#0a2342] rounded-lg border border-[#2a4d7d]">
+                          <div className="mt-6 p-4 bg-white rounded-lg border border-[#2a4d7d]">
                             <h3 className="font-medium mb-2">Booking Summary</h3>
                             <div className="space-y-1 text-sm">
                               <div className="flex justify-between">
@@ -1284,7 +1284,7 @@ const BookingsTab = () => {
                                   <Input 
                                     placeholder="Your name" 
                                     {...field} 
-                                    className="bg-[#0a2342] border-[#2a4d7d] text-white"
+                                    className="bg-white border-gray-200 text-[#0A2540]"
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -1302,7 +1302,7 @@ const BookingsTab = () => {
                                     type="email" 
                                     placeholder="Your email" 
                                     {...field} 
-                                    className="bg-[#0a2342] border-[#2a4d7d] text-white"
+                                    className="bg-white border-gray-200 text-[#0A2540]"
                                   />
                                 </FormControl>
                                 <FormMessage />
@@ -1321,7 +1321,7 @@ const BookingsTab = () => {
                                 <Textarea 
                                   placeholder="Any specific details or questions you'd like to share" 
                                   {...field} 
-                                  className="bg-[#0a2342] border-[#2a4d7d] text-white resize-none min-h-[120px]"
+                                  className="bg-white border-gray-200 text-[#0A2540] resize-none min-h-[120px]"
                                 />
                               </FormControl>
                               <FormDescription>
@@ -1333,7 +1333,7 @@ const BookingsTab = () => {
                         />
                         
                         {selectedService && selectedDate && selectedTimeSlot && (
-                          <div className="mt-6 p-4 bg-[#0a2342] rounded-lg border border-[#2a4d7d]">
+                          <div className="mt-6 p-4 bg-white rounded-lg border border-[#2a4d7d]">
                             <h3 className="font-medium mb-2">Booking Summary</h3>
                             <div className="grid grid-cols-2 gap-y-2 text-sm">
                               <div className="text-gray-400">Service:</div>
@@ -1369,13 +1369,13 @@ const BookingsTab = () => {
                       onClick={handleBack} 
                       variant="outline" 
                       disabled={step === 1}
-                      className="border-[#2a4d7d] text-white hover:bg-[#0a2342] hover:text-white"
+                      className="border-[#2a4d7d] text-[#0A2540] hover:bg-white hover:text-[#0A2540]"
                     >
                       {step === 1 ? "Cancel" : "Back"}
                     </Button>
                     <Button 
                       type="submit" 
-                      className="bg-[#1d4ed8] hover:bg-blue-600 text-white min-w-[120px]"
+                      className="bg-[#1d4ed8] hover:bg-blue-600 text-[#0A2540] min-w-[120px]"
                       disabled={
                         (step === 1 && !watchService) ||
                         (step === 2 && (!watchDate || !form.getValues("timeSlot"))) ||
@@ -1397,7 +1397,7 @@ const BookingsTab = () => {
           <>
             {/* Overview Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <Card className="bg-[#173561] border-[#2a4d7d] shadow-sm">
+              <Card className="bg-white border-gray-200 shadow-sm">
                 <CardContent className="p-4 flex justify-between items-center">
                   <div>
                     <p className="text-gray-400 text-sm">Total Bookings</p>
@@ -1407,38 +1407,38 @@ const BookingsTab = () => {
                 </CardContent>
               </Card>
               
-              <Card className="bg-[#173561] border-[#2a4d7d] shadow-sm">
+              <Card className="bg-white border-gray-200 shadow-sm">
                 <CardContent className="p-4 flex justify-between items-center">
                   <div>
                     <p className="text-gray-400 text-sm">Confirmed</p>
                     <p className="text-2xl font-bold mt-1">{statusCounts.confirmed || 0}</p>
                   </div>
                   <div className="h-8 w-8 rounded-full bg-green-500 opacity-75 flex items-center justify-center">
-                    <Check className="h-5 w-5 text-white" />
+                    <Check className="h-5 w-5 text-[#0A2540]" />
                   </div>
                 </CardContent>
               </Card>
               
-              <Card className="bg-[#173561] border-[#2a4d7d] shadow-sm">
+              <Card className="bg-white border-gray-200 shadow-sm">
                 <CardContent className="p-4 flex justify-between items-center">
                   <div>
                     <p className="text-gray-400 text-sm">Rescheduled</p>
                     <p className="text-2xl font-bold mt-1">{statusCounts.rescheduled || 0}</p>
                   </div>
                   <div className="h-8 w-8 rounded-full bg-amber-500 opacity-75 flex items-center justify-center">
-                    <Clock className="h-5 w-5 text-white" />
+                    <Clock className="h-5 w-5 text-[#0A2540]" />
                   </div>
                 </CardContent>
               </Card>
               
-              <Card className="bg-[#173561] border-[#2a4d7d] shadow-sm">
+              <Card className="bg-white border-gray-200 shadow-sm">
                 <CardContent className="p-4 flex justify-between items-center">
                   <div>
                     <p className="text-gray-400 text-sm">Canceled</p>
                     <p className="text-2xl font-bold mt-1">{statusCounts.canceled || 0}</p>
                   </div>
                   <div className="h-8 w-8 rounded-full bg-red-500 opacity-75 flex items-center justify-center">
-                    <X className="h-5 w-5 text-white" />
+                    <X className="h-5 w-5 text-[#0A2540]" />
                   </div>
                 </CardContent>
               </Card>
@@ -1454,10 +1454,10 @@ const BookingsTab = () => {
                       value={selectedStatus}
                       onValueChange={setSelectedStatus}
                     >
-                      <SelectTrigger id="filter-status" className="w-40 bg-[#0a2342] border-[#2a4d7d] text-white">
+                      <SelectTrigger id="filter-status" className="w-40 bg-white border-gray-200 text-[#0A2540]">
                         <SelectValue placeholder="Filter status" />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#173561] border-[#2a4d7d] text-white">
+                      <SelectContent className="bg-white border-gray-200 text-[#0A2540]">
                         <SelectItem value="all">All Statuses</SelectItem>
                         <SelectItem value="confirmed">Confirmed</SelectItem>
                         <SelectItem value="rescheduled">Rescheduled</SelectItem>
@@ -1473,10 +1473,10 @@ const BookingsTab = () => {
                       value={selectedType}
                       onValueChange={setSelectedType}
                     >
-                      <SelectTrigger id="filter-type" className="w-40 bg-[#0a2342] border-[#2a4d7d] text-white">
+                      <SelectTrigger id="filter-type" className="w-40 bg-white border-gray-200 text-[#0A2540]">
                         <SelectValue placeholder="Filter type" />
                       </SelectTrigger>
-                      <SelectContent className="bg-[#173561] border-[#2a4d7d] text-white">
+                      <SelectContent className="bg-white border-gray-200 text-[#0A2540]">
                         <SelectItem value="all">All Types</SelectItem>
                         <SelectItem value="call">Call</SelectItem>
                         <SelectItem value="meeting">Meeting</SelectItem>
@@ -1493,7 +1493,7 @@ const BookingsTab = () => {
                         <Button
                           id="date-range"
                           variant="outline"
-                          className="w-[240px] justify-start text-left font-normal bg-[#0a2342] border-[#2a4d7d] text-white"
+                          className="w-[240px] justify-start text-left font-normal bg-white border-gray-200 text-[#0A2540]"
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
                           {dateRange.from ? (
@@ -1509,7 +1509,7 @@ const BookingsTab = () => {
                           )}
                         </Button>
                       </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 bg-[#173561] border-[#2a4d7d]">
+                      <PopoverContent className="w-auto p-0 bg-white border-gray-200">
                         <div className="p-3">
                           <CalendarComponent
                             initialFocus
@@ -1525,7 +1525,7 @@ const BookingsTab = () => {
                               }
                             }}
                             numberOfMonths={2}
-                            className="bg-[#173561] text-white"
+                            className="bg-white text-[#0A2540]"
                           />
                         </div>
                       </PopoverContent>
@@ -1540,7 +1540,7 @@ const BookingsTab = () => {
                       variant={viewMode === ViewMode.Grid ? "default" : "outline"}
                       size="icon"
                       className={cn(
-                        viewMode !== ViewMode.Grid && "border-[#2a4d7d] text-white hover:bg-[#0a2342]",
+                        viewMode !== ViewMode.Grid && "border-[#2a4d7d] text-[#0A2540] hover:bg-white",
                         viewMode === ViewMode.Grid && "bg-[#1d4ed8] hover:bg-blue-600"
                       )}
                       onClick={() => setViewMode(ViewMode.Grid)}
@@ -1551,7 +1551,7 @@ const BookingsTab = () => {
                       variant={viewMode === ViewMode.List ? "default" : "outline"}
                       size="icon"
                       className={cn(
-                        viewMode !== ViewMode.List && "border-[#2a4d7d] text-white hover:bg-[#0a2342]",
+                        viewMode !== ViewMode.List && "border-[#2a4d7d] text-[#0A2540] hover:bg-white",
                         viewMode === ViewMode.List && "bg-[#1d4ed8] hover:bg-blue-600"
                       )}
                       onClick={() => setViewMode(ViewMode.List)}
@@ -1562,7 +1562,7 @@ const BookingsTab = () => {
                       variant={viewMode === ViewMode.Calendar ? "default" : "outline"}
                       size="icon"
                       className={cn(
-                        viewMode !== ViewMode.Calendar && "border-[#2a4d7d] text-white hover:bg-[#0a2342]",
+                        viewMode !== ViewMode.Calendar && "border-[#2a4d7d] text-[#0A2540] hover:bg-white",
                         viewMode === ViewMode.Calendar && "bg-[#1d4ed8] hover:bg-blue-600"
                       )}
                       onClick={() => setViewMode(ViewMode.Calendar)}
