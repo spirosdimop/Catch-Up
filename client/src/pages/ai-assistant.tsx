@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PageTitle } from "@/components/ui/page-title";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Bot, Send, User, Calendar, Settings, MessageSquare, ArrowRight, Loader2 } from "lucide-react";
+import { Bot, Send, User, Calendar, Settings, MessageSquare, ArrowRight, Loader2, Edit, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -10,6 +10,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link } from "wouter";
 import { useAppSettings } from "@/lib/appSettingsContext";
+import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 
 // Message types
 type MessageRole = 'user' | 'assistant' | 'system';
@@ -45,11 +47,25 @@ interface CommandResult {
 export default function AIAssistant() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { updateSettings, applyLanguage } = useAppSettings();
+  const { settings, updateSettings, applyLanguage } = useAppSettings();
+  
+  // Assistant name modal state
+  const [nameModalOpen, setNameModalOpen] = useState(false);
+  const [nameInputValue, setNameInputValue] = useState(settings.assistantName || 'Assistant');
   
   // Message state
   const [inputValue, setInputValue] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Create welcome message with the assistant's name
+  const createWelcomeMessage = (assistantName: string) => {
+    return {
+      id: Date.now(),
+      text: `Hi, I'm ${assistantName}, your personal assistant! I can help with settings, calendar events, and auto-response messages. How can I assist you today?`,
+      role: 'assistant' as MessageRole,
+      timestamp: new Date()
+    };
+  };
   
   // Load messages from localStorage or use default welcome message
   const [messages, setMessages] = useState<Message[]>(() => {
@@ -65,22 +81,12 @@ export default function AIAssistant() {
       } catch (error) {
         console.error('Failed to parse saved messages:', error);
         // Return default message if parsing fails
-        return [{
-          id: 1,
-          text: "Welcome to the AI assistant! I can help with settings, calendar events, and auto-response messages. How can I assist you today?",
-          role: 'assistant' as MessageRole,
-          timestamp: new Date()
-        }];
+        return [createWelcomeMessage(settings.assistantName)];
       }
     }
     
     // Default welcome message for first-time users
-    return [{
-      id: 1,
-      text: "Welcome to the AI assistant! I can help with settings, calendar events, and auto-response messages. How can I assist you today?",
-      role: 'assistant' as MessageRole,
-      timestamp: new Date()
-    }];
+    return [createWelcomeMessage(settings.assistantName)];
   });
   
   // Conversation context
@@ -365,14 +371,7 @@ export default function AIAssistant() {
               size="sm"
               onClick={() => {
                 // Reset conversation but keep in localStorage
-                setMessages([
-                  {
-                    id: Date.now(),
-                    text: "Welcome to the AI assistant! I can help with settings, calendar events, and auto-response messages. How can I assist you today?",
-                    role: 'assistant',
-                    timestamp: new Date()
-                  }
-                ]);
+                setMessages([createWelcomeMessage(settings.assistantName)]);
                 // Reset context
                 setConversationContext("");
                 setInClarificationMode(false);
@@ -381,6 +380,14 @@ export default function AIAssistant() {
             >
               <Bot className="h-4 w-4 mr-1" />
               New Chat
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setNameModalOpen(true)}
+            >
+              <Edit className="h-4 w-4 mr-1" />
+              Name Assistant
             </Button>
             <Button
               variant="outline"

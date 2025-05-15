@@ -7,6 +7,7 @@ export interface AppSettings {
   preferred_route_type: 'fastest' | 'greenest';
   notification_preferences: 'all' | 'important_only' | 'none';
   default_reply_message: string;
+  assistantName: string;
 }
 
 const defaultSettings: AppSettings = {
@@ -15,7 +16,8 @@ const defaultSettings: AppSettings = {
   auto_reply_enabled: false,
   preferred_route_type: 'fastest',
   notification_preferences: 'all',
-  default_reply_message: 'I will get back to you as soon as possible.'
+  default_reply_message: 'I will get back to you as soon as possible.',
+  assistantName: 'Assistant'
 };
 
 interface AppSettingsContextType {
