@@ -14,7 +14,8 @@ import {
   MessageSquareIcon, 
   CalendarPlusIcon,
   RefreshCwIcon,
-  UserIcon
+  UserIcon,
+  Bot
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -203,8 +204,14 @@ export default function Dashboard() {
             <h3 className="ml-3 font-medium">Appointments Today</h3>
           </div>
           <div className="mt-auto">
-            <span className="text-3xl font-bold">{appointmentsToday}</span>
-            <Badge className="ml-2 bg-[#00C2D1]">Next: 2:00 PM</Badge>
+            <div className="flex items-baseline">
+              <span className="text-3xl font-bold">0</span>
+              <span className="text-2xl font-bold text-gray-500 ml-1">hrs</span>
+            </div>
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-xs text-gray-400">WORKING HOURS TODAY</span>
+              <span className="text-xs text-gray-400">0 MEETINGS</span>
+            </div>
           </div>
         </motion.div>
         
@@ -213,11 +220,17 @@ export default function Dashboard() {
             <div className="p-2 rounded-full bg-catchup-primary/20">
               <TrendingUpIcon className="h-5 w-5 text-[#10B981]" />
             </div>
-            <h3 className="ml-3 font-medium">Bookings This Week</h3>
+            <h3 className="ml-3 font-medium">Upcoming Schedule</h3>
           </div>
           <div className="mt-auto">
-            <span className="text-3xl font-bold">{bookingsThisWeek}</span>
-            <Badge className="ml-2 bg-[#10B981]">↑ 2 from last week</Badge>
+            <div className="flex items-baseline">
+              <span className="text-3xl font-bold">0</span>
+              <span className="text-2xl font-bold text-gray-500 ml-1">hrs</span>
+            </div>
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-xs text-gray-400">PLANNED AVAILABILITY</span>
+              <span className="text-xs text-gray-400">0 MEETINGS</span>
+            </div>
           </div>
         </motion.div>
         
@@ -226,17 +239,26 @@ export default function Dashboard() {
             <div className="p-2 rounded-full bg-catchup-primary/20">
               <BellIcon className="h-5 w-5 text-[#FFC700]" />
             </div>
-            <h3 className="ml-3 font-medium">Follow-ups Pending</h3>
+            <h3 className="ml-3 font-medium">Availability Today</h3>
           </div>
-          <div className="mt-auto">
-            <span className="text-3xl font-bold">{pendingFollowups}</span>
-            <Badge className="ml-2 bg-[#FFC700] text-gray-800">Urgent: 1</Badge>
+          <div className="flex-1 flex flex-col justify-center items-center py-3">
+            <div className="rounded-full bg-[#1A2235] h-16 w-16 flex items-center justify-center mb-2">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 8V12L15 15" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                <circle cx="12" cy="12" r="9" stroke="#6B7280" strokeWidth="2"/>
+              </svg>
+            </div>
+            <p className="text-xs text-gray-400 text-center mt-2">YOU'LL BE FREE FOR 24 HRS</p>
+            <p className="text-xs text-gray-500 text-center">EXCEPTIONALLY BLOCKED UNTIL TODAY</p>
           </div>
+          <button className="mt-3 bg-[#3A4D6C] text-white text-sm py-2 rounded-lg hover:bg-[#4A5D7C] transition-colors">
+            UNAVAILABLE TODAY
+          </button>
         </motion.div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Next Appointment Card */}
+        {/* Missed Calls Card */}
         <motion.div 
           variants={itemVariants}
           className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
@@ -244,103 +266,242 @@ export default function Dashboard() {
         >
           <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
             <h3 className="font-semibold text-lg text-gray-800 flex items-center">
-              <CalendarIcon className="mr-2 h-5 w-5 text-catchup-primary" />
-              Next Appointment
+              <PhoneIcon className="mr-2 h-5 w-5 text-catchup-primary" />
+              Missed Calls
             </h3>
-            <Link href="/calendar" className="text-sm text-catchup-primary hover:underline">
-              View Calendar
-            </Link>
+            <span className="text-sm text-gray-500 hover:underline cursor-pointer">
+              Show missing only
+            </span>
           </div>
-          <div className="p-6">
-            <div className="flex items-start border-l-4 border-catchup-primary pl-4 py-2">
-              <div className="mr-4 p-3 bg-catchup-primary/10 text-catchup-primary rounded-md text-center">
-                <div className="text-sm font-medium">TODAY</div>
-                <div className="text-xl font-bold">2:00</div>
-                <div className="text-sm">PM</div>
+          <div className="divide-y divide-gray-100">
+            {/* Missed Call Item 1 */}
+            <div className="p-5">
+              <div className="flex justify-between mb-1">
+                <h4 className="font-medium text-gray-900">Wilhelm Sequim</h4>
+                <span className="text-sm text-red-500">Extend missing reply</span>
               </div>
-              <div>
-                <h4 className="font-medium text-gray-900">Client Meeting with John Smith</h4>
-                <p className="text-gray-500 mt-1">Discussing project requirements and timeline</p>
-                <div className="flex mt-3 space-x-2">
-                  <Button variant="outline" size="sm" className="text-xs">
-                    Join Call
-                  </Button>
-                  <Button variant="ghost" size="sm" className="text-xs">
-                    Reschedule
-                  </Button>
-                </div>
+              <div className="flex justify-between mb-3">
+                <span className="text-sm text-gray-500">DATE REQUESTED</span>
+                <span className="text-sm text-gray-500">TIME REQUESTED</span>
+                <span className="text-sm text-gray-500">ACTION</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">03-08-2025</span>
+                <span className="text-sm font-medium">6:00 AM - 6:00 AM</span>
+                <button className="text-sm text-catchup-primary font-medium">Message →</button>
               </div>
             </div>
+            
+            {/* Missed Call Item 2 */}
+            <div className="p-5">
+              <div className="flex justify-between mb-1">
+                <h4 className="font-medium text-gray-900">Johan Green</h4>
+                <span className="text-sm text-red-500">5 voicemails</span>
+              </div>
+              <div className="flex justify-between mb-3">
+                <span className="text-sm text-gray-500">DATE</span>
+                <span className="text-sm text-gray-500">TIME REQUESTED</span>
+                <span className="text-sm text-gray-500">ACTION</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm font-medium">May 11, 2025</span>
+                <span className="text-sm font-medium">8:00 AM - 1:00 PM</span>
+                <button className="text-sm text-catchup-primary font-medium">Message →</button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
 
-            <div className="mt-4 border-l-4 border-gray-200 pl-4 py-2">
-              <div className="flex items-start">
-                <div className="mr-4 p-3 bg-gray-100 text-gray-500 rounded-md text-center">
-                  <div className="text-sm font-medium">TMR</div>
-                  <div className="text-xl font-bold">10:30</div>
-                  <div className="text-sm">AM</div>
+        {/* AI Assistant Card */}
+        <motion.div 
+          variants={itemVariants}
+          className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
+          style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
+        >
+          <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+            <h3 className="font-semibold text-lg text-gray-800 flex items-center">
+              <Bot className="mr-2 h-5 w-5 text-catchup-primary" />
+              AI Assistant
+            </h3>
+          </div>
+          <div className="p-4">
+            {/* Reschedule Appointment */}
+            <div className="bg-gray-50 rounded-lg p-4 mb-3">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-medium text-gray-900">Reschedule Appointment</h4>
+                <button className="text-xs bg-blue-500 text-white px-3 py-1 rounded-full">Approve</button>
+              </div>
+              <p className="text-sm text-gray-600 mb-1">Appointment rescheduled at client's request:</p>
+              <p className="text-sm text-gray-500">Rescheduled from 10/23/2025 to 11/05/2025</p>
+            </div>
+            
+            {/* Follow-up Message */}
+            <div className="bg-gray-50 rounded-lg p-4">
+              <div className="flex justify-between items-center mb-2">
+                <h4 className="font-medium text-gray-900">Send Follow Up Message</h4>
+                <div className="flex space-x-1">
+                  <button className="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full">Out</button>
+                  <button className="text-xs bg-blue-500 text-white px-3 py-1 rounded-full">Edit</button>
                 </div>
+              </div>
+              <p className="text-sm text-gray-600">Send automated status on client call</p>
+              <p className="text-xs italic text-gray-500 mt-1">Appointment has been created for October 11</p>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Calendar Card */}
+        <motion.div 
+          variants={itemVariants} 
+          className="lg:col-span-2 bg-white rounded-xl overflow-hidden border border-gray-100"
+          style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
+        >
+          <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+            <div className="flex items-center">
+              <h3 className="font-semibold text-lg text-gray-800">May 20%</h3>
+              <button className="ml-2 p-1 rounded hover:bg-gray-100">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M8 4.5V11.5" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round"/>
+                  <path d="M4.5 8H11.5" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </button>
+              <button className="ml-1 p-1 rounded hover:bg-gray-100">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 4L6 8L10 12" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button className="p-1 rounded hover:bg-gray-100">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M6 4L10 8L6 12" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            </div>
+            <div className="text-xs text-gray-500">May '24</div>
+          </div>
+          
+          {/* Calendar grid */}
+          <div className="p-4">
+            <div className="grid grid-cols-7 gap-2 text-center text-sm font-medium mb-2">
+              <div>Sun</div>
+              <div>Mon</div>
+              <div>Tue</div>
+              <div>Wed</div>
+              <div>Thu</div>
+              <div>Fri</div>
+              <div>Sat</div>
+            </div>
+            
+            <div className="grid grid-cols-7 gap-2 text-center">
+              {/* Week 1 */}
+              <div className="text-gray-400 p-2">28</div>
+              <div className="text-gray-400 p-2">29</div>
+              <div className="text-gray-400 p-2">30</div>
+              <div className="p-2 rounded">1</div>
+              <div className="p-2 rounded">2</div>
+              <div className="p-2 rounded">3</div>
+              <div className="p-2 rounded">4</div>
+              
+              {/* Week 2 */}
+              <div className="p-2 rounded">5</div>
+              <div className="p-2 rounded">6</div>
+              <div className="p-2 rounded">7</div>
+              <div className="p-2 rounded">8</div>
+              <div className="p-2 rounded">9</div>
+              <div className="p-2 rounded">10</div>
+              <div className="p-2 rounded">11</div>
+              
+              {/* Week 3 */}
+              <div className="p-2 rounded">12</div>
+              <div className="p-2 rounded">13</div>
+              <div className="p-2 font-bold">14</div>
+              <div className="p-2 bg-catchup-primary text-white rounded-full">15</div>
+              <div className="p-2 rounded">16</div>
+              <div className="p-2 rounded">17</div>
+              <div className="p-2 rounded">18</div>
+              
+              {/* Week 4 */}
+              <div className="p-2 rounded">19</div>
+              <div className="p-2 rounded">20</div>
+              <div className="p-2 rounded">21</div>
+              <div className="p-2 rounded">22</div>
+              <div className="p-2 rounded">23</div>
+              <div className="p-2 rounded">24</div>
+              <div className="p-2 rounded">25</div>
+              
+              {/* Week 5 */}
+              <div className="p-2 rounded">26</div>
+              <div className="p-2 rounded">27</div>
+              <div className="p-2 rounded">28</div>
+              <div className="p-2 rounded">29</div>
+              <div className="p-2 rounded">30</div>
+              <div className="text-gray-400 p-2">1</div>
+              <div className="text-gray-400 p-2">2</div>
+            </div>
+            
+            <div className="mt-6 flex justify-between border-t border-gray-100 pt-4">
+              <div className="text-sm text-gray-500">May 2025</div>
+              <div className="text-sm text-gray-500">May 2022</div>
+            </div>
+            
+            {/* Appointment on calendar */}
+            <div className="mt-8 border-t border-gray-100 pt-4">
+              <div className="text-xs text-gray-500 mb-2">WED 15</div>
+              <div className="flex gap-4 items-start">
+                <div className="mt-1 h-2 w-2 rounded-full bg-catchup-primary"></div>
                 <div>
-                  <h4 className="font-medium text-gray-700">Follow-up with Sarah Jones</h4>
-                  <p className="text-gray-500 mt-1">Reviewing website design progress</p>
+                  <h4 className="font-medium">Sean Dillion</h4>
+                  <p className="text-xs text-gray-500 mt-1">POTENTIAL CLIENT • ONLINE</p>
+                  <div className="mt-2 text-sm font-medium flex items-center gap-1">
+                    <span>Team Pitch | 5:00pm</span>
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <button className="px-4 py-2 bg-catchup-primary text-white text-sm rounded-lg">Team Reschedule Time</button>
+                    <button className="px-4 py-2 border border-gray-200 text-gray-600 text-sm rounded-lg">Cancel</button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Time Tracking Card - Redesigned with softer shadow */}
-        {isLoadingTimeEntries ? (
-          <motion.div 
-            variants={itemVariants}
-            className="bg-white rounded-xl p-6 space-y-4"
-            style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
-          >
-            <Skeleton className="h-8 w-72" />
-            <Skeleton className="h-80 w-full" />
-          </motion.div>
-        ) : (
-          <motion.div 
-            variants={itemVariants}
-            className="bg-white rounded-xl overflow-hidden border border-gray-100"
-            style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
-          >
-            <TimeTrackingWidget 
-              timeEntries={todayEntries || []} 
-              weeklySummary={weeklySummary}
-              totalHours={totalHoursTracked / 60}
-            />
-          </motion.div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Tasks Overview Card - with better shadows */}
-        {isLoadingTasks ? (
-          <motion.div 
-            variants={itemVariants} 
-            className="bg-white rounded-xl p-6 space-y-4 lg:col-span-2 border border-gray-100"
-            style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
-          >
-            <Skeleton className="h-8 w-72" />
-            <Skeleton className="h-80 w-full" />
-          </motion.div>
-        ) : (
-          <motion.div 
-            variants={itemVariants} 
-            className="lg:col-span-2 bg-white rounded-xl overflow-hidden border border-gray-100"
-            style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
-          >
-            <TaskList tasks={tasksWithProjects || []} />
-          </motion.div>
-        )}
-
-        {/* Reminders Card - updated with same styling */}
+        {/* Suggestions Card */}
         <motion.div 
           variants={itemVariants}
           className="bg-white rounded-xl overflow-hidden border border-gray-100"
           style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
         >
-          <ReminderSummary />
+          <div className="border-b border-gray-100 px-6 py-4">
+            <h3 className="font-semibold text-lg text-gray-800">Suggestions</h3>
+          </div>
+          <div className="p-4 space-y-6">
+            {/* Suggestion 1 */}
+            <div>
+              <div className="flex justify-between items-start mb-2">
+                <h4 className="font-medium text-gray-900">Reschedule Appointment</h4>
+                <button className="text-xs text-blue-500 font-medium">Approve</button>
+              </div>
+              <p className="text-sm text-gray-500 mb-4">Approve 5:00 pm time that fits both your schedule</p>
+              <div className="text-xs text-gray-400 flex items-center justify-between">
+                <span>TUESDAY, AUGUST 14, 2025 - 5:00 PM</span>
+                <button className="text-xs text-blue-500">Edit</button>
+              </div>
+            </div>
+
+            {/* Suggestion 2 */}
+            <div>
+              <div className="flex justify-between items-start mb-2">
+                <h4 className="font-medium text-gray-900">Send Follow Up Message</h4>
+                <button className="text-xs text-blue-500 font-medium">Edit</button>
+              </div>
+              <p className="text-sm text-gray-500 mb-4">Improve profits on all technical. Hanan</p>
+              <div className="text-xs text-gray-400 flex items-center justify-between">
+                <span>CUSTOMER HASN'T REPLIED</span>
+                <button className="text-xs text-blue-500">Dismiss</button>
+              </div>
+            </div>
+          </div>
         </motion.div>
       </div>
     </motion.div>

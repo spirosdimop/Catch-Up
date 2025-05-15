@@ -83,15 +83,15 @@ export function AppShell({
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* Sidebar for desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 shadow-sm">
+      <aside className="hidden md:flex flex-col w-64 bg-[#0A2540] shadow-md">
         {/* Logo */}
-        <div className="p-4 border-b border-gray-200">
+        <div className="p-4 border-b border-[#1A2E4A]">
           <Link href="/dashboard">
             <div className="flex items-center gap-3 cursor-pointer">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-catchup-primary">
-                <Star className="h-5 w-5 text-white" />
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+                <Star className="h-5 w-5 text-[#0A2540]" />
               </div>
-              <span className="text-xl font-semibold text-catchup-primary">Catch Up</span>
+              <span className="text-xl font-semibold text-white">Catch Up</span>
             </div>
           </Link>
         </div>
@@ -110,8 +110,8 @@ export function AppShell({
                         "flex items-center gap-3 px-4 py-3 rounded-lg",
                         "cursor-pointer transition-all duration-200",
                         isActive 
-                          ? "bg-catchup-primary text-white" 
-                          : "text-gray-600 hover:bg-gray-100"
+                          ? "bg-white text-[#0A2540]" 
+                          : "text-white hover:bg-[#1F2A40]"
                       )}
                     >
                       {item.icon}
@@ -135,18 +135,18 @@ export function AppShell({
         </nav>
         
         {/* User profile section */}
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4 border-t border-[#1A2E4A]">
           <Link href="/profile">
-            <div className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors">
-              <div className="h-10 w-10 rounded-full bg-catchup-primary/10 flex items-center justify-center">
-                <User className="h-5 w-5 text-catchup-primary" />
+            <div className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-[#1F2A40] transition-colors">
+              <div className="h-10 w-10 rounded-full bg-white text-[#0A2540] flex items-center justify-center">
+                <span className="text-xs font-semibold">AL</span>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {user?.firstName} {user?.lastName}
+                <p className="text-sm font-medium text-white truncate">
+                  Alex Johnson
                 </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {user?.email || "user@example.com"}
+                <p className="text-xs text-gray-400 truncate">
+                  alex@example.com
                 </p>
               </div>
             </div>
@@ -173,22 +173,22 @@ export function AppShell({
               animate={{ x: 0 }}
               exit={{ x: "-100%" }}
               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="fixed md:hidden flex flex-col w-64 h-full bg-white border-r border-gray-200 shadow-lg z-30"
+              className="fixed md:hidden flex flex-col w-64 h-full bg-[#0A2540] shadow-lg z-30"
             >
-              <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+              <div className="p-4 border-b border-[#1A2E4A] flex items-center justify-between">
                 <Link href="/dashboard">
                   <div className="flex items-center gap-3 cursor-pointer">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-catchup-primary">
-                      <Star className="h-5 w-5 text-white" />
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+                      <Star className="h-5 w-5 text-[#0A2540]" />
                     </div>
-                    <span className="text-xl font-semibold text-catchup-primary">Catch Up</span>
+                    <span className="text-xl font-semibold text-white">Catch Up</span>
                   </div>
                 </Link>
                 <button 
                   onClick={toggleSidebar}
-                  className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-gray-100"
+                  className="h-8 w-8 flex items-center justify-center rounded-full hover:bg-[#1F2A40] text-white"
                 >
-                  <X className="h-5 w-5 text-gray-500" />
+                  <X className="h-5 w-5" />
                 </button>
               </div>
               
@@ -205,8 +205,8 @@ export function AppShell({
                               "flex items-center gap-3 px-4 py-3 rounded-lg",
                               "cursor-pointer transition-all duration-200",
                               isActive 
-                                ? "bg-catchup-primary text-white" 
-                                : "text-gray-600 hover:bg-gray-100"
+                                ? "bg-white text-[#0A2540]" 
+                                : "text-white hover:bg-[#1F2A40]"
                             )}
                             onClick={toggleSidebar}
                           >
@@ -230,18 +230,18 @@ export function AppShell({
                 </ul>
               </nav>
               
-              <div className="p-4 border-t border-gray-200">
+              <div className="p-4 border-t border-[#1A2E4A]">
                 <Link href="/profile">
-                  <div className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <div className="h-10 w-10 rounded-full bg-catchup-primary/10 flex items-center justify-center">
-                      <User className="h-5 w-5 text-catchup-primary" />
+                  <div className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-[#1F2A40] transition-colors">
+                    <div className="h-10 w-10 rounded-full bg-white text-[#0A2540] flex items-center justify-center">
+                      <span className="text-xs font-semibold">AL</span>
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
-                        {user?.firstName} {user?.lastName}
+                      <p className="text-sm font-medium text-white truncate">
+                        Alex Johnson
                       </p>
-                      <p className="text-xs text-gray-500 truncate">
-                        {user?.email || "user@example.com"}
+                      <p className="text-xs text-gray-400 truncate">
+                        alex@example.com
                       </p>
                     </div>
                   </div>
@@ -263,17 +263,17 @@ export function AppShell({
                 onClick={toggleSidebar}
                 className="md:hidden h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-100"
               >
-                <Menu className="h-5 w-5 text-gray-600" />
+                <Menu className="h-5 w-5 text-[#0A2540]" />
               </button>
               
               {/* Page title */}
-              <h1 className="text-xl font-semibold text-catchup-primary">
+              <h1 className="text-xl font-semibold text-[#0A2540]">
                 {title || "Dashboard"}
               </h1>
             </div>
             
             {/* Right header content */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-4">
               {/* Notifications */}
               <button className="h-10 w-10 flex items-center justify-center rounded-full hover:bg-gray-100 relative">
                 <Bell className="h-5 w-5 text-gray-600" />
@@ -282,10 +282,28 @@ export function AppShell({
                 </span>
               </button>
               
+              {/* AI assistant button */}
+              <Link href="/ai-assistant">
+                <div className="hidden sm:flex h-10 w-10 rounded-full bg-indigo-100 hover:bg-indigo-200 items-center justify-center transition-colors">
+                  <Bot className="h-5 w-5 text-indigo-600" />
+                </div>
+              </Link>
+              
+              {/* User profile mini widget */}
+              <div className="hidden md:flex items-center gap-3 px-3 py-1.5 rounded-full bg-gray-100 hover:bg-gray-200 transition-colors cursor-pointer">
+                <div className="text-right text-xs">
+                  <p className="font-semibold text-gray-800">Alex</p>
+                  <p className="text-gray-500">Online</p>
+                </div>
+                <div className="h-8 w-8 bg-[#0A2540] text-white rounded-full flex items-center justify-center">
+                  <span className="text-xs font-semibold">AL</span>
+                </div>
+              </div>
+              
               {/* User profile for mobile */}
               <Link href="/profile">
-                <div className="md:hidden h-10 w-10 rounded-full bg-catchup-primary/10 flex items-center justify-center">
-                  <User className="h-5 w-5 text-catchup-primary" />
+                <div className="md:hidden h-10 w-10 rounded-full bg-[#0A2540] text-white flex items-center justify-center">
+                  <span className="text-xs font-semibold">AL</span>
                 </div>
               </Link>
               
