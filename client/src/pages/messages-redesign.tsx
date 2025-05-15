@@ -58,9 +58,14 @@ const MessagesRedesign = () => {
   const [activeSection, setActiveSection] = useState('messages'); // 'messages' or 'autoResponses'
   
   // State for auto-response form
-  const [formState, setFormState] = useState({
+  const [formState, setFormState] = useState<{
+    name: string;
+    type: 'missed_call' | 'reschedule' | 'cancellation' | 'confirmation' | 'emergency' | 'general';
+    content: string;
+    isDefault: boolean;
+  }>({
     name: '',
-    type: 'general' as const,
+    type: 'general',
     content: '',
     isDefault: false
   });
@@ -303,6 +308,55 @@ const MessagesRedesign = () => {
     }
   };
 
+  // Helper functions for auto-response section display
+  const getSectionInfo = (type: string) => {
+    switch (type) {
+      case 'missed_call':
+        return { 
+          title: 'Missed Call Templates', 
+          bgColor: 'bg-blue-50' 
+        };
+      case 'reschedule':
+        return { 
+          title: 'Reschedule Templates', 
+          bgColor: 'bg-purple-50' 
+        };
+      case 'cancellation':
+        return { 
+          title: 'Cancellation Templates', 
+          bgColor: 'bg-red-50' 
+        };
+      case 'confirmation':
+        return { 
+          title: 'Confirmation Templates', 
+          bgColor: 'bg-green-50' 
+        };
+      case 'emergency':
+        return { 
+          title: 'Emergency Templates', 
+          bgColor: 'bg-amber-50' 
+        };
+      case 'general':
+      default:
+        return { 
+          title: 'General Message Templates', 
+          bgColor: 'bg-gray-50' 
+        };
+    }
+  };
+  
+  const getIconColor = (type: string) => {
+    switch (type) {
+      case 'missed_call': return 'text-blue-500';
+      case 'reschedule': return 'text-purple-500';
+      case 'cancellation': return 'text-red-500';
+      case 'confirmation': return 'text-green-500';
+      case 'emergency': return 'text-amber-500';
+      case 'general':
+      default: return 'text-gray-500';
+    }
+  };
+  
   // Render message card based on type
   const renderMessageCard = (message: Message) => {
     // Icon based on message type
@@ -757,9 +811,6 @@ const MessagesRedesign = () => {
       
       {/* Compose Message Dialog */}
       <ComposeDialog open={isComposeOpen} onOpenChange={setIsComposeOpen} />
-      
-      {/* Auto Responses Dialog */}
-      <AutoResponses open={isAutoResponsesOpen} onOpenChange={setIsAutoResponsesOpen} />
     </div>
   );
 };
