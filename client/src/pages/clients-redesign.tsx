@@ -1153,7 +1153,7 @@ const ClientsRedesign = () => {
                     name="name"
                     placeholder="John Doe" 
                     className="bg-white border-gray-200 text-[#0A2540]"
-                    defaultValue={selectedClient.name}
+                    defaultValue={selectedClient.name || ''}
                     required 
                   />
                 </div>
@@ -1167,7 +1167,7 @@ const ClientsRedesign = () => {
                       type="email" 
                       placeholder="john@example.com" 
                       className="bg-white border-gray-200 text-[#0A2540]"
-                      defaultValue={selectedClient.email}
+                      defaultValue={selectedClient.email || ''}
                       required 
                     />
                   </div>
@@ -1197,7 +1197,7 @@ const ClientsRedesign = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="status">Client Status</Label>
-                    <Select defaultValue={selectedClient.status} name="status">
+                    <Select defaultValue={selectedClient.status || "new"} name="status">
                       <SelectTrigger className="bg-white border-gray-200 text-[#0A2540]">
                         <SelectValue placeholder="Select status" />
                       </SelectTrigger>
@@ -1210,7 +1210,7 @@ const ClientsRedesign = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="loyalty">Loyalty Level</Label>
-                    <Select defaultValue={selectedClient.loyalty} name="loyalty">
+                    <Select defaultValue={selectedClient.loyalty || "one-time"} name="loyalty">
                       <SelectTrigger className="bg-white border-gray-200 text-[#0A2540]">
                         <SelectValue placeholder="Select loyalty" />
                       </SelectTrigger>
