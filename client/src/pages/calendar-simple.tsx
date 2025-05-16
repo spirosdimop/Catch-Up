@@ -105,7 +105,8 @@ export default function CalendarPage() {
         eventType: newEventFormData.type
       };
       
-      setAllEvents(prev => [...prev, localEvent]);
+      // Add to local events collection
+      setLocalOnlyEvents(prev => [...prev, localEvent]);
       setIsAddEventModalOpen(false);
       
       toast({
@@ -139,25 +140,10 @@ export default function CalendarPage() {
     }
   });
   
-  // Update the combined events whenever API events change
-  useEffect(() => {
-    console.log("API Events:", apiEvents);
-    
-    // Filter out API events from local events to avoid duplicates
-    const localOnlyEvents = allEvents.filter(
-      localEvent => typeof localEvent.id === 'string' && localEvent.id.startsWith('local-')
-    );
-    
-    console.log("Local Events:", localOnlyEvents);
-    
-    // Combine API and local events
-    const combinedEvents = [...apiEvents, ...localOnlyEvents];
-    console.log("Combined Events:", combinedEvents);
-    
-    setAllEvents(combinedEvents);
-  }, [apiEvents]);
+  // Track local events separately to avoid infinite loops
+  const [localOnlyEvents, setLocalOnlyEvents] = useState<CalendarEvent[]>([]);
   
-  // Add a dummy event to demonstrate functionality on initial load
+  // Add a dummy event on initial load
   useEffect(() => {
     // Create a sample event for tomorrow at 10 AM
     const tomorrow = new Date();
@@ -176,11 +162,21 @@ export default function CalendarPage() {
       eventType: 'client_meeting'
     };
     
-    // Add the demo event if no other events exist
-    if (allEvents.length === 0) {
-      setAllEvents([demoEvent]);
-    }
+    // Set our initial local event
+    setLocalOnlyEvents([demoEvent]);
   }, []);
+  
+  // Combine API events and local events without causing infinite loops
+  useEffect(() => {
+    console.log("API Events:", apiEvents);
+    console.log("Local Events:", localOnlyEvents);
+    
+    // Safely combine both event sources
+    const combinedEvents = [...apiEvents, ...localOnlyEvents];
+    console.log("Setting combined events:", combinedEvents);
+    
+    setAllEvents(combinedEvents);
+  }, [apiEvents, localOnlyEvents]);
   
   // Handle form changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
