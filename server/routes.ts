@@ -234,73 +234,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid client ID" });
       }
       
-      // Check for any reasons why the client can't be deleted
-      const restrictions = [];
-      
-      // Check for events associated with this client
-      const events = await storage.getEvents("user-1"); // Using default user
-      const clientEvents = events.filter(event => event.clientId === id);
-      if (clientEvents.length > 0) {
-        restrictions.push({
-          type: "events",
-          count: clientEvents.length,
-          message: "This client has calendar events or bookings scheduled."
-        });
-      }
-      
-      // Check for projects associated with this client
-      const clientProjects = await storage.getProjectsByClient(id);
-      if (clientProjects.length > 0) {
-        restrictions.push({
-          type: "projects",
-          count: clientProjects.length,
-          message: "This client has active projects."
-        });
-      }
-      
-      // Check for tasks associated with this client through projects
-      let hasAssociatedTasks = false;
-      for (const project of clientProjects) {
-        const tasks = await storage.getTasksByProject(project.id);
-        if (tasks.length > 0) {
-          hasAssociatedTasks = true;
-          restrictions.push({
-            type: "tasks",
-            count: tasks.length,
-            projectId: project.id,
-            projectName: project.name,
-            message: `This client has ${tasks.length} active tasks in project "${project.name}".`
-          });
-          break; // Only need to find one project with tasks
+      // We'll use a simpler approach to avoid database errors
+      // Skip complex queries and just try the deletion
+      // Try to delete, but catch foreign key constraint errors
+      try {
+        const deleted = await storage.deleteClient(id);
+        if (!deleted) {
+          return res.status(404).json({ message: "Client not found" });
         }
+        
+        res.status(204).end();
+      } catch (deleteError) {
+        console.log("Delete error:", deleteError);
+        
+        // Check for foreign key constraint error
+        if (deleteError && 
+            (deleteError.code === '23503' || 
+             (deleteError.message && deleteError.message.includes('foreign key constraint')))) {
+          
+          // Send a friendly error message with suggestions
+          return res.status(400).json({
+            message: "Cannot delete client with associated records",
+            detail: "This client has bookings, events, or other records associated with them and cannot be deleted until these are removed.",
+            recommendations: [
+              "Cancel or delete any bookings or events linked to this client",
+              "Remove any projects or tasks associated with this client",
+              "Archive the client instead of deleting if you need to keep their records"
+            ]
+          });
+        }
+        
+        // For other errors, rethrow
+        throw deleteError;
       }
-      
-      // If any restrictions found, return the details
-      if (restrictions.length > 0) {
-        return res.status(400).json({
-          message: "Cannot delete client with associated records",
-          detail: "This client cannot be deleted until all associated bookings, events, projects, and tasks are completed or removed.",
-          restrictions: restrictions,
-          recommendations: [
-            "Complete or cancel any scheduled bookings or events for this client",
-            "Remove any projects or tasks associated with this client",
-            "Archive the client instead of deleting if they have historical records you need to keep"
-          ]
-        });
-      }
-      
-      // If no dependencies found, proceed with deletion
-      const deleted = await storage.deleteClient(id);
-      if (!deleted) {
-        return res.status(404).json({ message: "Client not found" });
-      }
-      
-      res.status(204).end();
     } catch (error) {
       console.error("Error deleting client:", error);
       res.status(500).json({ 
         message: "Failed to delete client", 
-        error: error instanceof Error ? error.message : String(error) 
+        error: error instanceof Error ? error.message : String(error)
       });
     }
   });
