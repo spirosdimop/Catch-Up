@@ -195,14 +195,24 @@ export function NewBookingDialog({ open, onOpenChange }: NewBookingDialogProps) 
       
       return response.json();
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
+      // First invalidate the queries to refetch
       queryClient.invalidateQueries({ queryKey: ['/api/bookings'] });
+      
+      // Force an immediate refetch to ensure the booking list updates
+      queryClient.refetchQueries({ queryKey: ['/api/bookings'] });
+      
+      // Close the dialog
       onOpenChange(false);
+      
+      // Show success notification
       toast({
         title: "Booking Created",
-        description: "Your booking has been successfully created.",
+        description: "Your booking has been successfully created and added to your calendar.",
         variant: "default",
       });
+      
+      // Reset form
       form.reset();
     },
     onError: (error) => {

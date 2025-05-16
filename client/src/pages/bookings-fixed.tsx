@@ -130,7 +130,16 @@ export const BookingsFixed = () => {
   // This ensures we get the latest data after creating a new booking
   React.useEffect(() => {
     refetch();
-  }, [refetch, isNewBookingOpen]);
+    // Reset filters when a booking is added to ensure it's visible
+    if (!isNewBookingOpen) {
+      setSelectedStatus('all');
+      setSelectedType('all');
+      // Only reset date if we're not in calendar mode
+      if (viewMode !== ViewMode.Calendar) {
+        setManagementSelectedDate(undefined);
+      }
+    }
+  }, [refetch, isNewBookingOpen, viewMode]);
   
   // Filter bookings
   const filteredBookings = bookings.filter(booking => {
