@@ -113,16 +113,24 @@ export const BookingsFixed = () => {
   const [isRescheduleOpen, setIsRescheduleOpen] = useState(false);
   
   // Query bookings
-  const { data: bookings = [], isLoading } = useQuery<Booking[], Error>({
+  const { data: bookings = [], isLoading, refetch } = useQuery<Booking[], Error>({
     queryKey: ['/api/bookings'],
     queryFn: async () => {
       const response = await fetch('/api/bookings');
       if (!response.ok) {
         throw new Error('Failed to fetch bookings');
       }
-      return response.json();
+      const data = await response.json();
+      console.log("Fetched bookings:", data);
+      return data;
     }
   });
+  
+  // Refetch bookings when component mounts or when isNewBookingOpen changes
+  // This ensures we get the latest data after creating a new booking
+  React.useEffect(() => {
+    refetch();
+  }, [refetch, isNewBookingOpen]);
   
   // Filter bookings
   const filteredBookings = bookings.filter(booking => {

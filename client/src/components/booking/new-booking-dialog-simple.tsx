@@ -268,7 +268,7 @@ export function NewBookingDialog({ open, onOpenChange }: NewBookingDialogProps) 
                   <FormLabel>Service Type</FormLabel>
                   <Select 
                     onValueChange={field.onChange} 
-                    defaultValue={field.value}
+                    value={field.value}
                   >
                     <FormControl>
                       <SelectTrigger className="border-gray-300">

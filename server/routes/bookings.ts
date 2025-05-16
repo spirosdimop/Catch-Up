@@ -135,68 +135,91 @@ export const registerBookingRoutes = (app: any) => {
   // Get all bookings
   app.get("/api/bookings", async (req: Request, res: Response) => {
     try {
-      // For demo purposes, return some mock bookings until database has real data
-      const mockBookings = [
-        {
-          id: 1,
-          date: "2025-05-20",
-          time: "10:00",
-          duration: 60,
-          type: "meeting",
-          status: "confirmed",
-          location: "Office",
-          notes: "Initial consultation",
-          client: {
-            name: "Sarah Johnson",
-            email: "sarah.j@example.com",
-            avatar: null
-          },
-          createdAt: "2025-05-15T10:00:00Z",
-          updatedAt: "2025-05-15T10:00:00Z"
-        },
-        {
-          id: 2,
-          date: "2025-05-21",
-          time: "14:30",
-          duration: 45,
-          type: "call",
-          status: "confirmed",
-          location: "Phone",
-          notes: "Follow-up call",
-          client: {
-            name: "Michael Chen",
-            email: "m.chen@example.com",
-            avatar: null
-          },
-          createdAt: "2025-05-15T11:00:00Z",
-          updatedAt: "2025-05-15T11:00:00Z"
-        }
-      ];
+      // Fetch bookings from database
+      const dbBookings = await db.select().from(bookings);
       
-      // Try to get bookings from database
-      try {
-        const dbBookings = await db.select().from(bookings);
+      // Get all clients for joining
+      const clientList = await db.select().from(clients);
+      
+      // Map clients by ID for easy lookup
+      const clientMap = new Map();
+      clientList.forEach(client => {
+        clientMap.set(client.id, client);
+      });
+      
+      // Format bookings with client info
+      const formattedBookings = dbBookings.map(booking => {
+        // Find the client by ID
+        const client = clientMap.get(booking.clientId) || { 
+          name: `Client ${booking.clientId}`, 
+          email: `client${booking.clientId}@example.com` 
+        };
         
-        // If we have bookings in the database, use those instead of mock data
-        if (dbBookings && dbBookings.length > 0) {
-          // Format the bookings to include client info
-          return res.json(dbBookings.map(booking => {
-            return {
-              ...booking,
-              client: {
-                id: booking.clientId,
-                name: `Client ${booking.clientId}`, // This would come from clients table
-                email: `client${booking.clientId}@example.com` // This would come from clients table
-              }
-            };
-          }));
-        }
-      } catch (dbError) {
-        console.log("Using mock bookings data due to DB error:", dbError);
+        return {
+          id: booking.id,
+          date: booking.date,
+          time: booking.time,
+          duration: booking.duration,
+          type: booking.type,
+          status: booking.status,
+          location: booking.location || "Office",
+          notes: booking.notes,
+          clientId: booking.clientId,
+          serviceId: booking.serviceId,
+          priority: booking.priority,
+          createdAt: booking.createdAt,
+          updatedAt: booking.updatedAt,
+          client: {
+            id: booking.clientId,
+            name: client.name,
+            email: client.email,
+            avatar: null // You can add avatar if you have it
+          }
+        };
+      });
+      
+      // If no database bookings, provide sample bookings
+      if (formattedBookings.length === 0) {
+        return res.json([
+          {
+            id: 1,
+            date: "2025-05-20",
+            time: "10:00",
+            duration: 60,
+            type: "meeting",
+            status: "confirmed",
+            location: "Office",
+            notes: "Initial consultation",
+            client: {
+              name: "Sarah Johnson",
+              email: "sarah.j@example.com",
+              avatar: null
+            },
+            createdAt: "2025-05-15T10:00:00Z",
+            updatedAt: "2025-05-15T10:00:00Z"
+          },
+          {
+            id: 2,
+            date: "2025-05-21",
+            time: "14:30",
+            duration: 45,
+            type: "call",
+            status: "confirmed",
+            location: "Phone",
+            notes: "Follow-up call",
+            client: {
+              name: "Michael Chen",
+              email: "m.chen@example.com",
+              avatar: null
+            },
+            createdAt: "2025-05-15T11:00:00Z",
+            updatedAt: "2025-05-15T11:00:00Z"
+          }
+        ]);
       }
       
-      // Return mock bookings if database has no data
-      res.json(mockBookings);
+      // Return the formatted bookings
+      res.json(formattedBookings);
     } catch (error) {
       console.error("Error fetching bookings:", error);
       res.status(500).json({ error: "Failed to fetch bookings" });
