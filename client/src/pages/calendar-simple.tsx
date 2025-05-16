@@ -141,13 +141,46 @@ export default function CalendarPage() {
   
   // Update the combined events whenever API events change
   useEffect(() => {
+    console.log("API Events:", apiEvents);
+    
     // Filter out API events from local events to avoid duplicates
     const localOnlyEvents = allEvents.filter(
       localEvent => typeof localEvent.id === 'string' && localEvent.id.startsWith('local-')
     );
     
-    setAllEvents([...apiEvents, ...localOnlyEvents]);
+    console.log("Local Events:", localOnlyEvents);
+    
+    // Combine API and local events
+    const combinedEvents = [...apiEvents, ...localOnlyEvents];
+    console.log("Combined Events:", combinedEvents);
+    
+    setAllEvents(combinedEvents);
   }, [apiEvents]);
+  
+  // Add a dummy event to demonstrate functionality on initial load
+  useEffect(() => {
+    // Create a sample event for tomorrow at 10 AM
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(10, 0, 0, 0);
+    
+    const endTime = new Date(tomorrow);
+    endTime.setHours(11, 0, 0, 0);
+    
+    const demoEvent: CalendarEvent = {
+      id: 'demo-1',
+      title: 'Sample Event',
+      start: tomorrow,
+      end: endTime,
+      description: 'This is a sample event to show how events appear on your calendar',
+      eventType: 'client_meeting'
+    };
+    
+    // Add the demo event if no other events exist
+    if (allEvents.length === 0) {
+      setAllEvents([demoEvent]);
+    }
+  }, []);
   
   // Handle form changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
