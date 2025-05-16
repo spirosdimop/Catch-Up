@@ -53,11 +53,15 @@ interface CalendarEvent {
   id: number;
   userId: string;
   title: string;
-  start: Date;
-  end: Date;
+  start: Date;  // For display in BigCalendar
+  end: Date;    // For display in BigCalendar
+  startTime?: Date | string; // For API
+  endTime?: Date | string;   // For API
+  eventType?: string;
   type?: string;
   description?: string;
   attendees?: number;
+  isConfirmed?: boolean;
 }
 
 // Upcoming tasks component
@@ -249,13 +253,18 @@ const CalendarNew = () => {
   
   // Create event mutation
   const createEventMutation = useMutation({
-    mutationFn: async (eventData: Omit<CalendarEvent, 'id'>) => {
+    mutationFn: async (eventData: any) => { // Using any to bypass type restrictions temporarily
+      console.log("Submitting event data:", eventData);
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(eventData),
       });
-      if (!response.ok) throw new Error('Failed to create event');
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error("Event creation error:", errorData);
+        throw new Error(errorData.message || 'Failed to create event');
+      }
       return response.json();
     },
     onSuccess: () => {
@@ -633,16 +642,26 @@ const CalendarNew = () => {
                   endDate.setHours(hours, minutes);
                 }
                 
-                // Convert dates to ISO strings and match the field names expected by the backend
-                createEventMutation.mutate({
+                // Format event data for API submission, matching exactly what the backend expects
+                const eventData = {
                   title: newEventFormData.title,
-                  description: newEventFormData.description,
+                  description: newEventFormData.description || "",
+                  // Format startTime and endTime as ISO strings
                   startTime: startDate.toISOString(),
-                  endTime: endDate.toISOString(), 
-                  eventType: newEventFormData.type,
-                  userId: "user-1", // This would be dynamically set in a real app
-                  isConfirmed: true // Default to confirmed events
-                });
+                  endTime: endDate.toISOString(),
+                  // Map type to eventType
+                  eventType: newEventFormData.type || "busy",
+                  // Include userId and isConfirmed
+                  userId: "user-1", // Would be dynamic in a real app
+                  isConfirmed: true,
+                  // Include any other required fields
+                  location: null,
+                  clientName: null,
+                  color: null
+                };
+                
+                console.log("Submitting event:", eventData);
+                createEventMutation.mutate(eventData);
               }}
             >
               Add Event
