@@ -472,8 +472,41 @@ const ClientsRedesign = () => {
         setIsDeleteConfirmOpen(false);
         setIsDetailsOpen(false);
       } else {
-        const error = await response.json();
-        throw new Error(error.message || 'Failed to delete client');
+        const errorData = await response.json();
+        // Show a more helpful error message when there are constraints
+        if (response.status === 400 && errorData.detail) {
+          // Create a dialog to show the detailed reasons
+          setIsDeleteConfirmOpen(false);
+          
+          // Create a list of restrictions in the toast message
+          let restrictionText = errorData.detail;
+          
+          if (errorData.restrictions && errorData.restrictions.length > 0) {
+            restrictionText += "\n\nReasons:";
+            errorData.restrictions.forEach((r: any) => {
+              if (r.message) {
+                restrictionText += `\n- ${r.message}`;
+              }
+            });
+            
+            // Add recommendations if available
+            if (errorData.recommendations && errorData.recommendations.length > 0) {
+              restrictionText += "\n\nRecommendations:";
+              errorData.recommendations.forEach((rec: string) => {
+                restrictionText += `\n- ${rec}`;
+              });
+            }
+          }
+          
+          toast({
+            title: "Cannot Delete Client",
+            description: restrictionText,
+            variant: "destructive",
+            duration: 10000, // Show for longer since it has more content
+          });
+        } else {
+          throw new Error(errorData.message || 'Failed to delete client');
+        }
       }
     } catch (error) {
       console.error('Error deleting client:', error);

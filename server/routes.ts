@@ -234,23 +234,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid client ID" });
       }
       
-      // Check if there are events associated with this client
-      // Use storage interface instead of direct db queries
+      // Check for any reasons why the client can't be deleted
+      const restrictions = [];
+      
+      // Check for events associated with this client
       const events = await storage.getEvents("user-1"); // Using default user
       const clientEvents = events.filter(event => event.clientId === id);
       if (clientEvents.length > 0) {
-        return res.status(400).json({ 
-          message: "Cannot delete client with associated events", 
-          detail: "This client has calendar events associated with them. Please remove the events first."
+        restrictions.push({
+          type: "events",
+          count: clientEvents.length,
+          message: "This client has calendar events or bookings scheduled."
         });
       }
       
-      // Check if there are projects associated with this client
+      // Check for projects associated with this client
       const clientProjects = await storage.getProjectsByClient(id);
       if (clientProjects.length > 0) {
-        return res.status(400).json({ 
-          message: "Cannot delete client with associated projects", 
-          detail: "This client has projects associated with them. Please remove the projects first."
+        restrictions.push({
+          type: "projects",
+          count: clientProjects.length,
+          message: "This client has active projects."
+        });
+      }
+      
+      // Check for tasks associated with this client through projects
+      let hasAssociatedTasks = false;
+      for (const project of clientProjects) {
+        const tasks = await storage.getTasksByProject(project.id);
+        if (tasks.length > 0) {
+          hasAssociatedTasks = true;
+          restrictions.push({
+            type: "tasks",
+            count: tasks.length,
+            projectId: project.id,
+            projectName: project.name,
+            message: `This client has ${tasks.length} active tasks in project "${project.name}".`
+          });
+          break; // Only need to find one project with tasks
+        }
+      }
+      
+      // If any restrictions found, return the details
+      if (restrictions.length > 0) {
+        return res.status(400).json({
+          message: "Cannot delete client with associated records",
+          detail: "This client cannot be deleted until all associated bookings, events, projects, and tasks are completed or removed.",
+          restrictions: restrictions,
+          recommendations: [
+            "Complete or cancel any scheduled bookings or events for this client",
+            "Remove any projects or tasks associated with this client",
+            "Archive the client instead of deleting if they have historical records you need to keep"
+          ]
         });
       }
       
