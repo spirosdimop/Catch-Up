@@ -48,15 +48,19 @@ export default function Projects() {
     refetchOnWindowFocus: true // Refetch when window regains focus
   });
 
-  const { data: clients } = useQuery<Client[]>({
+  const { data: clients, isLoading: isLoadingClients, isError: isClientsError } = useQuery<Client[]>({
     queryKey: ['/api/clients'],
     onSuccess: (data) => {
       console.log("Clients loaded successfully:", data);
     },
     onError: (error) => {
       console.error("Error loading clients:", error);
+      // Don't show toast, just log the error to console
     },
-    staleTime: 0 // Always fetch fresh data
+    retry: 2,
+    staleTime: 0, // Always fetch fresh data
+    // Return empty array if there's an error to prevent null reference errors
+    placeholderData: []
   });
 
   // Create project mutation
