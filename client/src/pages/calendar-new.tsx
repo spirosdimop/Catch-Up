@@ -633,14 +633,15 @@ const CalendarNew = () => {
                   endDate.setHours(hours, minutes);
                 }
                 
-                // Convert dates to ISO strings to ensure proper format
+                // Convert dates to ISO strings and match the field names expected by the backend
                 createEventMutation.mutate({
                   title: newEventFormData.title,
                   description: newEventFormData.description,
-                  start: startDate.toISOString(),
-                  end: endDate.toISOString(),
-                  type: newEventFormData.type,
-                  userId: "user-1" // This would be dynamically set in a real app
+                  startTime: startDate.toISOString(),
+                  endTime: endDate.toISOString(), 
+                  eventType: newEventFormData.type,
+                  userId: "user-1", // This would be dynamically set in a real app
+                  isConfirmed: true // Default to confirmed events
                 });
               }}
             >
