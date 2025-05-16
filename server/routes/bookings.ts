@@ -64,6 +64,40 @@ type NewBookingRequest = z.infer<typeof newBookingSchema>;
 type LegacyBookingRequest = z.infer<typeof legacyBookingSchema>;
 
 export const registerBookingRoutes = (app: any) => {
+  // Get services for booking form
+  app.get("/api/services", async (_req: Request, res: Response) => {
+    try {
+      // Return sample services for booking
+      const sampleServices = [
+        {
+          id: "1",
+          name: "Consultation",
+          description: "Initial client consultation",
+          duration: 60,
+          price: 150
+        },
+        {
+          id: "2",
+          name: "Strategy Session",
+          description: "Business strategy planning",
+          duration: 90,
+          price: 250
+        },
+        {
+          id: "3", 
+          name: "Follow-up Meeting",
+          description: "Project follow-up and review",
+          duration: 30,
+          price: 100
+        }
+      ];
+      
+      res.json(sampleServices);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+      res.status(500).json({ error: "Failed to fetch services" });
+    }
+  });
   // Get available time slots for a specific day and service
   app.get("/api/bookings/available-slots", async (req: Request, res: Response) => {
     try {
