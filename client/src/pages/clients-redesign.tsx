@@ -485,6 +485,8 @@ const ClientsRedesign = () => {
           setIsDeleteConfirmOpen(false);
           
           // Store the error details for display in the modal
+          console.log("Error data received:", errorData);
+          
           setDeleteErrorDetails({
             detail: errorData.detail,
             restrictions: errorData.restrictions,
@@ -493,6 +495,7 @@ const ClientsRedesign = () => {
           
           // Open the error dialog
           setIsDeleteErrorOpen(true);
+          console.log("Set delete error open to true");
         } else {
           throw new Error(errorData.message || 'Failed to delete client');
         }
@@ -1391,6 +1394,9 @@ const ClientsRedesign = () => {
   // Delete Confirmation Dialog
   // Create a dialog component to show the delete error details
   const DeleteErrorDialog = () => {
+    console.log("Rendering DeleteErrorDialog, open state:", isDeleteErrorOpen);
+    console.log("Error details:", deleteErrorDetails);
+    
     return (
       <Dialog open={isDeleteErrorOpen} onOpenChange={setIsDeleteErrorOpen}>
         <DialogContent className="bg-white border-gray-200 text-[#0A2540] sm:max-w-[500px]">
