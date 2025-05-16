@@ -1398,16 +1398,16 @@ const ClientsRedesign = () => {
     console.log("Error details:", deleteErrorDetails);
     
     return (
-      <Dialog open={isDeleteErrorOpen} onOpenChange={setIsDeleteErrorOpen}>
-        <DialogContent className="bg-white border-gray-200 text-[#0A2540] sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle className="text-xl flex items-center gap-2 text-red-500">
+      <AlertDialog open={isDeleteErrorOpen} onOpenChange={setIsDeleteErrorOpen}>
+        <AlertDialogContent className="bg-white border-gray-200 text-[#0A2540] sm:max-w-[500px]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl flex items-center gap-2 text-red-500">
               <AlertTriangle className="w-5 h-5" /> Cannot Delete Client
-            </DialogTitle>
-            <DialogDescription className="text-base">
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base text-gray-700">
               {deleteErrorDetails.detail}
-            </DialogDescription>
-          </DialogHeader>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
           
           <div className="mt-4 space-y-4">
             {deleteErrorDetails.restrictions && deleteErrorDetails.restrictions.length > 0 && (
@@ -1433,13 +1433,13 @@ const ClientsRedesign = () => {
             )}
           </div>
           
-          <DialogFooter>
-            <Button onClick={() => setIsDeleteErrorOpen(false)}>
+          <AlertDialogFooter>
+            <AlertDialogAction onClick={() => setIsDeleteErrorOpen(false)}>
               OK
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     );
   };
 
