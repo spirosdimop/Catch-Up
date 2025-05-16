@@ -13,7 +13,8 @@ import {
   Menu,
   X,
   ChevronRight,
-  Bell
+  Bell,
+  FolderKanban
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AIAssistantFloating } from "@/components/ai-assistant/floating-button";
@@ -64,6 +65,11 @@ export function AppShell({
       icon: <Users className="h-5 w-5" />,
       label: "Clients",
       href: "/clients"
+    },
+    {
+      icon: <FolderKanban className="h-5 w-5" />,
+      label: "Projects",
+      href: "/projects"
     },
     {
       icon: <Bot className="h-5 w-5" />,
