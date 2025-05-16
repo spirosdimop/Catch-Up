@@ -228,7 +228,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Add a new endpoint to check client dependencies before deletion
-  apiRouter.get("/clients/:id/check-dependencies", async (req, res) => {
+  app.get("/api/clients/:id/check-dependencies", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
