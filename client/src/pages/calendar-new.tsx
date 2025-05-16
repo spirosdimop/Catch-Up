@@ -339,7 +339,10 @@ const CalendarNew = () => {
     }
   });
   
-  // Events data from API with fallback
+  // Use local state to manage events alongside fetched events
+  const [localEvents, setLocalEvents] = useState<CalendarEvent[]>([]);
+  
+  // Events data from API
   const { data: events = [] } = useQuery<CalendarEvent[], Error>({
     queryKey: ['/api/events'],
     queryFn: async () => {
@@ -687,11 +690,13 @@ const CalendarNew = () => {
                 // Add event to local calendar immediately for better user experience
                 const newLocalEvent = {
                   ...localEvent,
-                  id: `temp-${Date.now()}`, // Use string ID for temporary events
+                  id: Date.now(), // Use temporary ID for local events
+                  start: startDate, // For BigCalendar display
+                  end: endDate     // For BigCalendar display
                 };
                 
                 // Add to local events state first for immediate display
-                setEvents(prev => [...prev, newLocalEvent]);
+                setLocalEvents(prevEvents => [...prevEvents, newLocalEvent]);
                 
                 // Then try to save to server
                 createEventMutation.mutate(eventData, {
@@ -705,7 +710,13 @@ const CalendarNew = () => {
                   },
                   onSuccess: (data) => {
                     // On success, replace temp event with real one from server
-                    setEvents(prev => prev.filter(e => e.id !== newLocalEvent.id).concat(data));
+                    setLocalEvents(prevEvents => 
+                      prevEvents.filter(e => e.id !== newLocalEvent.id).concat({
+                        ...data,
+                        start: new Date(data.startTime), // For BigCalendar
+                        end: new Date(data.endTime)      // For BigCalendar
+                      })
+                    );
                     toast({
                       title: "Event Created",
                       description: "Your new event has been added to the calendar.",
