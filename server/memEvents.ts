@@ -23,9 +23,20 @@ export async function createEvent(event: InsertEvent): Promise<Event> {
   
   const newEvent: Event = {
     id,
-    ...event,
+    userId: event.userId,
+    title: event.title,
+    description: event.description || null,
     startTime: new Date(event.startTime),
     endTime: new Date(event.endTime),
+    location: event.location || null,
+    clientName: event.clientName || null,
+    clientId: event.clientId || null,
+    projectId: event.projectId || null,
+    invoiceId: event.invoiceId || null,
+    isConfirmed: event.isConfirmed ?? true,
+    eventType: event.eventType || "busy",
+    templateId: event.templateId || null,
+    color: event.color || null,
     createdAt: now,
     updatedAt: now
   };

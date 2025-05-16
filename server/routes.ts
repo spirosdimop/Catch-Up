@@ -2,6 +2,7 @@ import { Router, type Express, type Request, type Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { OpenAI } from "openai";
+import * as memEvents from "./memEvents"; // Import the in-memory event storage
 import { 
   processSchedulingRequest, 
   generateScheduleSummary, 
@@ -763,13 +764,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.status(204).end();
   });
 
+  
+  
   // Event endpoints
   apiRouter.get("/events", async (req, res) => {
     try {
       // Default userId for demo purposes, in a real app this would come from auth
       const userId = req.query.userId as string || "user-1";
-      const events = await storage.getEvents(userId);
-      res.json(events);
+      
+      try {
+        // First try to get events from the database
+        const events = await storage.getEvents(userId);
+        res.json(events);
+      } catch (dbError) {
+        console.log("Database error, falling back to in-memory events:", dbError);
+        // Fall back to in-memory events if database fails
+        const events = await memEvents.getEvents(userId);
+        res.json(events);
+      }
     } catch (error) {
       console.error("Error fetching events:", error);
       res.status(500).json({ message: "Failed to fetch events" });
