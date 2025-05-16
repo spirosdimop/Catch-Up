@@ -653,18 +653,22 @@ const CalendarNew = () => {
                 // Format event data for API submission, matching exactly what the backend expects
                 const eventData = {
                   title: newEventFormData.title,
-                  description: newEventFormData.description || "",
+                  description: newEventFormData.description || null,
                   // Format startTime and endTime as ISO strings
                   startTime: startDate.toISOString(),
                   endTime: endDate.toISOString(),
-                  // Map type to eventType
+                  // Map type to eventType - ensure it's one of the valid enum values
                   eventType: newEventFormData.type || "busy",
                   // Include userId and isConfirmed
                   userId: "user-1", // Would be dynamic in a real app
                   isConfirmed: true,
-                  // Include any other required fields
+                  // Include any other required fields with null values
                   location: null,
                   clientName: null,
+                  clientId: null,
+                  projectId: null,
+                  invoiceId: null,
+                  templateId: null,
                   color: null
                 };
                 
