@@ -454,6 +454,12 @@ const ClientsRedesign = () => {
   
   // Delete client handling
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isDeleteErrorOpen, setIsDeleteErrorOpen] = useState(false);
+  const [deleteErrorDetails, setDeleteErrorDetails] = useState<{
+    detail?: string;
+    restrictions?: Array<{type: string; count: number; message: string}>;
+    recommendations?: string[];
+  }>({});
   
   // Debug delete dialog state
   console.log('isDeleteConfirmOpen:', isDeleteConfirmOpen);
@@ -475,35 +481,18 @@ const ClientsRedesign = () => {
         const errorData = await response.json();
         // Show a more helpful error message when there are constraints
         if (response.status === 400 && errorData.detail) {
-          // Create a dialog to show the detailed reasons
+          // Close the delete confirmation dialog
           setIsDeleteConfirmOpen(false);
           
-          // Create a list of restrictions in the toast message
-          let restrictionText = errorData.detail;
-          
-          if (errorData.restrictions && errorData.restrictions.length > 0) {
-            restrictionText += "\n\nReasons:";
-            errorData.restrictions.forEach((r: any) => {
-              if (r.message) {
-                restrictionText += `\n- ${r.message}`;
-              }
-            });
-            
-            // Add recommendations if available
-            if (errorData.recommendations && errorData.recommendations.length > 0) {
-              restrictionText += "\n\nRecommendations:";
-              errorData.recommendations.forEach((rec: string) => {
-                restrictionText += `\n- ${rec}`;
-              });
-            }
-          }
-          
-          toast({
-            title: "Cannot Delete Client",
-            description: restrictionText,
-            variant: "destructive",
-            duration: 10000, // Show for longer since it has more content
+          // Store the error details for display in the modal
+          setDeleteErrorDetails({
+            detail: errorData.detail,
+            restrictions: errorData.restrictions,
+            recommendations: errorData.recommendations
           });
+          
+          // Open the error dialog
+          setIsDeleteErrorOpen(true);
         } else {
           throw new Error(errorData.message || 'Failed to delete client');
         }
@@ -1400,6 +1389,54 @@ const ClientsRedesign = () => {
   };
 
   // Delete Confirmation Dialog
+  // Create a dialog component to show the delete error details
+  const DeleteErrorDialog = () => {
+    return (
+      <Dialog open={isDeleteErrorOpen} onOpenChange={setIsDeleteErrorOpen}>
+        <DialogContent className="bg-white border-gray-200 text-[#0A2540] sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle className="text-xl flex items-center gap-2 text-red-500">
+              <AlertTriangle className="w-5 h-5" /> Cannot Delete Client
+            </DialogTitle>
+            <DialogDescription className="text-base">
+              {deleteErrorDetails.detail}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="mt-4 space-y-4">
+            {deleteErrorDetails.restrictions && deleteErrorDetails.restrictions.length > 0 && (
+              <div>
+                <h4 className="font-medium text-lg mb-2">Reasons:</h4>
+                <ul className="list-disc pl-5 space-y-1">
+                  {deleteErrorDetails.restrictions.map((restriction, index) => (
+                    <li key={index} className="text-sm">{restriction.message}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {deleteErrorDetails.recommendations && deleteErrorDetails.recommendations.length > 0 && (
+              <div>
+                <h4 className="font-medium text-lg mb-2">Recommendations:</h4>
+                <ul className="list-disc pl-5 space-y-1">
+                  {deleteErrorDetails.recommendations.map((recommendation, index) => (
+                    <li key={index} className="text-sm">{recommendation}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button onClick={() => setIsDeleteErrorOpen(false)}>
+              OK
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    );
+  };
+
   const DeleteConfirmDialog = () => {
     console.log('Rendering DeleteConfirmDialog, open state:', isDeleteConfirmOpen);
     
