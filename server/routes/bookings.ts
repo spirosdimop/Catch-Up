@@ -13,11 +13,27 @@ import {
 import { nanoid } from "nanoid";
 import { eq, and, gte, lt } from "drizzle-orm";
 
-// Schema for the new booking system
+// Schema for our booking form data
+const bookingFormSchema = z.object({
+  date: z.string().min(1, "Date is required"),
+  time: z.string().optional(),
+  timeSlot: z.string().optional(),
+  duration: z.number().optional().default(60),
+  type: z.string().optional().default("meeting"),
+  status: z.string().optional().default("confirmed"),
+  location: z.string().optional().default("Office"),
+  notes: z.string().optional().default(""),
+  clientId: z.number(),
+  serviceId: z.string().optional(),
+  service: z.string().optional(),
+  priority: z.string().optional().default("normal"),
+});
+
+// Simplified booking schema for validation
 const newBookingSchema = z.object({
   date: z.string().min(1, "Date is required"),
   time: z.string().min(1, "Time is required"),
-  duration: z.number().min(1, "Duration is required").default(60),
+  duration: z.number().default(60),
   type: z.string().default("meeting"),
   status: z.string().default("confirmed"),
   location: z.string().optional(),
@@ -192,103 +208,94 @@ export const registerBookingRoutes = (app: any) => {
     try {
       console.log("Received booking request:", req.body);
       
-      // Try to parse with the new schema
-      let bookingData: NewBookingRequest;
-      try {
-        bookingData = newBookingSchema.parse(req.body);
-      } catch (e) {
-        // If it fails, try the legacy schema
-        const legacyData = legacyBookingSchema.parse(req.body);
-        
-        // Convert legacy format to new format
-        bookingData = {
-          date: legacyData.date,
-          time: legacyData.time,
-          duration: legacyData.duration,
-          type: "meeting", // Default
-          status: "confirmed", // Default
-          location: legacyData.location || "Office",
-          notes: legacyData.notes,
-          clientId: typeof legacyData.serviceId === 'number' ? legacyData.serviceId : 1, // Default client ID
-          serviceId: typeof legacyData.serviceId === 'string' ? legacyData.serviceId : "1", // Default service ID
-          priority: "normal" // Default
-        };
-      }
+      // First, parse the form data to get all possible fields
+      const formData = bookingFormSchema.parse(req.body);
+      console.log("Parsed form data:", formData);
       
-      console.log("Processed booking data:", bookingData);
+      // Process the form data to create a valid booking object
+      const bookingData = {
+        date: formData.date,
+        // Use timeSlot as time if available, otherwise use time or default
+        time: formData.timeSlot || formData.time || "09:00", 
+        duration: formData.duration || 60,
+        type: formData.type || "meeting",
+        status: formData.status || "confirmed",
+        location: formData.location || "Office",
+        notes: formData.notes || "",
+        clientId: formData.clientId,
+        // Use service as serviceId if available
+        serviceId: formData.service || formData.serviceId || "1",
+        priority: formData.priority || "normal",
+      };
+      
+      // Validate the processed data against our schema
+      const validatedData = newBookingSchema.parse(bookingData);
+      console.log("Validated booking data:", validatedData);
       
       // Create new booking record
       const newBooking = await db.insert(bookings).values({
-        date: bookingData.date,
-        time: bookingData.time,
-        duration: bookingData.duration || 60,
-        type: bookingData.type as any || "meeting",
-        status: bookingData.status as any || "confirmed",
-        location: bookingData.location,
-        notes: bookingData.notes,
-        clientId: bookingData.clientId,
-        serviceId: bookingData.serviceId,
-        priority: bookingData.priority || "normal",
+        date: validatedData.date,
+        time: validatedData.time,
+        duration: validatedData.duration,
+        type: validatedData.type as any,
+        status: validatedData.status as any,
+        location: validatedData.location || "Office",
+        notes: validatedData.notes || "",
+        clientId: validatedData.clientId,
+        serviceId: validatedData.serviceId,
+        priority: validatedData.priority,
         createdAt: new Date(),
         updatedAt: new Date(),
       }).returning();
       
-      // Also create an event for the calendar (maintaining backward compatibility)
+      console.log("Created booking:", newBooking[0]);
+      
+      // Also create an event for the calendar
       try {
         // Parse the date and time
-        const bookingDate = new Date(bookingData.date);
+        const dateStr = validatedData.date;
+        const timeStr = validatedData.time;
         
-        // Handle time string in various formats (9:00 AM, 9:00, 14:00, etc.)
-        let hours = 0;
-        let minutes = 0;
-        let isPM = false;
+        // Create start date (combining date and time)
+        const [year, month, day] = dateStr.split('-').map(Number);
+        let [hours, minutes] = [0, 0];
         
-        if (bookingData.time.includes(':')) {
-          const timeMatch = bookingData.time.match(/(\d+):(\d+)/);
-          if (timeMatch) {
-            hours = parseInt(timeMatch[1], 10);
-            minutes = parseInt(timeMatch[2], 10);
-            isPM = /pm/i.test(bookingData.time);
-          }
-        } else {
-          // Time might be just "9 AM" or "2 PM"
-          const timeMatch = bookingData.time.match(/(\d+)/);
-          if (timeMatch) {
-            hours = parseInt(timeMatch[1], 10);
-            isPM = /pm/i.test(bookingData.time);
-          }
+        if (timeStr.includes(':')) {
+          [hours, minutes] = timeStr.split(':').map(Number);
+        } else if (timeStr.match(/^\d+$/)) {
+          hours = parseInt(timeStr, 10);
         }
         
-        // Adjust hours for PM if needed
-        if (isPM && hours < 12) {
+        // Handle AM/PM format
+        if (timeStr.toLowerCase().includes('pm') && hours < 12) {
           hours += 12;
         }
         
-        bookingDate.setHours(hours, minutes, 0, 0);
+        // Create JavaScript Date objects
+        const startTime = new Date(year, month - 1, day, hours, minutes);
+        const endTime = new Date(startTime);
+        endTime.setMinutes(endTime.getMinutes() + validatedData.duration);
         
-        // Calculate end time based on duration
-        const endTime = new Date(bookingDate);
-        endTime.setMinutes(endTime.getMinutes() + bookingData.duration);
+        // Get a client name (in a real app we would fetch this from the database)
+        const clientName = `Client ${validatedData.clientId}`;
         
-        // Get the client (would be done via database in a real app)
-        const clientName = "Client Name"; // We'd fetch this from DB using clientId
-        
-        // Create the event (booking)
         await db.insert(events).values({
-          userId: "user123", // This would be the actual user ID
+          userId: "user123", // Default user ID
           title: `Meeting with ${clientName}`,
-          description: bookingData.notes || `Appointment with client ID ${bookingData.clientId}`,
-          startTime: bookingDate,
+          description: validatedData.notes || `Appointment with client ID ${validatedData.clientId}`,
+          startTime: startTime,
           endTime: endTime,
-          location: bookingData.location || "Office",
+          location: validatedData.location || "Office",
           clientName: clientName,
-          clientId: bookingData.clientId,
+          clientId: validatedData.clientId,
           eventType: EventType.CLIENT_MEETING,
           color: "#4CAF50", // Green for client meetings
           isConfirmed: true,
           createdAt: new Date(),
           updatedAt: new Date(),
         });
+        
+        console.log("Created calendar event");
       } catch (eventError) {
         console.error("Error creating event:", eventError);
         // We don't fail the entire booking if the event creation fails
