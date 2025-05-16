@@ -228,17 +228,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   apiRouter.delete("/clients/:id", async (req, res) => {
-    const id = parseInt(req.params.id);
-    if (isNaN(id)) {
-      return res.status(400).json({ message: "Invalid client ID" });
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid client ID" });
+      }
+      
+      // Check if there are events associated with this client
+      // Use storage interface instead of direct db queries
+      const events = await storage.getEvents("user-1"); // Using default user
+      const clientEvents = events.filter(event => event.clientId === id);
+      if (clientEvents.length > 0) {
+        return res.status(400).json({ 
+          message: "Cannot delete client with associated events", 
+          detail: "This client has calendar events associated with them. Please remove the events first."
+        });
+      }
+      
+      // Check if there are projects associated with this client
+      const clientProjects = await storage.getProjectsByClient(id);
+      if (clientProjects.length > 0) {
+        return res.status(400).json({ 
+          message: "Cannot delete client with associated projects", 
+          detail: "This client has projects associated with them. Please remove the projects first."
+        });
+      }
+      
+      // If no dependencies found, proceed with deletion
+      const deleted = await storage.deleteClient(id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Client not found" });
+      }
+      
+      res.status(204).end();
+    } catch (error) {
+      console.error("Error deleting client:", error);
+      res.status(500).json({ 
+        message: "Failed to delete client", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
     }
-
-    const deleted = await storage.deleteClient(id);
-    if (!deleted) {
-      return res.status(404).json({ message: "Client not found" });
-    }
-
-    res.status(204).end();
   });
 
   // Project endpoints
