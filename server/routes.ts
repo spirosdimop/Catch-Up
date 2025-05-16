@@ -249,8 +249,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Check for foreign key constraint error
         if (deleteError && 
-            (deleteError.code === '23503' || 
-             (deleteError.message && deleteError.message.includes('foreign key constraint')))) {
+            ((deleteError as any).code === '23503' || 
+             ((deleteError as any).message && (deleteError as any).message.includes('foreign key constraint')))) {
           
           // Send a friendly error message with suggestions
           return res.status(400).json({

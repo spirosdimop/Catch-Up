@@ -1668,6 +1668,7 @@ const ClientsRedesign = () => {
       <EditClientDialog />
       <SendMessageDialog />
       <DeleteConfirmDialog />
+      <DeleteErrorDialog />
     </div>
   );
 };
