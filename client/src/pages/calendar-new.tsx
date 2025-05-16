@@ -633,11 +633,12 @@ const CalendarNew = () => {
                   endDate.setHours(hours, minutes);
                 }
                 
+                // Convert dates to ISO strings to ensure proper format
                 createEventMutation.mutate({
                   title: newEventFormData.title,
                   description: newEventFormData.description,
-                  start: startDate,
-                  end: endDate,
+                  start: startDate.toISOString(),
+                  end: endDate.toISOString(),
                   type: newEventFormData.type,
                   userId: "user-1" // This would be dynamically set in a real app
                 });
