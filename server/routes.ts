@@ -1067,6 +1067,20 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       res.json({ message: responseContent });
     } catch (error) {
       console.error("Error in AI chat:", error);
+      // Check for specific error types
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ 
+          message: "Invalid request format",
+          errors: error.errors
+        });
+      }
+      // Handle network or API errors
+      if (error instanceof Error && error.message.includes('OpenAI')) {
+        return res.status(503).json({
+          message: "AI service temporarily unavailable",
+          retry_after: 30
+        });
+      }
       res.status(500).json({ 
         message: "Failed to process chat message",
         error: error instanceof Error ? error.message : String(error)
@@ -1728,7 +1742,8 @@ Remember: The most helpful thing you can do is direct users to the specialized t
   // Navigation tracking endpoints
   apiRouter.post("/navigation/track", async (req, res) => {
     try {
-      const { userId, path, fromPath, sessionId, timeOnPage = null, clickedElements = [] } = req.body;
+      const { userId, path, fromPath, sessionId, timeOnPage, clickedElements = [] } = req.body;
+      const validatedTimeOnPage = timeOnPage && !isNaN(Number(timeOnPage)) ? Number(timeOnPage) : null;
       
       if (!userId || !path || !sessionId) {
         return res.status(400).json({ 
