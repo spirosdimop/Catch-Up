@@ -25,6 +25,7 @@ import BookingsTabUpdated from "@/pages/bookings-tab-updated";
 import { BookingsFixed } from "@/pages/bookings-fixed";
 import Calendar from "@/pages/calendar";
 import CalendarNew from "@/pages/calendar-new";
+import CalendarSimple from "@/pages/calendar-simple";
 import Profile from "@/pages/profile";
 import ProfileRedesign from "@/pages/profile-redesign";
 import AIAssistant from "@/pages/ai-assistant";
@@ -129,6 +130,7 @@ function Router() {
         <Route path="/messages-original" component={Messages} />
         <Route path="/calendar" component={CalendarNew} />
         <Route path="/calendar-original" component={Calendar} />
+        <Route path="/calendar-simple" component={CalendarSimple} />
         <Route path="/profile" component={ProfileRedesign} />
         <Route path="/profile-original" component={Profile} />
         <Route path="/projects" component={Projects} />
