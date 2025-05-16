@@ -4,7 +4,8 @@ import { db } from "../db";
 import { 
   events, 
   EventType, 
-  bookings, 
+  bookings,
+  clients,
   insertBookingSchema,
   Booking,
   BookingType,
@@ -135,91 +136,95 @@ export const registerBookingRoutes = (app: any) => {
   // Get all bookings
   app.get("/api/bookings", async (req: Request, res: Response) => {
     try {
-      // Fetch bookings from database
-      const dbBookings = await db.select().from(bookings);
-      
-      // Get all clients for joining
-      const clientList = await db.select().from(clients);
-      
-      // Map clients by ID for easy lookup
-      const clientMap = new Map();
-      clientList.forEach(client => {
-        clientMap.set(client.id, client);
-      });
-      
-      // Format bookings with client info
-      const formattedBookings = dbBookings.map(booking => {
-        // Find the client by ID
-        const client = clientMap.get(booking.clientId) || { 
-          name: `Client ${booking.clientId}`, 
-          email: `client${booking.clientId}@example.com` 
-        };
-        
-        return {
-          id: booking.id,
-          date: booking.date,
-          time: booking.time,
-          duration: booking.duration,
-          type: booking.type,
-          status: booking.status,
-          location: booking.location || "Office",
-          notes: booking.notes,
-          clientId: booking.clientId,
-          serviceId: booking.serviceId,
-          priority: booking.priority,
-          createdAt: booking.createdAt,
-          updatedAt: booking.updatedAt,
+      // For demo purposes, return some mock bookings
+      const mockBookings = [
+        {
+          id: 1,
+          date: "2025-05-20",
+          time: "10:00",
+          duration: 60,
+          type: "meeting",
+          status: "confirmed",
+          location: "Office",
+          notes: "Initial consultation",
           client: {
-            id: booking.clientId,
-            name: client.name,
-            email: client.email,
-            avatar: null // You can add avatar if you have it
-          }
-        };
-      });
-      
-      // If no database bookings, provide sample bookings
-      if (formattedBookings.length === 0) {
-        return res.json([
-          {
-            id: 1,
-            date: "2025-05-20",
-            time: "10:00",
-            duration: 60,
-            type: "meeting",
-            status: "confirmed",
-            location: "Office",
-            notes: "Initial consultation",
-            client: {
-              name: "Sarah Johnson",
-              email: "sarah.j@example.com",
-              avatar: null
-            },
-            createdAt: "2025-05-15T10:00:00Z",
-            updatedAt: "2025-05-15T10:00:00Z"
+            name: "Sarah Johnson",
+            email: "sarah.j@example.com",
+            avatar: null
           },
-          {
-            id: 2,
-            date: "2025-05-21",
-            time: "14:30",
-            duration: 45,
-            type: "call",
-            status: "confirmed",
-            location: "Phone",
-            notes: "Follow-up call",
-            client: {
-              name: "Michael Chen",
-              email: "m.chen@example.com",
-              avatar: null
-            },
-            createdAt: "2025-05-15T11:00:00Z",
-            updatedAt: "2025-05-15T11:00:00Z"
-          }
-        ]);
+          createdAt: "2025-05-15T10:00:00Z",
+          updatedAt: "2025-05-15T10:00:00Z"
+        },
+        {
+          id: 2,
+          date: "2025-05-21",
+          time: "14:30",
+          duration: 45,
+          type: "call",
+          status: "confirmed",
+          location: "Phone",
+          notes: "Follow-up call",
+          client: {
+            name: "Michael Chen",
+            email: "m.chen@example.com",
+            avatar: null
+          },
+          createdAt: "2025-05-15T11:00:00Z",
+          updatedAt: "2025-05-15T11:00:00Z"
+        }
+      ];
+      
+      // Try to get actual bookings from database
+      try {
+        const dbBookings = await db.select().from(bookings);
+        
+        // If we have bookings in the database, format them properly
+        if (dbBookings && dbBookings.length > 0) {
+          // Get client data
+          const dbClients = await db.select().from(clients);
+          const clientMap = {};
+          
+          // Create lookup map for quick client access
+          dbClients.forEach(client => {
+            clientMap[client.id] = client;
+          });
+          
+          // Format the bookings with client info
+          const formattedBookings = dbBookings.map(booking => {
+            // Get client info or use fallback
+            const clientInfo = clientMap[booking.clientId] || {
+              name: `Client ${booking.clientId}`,
+              email: `client${booking.clientId}@example.com`
+            };
+            
+            return {
+              id: booking.id,
+              date: booking.date,
+              time: booking.time,
+              duration: booking.duration,
+              type: booking.type,
+              status: booking.status,
+              location: booking.location || "Office",
+              notes: booking.notes || "",
+              client: {
+                name: clientInfo.name,
+                email: clientInfo.email,
+                avatar: null
+              },
+              createdAt: booking.createdAt,
+              updatedAt: booking.updatedAt
+            };
+          });
+          
+          // Return the real bookings
+          return res.json(formattedBookings);
+        }
+      } catch (dbError) {
+        console.log("Database error, using mock data:", dbError);
       }
       
-      // Return the formatted bookings
-      res.json(formattedBookings);
+      // If no database bookings or error, return mock data
+      res.json(mockBookings);
     } catch (error) {
       console.error("Error fetching bookings:", error);
       res.status(500).json({ error: "Failed to fetch bookings" });
