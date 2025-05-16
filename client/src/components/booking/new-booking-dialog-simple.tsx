@@ -220,7 +220,7 @@ export function NewBookingDialog({ open, onOpenChange }: NewBookingDialogProps) 
   
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-white border-gray-200 text-[#0A2540] sm:max-w-[600px]">
+      <DialogContent className="bg-white border-gray-200 text-[#0A2540] sm:max-w-[650px] md:max-w-[700px]">
         <DialogHeader>
           <DialogTitle className="text-xl font-bold">Create New Booking</DialogTitle>
           <DialogDescription>
@@ -352,7 +352,7 @@ export function NewBookingDialog({ open, onOpenChange }: NewBookingDialogProps) 
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Time Slot</FormLabel>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-4 gap-2 max-h-[180px] overflow-y-auto p-1">
                       {timeSlots.map((slot) => (
                         <Button
                           key={slot.id}
@@ -361,7 +361,7 @@ export function NewBookingDialog({ open, onOpenChange }: NewBookingDialogProps) 
                           variant={field.value === slot.id ? "default" : "outline"}
                           disabled={!slot.available}
                           className={cn(
-                            "h-10",
+                            "h-10 text-sm",
                             field.value === slot.id ? "bg-[#0A2540] text-white" : "border-gray-300",
                             !slot.available && "opacity-50 cursor-not-allowed"
                           )}
