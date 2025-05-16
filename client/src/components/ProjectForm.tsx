@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -104,6 +105,13 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
           status: ProjectStatus.IN_PROGRESS,
         },
   });
+  
+  // Update form values when clients are loaded or changed
+  useEffect(() => {
+    if (!form.getValues().clientId && clients.length > 0) {
+      form.setValue('clientId', clients[0].id);
+    }
+  }, [clients, form]);
 
   return (
     <Form {...form}>
@@ -148,22 +156,27 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
               <FormLabel>Client*</FormLabel>
               <Select 
                 onValueChange={(value) => field.onChange(parseInt(value))}
-                value={field.value?.toString() || ""}
-                defaultValue={clients.length > 0 ? clients[0].id.toString() : ""}
+                value={field.value?.toString() || (clients.length > 0 ? clients[0].id.toString() : "")}
               >
                 <FormControl>
                   <SelectTrigger>
                     <SelectValue placeholder="Select a client">
-                      {field.value ? clients.find(c => c.id === field.value)?.name : "Select a client"}
+                      {field.value && clients.length > 0 
+                        ? clients.find(c => c.id === field.value)?.name || "Select a client"
+                        : clients.length > 0 ? clients[0].name : "Select a client"}
                     </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {clients.map((client) => (
-                    <SelectItem key={client.id} value={client.id.toString()}>
-                      {client.name}
-                    </SelectItem>
-                  ))}
+                  {clients.length === 0 ? (
+                    <SelectItem value="" disabled>No clients available</SelectItem>
+                  ) : (
+                    clients.map((client) => (
+                      <SelectItem key={client.id} value={client.id.toString()}>
+                        {client.name}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
               <FormMessage />
