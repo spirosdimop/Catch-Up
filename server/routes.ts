@@ -227,6 +227,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add a new endpoint to check client dependencies before deletion
+  apiRouter.get("/clients/:id/check-dependencies", async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid client ID" });
+      }
+      
+      // Check for all dependencies
+      const restrictions = [];
+      
+      // Check for events
+      try {
+        const events = await storage.getEvents("user-1");
+        const clientEvents = events.filter(event => event.clientId === id);
+        if (clientEvents.length > 0) {
+          restrictions.push({
+            type: "events",
+            count: clientEvents.length,
+            message: "This client has calendar events or bookings scheduled."
+          });
+        }
+      } catch (err) {
+        console.log("Error checking events:", err);
+      }
+      
+      // Check for projects
+      try {
+        const clientProjects = await storage.getProjectsByClient(id);
+        if (clientProjects.length > 0) {
+          restrictions.push({
+            type: "projects",
+            count: clientProjects.length,
+            message: "This client has active projects."
+          });
+          
+          // Check for tasks associated with these projects
+          for (const project of clientProjects) {
+            const tasks = await storage.getTasksByProject(project.id);
+            if (tasks.length > 0) {
+              restrictions.push({
+                type: "tasks",
+                count: tasks.length,
+                projectId: project.id,
+                projectName: project.name,
+                message: `This client has ${tasks.length} active tasks in project "${project.name}".`
+              });
+              break; // Only need to find one project with tasks
+            }
+          }
+        }
+      } catch (err) {
+        console.log("Error checking projects:", err);
+      }
+      
+      return res.status(200).json({
+        canDelete: restrictions.length === 0,
+        restrictions: restrictions,
+        recommendations: restrictions.length > 0 ? [
+          "Cancel or delete any bookings or events linked to this client",
+          "Remove any projects or tasks associated with this client",
+          "Archive the client instead of deleting if you need to keep their records"
+        ] : []
+      });
+    } catch (error) {
+      console.error("Error checking client dependencies:", error);
+      res.status(500).json({ 
+        message: "Failed to check client dependencies", 
+        error: error instanceof Error ? error.message : String(error)
+      });
+    }
+  });
+
   apiRouter.delete("/clients/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
@@ -234,8 +307,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid client ID" });
       }
       
-      // We'll use a simpler approach to avoid database errors
-      // Skip complex queries and just try the deletion
       // Try to delete, but catch foreign key constraint errors
       try {
         const deleted = await storage.deleteClient(id);

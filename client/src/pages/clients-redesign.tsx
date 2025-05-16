@@ -468,6 +468,28 @@ const ClientsRedesign = () => {
     if (!selectedClient) return;
     
     try {
+      // First, check if the client can be deleted by checking dependencies
+      const checkResponse = await apiRequest("GET", `/api/clients/${selectedClient.id}/check-dependencies`);
+      const checkResult = await checkResponse.json();
+      
+      if (!checkResult.canDelete) {
+        // If client can't be deleted, show the error dialog
+        setIsDeleteConfirmOpen(false);
+        
+        console.log("Client dependencies found:", checkResult);
+        
+        setDeleteErrorDetails({
+          detail: "This client has bookings, events, or other records associated with them and cannot be deleted until these are removed.",
+          restrictions: checkResult.restrictions,
+          recommendations: checkResult.recommendations
+        });
+        
+        // Show the error dialog
+        setIsDeleteErrorOpen(true);
+        return;
+      }
+      
+      // If we can delete, proceed with deletion
       const response = await apiRequest("DELETE", `/api/clients/${selectedClient.id}`);
       if (response.ok) {
         queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
@@ -479,14 +501,12 @@ const ClientsRedesign = () => {
         setIsDetailsOpen(false);
       } else {
         const errorData = await response.json();
-        // Show a more helpful error message when there are constraints
+        
         if (response.status === 400 && errorData.detail) {
           // Close the delete confirmation dialog
           setIsDeleteConfirmOpen(false);
           
-          // Store the error details for display in the modal
-          console.log("Error data received:", errorData);
-          
+          // For any unexpected constraint errors
           setDeleteErrorDetails({
             detail: errorData.detail,
             restrictions: errorData.restrictions,
@@ -495,7 +515,6 @@ const ClientsRedesign = () => {
           
           // Open the error dialog
           setIsDeleteErrorOpen(true);
-          console.log("Set delete error open to true");
         } else {
           throw new Error(errorData.message || 'Failed to delete client');
         }
