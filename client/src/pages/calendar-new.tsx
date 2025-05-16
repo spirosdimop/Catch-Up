@@ -565,10 +565,15 @@ const CalendarNew = () => {
                   <SelectValue placeholder="Select event type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="meeting">Meeting</SelectItem>
-                  <SelectItem value="task">Task</SelectItem>
-                  <SelectItem value="reminder">Reminder</SelectItem>
-                  <SelectItem value="event">Other Event</SelectItem>
+                  <SelectItem value="client_meeting">Client Meeting</SelectItem>
+                  <SelectItem value="consultation">Consultation</SelectItem>
+                  <SelectItem value="busy">Busy</SelectItem>
+                  <SelectItem value="private">Private</SelectItem>
+                  <SelectItem value="available">Available</SelectItem>
+                  <SelectItem value="travel">Travel</SelectItem>
+                  <SelectItem value="project_work">Project Work</SelectItem>
+                  <SelectItem value="follow_up">Follow-up</SelectItem>
+                  <SelectItem value="training">Training</SelectItem>
                 </SelectContent>
               </Select>
             </div>
