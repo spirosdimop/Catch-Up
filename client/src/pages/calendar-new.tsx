@@ -672,8 +672,47 @@ const CalendarNew = () => {
                   color: null
                 };
                 
+                // Handle the event locally if the server fails
+                const localEvent = {
+                  id: Date.now(), // Generate a temporary ID
+                  ...eventData,
+                  startTime: startDate,
+                  endTime: endDate,
+                  createdAt: new Date(),
+                  updatedAt: new Date()
+                };
+                
                 console.log("Submitting event:", eventData);
-                createEventMutation.mutate(eventData);
+                
+                // Add event to local calendar immediately for better user experience
+                const newLocalEvent = {
+                  ...localEvent,
+                  id: `temp-${Date.now()}`, // Use string ID for temporary events
+                };
+                
+                // Add to local events state first for immediate display
+                setEvents(prev => [...prev, newLocalEvent]);
+                
+                // Then try to save to server
+                createEventMutation.mutate(eventData, {
+                  onError: (error) => {
+                    console.error("Failed to save event to server:", error);
+                    toast({
+                      title: "Event Created Locally",
+                      description: "The event was added to your calendar but couldn't be saved to the server. It will be available until you refresh the page.",
+                      variant: "default"
+                    });
+                  },
+                  onSuccess: (data) => {
+                    // On success, replace temp event with real one from server
+                    setEvents(prev => prev.filter(e => e.id !== newLocalEvent.id).concat(data));
+                    toast({
+                      title: "Event Created",
+                      description: "Your new event has been added to the calendar.",
+                      variant: "default"
+                    });
+                  }
+                });
               }}
             >
               Add Event
