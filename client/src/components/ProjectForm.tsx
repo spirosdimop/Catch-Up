@@ -97,7 +97,7 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
       : {
           name: "",
           description: "",
-          clientId: undefined as any,
+          clientId: clients.length > 0 ? clients[0].id : undefined,
           startDate: new Date().toISOString(), // Use ISO string format for consistency
           endDate: null,
           budget: undefined,
@@ -148,11 +148,14 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
               <FormLabel>Client*</FormLabel>
               <Select 
                 onValueChange={(value) => field.onChange(parseInt(value))}
-                value={field.value?.toString()}
+                value={field.value?.toString() || ""}
+                defaultValue={clients.length > 0 ? clients[0].id.toString() : ""}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a client" />
+                    <SelectValue placeholder="Select a client">
+                      {field.value ? clients.find(c => c.id === field.value)?.name : "Select a client"}
+                    </SelectValue>
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
