@@ -347,11 +347,14 @@ const CalendarNew = () => {
         const response = await apiRequest("GET", '/api/events');
         const data = await response.json();
         // Convert date strings to Date objects if needed
-        return Array.isArray(data) ? data.map((event: any) => ({
-          ...event,
-          start: new Date(event.start),
-          end: new Date(event.end)
-        })) : [];
+        return Array.isArray(data) ? data.map((event: any) => {
+          // Map the backend fields (startTime/endTime) to what BigCalendar expects (start/end)
+          return {
+            ...event,
+            start: new Date(event.startTime),
+            end: new Date(event.endTime)
+          };
+        }) : [];
       } catch (error) {
         console.error('Failed to fetch events', error);
         return [];
