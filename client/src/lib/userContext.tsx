@@ -16,6 +16,17 @@ export interface UserData {
   voicemailMessage?: string;
   smsFollowUpMessage?: string;
   availabilityHours?: string; // JSON string with availability hours
+  customInsights?: Array<{
+    label: string;
+    value: string | number;
+    isVisible: boolean;
+  }>;
+  stats?: {
+    clientsHelped: number;
+    tasksCompleted: number;
+    goalsReached: number;
+    satisfactionRate: number;
+  };
   // Additional properties for UI demo
   businessHours?: Array<{
     day: string;
