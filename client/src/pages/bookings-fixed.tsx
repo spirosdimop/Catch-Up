@@ -548,27 +548,26 @@ export const BookingsFixed = () => {
           <div className="space-y-4 py-2">
             <div className="flex flex-col space-y-1">
               <h4 className="text-sm font-medium text-gray-500">Client</h4>
-              <p className="font-medium">{detailsBooking.client.name}</p>
-              <p className="text-sm">{detailsBooking.client.email}</p>
+              <p className="font-medium">{detailsBooking.clientName || "Client"}</p>
+              <p className="text-sm">{detailsBooking.clientPhone || "Phone unavailable"}</p>
             </div>
             
             <div className="flex flex-col space-y-1">
               <h4 className="text-sm font-medium text-gray-500">Date & Time</h4>
-              <p>{format(parseISO(detailsBooking.date), 'MMMM d, yyyy')} at {detailsBooking.time}</p>
-              <p className="text-sm">{detailsBooking.duration} minutes</p>
+              <p>{detailsBooking.date ? format(parseISO(detailsBooking.date), 'MMMM d, yyyy') : "Not scheduled"} at {detailsBooking.time || "Not specified"}</p>
+              <p className="text-sm">{detailsBooking.serviceName || "Service not specified"}</p>
             </div>
             
             <div className="flex flex-col space-y-1">
-              <h4 className="text-sm font-medium text-gray-500">Type</h4>
-              <p className="capitalize">{detailsBooking.type}</p>
+              <h4 className="text-sm font-medium text-gray-500">Service</h4>
+              <p className="capitalize">{detailsBooking.serviceName || "No service selected"}</p>
+              <p className="text-sm">{detailsBooking.servicePrice || "Price not specified"}</p>
             </div>
             
-            {detailsBooking.location && (
-              <div className="flex flex-col space-y-1">
-                <h4 className="text-sm font-medium text-gray-500">Location</h4>
-                <p>{detailsBooking.location}</p>
-              </div>
-            )}
+            <div className="flex flex-col space-y-1">
+              <h4 className="text-sm font-medium text-gray-500">Notes</h4>
+              <p>{detailsBooking.notes || "No notes"}</p>
+            </div>
             
             <div className="flex flex-col space-y-1">
               <h4 className="text-sm font-medium text-gray-500">Status</h4>
