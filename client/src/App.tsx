@@ -31,6 +31,7 @@ import ProfileRedesign from "@/pages/profile-redesign";
 import AIAssistant from "@/pages/ai-assistant";
 
 import Projects from "@/pages/Projects";
+import ProjectDetail from "@/pages/project";
 import Signup from "@/pages/signup";
 import LandingPage from "@/pages/landing";
 // Import new landing page
@@ -134,10 +135,7 @@ function Router() {
         <Route path="/profile" component={ProfileRedesign} />
         <Route path="/profile-original" component={Profile} />
         <Route path="/projects" component={Projects} />
-        <Route path="/projects/:id" component={() => {
-          const ProjectDetail = require("@/pages/project").default;
-          return <ProjectDetail />;
-        }} />
+        <Route path="/projects/:id" component={ProjectDetail} />
         <Route path="/ai-assistant" component={AIAssistant} />
         <Route path="/settings" component={Settings} />
         <Route component={NotFound} />
