@@ -39,9 +39,11 @@ export default function ProfileRedesign() {
   const [services, setServices] = useState<Array<{
     name: string;
     description?: string;
-    duration: number;
-    price: number;
+    duration: number | string;
+    price: number | string;
     locationType?: string;
+    hasDurationRange?: boolean;
+    hasPriceRange?: boolean;
   }>>([]);
   const [customInsights, setCustomInsights] = useState<{
     label: string;
@@ -268,7 +270,9 @@ export default function ProfileRedesign() {
         description: "Enter a description for this service",
         duration: 60,
         price: 0,
-        locationType: "In-person"
+        locationType: "In-person",
+        hasDurationRange: false,
+        hasPriceRange: false
       }
     ]);
   };
@@ -290,7 +294,15 @@ export default function ProfileRedesign() {
       // Update the user data with the modified services
       updateUser({
         ...user,
-        services
+        services: services.map(service => ({
+          name: service.name,
+          description: service.description,
+          duration: typeof service.duration === 'string' ? service.duration : service.duration,
+          price: typeof service.price === 'string' ? service.price : service.price,
+          locationType: service.locationType,
+          hasDurationRange: service.hasDurationRange,
+          hasPriceRange: service.hasPriceRange
+        }))
       });
       
       setIsEditingServices(false);
@@ -651,22 +663,97 @@ export default function ProfileRedesign() {
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                       <div>
-                        <label className="block text-sm text-gray-600 mb-1">Duration (minutes)</label>
-                        <Input
-                          type="number"
-                          value={service.duration}
-                          onChange={(e) => updateServiceField(index, 'duration', Number(e.target.value))}
-                          className="border-gray-300"
-                        />
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="block text-sm text-gray-600">Duration (minutes)</label>
+                          <div className="flex items-center">
+                            <label className="text-xs text-gray-500 mr-2">Range</label>
+                            <input 
+                              type="checkbox" 
+                              checked={service.hasDurationRange}
+                              onChange={() => {
+                                const newValue = !service.hasDurationRange;
+                                updateServiceField(index, 'hasDurationRange', newValue);
+                                // If toggling to range, convert single value to range format
+                                if (newValue && typeof service.duration === 'number') {
+                                  updateServiceField(index, 'duration', `${service.duration}-${service.duration + 15}`);
+                                }
+                                // If toggling to single, take first number from range
+                                if (!newValue && typeof service.duration === 'string') {
+                                  const firstValue = parseInt(service.duration.split('-')[0]) || 60;
+                                  updateServiceField(index, 'duration', firstValue);
+                                }
+                              }}
+                              className="h-4 w-4"
+                            />
+                          </div>
+                        </div>
+                        
+                        {service.hasDurationRange ? (
+                          <Input
+                            type="text"
+                            value={service.duration}
+                            onChange={(e) => updateServiceField(index, 'duration', e.target.value)}
+                            className="border-gray-300"
+                            placeholder="e.g. 30-45"
+                          />
+                        ) : (
+                          <Input
+                            type="number"
+                            value={typeof service.duration === 'number' ? service.duration : parseInt(service.duration.toString()) || 60}
+                            onChange={(e) => updateServiceField(index, 'duration', Number(e.target.value))}
+                            className="border-gray-300"
+                          />
+                        )}
+                        <div className="text-xs text-gray-500 mt-1">
+                          {service.hasDurationRange ? "Format: min-max (e.g. 30-45)" : "Specific duration in minutes"}
+                        </div>
                       </div>
+                      
                       <div>
-                        <label className="block text-sm text-gray-600 mb-1">Price ($)</label>
-                        <Input
-                          type="number"
-                          value={service.price}
-                          onChange={(e) => updateServiceField(index, 'price', Number(e.target.value))}
-                          className="border-gray-300"
-                        />
+                        <div className="flex justify-between items-center mb-1">
+                          <label className="block text-sm text-gray-600">Price ($)</label>
+                          <div className="flex items-center">
+                            <label className="text-xs text-gray-500 mr-2">Range</label>
+                            <input 
+                              type="checkbox" 
+                              checked={service.hasPriceRange}
+                              onChange={() => {
+                                const newValue = !service.hasPriceRange;
+                                updateServiceField(index, 'hasPriceRange', newValue);
+                                // If toggling to range, convert single value to range format
+                                if (newValue && typeof service.price === 'number') {
+                                  updateServiceField(index, 'price', `${service.price}-${service.price + 10}`);
+                                }
+                                // If toggling to single, take first number from range
+                                if (!newValue && typeof service.price === 'string') {
+                                  const firstValue = parseInt(service.price.split('-')[0]) || 0;
+                                  updateServiceField(index, 'price', firstValue);
+                                }
+                              }}
+                              className="h-4 w-4"
+                            />
+                          </div>
+                        </div>
+                        
+                        {service.hasPriceRange ? (
+                          <Input
+                            type="text"
+                            value={service.price}
+                            onChange={(e) => updateServiceField(index, 'price', e.target.value)}
+                            className="border-gray-300"
+                            placeholder="e.g. 50-75"
+                          />
+                        ) : (
+                          <Input
+                            type="number"
+                            value={typeof service.price === 'number' ? service.price : parseInt(service.price.toString()) || 0}
+                            onChange={(e) => updateServiceField(index, 'price', Number(e.target.value))}
+                            className="border-gray-300"
+                          />
+                        )}
+                        <div className="text-xs text-gray-500 mt-1">
+                          {service.hasPriceRange ? "Format: min-max (e.g. 50-75)" : "Specific price in dollars"}
+                        </div>
                       </div>
                       <div>
                         <label className="block text-sm text-gray-600 mb-1">Location Type</label>
@@ -715,13 +802,21 @@ export default function ProfileRedesign() {
                         <h3 className="text-lg font-semibold text-[#0a2342]">{service.name}</h3>
                         <p className="text-gray-600 mt-2 min-h-[80px]">{service.description}</p>
                       </div>
-                      <Badge className="bg-[#1d4ed8] text-white text-lg font-semibold">${service.price}</Badge>
+                      <Badge className="bg-[#1d4ed8] text-white text-lg font-semibold">
+                        {typeof service.price === 'string' && service.price.includes('-') 
+                          ? `$${service.price}` 
+                          : `$${service.price}`}
+                      </Badge>
                     </div>
                     
                     <div className="flex flex-wrap justify-between gap-x-6 mt-4 pt-3 border-t border-gray-100 text-sm">
                       <div className="flex items-center">
                         <Clock className="h-4 w-4 mr-1 text-gray-500" />
-                        <span>{service.duration} minutes</span>
+                        <span>
+                          {typeof service.duration === 'string' && service.duration.includes('-') 
+                            ? `${service.duration} minutes` 
+                            : `${service.duration} minutes`}
+                        </span>
                       </div>
                       
                       {service.locationType && (

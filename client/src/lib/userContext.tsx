@@ -44,9 +44,11 @@ export interface UserData {
   services: Array<{
     name: string;
     description?: string;
-    duration: number;
-    price: number;
+    duration: number | string;
+    price: number | string;
     locationType?: string;
+    hasDurationRange?: boolean;
+    hasPriceRange?: boolean;
   }>;
 }
 
