@@ -77,6 +77,11 @@ interface ProjectFormProps {
 
 export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmitting }: ProjectFormProps) {
   // Create form with validation
+  // Always set today's date for new projects
+  const today = new Date();
+  today.setHours(0, 0, 0, 0); // Reset time portion to ensure consistency
+  const todayISOString = today.toISOString();
+  
   const form = useForm<z.infer<typeof projectFormSchema>>({
     resolver: zodResolver(projectFormSchema),
     defaultValues: defaultValues 
@@ -87,7 +92,7 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
             ? (typeof defaultValues.startDate === 'string' 
                 ? defaultValues.startDate 
                 : defaultValues.startDate.toISOString())
-            : null,
+            : todayISOString, // Default to today if no start date
           endDate: defaultValues.endDate 
             ? (typeof defaultValues.endDate === 'string'
                 ? defaultValues.endDate
@@ -99,7 +104,7 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
           name: "",
           description: "",
           clientId: clients.length > 0 ? clients[0].id : undefined,
-          startDate: new Date().toISOString(), // Use ISO string format for consistency
+          startDate: todayISOString, // Always use today's date for new projects
           endDate: null,
           budget: undefined,
           status: ProjectStatus.IN_PROGRESS,
