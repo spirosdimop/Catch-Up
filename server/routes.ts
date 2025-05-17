@@ -347,6 +347,140 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     }
   });
+  
+  // Client cleanup endpoint - removes unconnected and duplicate clients
+  apiRouter.post("/clients/cleanup", async (req, res) => {
+    try {
+      // 1. Find clients not connected to any projects, events, or invoices
+      const unconnectedClients = await storage.getUnconnectedClients();
+      
+      // 2. Find clients with duplicate email addresses
+      const duplicateClients = await storage.getDuplicateClients();
+      
+      // Group duplicate clients by email for processing
+      const clientsByEmail: Record<string, Client[]> = {};
+      duplicateClients.forEach(client => {
+        const email = client.email.toLowerCase().trim();
+        if (!clientsByEmail[email]) {
+          clientsByEmail[email] = [];
+        }
+        clientsByEmail[email].push(client);
+      });
+      
+      // Process and delete unconnected clients
+      const unconnectedResults = await Promise.all(
+        unconnectedClients.map(async client => {
+          try {
+            const deleted = await storage.deleteClient(client.id);
+            return {
+              id: client.id,
+              name: client.name,
+              email: client.email,
+              deleted,
+              reason: "unconnected"
+            };
+          } catch (error) {
+            return {
+              id: client.id,
+              name: client.name,
+              email: client.email,
+              deleted: false,
+              error: error instanceof Error ? error.message : String(error),
+              reason: "unconnected"
+            };
+          }
+        })
+      );
+      
+      // Process duplicate clients (keep one per email, delete the rest)
+      const duplicateResults: Array<{
+        id: number;
+        name: string;
+        email: string;
+        deleted: boolean;
+        reason: string;
+        keepId?: number;
+        keepName?: string;
+        error?: string;
+      }> = [];
+      
+      for (const email in clientsByEmail) {
+        const clientsWithEmail = clientsByEmail[email];
+        
+        // Skip if only one client with this email (sanity check)
+        if (clientsWithEmail.length <= 1) continue;
+        
+        // Keep the first client, try to delete the rest
+        const [keepClient, ...duplicatesToDelete] = clientsWithEmail;
+        
+        for (const dupeClient of duplicatesToDelete) {
+          try {
+            // Check if this client has any projects
+            const clientProjects = await storage.getProjectsByClient(dupeClient.id);
+            if (clientProjects.length > 0) {
+              duplicateResults.push({
+                id: dupeClient.id,
+                name: dupeClient.name,
+                email: dupeClient.email,
+                deleted: false,
+                reason: "duplicate_with_projects",
+                keepId: keepClient.id,
+                keepName: keepClient.name,
+                error: "Client has associated projects and cannot be deleted"
+              });
+              continue;
+            }
+            
+            // If no projects, delete the duplicate
+            const deleted = await storage.deleteClient(dupeClient.id);
+            duplicateResults.push({
+              id: dupeClient.id,
+              name: dupeClient.name,
+              email: dupeClient.email,
+              deleted,
+              reason: "duplicate",
+              keepId: keepClient.id,
+              keepName: keepClient.name
+            });
+          } catch (error) {
+            duplicateResults.push({
+              id: dupeClient.id,
+              name: dupeClient.name,
+              email: dupeClient.email,
+              deleted: false,
+              reason: "duplicate",
+              keepId: keepClient.id,
+              keepName: keepClient.name,
+              error: error instanceof Error ? error.message : String(error)
+            });
+          }
+        }
+      }
+      
+      // Return results summary
+      res.json({
+        unconnected: {
+          count: unconnectedClients.length,
+          deleted: unconnectedResults.filter(r => r.deleted).length,
+          results: unconnectedResults
+        },
+        duplicates: {
+          count: duplicateClients.length,
+          duplicateEmails: Object.keys(clientsByEmail).length,
+          deleted: duplicateResults.filter(r => r.deleted).length,
+          results: duplicateResults
+        },
+        totalDeleted: unconnectedResults.filter(r => r.deleted).length + 
+                     duplicateResults.filter(r => r.deleted).length
+      });
+    } catch (error) {
+      console.error("Error cleaning up clients:", error);
+      res.status(500).json({ 
+        message: "Failed to clean up clients", 
+        error: error instanceof Error ? error.message : String(error) 
+      });
+    }
+  });
 
   // Project endpoints
   apiRouter.get("/projects", async (req, res) => {

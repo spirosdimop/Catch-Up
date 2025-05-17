@@ -1,5 +1,5 @@
 import { db } from './db';
-import { eq, desc, and, sql, notInArray, inArray, count, isNull, notEq } from 'drizzle-orm';
+import { eq, desc, and, sql, notInArray, inArray, count, isNull, ne } from 'drizzle-orm';
 import * as schema from '@shared/schema';
 import {
   User,
@@ -333,6 +333,72 @@ export class DatabaseStorage implements IStorage {
       .delete(schema.clients)
       .where(eq(schema.clients.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  // Get clients that aren't connected to any projects, events, or invoices
+  async getUnconnectedClients(): Promise<Client[]> {
+    // Get all clients
+    const allClients = await this.getClients();
+    
+    // Get client IDs that have projects
+    const projectClientIds = await db
+      .select({ id: schema.projects.clientId })
+      .from(schema.projects);
+    
+    // Get client IDs that have events
+    const eventClientIds = await db
+      .select({ id: schema.events.clientId })
+      .from(schema.events)
+      .where(ne(schema.events.clientId, null));
+    
+    // Get client IDs that have invoices
+    const invoiceClientIds = await db
+      .select({ id: schema.invoices.clientId })
+      .from(schema.invoices);
+    
+    // Create a set of connected client IDs
+    const connectedClientIds = new Set([
+      ...projectClientIds.map(p => p.id),
+      ...eventClientIds.map(e => e.id as number),
+      ...invoiceClientIds.map(i => i.id)
+    ]);
+    
+    // Filter out clients that have connections
+    const unconnectedClients = allClients.filter(client => 
+      !connectedClientIds.has(client.id)
+    );
+    
+    return unconnectedClients;
+  }
+  
+  // Get clients with duplicate email addresses
+  async getDuplicateClients(): Promise<Client[]> {
+    // Get all clients
+    const allClients = await this.getClients();
+    
+    // Create a map to track emails
+    const emailMap = new Map<string, number>();
+    const duplicateEmails = new Set<string>();
+    
+    // Find duplicate emails
+    allClients.forEach(client => {
+      const email = client.email.toLowerCase().trim();
+      if (emailMap.has(email)) {
+        duplicateEmails.add(email);
+      } else {
+        emailMap.set(email, client.id);
+      }
+    });
+    
+    // If no duplicates, return empty array
+    if (duplicateEmails.size === 0) {
+      return [];
+    }
+    
+    // Return all clients with duplicate emails
+    return allClients.filter(client => 
+      duplicateEmails.has(client.email.toLowerCase().trim())
+    );
   }
   
   async getProjects(): Promise<Project[]> { 

@@ -996,6 +996,64 @@ export class MemStorage implements IStorage {
   async updateUserPreferences(userId: string, preferences: Partial<InsertUserPreferences>): Promise<UserPreferences | undefined> {
     return undefined;
   }
+  
+  // Implementation for the unconnected clients lookup
+  async getUnconnectedClients(): Promise<Client[]> {
+    // Get all clients
+    const allClients = Array.from(this.clients.values());
+    
+    // Get all client IDs that have projects
+    const projectClientIds = new Set<number>();
+    for (const project of this.projects.values()) {
+      projectClientIds.add(project.clientId);
+    }
+    
+    // Get all client IDs that have events
+    const eventClientIds = new Set<number>();
+    for (const event of this.events.values()) {
+      if (event.clientId !== null) {
+        eventClientIds.add(event.clientId);
+      }
+    }
+    
+    // Get all client IDs that have invoices
+    const invoiceClientIds = new Set<number>();
+    for (const invoice of this.invoices.values()) {
+      invoiceClientIds.add(invoice.clientId);
+    }
+    
+    // Find clients that are not connected to projects, events, or invoices
+    return allClients.filter(client => 
+      !projectClientIds.has(client.id) && 
+      !eventClientIds.has(client.id) && 
+      !invoiceClientIds.has(client.id)
+    );
+  }
+  
+  // Implementation for finding duplicate clients
+  async getDuplicateClients(): Promise<Client[]> {
+    // Get all clients
+    const allClients = Array.from(this.clients.values());
+    
+    // Track emails to find duplicates
+    const emailMap = new Map<string, number>();
+    const duplicateEmails = new Set<string>();
+    
+    // Find duplicate emails
+    allClients.forEach(client => {
+      const email = client.email.toLowerCase().trim();
+      if (emailMap.has(email)) {
+        duplicateEmails.add(email);
+      } else {
+        emailMap.set(email, client.id);
+      }
+    });
+    
+    // Return all clients with duplicate emails
+    return allClients.filter(client => 
+      duplicateEmails.has(client.email.toLowerCase().trim())
+    );
+  }
 }
 
 // Import the DatabaseStorage
