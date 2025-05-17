@@ -9,7 +9,7 @@ export interface BookingRequest {
   servicePrice?: string | number;
   date: string;
   time: string;
-  status: "pending" | "accepted" | "declined" | "rescheduled";
+  status: "confirmed" | "rescheduled" | "canceled" | "emergency";
   professionalId: string;
   createdAt: string;
   notes?: string;

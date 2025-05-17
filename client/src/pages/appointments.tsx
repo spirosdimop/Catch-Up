@@ -47,7 +47,7 @@ export default function AppointmentsPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: "accepted" })
+        body: JSON.stringify({ status: "confirmed" })
       });
       
       if (response.ok) {
@@ -77,7 +77,7 @@ export default function AppointmentsPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ status: "declined" })
+        body: JSON.stringify({ status: "canceled" })
       });
       
       if (response.ok) {
@@ -177,7 +177,7 @@ export default function AppointmentsPage() {
                 servicePrice: "$100",
                 date: "2025-05-30",
                 time: "10:00 AM",
-                status: "pending" as const,
+                status: "confirmed" as const,
                 professionalId: "1",
                 createdAt: new Date().toISOString(),
                 notes: "This is a test booking"

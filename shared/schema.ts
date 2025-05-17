@@ -247,7 +247,7 @@ export const bookings = pgTable("bookings", {
   date: text("date").notNull(),
   time: text("time").notNull(),
   notes: text("notes"),
-  status: bookingStatusEnum("status").notNull().default("pending"),
+  status: bookingStatusEnum("status").notNull().default("confirmed"),
   professionalId: text("professional_id").notNull(), // Points to a user
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
