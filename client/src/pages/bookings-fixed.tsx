@@ -274,7 +274,7 @@ export const BookingsFixed = () => {
             <div className="flex items-center p-4">
               <div className="flex-1">
                 <div className="flex items-center space-x-2">
-                  <h3 className="font-semibold">{booking.client.name}</h3>
+                  <h3 className="font-semibold">{booking.clientName}</h3>
                   <Badge 
                     className={cn(
                       "text-xs",
@@ -287,7 +287,7 @@ export const BookingsFixed = () => {
                     {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                   </Badge>
                 </div>
-                <p className="text-sm text-gray-500 mt-1">{booking.client.email}</p>
+                <p className="text-sm text-gray-500 mt-1">{booking.clientPhone}</p>
                 <div className="flex items-center space-x-4 mt-2 text-sm">
                   <div className="flex items-center">
                     <CalendarIcon className="mr-1 h-4 w-4 text-gray-500" />
