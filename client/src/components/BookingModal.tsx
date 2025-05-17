@@ -77,7 +77,7 @@ export default function BookingModal({
         servicePrice: selectedService?.price,
         date: formData.date,
         time: formData.time,
-        status: "pending" as const,
+        status: "confirmed" as const,
         professionalId,
         createdAt: new Date().toISOString()
       };

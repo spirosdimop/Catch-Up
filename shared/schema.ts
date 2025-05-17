@@ -230,10 +230,10 @@ export const insertInvoiceItemSchema = createInsertSchema(invoiceItems).pick({
 
 // Booking status enum
 export const bookingStatusEnum = pgEnum("booking_status", [
-  "pending",
-  "accepted",
-  "declined",
+  "confirmed",
   "rescheduled",
+  "canceled",
+  "emergency",
 ]);
 
 // Bookings schema
