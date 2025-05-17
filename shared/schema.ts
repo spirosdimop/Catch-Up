@@ -1,6 +1,7 @@
 import { pgTable, text, serial, integer, boolean, timestamp, doublePrecision, pgEnum } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 // User schema
 export const users = pgTable("users", {
@@ -227,6 +228,43 @@ export const insertInvoiceItemSchema = createInsertSchema(invoiceItems).pick({
   amount: true,
 });
 
+// Booking status enum
+export const bookingStatusEnum = pgEnum("booking_status", [
+  "pending",
+  "accepted",
+  "declined",
+  "rescheduled",
+]);
+
+// Bookings schema
+export const bookings = pgTable("bookings", {
+  id: serial("id").primaryKey(),
+  externalId: text("external_id").notNull(), // Client-side ID
+  clientName: text("client_name").notNull(),
+  clientPhone: text("client_phone").notNull(),
+  serviceName: text("service_name"),
+  servicePrice: text("service_price"),
+  date: text("date").notNull(),
+  time: text("time").notNull(),
+  notes: text("notes"),
+  status: bookingStatusEnum("status").notNull().default("pending"),
+  professionalId: text("professional_id").notNull(), // Points to a user
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertBookingSchema = createInsertSchema(bookings).pick({
+  externalId: true,
+  clientName: true,
+  clientPhone: true,
+  serviceName: true,
+  servicePrice: true,
+  date: true,
+  time: true,
+  notes: true,
+  status: true,
+  professionalId: true,
+});
+
 // Type exports
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -248,6 +286,9 @@ export type InsertInvoice = z.infer<typeof insertInvoiceSchema>;
 
 export type InvoiceItem = typeof invoiceItems.$inferSelect;
 export type InsertInvoiceItem = z.infer<typeof insertInvoiceItemSchema>;
+
+export type Booking = typeof bookings.$inferSelect;
+export type InsertBooking = z.infer<typeof insertBookingSchema>;
 
 // Sign-up related schemas
 export const locationTypeEnum = pgEnum("location_type", [
@@ -375,6 +416,13 @@ export const InvoiceStatus = {
   PAID: 'paid',
   OVERDUE: 'overdue',
   CANCELED: 'canceled'
+} as const;
+
+export const BookingStatus = {
+  PENDING: 'pending',
+  ACCEPTED: 'accepted',
+  DECLINED: 'declined',
+  RESCHEDULED: 'rescheduled'
 } as const;
 
 // Calendar event type enum
@@ -547,81 +595,72 @@ export type InsertAiCommandEffect = z.infer<typeof insertAiCommandEffectSchema>;
 // User Navigation Tracking
 export const navigationEvents = pgTable("navigation_events", {
   id: serial("id").primaryKey(),
-  userId: text("user_id").notNull(), // Using string for userId to support Replit Auth
-  path: text("path").notNull(), // Current path user navigated to
-  fromPath: text("from_path"), // Previous path user was on
+  userId: text("user_id").notNull(),
+  path: text("path").notNull(),
+  fromPath: text("from_path"),
   timestamp: timestamp("timestamp").defaultNow().notNull(),
-  sessionId: text("session_id").notNull(), // Unique identifier for the user's session
-  timeOnPage: integer("time_on_page").default(0), // Time spent on page in seconds
-  clickedElements: text("clicked_elements"), // JSON stringified array of element IDs clicked
+  sessionId: text("session_id").notNull(),
+  timeOnPage: integer("time_on_page"),
+  clickedElements: text("clicked_elements"), // JSON string with array of clicked elements
 });
 
-// User Preferences
-export const userPreferences = pgTable("user_preferences", {
-  id: serial("id").primaryKey(),
-  userId: text("user_id").notNull().unique(), // Using string for userId to support Replit Auth
-  language: text("language").default("en").notNull(), // ISO language code
-  theme: text("theme").default("light").notNull(), // light, dark, system
-  notificationsEnabled: boolean("notifications_enabled").default(true).notNull(),
-  emailNotifications: boolean("email_notifications").default(true).notNull(),
-  calendarIntegration: boolean("calendar_integration").default(false).notNull(),
-  defaultView: text("default_view").default("week").notNull(), // week, day, month
-  weekStartsOn: integer("week_starts_on").default(0).notNull(), // 0 = Sunday, 6 = Saturday
-  hourFormat: integer("hour_format").default(12).notNull(), // 12 or 24
-  timezone: text("timezone").default("UTC").notNull(),
-  automaticTimeTracking: boolean("automatic_time_tracking").default(false).notNull(),
-  assistantName: text("assistant_name").default("Assistant").notNull(), // Customizable name for the AI assistant
-  lastUpdated: timestamp("last_updated").defaultNow().notNull(),
-});
-
-// Export schemas for navigation and preferences
 export const insertNavigationEventSchema = createInsertSchema(navigationEvents).pick({
   userId: true,
   path: true,
   fromPath: true,
-  timestamp: true,
   sessionId: true,
   timeOnPage: true,
   clickedElements: true,
 });
 
-export const insertUserPreferencesSchema = createInsertSchema(userPreferences).pick({
-  userId: true,
-  language: true,
-  theme: true,
-  notificationsEnabled: true,
-  emailNotifications: true,
-  calendarIntegration: true,
-  defaultView: true,
-  weekStartsOn: true,
-  hourFormat: true,
-  timezone: true,
-  automaticTimeTracking: true,
-  assistantName: true,
-});
-
 export type NavigationEvent = typeof navigationEvents.$inferSelect;
 export type InsertNavigationEvent = z.infer<typeof insertNavigationEventSchema>;
+
+// User Preferences
+export const userPreferences = pgTable("user_preferences", {
+  id: serial("id").primaryKey(),
+  userId: text("user_id").notNull().unique(),
+  theme: text("theme").default("system"),
+  dateFormat: text("date_format").default("MM/dd/yyyy"),
+  timeFormat: text("time_format").default("hh:mm a"),
+  defaultView: text("default_view").default("month"), // week, day, month
+  startOfWeek: integer("start_of_week").default(0), // 0=Sunday, 1=Monday
+  notifications: boolean("notifications").default(true),
+  language: text("language").default("en"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const insertUserPreferencesSchema = createInsertSchema(userPreferences).pick({
+  userId: true,
+  theme: true,
+  dateFormat: true,
+  timeFormat: true,
+  defaultView: true,
+  startOfWeek: true,
+  notifications: true,
+  language: true,
+});
 
 export type UserPreferences = typeof userPreferences.$inferSelect;
 export type InsertUserPreferences = z.infer<typeof insertUserPreferencesSchema>;
 
-// Auto Response Templates schema
+// Auto responses for messaging
 export const autoResponses = pgTable("auto_responses", {
   id: serial("id").primaryKey(),
-  userId: text("user_id").notNull(), // Using string for userId to support Replit Auth
-  name: text("name").notNull(), // Name of the template
-  type: messageTypeEnum("type").default("general").notNull(), // Type of message
-  content: text("content").notNull(), // Template content
-  isDefault: boolean("is_default").default(false).notNull(), // Whether this is the default template for this type
+  userId: text("user_id").notNull(),
+  name: text("name").notNull(),
+  type: messageTypeEnum("type").notNull(),
+  content: text("content").notNull(),
+  isDefault: boolean("is_default").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull()
 });
 
 export const insertAutoResponseSchema = createInsertSchema(autoResponses).pick({
   userId: true,
   name: true,
-  type: true, 
+  type: true,
   content: true,
   isDefault: true,
 });
@@ -629,67 +668,117 @@ export const insertAutoResponseSchema = createInsertSchema(autoResponses).pick({
 export type AutoResponse = typeof autoResponses.$inferSelect;
 export type InsertAutoResponse = z.infer<typeof insertAutoResponseSchema>;
 
-// Booking status enum
-export const bookingStatusEnum = pgEnum("booking_status", [
-  "confirmed",
-  "rescheduled",
-  "canceled",
-  "emergency"
-]);
+// Set up relations between schemas
+export const usersRelations = relations(users, ({ many }) => ({
+  events: many(events),
+  eventTemplates: many(eventTemplates),
+  bookings: many(bookings),
+  autoResponses: many(autoResponses),
+  userPreferences: many(userPreferences),
+}));
 
-// Booking type enum
-export const bookingTypeEnum = pgEnum("booking_type", [
-  "call",
-  "meeting",
-  "followup",
-  "consultation"
-]);
+export const clientsRelations = relations(clients, ({ many }) => ({
+  projects: many(projects),
+  invoices: many(invoices),
+  events: many(events),
+}));
 
-// Bookings schema
-export const bookings = pgTable("bookings", {
-  id: serial("id").primaryKey(),
-  date: text("date").notNull(), // Format: 'YYYY-MM-DD'
-  time: text("time").notNull(), // Format: 'HH:MM'
-  duration: integer("duration").default(60).notNull(), // Duration in minutes
-  type: bookingTypeEnum("type").default("meeting").notNull(),
-  status: bookingStatusEnum("status").default("confirmed").notNull(),
-  location: text("location"),
-  notes: text("notes"),
-  clientId: integer("client_id").notNull(),
-  serviceId: text("service_id").notNull(),
-  priority: text("priority").default("normal").notNull(), // 'normal' or 'emergency'
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+export const projectsRelations = relations(projects, ({ one, many }) => ({
+  client: one(clients, {
+    fields: [projects.clientId],
+    references: [clients.id],
+  }),
+  tasks: many(tasks),
+  timeEntries: many(timeEntries),
+  events: many(events),
+}));
 
-// Booking schema for zod validation
-export const insertBookingSchema = createInsertSchema(bookings).pick({
-  date: true,
-  time: true,
-  duration: true,
-  type: true,
-  status: true,
-  location: true,
-  notes: true,
-  clientId: true,
-  serviceId: true,
-  priority: true,
-});
+export const tasksRelations = relations(tasks, ({ one, many }) => ({
+  project: one(projects, {
+    fields: [tasks.projectId],
+    references: [projects.id],
+  }),
+  timeEntries: many(timeEntries),
+}));
 
-export type Booking = typeof bookings.$inferSelect;
-export type InsertBooking = z.infer<typeof insertBookingSchema>;
+export const timeEntriesRelations = relations(timeEntries, ({ one }) => ({
+  project: one(projects, {
+    fields: [timeEntries.projectId],
+    references: [projects.id],
+  }),
+  task: one(tasks, {
+    fields: [timeEntries.taskId],
+    references: [tasks.id],
+  }),
+}));
 
-// Helper enums for frontend
-export const BookingStatus = {
-  CONFIRMED: 'confirmed',
-  RESCHEDULED: 'rescheduled',
-  CANCELED: 'canceled',
-  EMERGENCY: 'emergency'
-} as const;
+export const invoicesRelations = relations(invoices, ({ one, many }) => ({
+  client: one(clients, {
+    fields: [invoices.clientId],
+    references: [clients.id],
+  }),
+  events: many(events),
+  invoiceItems: many(invoiceItems),
+}));
 
-export const BookingType = {
-  CALL: 'call',
-  MEETING: 'meeting',
-  FOLLOWUP: 'followup',
-  CONSULTATION: 'consultation'
-} as const;
+export const invoiceItemsRelations = relations(invoiceItems, ({ one }) => ({
+  invoice: one(invoices, {
+    fields: [invoiceItems.invoiceId],
+    references: [invoices.id],
+  }),
+}));
+
+export const bookingsRelations = relations(bookings, ({ one }) => ({
+  professional: one(users, {
+    fields: [bookings.professionalId],
+    references: [users.id],
+  }),
+}));
+
+export const eventsRelations = relations(events, ({ one }) => ({
+  client: one(clients, {
+    fields: [events.clientId],
+    references: [clients.id],
+  }),
+  project: one(projects, {
+    fields: [events.projectId],
+    references: [projects.id],
+  }),
+  invoice: one(invoices, {
+    fields: [events.invoiceId],
+    references: [invoices.id],
+  }),
+  template: one(eventTemplates, {
+    fields: [events.templateId],
+    references: [eventTemplates.id],
+  }),
+}));
+
+export const eventTemplatesRelations = relations(eventTemplates, ({ many }) => ({
+  events: many(events),
+}));
+
+export const aiCommandsRelations = relations(aiCommands, ({ many }) => ({
+  effects: many(aiCommandEffects),
+}));
+
+export const aiCommandEffectsRelations = relations(aiCommandEffects, ({ one }) => ({
+  command: one(aiCommands, {
+    fields: [aiCommandEffects.commandId],
+    references: [aiCommands.id],
+  }),
+}));
+
+export const userPreferencesRelations = relations(userPreferences, ({ one }) => ({
+  user: one(users, {
+    fields: [userPreferences.userId],
+    references: [users.id],
+  }),
+}));
+
+export const autoResponsesRelations = relations(autoResponses, ({ one }) => ({
+  user: one(users, {
+    fields: [autoResponses.userId],
+    references: [users.id],
+  }),
+}));

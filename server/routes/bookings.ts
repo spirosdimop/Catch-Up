@@ -1,102 +1,129 @@
 import express from "express";
-import { storage } from "../storage";
-import { nanoid } from "nanoid";
+import { z } from "zod";
+import { db } from "../db";
+import { bookings, insertBookingSchema } from "../../shared/schema";
+import { eq } from "drizzle-orm";
 
 const router = express.Router();
 
-// Initialize bookings array if it doesn't exist
-if (!storage.data.bookings) {
-  storage.data.bookings = [];
-}
-
-// Get all booking requests
-router.get('/api/bookings', (req, res) => {
+// Get all bookings
+router.get("/", async (req, res) => {
   try {
-    res.json(storage.data.bookings || []);
+    const result = await db.select().from(bookings);
+    res.json(result);
   } catch (error) {
-    console.error('Error fetching booking requests:', error);
-    res.status(500).json({ error: 'Failed to fetch booking requests' });
+    console.error("Error fetching bookings:", error);
+    res.status(500).json({ error: "Failed to fetch bookings" });
   }
 });
 
-// Get booking requests by professional ID
-router.get('/api/bookings/professional/:id', (req, res) => {
+// Get a specific booking by ID
+router.get("/:id", async (req, res) => {
   try {
-    const professionalId = req.params.id;
-    const bookings = storage.data.bookings.filter(booking => booking.professionalId === professionalId);
-    res.json(bookings || []);
+    const { id } = req.params;
+    const result = await db.select().from(bookings).where(eq(bookings.id, parseInt(id)));
+    
+    if (result.length === 0) {
+      return res.status(404).json({ error: "Booking not found" });
+    }
+    
+    res.json(result[0]);
   } catch (error) {
-    console.error('Error fetching professional\'s booking requests:', error);
-    res.status(500).json({ error: 'Failed to fetch professional\'s booking requests' });
+    console.error("Error fetching booking:", error);
+    res.status(500).json({ error: "Failed to fetch booking" });
   }
 });
 
-// Create a new booking request
-router.post('/api/bookings', (req, res) => {
+// Create a new booking
+router.post("/", async (req, res) => {
   try {
-    const bookingRequest = {
-      id: nanoid(),
-      ...req.body,
-      createdAt: new Date().toISOString()
-    };
+    const bookingData = insertBookingSchema.parse(req.body);
     
-    storage.data.bookings.push(bookingRequest);
-    res.status(201).json(bookingRequest);
+    const [newBooking] = await db.insert(bookings)
+      .values({
+        ...bookingData,
+        createdAt: new Date()
+      })
+      .returning();
+    
+    res.status(201).json(newBooking);
   } catch (error) {
-    console.error('Error creating booking request:', error);
-    res.status(500).json({ error: 'Failed to create booking request' });
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors });
+    }
+    
+    console.error("Error creating booking:", error);
+    res.status(500).json({ error: "Failed to create booking" });
   }
 });
 
-// Update booking status (accept, decline, reschedule)
-router.patch('/api/bookings/:id', (req, res) => {
+// Update a booking
+router.patch("/:id", async (req, res) => {
   try {
-    const bookingId = req.params.id;
-    const { status, notes, newDate, newTime } = req.body;
+    const { id } = req.params;
+    const parsedId = parseInt(id);
     
-    const bookingIndex = storage.data.bookings.findIndex(booking => booking.id === bookingId);
+    // Validate the update data
+    const updateData = insertBookingSchema.partial().parse(req.body);
     
-    if (bookingIndex === -1) {
-      return res.status(404).json({ error: 'Booking request not found' });
+    // Check if the booking exists
+    const existingBooking = await db.select().from(bookings).where(eq(bookings.id, parsedId));
+    if (existingBooking.length === 0) {
+      return res.status(404).json({ error: "Booking not found" });
     }
     
     // Update the booking
-    const updatedBooking = {
-      ...storage.data.bookings[bookingIndex],
-      status,
-      notes: notes || storage.data.bookings[bookingIndex].notes,
-      updatedAt: new Date().toISOString()
-    };
+    const [updatedBooking] = await db.update(bookings)
+      .set(updateData)
+      .where(eq(bookings.id, parsedId))
+      .returning();
     
-    // If rescheduling, update date and time
-    if (status === 'rescheduled' && newDate && newTime) {
-      updatedBooking.date = newDate;
-      updatedBooking.time = newTime;
-    }
-    
-    storage.data.bookings[bookingIndex] = updatedBooking;
     res.json(updatedBooking);
   } catch (error) {
-    console.error('Error updating booking request:', error);
-    res.status(500).json({ error: 'Failed to update booking request' });
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({ error: error.errors });
+    }
+    
+    console.error("Error updating booking:", error);
+    res.status(500).json({ error: "Failed to update booking" });
   }
 });
 
-// Delete a booking request
-router.delete('/api/bookings/:id', (req, res) => {
+// Delete a booking
+router.delete("/:id", async (req, res) => {
   try {
-    const bookingId = req.params.id;
-    const bookingIndex = storage.data.bookings.findIndex(booking => booking.id === bookingId);
+    const { id } = req.params;
+    const parsedId = parseInt(id);
     
-    if (bookingIndex === -1) {
-      return res.status(404).json({ error: 'Booking request not found' });
+    // Check if the booking exists
+    const existingBooking = await db.select().from(bookings).where(eq(bookings.id, parsedId));
+    if (existingBooking.length === 0) {
+      return res.status(404).json({ error: "Booking not found" });
     }
     
-    storage.data.bookings.splice(bookingIndex, 1);
-    res.status(204).send();
+    // Delete the booking
+    await db.delete(bookings).where(eq(bookings.id, parsedId));
+    
+    res.json({ success: true });
   } catch (error) {
-    console.error('Error deleting booking request:', error);
-    res.status(500).json({ error: 'Failed to delete booking request' });
+    console.error("Error deleting booking:", error);
+    res.status(500).json({ error: "Failed to delete booking" });
+  }
+});
+
+// Get bookings by professional ID
+router.get("/professional/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const result = await db.select()
+      .from(bookings)
+      .where(eq(bookings.professionalId, id));
+    
+    res.json(result);
+  } catch (error) {
+    console.error("Error fetching bookings by professional:", error);
+    res.status(500).json({ error: "Failed to fetch bookings by professional" });
   }
 });
 

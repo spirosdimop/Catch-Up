@@ -1,7 +1,8 @@
-// Simple client-side booking storage management
+import { apiRequest } from "@/lib/queryClient";
 
 export interface BookingRequest {
   id: string;
+  externalId: string;
   clientName: string;
   clientPhone: string;
   serviceName?: string;
@@ -14,11 +15,58 @@ export interface BookingRequest {
   notes?: string;
 }
 
-// Key for localStorage
+// Local storage key for offline capability
 const BOOKINGS_STORAGE_KEY = 'app_booking_requests';
 
-// Get all booking requests
-export function getAllBookings(): BookingRequest[] {
+// Get all bookings - first tries from API, falls back to localStorage
+export async function getAllBookings(): Promise<BookingRequest[]> {
+  try {
+    // Try to get bookings from API first
+    const response = await apiRequest('/api/bookings');
+    
+    if (response && Array.isArray(response)) {
+      // Convert any numeric IDs to strings for consistency
+      return response.map(booking => ({
+        ...booking,
+        id: booking.id.toString(),
+      }));
+    }
+    
+    // If API fails or returns unexpected format, try localStorage
+    return getLocalBookings();
+  } catch (error) {
+    console.error('Failed to get bookings from API, using local storage:', error);
+    return getLocalBookings();
+  }
+}
+
+// Get bookings by professional ID
+export async function getBookingsByProfessional(professionalId: string): Promise<BookingRequest[]> {
+  try {
+    // Try to get bookings from API first
+    const response = await apiRequest(`/api/bookings/professional/${professionalId}`);
+    
+    if (response && Array.isArray(response)) {
+      // Convert any numeric IDs to strings for consistency
+      return response.map(booking => ({
+        ...booking,
+        id: booking.id.toString(),
+      }));
+    }
+    
+    // If API fails, filter local bookings by professionalId
+    const localBookings = getLocalBookings();
+    return localBookings.filter(b => b.professionalId === professionalId);
+  } catch (error) {
+    console.error('Failed to get bookings by professional from API, using local storage:', error);
+    // Filter local bookings by professionalId
+    const localBookings = getLocalBookings();
+    return localBookings.filter(b => b.professionalId === professionalId);
+  }
+}
+
+// Helper to get bookings from localStorage
+function getLocalBookings(): BookingRequest[] {
   try {
     const storedData = localStorage.getItem(BOOKINGS_STORAGE_KEY);
     if (!storedData) return [];
@@ -29,27 +77,79 @@ export function getAllBookings(): BookingRequest[] {
   }
 }
 
-// Add a new booking request
-export function addBooking(booking: BookingRequest): BookingRequest {
+// Add a new booking
+export async function addBooking(booking: Omit<BookingRequest, 'id'>): Promise<BookingRequest> {
   try {
-    const bookings = getAllBookings();
-    const updatedBookings = [...bookings, booking];
+    // Generate a unique ID for the booking if one is not provided
+    const externalId = booking.externalId || Date.now().toString();
+    const newBooking = { ...booking, externalId };
+
+    // Try to save to API first
+    try {
+      const response = await apiRequest('/api/bookings', {
+        method: 'POST',
+        data: newBooking
+      });
+      
+      if (response && response.id) {
+        // Successfully saved to API, return the response
+        return {
+          ...response,
+          id: response.id.toString() // Ensure ID is string
+        };
+      }
+    } catch (apiError) {
+      console.error('Failed to save booking to API:', apiError);
+      // Continue to save locally if API fails
+    }
+    
+    // Save to localStorage as backup or if API fails
+    const localId = Date.now().toString();
+    const localBooking: BookingRequest = {
+      ...newBooking,
+      id: localId,
+    };
+    
+    // Get existing bookings and add the new one
+    const bookings = getLocalBookings();
+    const updatedBookings = [...bookings, localBooking];
     localStorage.setItem(BOOKINGS_STORAGE_KEY, JSON.stringify(updatedBookings));
-    console.log('Booking saved successfully:', booking);
-    return booking;
+    
+    console.log('Booking saved to local storage:', localBooking);
+    return localBooking;
   } catch (error) {
     console.error('Failed to save booking:', error);
     throw new Error('Failed to save booking request');
   }
 }
 
-// Update a booking request
-export function updateBooking(
+// Update a booking
+export async function updateBooking(
   bookingId: string,
   updates: Partial<BookingRequest>
-): BookingRequest | null {
+): Promise<BookingRequest | null> {
   try {
-    const bookings = getAllBookings();
+    // Try to update in API first
+    try {
+      const response = await apiRequest(`/api/bookings/${bookingId}`, {
+        method: 'PATCH',
+        data: updates
+      });
+      
+      if (response && response.id) {
+        // Successfully updated in API
+        return {
+          ...response,
+          id: response.id.toString() // Ensure ID is string
+        };
+      }
+    } catch (apiError) {
+      console.error('Failed to update booking in API:', apiError);
+      // Continue to update locally if API fails
+    }
+    
+    // Update in localStorage as backup or if API fails
+    const bookings = getLocalBookings();
     const index = bookings.findIndex(b => b.id === bookingId);
     
     if (index === -1) return null;
@@ -65,10 +165,26 @@ export function updateBooking(
   }
 }
 
-// Delete a booking request
-export function deleteBooking(bookingId: string): boolean {
+// Delete a booking
+export async function deleteBooking(bookingId: string): Promise<boolean> {
   try {
-    const bookings = getAllBookings();
+    // Try to delete from API first
+    try {
+      const response = await apiRequest(`/api/bookings/${bookingId}`, {
+        method: 'DELETE'
+      });
+      
+      if (response && response.success) {
+        // Successfully deleted from API
+        return true;
+      }
+    } catch (apiError) {
+      console.error('Failed to delete booking from API:', apiError);
+      // Continue to delete locally if API fails
+    }
+    
+    // Delete from localStorage as backup or if API fails
+    const bookings = getLocalBookings();
     const updatedBookings = bookings.filter(b => b.id !== bookingId);
     
     if (updatedBookings.length === bookings.length) {

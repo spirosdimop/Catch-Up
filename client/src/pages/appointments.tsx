@@ -4,43 +4,42 @@ import { Button } from "@/components/ui/button";
 import { Check, X, Calendar, Clock, User, Phone, CalendarClock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { getAllBookings, updateBooking, deleteBooking, BookingRequest } from "@/lib/bookingStorage";
+import { useQuery } from "@tanstack/react-query";
 
 export default function AppointmentsPage() {
-  const [bookings, setBookings] = useState<BookingRequest[]>([]);
   const [selectedTab, setSelectedTab] = useState<'pending' | 'accepted' | 'declined' | 'all'>('pending');
   const { toast } = useToast();
 
-  // Load bookings on component mount
-  useEffect(() => {
-    loadBookings();
-  }, []);
-
-  // Function to load bookings from storage
-  const loadBookings = () => {
-    try {
-      const bookingsData = getAllBookings();
-      console.log("Loaded bookings:", bookingsData);
-      setBookings(bookingsData);
-    } catch (error) {
-      console.error("Error loading bookings:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load booking requests",
-        variant: "destructive",
-      });
+  // Use React Query to fetch bookings
+  const { 
+    data: bookings = [], 
+    isLoading, 
+    isError, 
+    refetch: refetchBookings 
+  } = useQuery({
+    queryKey: ['/api/bookings'],
+    queryFn: async () => {
+      try {
+        const data = await getAllBookings();
+        console.log("Loaded bookings:", data);
+        return data;
+      } catch (error) {
+        console.error("Error loading bookings:", error);
+        throw error;
+      }
     }
-  };
+  });
 
   // Handle accepting a booking
-  const handleAccept = (bookingId: string) => {
+  const handleAccept = async (bookingId: string) => {
     try {
-      const updatedBooking = updateBooking(bookingId, { status: "accepted" });
+      const updatedBooking = await updateBooking(bookingId, { status: "accepted" });
       if (updatedBooking) {
         toast({
           title: "Booking Accepted",
           description: "The client will be notified about your response.",
         });
-        loadBookings();
+        refetchBookings();
       }
     } catch (error) {
       console.error("Error accepting booking:", error);
@@ -53,15 +52,15 @@ export default function AppointmentsPage() {
   };
 
   // Handle declining a booking
-  const handleDecline = (bookingId: string) => {
+  const handleDecline = async (bookingId: string) => {
     try {
-      const updatedBooking = updateBooking(bookingId, { status: "declined" });
+      const updatedBooking = await updateBooking(bookingId, { status: "declined" });
       if (updatedBooking) {
         toast({
           title: "Booking Declined",
           description: "The client will be notified about your response.",
         });
-        loadBookings();
+        refetchBookings();
       }
     } catch (error) {
       console.error("Error declining booking:", error);
@@ -127,44 +126,51 @@ export default function AppointmentsPage() {
           variant="outline"
           onClick={() => {
             localStorage.removeItem('app_booking_requests');
-            loadBookings();
+            refetchBookings();
             toast({
-              title: "Bookings Cleared",
-              description: "All booking requests have been cleared for testing.",
+              title: "Local Bookings Cleared",
+              description: "All locally stored booking requests have been cleared.",
             });
           }}
         >
-          Clear All Bookings (Testing)
+          Clear Local Bookings
         </Button>
         
         <Button
           variant="outline"
           className="ml-2"
-          onClick={() => {
+          onClick={async () => {
             // Add a sample booking for testing
-            const testBooking: BookingRequest = {
-              id: Date.now().toString(),
-              clientName: "Test Client",
-              clientPhone: "555-123-4567",
-              serviceName: "Test Service",
-              servicePrice: "$100",
-              date: "2025-05-30",
-              time: "10:00 AM",
-              status: "pending",
-              professionalId: "1",
-              createdAt: new Date().toISOString(),
-              notes: "This is a test booking"
-            };
-            
-            const bookingsData = getAllBookings();
-            const updatedBookings = [...bookingsData, testBooking];
-            localStorage.setItem('app_booking_requests', JSON.stringify(updatedBookings));
-            
-            loadBookings();
-            toast({
-              title: "Test Booking Added",
-              description: "A test booking has been added for demonstration.",
-            });
+            try {
+              const testBooking = {
+                externalId: Date.now().toString(),
+                clientName: "Test Client",
+                clientPhone: "555-123-4567",
+                serviceName: "Test Service",
+                servicePrice: "$100",
+                date: "2025-05-30",
+                time: "10:00 AM",
+                status: "pending" as const,
+                professionalId: "1",
+                createdAt: new Date().toISOString(),
+                notes: "This is a test booking"
+              };
+              
+              await addBooking(testBooking);
+              refetchBookings();
+              
+              toast({
+                title: "Test Booking Added",
+                description: "A test booking has been added for demonstration.",
+              });
+            } catch (error) {
+              console.error("Error adding test booking:", error);
+              toast({
+                title: "Error",
+                description: "Failed to add test booking",
+                variant: "destructive",
+              });
+            }
           }}
         >
           Add Test Booking

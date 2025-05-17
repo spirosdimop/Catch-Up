@@ -69,15 +69,15 @@ export default function BookingModal({
     try {
       const selectedService = services.find((s, index) => index.toString() === formData.serviceId);
       
-      const bookingRequest: BookingRequest = {
-        id: Date.now().toString(),
+      const bookingRequest = {
+        externalId: Date.now().toString(),
         clientName: formData.clientName,
         clientPhone: formData.clientPhone,
         serviceName: selectedService?.name,
         servicePrice: selectedService?.price,
         date: formData.date,
         time: formData.time,
-        status: "pending",
+        status: "pending" as const,
         professionalId,
         createdAt: new Date().toISOString()
       };
