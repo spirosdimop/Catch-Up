@@ -380,16 +380,12 @@ export const BookingsFixed = () => {
             <CardHeader className="pb-2">
               <div className="flex justify-between items-start">
                 <div className="flex items-center space-x-2">
-                  {booking.client.avatar ? (
-                    <div className="h-8 w-8 rounded-full bg-cover bg-center" style={{ backgroundImage: `url(${booking.client.avatar})` }} />
-                  ) : (
-                    <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
-                      <Users className="h-4 w-4 text-gray-500" />
-                    </div>
-                  )}
+                  <div className="h-8 w-8 rounded-full bg-gray-100 flex items-center justify-center">
+                    <Users className="h-4 w-4 text-gray-500" />
+                  </div>
                   <div>
-                    <CardTitle className="text-sm font-medium">{booking.client.name}</CardTitle>
-                    <CardDescription className="text-xs">{booking.type}</CardDescription>
+                    <CardTitle className="text-sm font-medium">{booking.clientName || "Client"}</CardTitle>
+                    <CardDescription className="text-xs">{booking.serviceName || "Service"}</CardDescription>
                   </div>
                 </div>
                 <Badge 
