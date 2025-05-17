@@ -11,6 +11,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { addBooking, BookingRequest } from "@/lib/bookingStorage";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -68,7 +69,7 @@ export default function BookingModal({
     try {
       const selectedService = services.find((s, index) => index.toString() === formData.serviceId);
       
-      const bookingRequest = {
+      const bookingRequest: BookingRequest = {
         id: Date.now().toString(),
         clientName: formData.clientName,
         clientPhone: formData.clientPhone,
@@ -81,14 +82,14 @@ export default function BookingModal({
         createdAt: new Date().toISOString()
       };
       
-      // Store the booking request in localStorage for the demo
-      const existingBookings = JSON.parse(localStorage.getItem('bookingRequests') || '[]');
-      const updatedBookings = [...existingBookings, bookingRequest];
-      localStorage.setItem('bookingRequests', JSON.stringify(updatedBookings));
+      // Store the booking using our storage helper
+      addBooking(bookingRequest);
       
-      // Log the saved bookings to console for debugging
-      console.log('Booking saved:', bookingRequest);
-      console.log('All bookings:', updatedBookings);
+      // Clear the existing outdated storage
+      localStorage.removeItem('bookingRequests');
+      
+      // Log the saved booking for debugging
+      console.log('Booking submitted:', bookingRequest);
       
       toast({
         title: "Booking Request Sent",
