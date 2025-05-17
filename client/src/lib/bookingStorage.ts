@@ -186,11 +186,14 @@ export async function deleteBooking(bookingId: string): Promise<boolean> {
   try {
     // Try to delete from API first
     try {
-      const response = await apiRequest(`/api/bookings/${bookingId}`, {
-        method: 'DELETE'
+      const response = await fetch(`/api/bookings/${bookingId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        }
       });
       
-      if (response && response.success) {
+      if (response.ok) {
         // Successfully deleted from API
         return true;
       }
