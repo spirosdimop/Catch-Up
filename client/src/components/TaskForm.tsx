@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
   SelectContent,
@@ -20,62 +19,47 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { 
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Task } from "@shared/schema";
 import { format } from "date-fns";
-import { cn } from "@/lib/utils";
-import { Project, Task } from "@shared/schema";
 
 // Create a schema for task form
 const taskFormSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
-  description: z.string().optional(),
-  projectId: z.coerce.number({
-    required_error: "Project is required",
-    invalid_type_error: "Project is required",
-  }),
-  dueDate: z.date().optional(),
-  priority: z.string({
-    required_error: "Priority is required",
-  }),
-  status: z.string({
-    required_error: "Status is required",
-  }),
-  completed: z.boolean().default(false),
+  description: z.string().optional().nullable(),
+  status: z.enum(["to_do", "in_progress", "review", "completed"]),
+  priority: z.enum(["low", "medium", "high", "urgent"]),
+  projectId: z.number(),
+  deadline: z.string().optional().nullable(),
+  completed: z.boolean().default(false)
 });
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
 
 interface TaskFormProps {
-  projects: Project[];
   defaultValues?: Task;
+  projectId: number;
   onSubmit: (data: TaskFormValues) => void;
   isSubmitting: boolean;
 }
 
-export default function TaskForm({ projects, defaultValues, onSubmit, isSubmitting }: TaskFormProps) {
-  // Create form with validation
+export default function TaskForm({ defaultValues, projectId, onSubmit, isSubmitting }: TaskFormProps) {
+  // Set up form with validation
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
-    defaultValues: defaultValues 
-      ? {
-          ...defaultValues,
-          dueDate: defaultValues.dueDate ? new Date(defaultValues.dueDate) : undefined,
-        }
-      : {
-          title: "",
-          description: "",
-          projectId: undefined,
-          dueDate: undefined,
-          priority: "Medium",
-          status: "To Do",
-          completed: false,
-        },
+    defaultValues: defaultValues ? {
+      ...defaultValues,
+      projectId: defaultValues.projectId || projectId,
+      deadline: defaultValues.deadline ? format(new Date(defaultValues.deadline), "yyyy-MM-dd") : "",
+    } : {
+      title: "",
+      description: "",
+      status: "to_do",
+      priority: "medium",
+      projectId: projectId,
+      deadline: "",
+      completed: false
+    },
   });
 
   return (
@@ -86,7 +70,7 @@ export default function TaskForm({ projects, defaultValues, onSubmit, isSubmitti
           name="title"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Task Title*</FormLabel>
+              <FormLabel>Title*</FormLabel>
               <FormControl>
                 <Input placeholder="Task title" {...field} />
               </FormControl>
@@ -105,77 +89,9 @@ export default function TaskForm({ projects, defaultValues, onSubmit, isSubmitti
                 <Textarea 
                   placeholder="Task description" 
                   {...field} 
-                  value={field.value || ""}
+                  value={field.value || ""} 
                 />
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="projectId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Project*</FormLabel>
-              <Select 
-                onValueChange={(value) => field.onChange(parseInt(value))}
-                value={field.value?.toString()}
-              >
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a project" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {projects.map((project) => (
-                    <SelectItem key={project.id} value={project.id.toString()}>
-                      {project.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="dueDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Due Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "pl-3 text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      {field.value ? (
-                        format(field.value, "MMM d, yyyy")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value || undefined}
-                    onSelect={field.onChange}
-                    initialFocus
-                    disabled={(date) => date < new Date("1900-01-01")}
-                  />
-                </PopoverContent>
-              </Popover>
               <FormMessage />
             </FormItem>
           )}
@@ -184,21 +100,24 @@ export default function TaskForm({ projects, defaultValues, onSubmit, isSubmitti
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormField
             control={form.control}
-            name="priority"
+            name="status"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Priority*</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <FormLabel>Status</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select priority" />
+                      <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="Low">Low</SelectItem>
-                    <SelectItem value="Medium">Medium</SelectItem>
-                    <SelectItem value="High">High</SelectItem>
-                    <SelectItem value="Urgent">Urgent</SelectItem>
+                    <SelectItem value="to_do">To Do</SelectItem>
+                    <SelectItem value="in_progress">In Progress</SelectItem>
+                    <SelectItem value="review">Review</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -208,21 +127,24 @@ export default function TaskForm({ projects, defaultValues, onSubmit, isSubmitti
 
           <FormField
             control={form.control}
-            name="status"
+            name="priority"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Status*</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
+                <FormLabel>Priority</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
                   <FormControl>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
+                      <SelectValue placeholder="Select priority" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="To Do">To Do</SelectItem>
-                    <SelectItem value="In Progress">In Progress</SelectItem>
-                    <SelectItem value="Review">Review</SelectItem>
-                    <SelectItem value="Completed">Completed</SelectItem>
+                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="medium">Medium</SelectItem>
+                    <SelectItem value="high">High</SelectItem>
+                    <SelectItem value="urgent">Urgent</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -233,9 +155,23 @@ export default function TaskForm({ projects, defaultValues, onSubmit, isSubmitti
 
         <FormField
           control={form.control}
+          name="deadline"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Deadline</FormLabel>
+              <FormControl>
+                <Input type="date" {...field} value={field.value || ""} />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="completed"
           render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
               <FormControl>
                 <Checkbox
                   checked={field.value}
@@ -244,13 +180,14 @@ export default function TaskForm({ projects, defaultValues, onSubmit, isSubmitti
               </FormControl>
               <div className="space-y-1 leading-none">
                 <FormLabel>
-                  Mark as completed
+                  Completed
                 </FormLabel>
               </div>
-              <FormMessage />
             </FormItem>
           )}
         />
+
+        <input type="hidden" {...form.register("projectId")} value={projectId} />
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isSubmitting}>
