@@ -421,50 +421,250 @@ export class DatabaseStorage implements IStorage {
     return result.rowCount ? result.rowCount > 0 : false;
   }
   
-  async getTimeEntries(): Promise<TimeEntry[]> { return []; }
-  async getTimeEntriesByProject(projectId: number): Promise<TimeEntry[]> { return []; }
-  async getTimeEntriesByTask(taskId: number): Promise<TimeEntry[]> { return []; }
-  async getTimeEntry(id: number): Promise<TimeEntry | undefined> { return undefined; }
+  async getTimeEntries(): Promise<TimeEntry[]> { 
+    return await db.select().from(schema.timeEntries);
+  }
+  
+  async getTimeEntriesByProject(projectId: number): Promise<TimeEntry[]> { 
+    return await db
+      .select()
+      .from(schema.timeEntries)
+      .where(eq(schema.timeEntries.projectId, projectId));
+  }
+  
+  async getTimeEntriesByTask(taskId: number): Promise<TimeEntry[]> { 
+    return await db
+      .select()
+      .from(schema.timeEntries)
+      .where(eq(schema.timeEntries.taskId, taskId));
+  }
+  
+  async getTimeEntry(id: number): Promise<TimeEntry | undefined> { 
+    const result = await db
+      .select()
+      .from(schema.timeEntries)
+      .where(eq(schema.timeEntries.id, id));
+    return result[0];
+  }
+  
   async createTimeEntry(timeEntry: InsertTimeEntry): Promise<TimeEntry> { 
-    return {} as TimeEntry; 
+    const [result] = await db
+      .insert(schema.timeEntries)
+      .values({
+        ...timeEntry,
+        createdAt: new Date()
+      })
+      .returning();
+    return result;
   }
-  async updateTimeEntry(id: number, timeEntry: Partial<InsertTimeEntry>): Promise<TimeEntry | undefined> { return undefined; }
-  async deleteTimeEntry(id: number): Promise<boolean> { return false; }
   
-  async getInvoices(): Promise<Invoice[]> { return []; }
-  async getInvoicesByClient(clientId: number): Promise<Invoice[]> { return []; }
-  async getInvoice(id: number): Promise<Invoice | undefined> { return undefined; }
-  async createInvoice(invoice: InsertInvoice): Promise<Invoice> { 
-    return {} as Invoice; 
+  async updateTimeEntry(id: number, timeEntry: Partial<InsertTimeEntry>): Promise<TimeEntry | undefined> { 
+    const [result] = await db
+      .update(schema.timeEntries)
+      .set(timeEntry)
+      .where(eq(schema.timeEntries.id, id))
+      .returning();
+    return result;
   }
-  async updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined> { return undefined; }
-  async deleteInvoice(id: number): Promise<boolean> { return false; }
   
-  async getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]> { return []; }
-  async getInvoiceItem(id: number): Promise<InvoiceItem | undefined> { return undefined; }
-  async createInvoiceItem(invoiceItem: InsertInvoiceItem): Promise<InvoiceItem> { 
-    return {} as InvoiceItem; 
+  async deleteTimeEntry(id: number): Promise<boolean> { 
+    const result = await db
+      .delete(schema.timeEntries)
+      .where(eq(schema.timeEntries.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
   }
-  async updateInvoiceItem(id: number, invoiceItem: Partial<InsertInvoiceItem>): Promise<InvoiceItem | undefined> { return undefined; }
-  async deleteInvoiceItem(id: number): Promise<boolean> { return false; }
   
-  async getServiceProviders(): Promise<ServiceProvider[]> { return []; }
-  async getServiceProvider(id: number): Promise<ServiceProvider | undefined> { return undefined; }
-  async getServiceProviderByEmail(email: string): Promise<ServiceProvider | undefined> { return undefined; }
+  async getInvoices(): Promise<Invoice[]> { 
+    return await db.select().from(schema.invoices);
+  }
+  
+  async getInvoicesByClient(clientId: number): Promise<Invoice[]> { 
+    return await db
+      .select()
+      .from(schema.invoices)
+      .where(eq(schema.invoices.clientId, clientId));
+  }
+  
+  async getInvoice(id: number): Promise<Invoice | undefined> {
+    const result = await db
+      .select()
+      .from(schema.invoices)
+      .where(eq(schema.invoices.id, id));
+    return result[0];
+  }
+  
+  async createInvoice(invoice: InsertInvoice): Promise<Invoice> {
+    const [result] = await db
+      .insert(schema.invoices)
+      .values({
+        ...invoice,
+        createdAt: new Date(),
+        status: invoice.status || "draft" // Set default status if not provided
+      })
+      .returning();
+    return result;
+  }
+  
+  async updateInvoice(id: number, invoice: Partial<InsertInvoice>): Promise<Invoice | undefined> {
+    const [result] = await db
+      .update(schema.invoices)
+      .set(invoice)
+      .where(eq(schema.invoices.id, id))
+      .returning();
+    return result;
+  }
+  
+  async deleteInvoice(id: number): Promise<boolean> {
+    const result = await db
+      .delete(schema.invoices)
+      .where(eq(schema.invoices.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  async getInvoiceItems(invoiceId: number): Promise<InvoiceItem[]> {
+    return await db
+      .select()
+      .from(schema.invoiceItems)
+      .where(eq(schema.invoiceItems.invoiceId, invoiceId));
+  }
+  
+  async getInvoiceItem(id: number): Promise<InvoiceItem | undefined> {
+    const result = await db
+      .select()
+      .from(schema.invoiceItems)
+      .where(eq(schema.invoiceItems.id, id));
+    return result[0];
+  }
+  
+  async createInvoiceItem(invoiceItem: InsertInvoiceItem): Promise<InvoiceItem> {
+    const [result] = await db
+      .insert(schema.invoiceItems)
+      .values(invoiceItem)
+      .returning();
+    return result;
+  }
+  
+  async updateInvoiceItem(id: number, invoiceItem: Partial<InsertInvoiceItem>): Promise<InvoiceItem | undefined> {
+    const [result] = await db
+      .update(schema.invoiceItems)
+      .set(invoiceItem)
+      .where(eq(schema.invoiceItems.id, id))
+      .returning();
+    return result;
+  }
+  
+  async deleteInvoiceItem(id: number): Promise<boolean> {
+    const result = await db
+      .delete(schema.invoiceItems)
+      .where(eq(schema.invoiceItems.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  async getServiceProviders(): Promise<ServiceProvider[]> { 
+    return await db.select().from(schema.serviceProviders);
+  }
+  
+  async getServiceProvider(id: number): Promise<ServiceProvider | undefined> { 
+    const result = await db
+      .select()
+      .from(schema.serviceProviders)
+      .where(eq(schema.serviceProviders.id, id));
+    return result[0];
+  }
+  
+  async getServiceProviderByEmail(email: string): Promise<ServiceProvider | undefined> { 
+    const result = await db
+      .select()
+      .from(schema.serviceProviders)
+      .where(eq(schema.serviceProviders.email, email));
+    return result[0];
+  }
+  
   async createServiceProvider(provider: InsertServiceProvider): Promise<ServiceProvider> { 
-    return {} as ServiceProvider; 
+    // Ensure all required fields have values or defaults
+    const providerData = {
+      ...provider,
+      serviceArea: provider.serviceArea || null,
+      profileImage: provider.profileImage || null,
+      voicemailMessage: provider.voicemailMessage || null,
+      smsFollowUpMessage: provider.smsFollowUpMessage || null,
+      availabilityHours: provider.availabilityHours || null,
+      createdAt: new Date()
+    };
+    
+    const [result] = await db
+      .insert(schema.serviceProviders)
+      .values(providerData)
+      .returning();
+    return result;
   }
-  async updateServiceProvider(id: number, provider: Partial<InsertServiceProvider>): Promise<ServiceProvider | undefined> { return undefined; }
-  async deleteServiceProvider(id: number): Promise<boolean> { return false; }
   
-  async getServices(): Promise<Service[]> { return []; }
-  async getServicesByProvider(providerId: number): Promise<Service[]> { return []; }
-  async getService(id: number): Promise<Service | undefined> { return undefined; }
-  async createService(service: InsertService): Promise<Service> { 
-    return {} as Service; 
+  async updateServiceProvider(id: number, provider: Partial<InsertServiceProvider>): Promise<ServiceProvider | undefined> { 
+    const [result] = await db
+      .update(schema.serviceProviders)
+      .set(provider)
+      .where(eq(schema.serviceProviders.id, id))
+      .returning();
+    return result;
   }
-  async updateService(id: number, service: Partial<InsertService>): Promise<Service | undefined> { return undefined; }
-  async deleteService(id: number): Promise<boolean> { return false; }
+  
+  async deleteServiceProvider(id: number): Promise<boolean> { 
+    const result = await db
+      .delete(schema.serviceProviders)
+      .where(eq(schema.serviceProviders.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+  
+  async getServices(): Promise<Service[]> { 
+    return await db.select().from(schema.services);
+  }
+  
+  async getServicesByProvider(providerId: number): Promise<Service[]> { 
+    return await db
+      .select()
+      .from(schema.services)
+      .where(eq(schema.services.providerId, providerId));
+  }
+  
+  async getService(id: number): Promise<Service | undefined> { 
+    const result = await db
+      .select()
+      .from(schema.services)
+      .where(eq(schema.services.id, id));
+    return result[0];
+  }
+  
+  async createService(service: InsertService): Promise<Service> { 
+    // Ensure all required fields have values or defaults
+    const serviceData = {
+      ...service,
+      description: service.description || null,
+      locationType: service.locationType || "office", // Default to office
+      createdAt: new Date()
+    };
+    
+    const [result] = await db
+      .insert(schema.services)
+      .values(serviceData)
+      .returning();
+    return result;
+  }
+  
+  async updateService(id: number, service: Partial<InsertService>): Promise<Service | undefined> { 
+    const [result] = await db
+      .update(schema.services)
+      .set(service)
+      .where(eq(schema.services.id, id))
+      .returning();
+    return result;
+  }
+  
+  async deleteService(id: number): Promise<boolean> { 
+    const result = await db
+      .delete(schema.services)
+      .where(eq(schema.services.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
   
   // Auto responses methods
   async getAutoResponses(userId: string): Promise<AutoResponse[]> {
