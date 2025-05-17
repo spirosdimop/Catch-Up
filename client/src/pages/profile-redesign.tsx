@@ -574,31 +574,173 @@ export default function ProfileRedesign() {
         </div>
       </div>
 
-      {/* Services section */}
+      {/* Services section - Enhanced with detailed editable view */}
       <div className="container max-w-6xl mx-auto px-4 py-10">
-        <h2 className="text-2xl font-bold text-[#0a2342] mb-8 text-center">Services Offered</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {user.services.map((service, index) => (
-            <Card key={index} className="bg-white shadow-md transition-all hover:shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex justify-between items-start mb-3">
-                  <div>
-                    <h3 className="text-lg font-semibold text-[#0a2342]">{service.name}</h3>
-                    <p className="text-sm text-gray-600">{service.description}</p>
-                  </div>
-                  <Badge className="bg-[#1d4ed8] text-white text-lg font-semibold">${service.price}</Badge>
-                </div>
-                
-                <div className="flex flex-wrap gap-x-6 mt-3 text-sm">
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-1 text-gray-500" />
-                    <span>{service.duration} minutes</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-bold text-[#0a2342]">Services Offered</h2>
+          {!isEditingServices ? (
+            <Button 
+              onClick={() => setIsEditingServices(true)}
+              className="bg-[#1d4ed8] text-white hover:bg-blue-700"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                <path d="M12 20h9"></path>
+                <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+              </svg>
+              Edit Services
+            </Button>
+          ) : (
+            <div className="flex gap-2">
+              <Button 
+                onClick={addNewService}
+                className="bg-green-600 text-white hover:bg-green-700"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
+                  <line x1="12" y1="5" x2="12" y2="19"></line>
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                Add New Service
+              </Button>
+              <Button 
+                onClick={saveServices}
+                className="bg-[#1d4ed8] text-white hover:bg-blue-700"
+              >
+                Save Changes
+              </Button>
+              <Button 
+                variant="outline"
+                onClick={() => {
+                  setServices(user.services || []);
+                  setIsEditingServices(false);
+                }}
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
         </div>
+        
+        {isEditingServices ? (
+          <div className="space-y-6">
+            {services.length > 0 ? services.map((service, index) => (
+              <div key={index} className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+                <div className="flex justify-between mb-4">
+                  <div className="w-full">
+                    <div className="flex justify-between mb-4">
+                      <Input
+                        value={service.name}
+                        onChange={(e) => updateServiceField(index, 'name', e.target.value)}
+                        className="text-lg font-bold text-[#0a2342] border-blue-300 mb-2 max-w-md"
+                        placeholder="Service Name"
+                      />
+                      <Button 
+                        variant="ghost" 
+                        size="icon"
+                        onClick={() => removeService(index)}
+                        className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M3 6h18"></path>
+                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+                          <line x1="10" y1="11" x2="10" y2="17"></line>
+                          <line x1="14" y1="11" x2="14" y2="17"></line>
+                        </svg>
+                      </Button>
+                    </div>
+                    
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">Duration (minutes)</label>
+                        <Input
+                          type="number"
+                          value={service.duration}
+                          onChange={(e) => updateServiceField(index, 'duration', Number(e.target.value))}
+                          className="border-gray-300"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">Price ($)</label>
+                        <Input
+                          type="number"
+                          value={service.price}
+                          onChange={(e) => updateServiceField(index, 'price', Number(e.target.value))}
+                          className="border-gray-300"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm text-gray-600 mb-1">Location Type</label>
+                        <select
+                          value={service.locationType || "In-person"}
+                          onChange={(e) => updateServiceField(index, 'locationType', e.target.value)}
+                          className="w-full h-10 px-3 border border-gray-300 rounded-md"
+                        >
+                          <option value="In-person">In-person</option>
+                          <option value="Remote">Remote</option>
+                          <option value="Hybrid">Hybrid</option>
+                        </select>
+                      </div>
+                    </div>
+                    
+                    <label className="block text-sm text-gray-600 mb-1">Description</label>
+                    <textarea
+                      value={service.description || ''}
+                      onChange={(e) => updateServiceField(index, 'description', e.target.value)}
+                      className="w-full p-3 border border-gray-300 rounded-md min-h-[100px]"
+                      placeholder="Describe your service in detail..."
+                    />
+                  </div>
+                </div>
+              </div>
+            )) : (
+              <div className="bg-white p-6 rounded-lg shadow-md text-center">
+                <p className="text-gray-500 mb-4">No services added yet.</p>
+                <Button 
+                  onClick={addNewService}
+                  className="bg-green-600 text-white hover:bg-green-700"
+                >
+                  Add Your First Service
+                </Button>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {services && services.length > 0 ? (
+              services.map((service, index) => (
+                <Card key={index} className="bg-white shadow-md transition-all hover:shadow-lg">
+                  <CardContent className="p-6">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <h3 className="text-lg font-semibold text-[#0a2342]">{service.name}</h3>
+                        <p className="text-gray-600 mt-2 min-h-[80px]">{service.description}</p>
+                      </div>
+                      <Badge className="bg-[#1d4ed8] text-white text-lg font-semibold">${service.price}</Badge>
+                    </div>
+                    
+                    <div className="flex flex-wrap justify-between gap-x-6 mt-4 pt-3 border-t border-gray-100 text-sm">
+                      <div className="flex items-center">
+                        <Clock className="h-4 w-4 mr-1 text-gray-500" />
+                        <span>{service.duration} minutes</span>
+                      </div>
+                      
+                      {service.locationType && (
+                        <div className="flex items-center">
+                          <MapPin className="h-4 w-4 mr-1 text-gray-500" />
+                          <span>{service.locationType}</span>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            ) : (
+              <div className="col-span-2 bg-white p-6 rounded-lg shadow-md text-center">
+                <p className="text-gray-500">No services added yet. Click 'Edit Services' to add your first service.</p>
+              </div>
+            )}
+          </div>
+        )}
         
         <div className="mt-10 flex justify-center">
           <Button 
