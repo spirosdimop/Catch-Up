@@ -272,6 +272,23 @@ export class DatabaseStorage implements IStorage {
   // would be implemented here. We're focusing on the AI, event, and navigation functionality
   // for this implementation.
 
+  // Client operations
+  async deleteClient(id: number): Promise<boolean> {
+    console.log("Attempting to delete client with ID:", id);
+    
+    try {
+      const result = await db
+        .delete(schema.clients)
+        .where(eq(schema.clients.id, id));
+      
+      console.log("Delete client result:", result);
+      return result.rowCount ? result.rowCount > 0 : false;
+    } catch (error) {
+      console.error("Error in deleteClient:", error);
+      throw error;
+    }
+  }
+
   // User related operations
   async getUser(id: number): Promise<User | undefined> {
     const [result] = await db
