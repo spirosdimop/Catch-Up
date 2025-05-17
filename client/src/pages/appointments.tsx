@@ -39,12 +39,22 @@ export default function AppointmentsPage() {
   useEffect(() => {
     if (user) {
       try {
+        // Log user id for debugging
+        console.log('Current user ID:', user.id);
+        
         const allBookings = JSON.parse(localStorage.getItem('bookingRequests') || '[]');
-        // Filter bookings for this professional
+        console.log('All booking requests from localStorage:', allBookings);
+        
+        // For demo purposes, show all bookings regardless of professionalId
+        setBookingRequests(allBookings);
+        
+        // Uncomment this for production to filter by professional ID
+        /*
         const professionalBookings = allBookings.filter(
           (booking: BookingRequest) => booking.professionalId === user.id
         );
         setBookingRequests(professionalBookings);
+        */
       } catch (error) {
         console.error('Error loading booking requests:', error);
       }

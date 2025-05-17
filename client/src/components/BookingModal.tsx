@@ -86,6 +86,10 @@ export default function BookingModal({
       const updatedBookings = [...existingBookings, bookingRequest];
       localStorage.setItem('bookingRequests', JSON.stringify(updatedBookings));
       
+      // Log the saved bookings to console for debugging
+      console.log('Booking saved:', bookingRequest);
+      console.log('All bookings:', updatedBookings);
+      
       toast({
         title: "Booking Request Sent",
         description: `Your booking request with ${professionalName} has been sent and will appear in their appointments page.`,
