@@ -28,6 +28,7 @@ import CalendarNew from "@/pages/calendar-new";
 import CalendarSimple from "@/pages/calendar-simple";
 import Profile from "@/pages/profile";
 import ProfileRedesign from "@/pages/profile-redesign";
+import PublicProfile from "@/pages/public-profile";
 import AIAssistant from "@/pages/ai-assistant";
 
 import Projects from "@/pages/Projects";
@@ -71,13 +72,17 @@ function Router() {
   // Check if current location is an old Catch Up page
   const isCatchUpPage = catchUpPages.some(page => location === page || location.startsWith(`${page}/`));
   
-  // Landing, Signup, and Login pages - we keep their unique non-app-shell design
-  if (noAppShellPages.includes(location)) {
+  // Check if this is a public profile page (format: /p/{username})
+  const isPublicProfilePage = location.startsWith('/p/');
+
+  // Landing, Signup, Login, and Public Profile pages don't use the app shell
+  if (noAppShellPages.includes(location) || isPublicProfilePage) {
     return (
       <Switch>
         <Route path="/" component={NewLandingPage} />
         <Route path="/signup" component={Signup} />
         <Route path="/login" component={Signup} /> {/* Reusing Signup component for login */}
+        <Route path="/p/:username" component={PublicProfile} />
       </Switch>
     );
   }
