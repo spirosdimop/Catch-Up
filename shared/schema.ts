@@ -72,10 +72,22 @@ export const insertProjectSchema = createInsertSchema(projects)
   })
   .transform((data) => {
     // Convert string dates to Date objects for the database
+    // Safely handle various date formats
+    const parseDate = (date: any) => {
+      if (!date) return null;
+      if (date instanceof Date) return date;
+      if (typeof date === 'string') {
+        const parsedDate = new Date(date);
+        if (isNaN(parsedDate.getTime())) return null;
+        return parsedDate;
+      }
+      return null;
+    };
+
     return {
       ...data,
-      startDate: data.startDate ? new Date(data.startDate) : null,
-      endDate: data.endDate ? new Date(data.endDate) : null,
+      startDate: parseDate(data.startDate),
+      endDate: parseDate(data.endDate),
     };
   });
 
