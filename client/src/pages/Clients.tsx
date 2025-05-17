@@ -336,6 +336,149 @@ export default function Clients() {
           )}
         </DialogContent>
       </Dialog>
+      
+      {/* Cleanup Confirmation Dialog */}
+      <Dialog open={isCleanupDialogOpen} onOpenChange={setIsCleanupDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Clean Up Client Database</DialogTitle>
+          </DialogHeader>
+          
+          {cleanupResults ? (
+            // Results view
+            <div className="py-4">
+              <h3 className="font-medium text-lg mb-4">Client cleanup completed</h3>
+              
+              <div className="space-y-4">
+                <div className="bg-green-50 p-4 rounded-md border border-green-200">
+                  <p className="text-green-700 font-medium">Removed {cleanupResults.totalDeleted} clients in total</p>
+                </div>
+                
+                {cleanupResults.unconnected.count > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2">Unconnected Clients</h4>
+                    <p className="text-sm text-gray-500 mb-2">
+                      Clients that were not linked to any projects, events, or invoices.
+                    </p>
+                    <div className="bg-gray-50 p-3 rounded border border-gray-200 text-sm">
+                      <p><span className="font-medium">Found:</span> {cleanupResults.unconnected.count}</p>
+                      <p><span className="font-medium">Deleted:</span> {cleanupResults.unconnected.deleted}</p>
+                    </div>
+                    
+                    {cleanupResults.unconnected.count > 0 && (
+                      <div className="mt-2 max-h-40 overflow-y-auto">
+                        <table className="w-full text-xs">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="p-2 text-left">Name</th>
+                              <th className="p-2 text-left">Email</th>
+                              <th className="p-2 text-left">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {cleanupResults.unconnected.results.map((result) => (
+                              <tr key={result.id} className="border-t">
+                                <td className="p-2">{result.name}</td>
+                                <td className="p-2">{result.email}</td>
+                                <td className="p-2">
+                                  {result.deleted ? (
+                                    <span className="text-green-600">Deleted</span>
+                                  ) : (
+                                    <span className="text-red-600">Failed: {result.error}</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
+                
+                {cleanupResults.duplicates.count > 0 && (
+                  <div>
+                    <h4 className="font-medium mb-2">Duplicate Clients</h4>
+                    <p className="text-sm text-gray-500 mb-2">
+                      Clients with the same email address. One client per email was kept.
+                    </p>
+                    <div className="bg-gray-50 p-3 rounded border border-gray-200 text-sm">
+                      <p><span className="font-medium">Found:</span> {cleanupResults.duplicates.count}</p>
+                      <p><span className="font-medium">Duplicate emails:</span> {cleanupResults.duplicates.duplicateEmails}</p>
+                      <p><span className="font-medium">Deleted:</span> {cleanupResults.duplicates.deleted}</p>
+                    </div>
+                    
+                    {cleanupResults.duplicates.results.length > 0 && (
+                      <div className="mt-2 max-h-40 overflow-y-auto">
+                        <table className="w-full text-xs">
+                          <thead className="bg-gray-50">
+                            <tr>
+                              <th className="p-2 text-left">Name</th>
+                              <th className="p-2 text-left">Email</th>
+                              <th className="p-2 text-left">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {cleanupResults.duplicates.results.map((result) => (
+                              <tr key={result.id} className="border-t">
+                                <td className="p-2">{result.name}</td>
+                                <td className="p-2">{result.email}</td>
+                                <td className="p-2">
+                                  {result.deleted ? (
+                                    <span className="text-green-600">Deleted (kept {result.keepName})</span>
+                                  ) : (
+                                    <span className="text-red-600">Failed: {result.error}</span>
+                                  )}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+              
+              <div className="mt-6 flex justify-end">
+                <Button onClick={() => {
+                  setCleanupResults(null);
+                  setIsCleanupDialogOpen(false);
+                }}>
+                  Close
+                </Button>
+              </div>
+            </div>
+          ) : (
+            // Confirmation view
+            <div className="py-4">
+              <p className="mb-4">
+                This will clean up your client database by:
+              </p>
+              <ul className="list-disc pl-5 mb-4 space-y-2 text-sm">
+                <li>Removing clients that are not connected to any projects, events, or invoices</li>
+                <li>Removing duplicate clients (keeping one per email address)</li>
+              </ul>
+              <p className="text-amber-600 font-medium mb-6">
+                This action cannot be undone.
+              </p>
+              
+              <div className="flex justify-end gap-2">
+                <Button variant="outline" onClick={() => setIsCleanupDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={() => cleanupClientsMutation.mutate()}
+                  disabled={cleanupClientsMutation.isPending}
+                >
+                  {cleanupClientsMutation.isPending ? "Cleaning..." : "Clean Up Database"}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
