@@ -78,15 +78,16 @@ interface Booking {
   duration: number;
   type: 'call' | 'meeting' | 'followup' | 'consultation';
   status: 'confirmed' | 'rescheduled' | 'canceled' | 'emergency';
-  client: {
-    name: string;
-    email: string;
-    avatar?: string;
-  };
+  clientName: string;
+  clientPhone: string;
+  serviceName?: string;
+  servicePrice?: string | number;
   location?: string;
   notes?: string;
+  professionalId: string;
+  externalId?: string;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
 }
 
 export const BookingsFixed = () => {
