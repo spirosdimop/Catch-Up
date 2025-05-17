@@ -3,6 +3,7 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export interface UserData {
   id?: string;
+  username?: string; // Added username for shareable profile links
   firstName: string;
   lastName: string;
   email: string;

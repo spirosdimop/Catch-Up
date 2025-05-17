@@ -1,9 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 import { 
   UserCircle, 
   Mail, 
@@ -15,7 +17,11 @@ import {
   BarChart3,
   Clock,
   Phone,
-  MapPin
+  MapPin,
+  Copy,
+  Share2,
+  Check,
+  Link
 } from "lucide-react";
 import { useUser } from "@/lib/userContext";
 import { useLocation } from "wouter";
@@ -23,13 +29,31 @@ import { useLocation } from "wouter";
 export default function ProfileRedesign() {
   const { user, setUser } = useUser();
   const [, setLocation] = useLocation();
+  const { toast } = useToast();
+  const [profileLink, setProfileLink] = useState<string>("");
+  const [copied, setCopied] = useState(false);
+  const linkInputRef = useRef<HTMLInputElement>(null);
   
+  // Generate profile link based on username
+  useEffect(() => {
+    if (user) {
+      // Generate a profile link using the window location and username
+      const baseUrl = window.location.origin;
+      const username = user.username || (user.firstName && user.lastName 
+        ? `${user.firstName.toLowerCase()}-${user.lastName.toLowerCase()}`
+        : `user-${user.id}`);
+        
+      setProfileLink(`${baseUrl}/p/${username}`);
+    }
+  }, [user]);
+
   // If no user exists, create a test user for development purposes
   useEffect(() => {
     if (!user) {
       console.log('Creating test user for development');
       setUser({
         id: "prod-coach-123",
+        username: "johnsmith",
         firstName: "John",
         lastName: "Smith",
         email: "john@productivity.coach",
@@ -75,6 +99,69 @@ export default function ProfileRedesign() {
       });
     }
   }, [user, setUser]);
+  
+  const copyProfileLink = () => {
+    if (profileLink) {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(profileLink)
+          .then(() => {
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+            toast({
+              title: "Link Copied",
+              description: "Profile link copied to clipboard",
+              variant: "default",
+            });
+          })
+          .catch(err => {
+            console.error('Failed to copy link: ', err);
+            // Fallback for clipboard API failure
+            copyLinkFallback();
+          });
+      } else {
+        // Fallback for browsers without clipboard API
+        copyLinkFallback();
+      }
+    }
+  };
+  
+  const copyLinkFallback = () => {
+    if (linkInputRef.current) {
+      linkInputRef.current.select();
+      document.execCommand('copy');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      toast({
+        title: "Link Copied",
+        description: "Profile link copied to clipboard",
+        variant: "default",
+      });
+    }
+  };
+  
+  const shareProfileLink = async () => {
+    if (navigator.share && profileLink) {
+      try {
+        await navigator.share({
+          title: `${user?.firstName} ${user?.lastName}'s Profile`,
+          text: `Book an appointment with ${user?.firstName} ${user?.lastName}`,
+          url: profileLink,
+        });
+        toast({
+          title: "Link Shared",
+          description: "Profile link shared successfully",
+          variant: "default",
+        });
+      } catch (err) {
+        console.error('Error sharing: ', err);
+        // If sharing fails, fall back to copying
+        copyProfileLink();
+      }
+    } else {
+      // If Web Share API is not available, fall back to copying
+      copyProfileLink();
+    }
+  };
   
   if (!user) {
     return <div className="flex justify-center items-center h-[80vh]">Loading...</div>;
@@ -191,8 +278,59 @@ export default function ProfileRedesign() {
         </div>
       </div>
       
+      {/* Shareable Profile Link section */}
+      <div className="container max-w-6xl mx-auto px-4 py-10">
+        <div className="bg-white p-6 rounded-lg shadow-md border border-gray-100">
+          <h2 className="text-xl font-bold text-[#0a2342] mb-4 flex items-center">
+            <Link className="h-5 w-5 mr-2 text-[#1d4ed8]" />
+            Your Shareable Booking Link
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Share this link with your clients so they can book appointments directly through your public profile page.
+          </p>
+          
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-grow">
+              <Input 
+                ref={linkInputRef}
+                value={profileLink}
+                readOnly
+                className="bg-gray-50 h-full"
+              />
+            </div>
+            <div className="flex gap-2">
+              <Button
+                onClick={copyProfileLink}
+                className="flex-shrink-0 bg-[#1d4ed8] hover:bg-blue-600"
+              >
+                {copied ? (
+                  <>
+                    <Check className="h-4 w-4 mr-2" />
+                    Copied
+                  </>
+                ) : (
+                  <>
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copy Link
+                  </>
+                )}
+              </Button>
+              
+              <Button
+                onClick={shareProfileLink}
+                variant="outline"
+                className="flex-shrink-0 border-[#1d4ed8] text-[#1d4ed8]"
+              >
+                <Share2 className="h-4 w-4 mr-2" />
+                Share
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Services section */}
-      <div className="container max-w-6xl mx-auto px-4 py-16">
+      <div className="container max-w-6xl mx-auto px-4 py-10">
         <h2 className="text-2xl font-bold text-[#0a2342] mb-8 text-center">Services Offered</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {user.services.map((service, index) => (
