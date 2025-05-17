@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Task, InsertTask } from "@shared/schema";
+import { Task, InsertTask, Project } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { PlusIcon, CheckIcon, ClockIcon } from "lucide-react";
+import { PlusIcon, CheckIcon, ClockIcon, MoveIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -52,7 +52,20 @@ export default function ProjectTasks({ projectId }: ProjectTasksProps) {
   const { toast } = useToast();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isTransferDialogOpen, setIsTransferDialogOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  
+  // Fetch all projects for the transfer functionality
+  const { data: allProjects = [] } = useQuery<Project[]>({
+    queryKey: ['/api/projects'],
+    queryFn: async () => {
+      const response = await fetch('/api/projects');
+      if (!response.ok) {
+        throw new Error("Failed to fetch projects");
+      }
+      return response.json();
+    }
+  });
 
   // Fetch tasks for this project
   const { data: tasks = [], isLoading, refetch } = useQuery<Task[]>({
@@ -327,6 +340,17 @@ export default function ProjectTasks({ projectId }: ProjectTasksProps) {
                   <Button
                     variant="ghost"
                     size="sm"
+                    onClick={() => {
+                      setSelectedTask(task);
+                      setIsTransferDialogOpen(true);
+                    }}
+                  >
+                    <MoveIcon className="h-4 w-4 mr-1" />
+                    Transfer
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     className="text-red-500 hover:text-red-600"
                     onClick={() => handleDeleteTask(task.id)}
                   >
@@ -365,6 +389,25 @@ export default function ProjectTasks({ projectId }: ProjectTasksProps) {
               onSubmit={handleSubmit}
               isSubmitting={updateTaskMutation.isPending}
               defaultValues={selectedTask}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Transfer Task Dialog */}
+      <Dialog open={isTransferDialogOpen} onOpenChange={setIsTransferDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Transfer Task to Another Project</DialogTitle>
+          </DialogHeader>
+          {selectedTask && (
+            <TaskForm
+              projectId={projectId}
+              onSubmit={handleSubmit}
+              isSubmitting={updateTaskMutation.isPending}
+              defaultValues={selectedTask}
+              allProjects={allProjects.filter(p => p.id !== projectId)} // Exclude current project
+              showProjectSelect={true}
             />
           )}
         </DialogContent>
