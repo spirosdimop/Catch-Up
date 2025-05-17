@@ -1,9 +1,10 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import { Project, Client, InsertProject, ProjectStatus } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { formatDate, getStatusColor } from "@/lib/utils";
-import { PlusIcon, SearchIcon, TrashIcon, PencilIcon } from "lucide-react";
+import { PlusIcon, SearchIcon, TrashIcon, PencilIcon, ExternalLinkIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,6 +29,7 @@ import {
 
 export default function Projects() {
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
@@ -297,7 +299,11 @@ export default function Projects() {
                   </TableRow>
                 ) : (
                   projectsWithClients?.map((project) => (
-                    <TableRow key={project.id}>
+                    <TableRow 
+                      key={project.id} 
+                      className="cursor-pointer hover:bg-gray-50"
+                      onClick={() => navigate(`/projects/${project.id}`)}
+                    >
                       <TableCell className="font-medium">{project.name}</TableCell>
                       <TableCell>{project.client?.name}</TableCell>
                       <TableCell>{formatDate(project.startDate)}</TableCell>
@@ -316,7 +322,18 @@ export default function Projects() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => {
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            navigate(`/projects/${project.id}`);
+                          }}
+                        >
+                          <ExternalLinkIcon className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
                             setSelectedProject(project);
                             setIsEditDialogOpen(true);
                           }}
@@ -326,7 +343,10 @@ export default function Projects() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDeleteProject(project.id)}
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            handleDeleteProject(project.id);
+                          }}
                         >
                           <TrashIcon className="h-4 w-4" />
                         </Button>
