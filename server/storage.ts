@@ -50,6 +50,8 @@ export interface IStorage {
   createClient(client: InsertClient): Promise<Client>;
   updateClient(id: number, client: Partial<InsertClient>): Promise<Client | undefined>;
   deleteClient(id: number): Promise<boolean>;
+  getUnconnectedClients(): Promise<Client[]>; // Get clients not connected to any projects, events, or invoices
+  getDuplicateClients(): Promise<Client[]>; // Get clients with duplicate email addresses
 
   // Project related operations
   getProjects(): Promise<Project[]>;

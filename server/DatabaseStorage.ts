@@ -1,5 +1,5 @@
 import { db } from './db';
-import { eq, desc, and, sql } from 'drizzle-orm';
+import { eq, desc, and, sql, notInArray, inArray, count, isNull, notEq } from 'drizzle-orm';
 import * as schema from '@shared/schema';
 import {
   User,
