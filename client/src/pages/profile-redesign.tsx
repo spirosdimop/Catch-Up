@@ -264,34 +264,7 @@ export default function ProfileRedesign() {
             <h1 className="text-3xl md:text-4xl font-bold mb-2">{user.firstName} {user.lastName}</h1>
             <p className="text-xl text-blue-200 mb-8">{user.profession}</p>
             
-            <div className="flex flex-wrap gap-3 justify-center mb-8">
-              <Button 
-                className="bg-white text-[#0a2342] hover:bg-blue-100"
-                size="lg"
-                onClick={() => setLocation("/messages")}
-              >
-                <MessageCircle className="h-5 w-5 mr-2" />
-                Message
-              </Button>
-              
-              <Button 
-                className="bg-white text-[#0a2342] hover:bg-blue-100"
-                size="lg"
-                onClick={() => setLocation("/calendar")}
-              >
-                <CalendarDays className="h-5 w-5 mr-2" />
-                Schedule
-              </Button>
-              
-              <Button 
-                className="bg-white text-[#0a2342] hover:bg-blue-100"
-                size="lg"
-                onClick={() => setLocation("/tasks")}
-              >
-                <ListTodo className="h-5 w-5 mr-2" />
-                View Tasks
-              </Button>
-            </div>
+            {/* Action buttons removed as requested */}
             
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6 text-sm">
               <div className="flex items-center">
