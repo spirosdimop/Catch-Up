@@ -72,22 +72,40 @@ export const insertProjectSchema = createInsertSchema(projects)
   })
   .transform((data) => {
     // Convert string dates to Date objects for the database
-    // Safely handle various date formats
-    const parseDate = (date: any) => {
+    // Using explicit TypeScript typings for clarity
+    const parseDate = (date: Date | string | null | undefined): Date | null => {
       if (!date) return null;
-      if (date instanceof Date) return date;
-      if (typeof date === 'string') {
-        const parsedDate = new Date(date);
-        if (isNaN(parsedDate.getTime())) return null;
-        return parsedDate;
+      
+      // If it's already a Date object, return it directly
+      if (date instanceof Date) {
+        return isNaN(date.getTime()) ? null : date;
       }
+      
+      // If it's a string, attempt to parse it
+      if (typeof date === 'string') {
+        try {
+          const parsedDate = new Date(date);
+          return isNaN(parsedDate.getTime()) ? null : parsedDate;
+        } catch (e) {
+          console.error("Failed to parse date:", e);
+          return null;
+        }
+      }
+      
+      // If we get here, it's an invalid format
       return null;
     };
 
+    // Transform the data with our parsed dates
     return {
       ...data,
+      name: data.name,
+      clientId: data.clientId,
+      description: data.description ?? null,
+      status: data.status,
       startDate: parseDate(data.startDate),
       endDate: parseDate(data.endDate),
+      budget: data.budget ?? null,
     };
   });
 

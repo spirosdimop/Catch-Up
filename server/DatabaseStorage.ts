@@ -353,24 +353,34 @@ export class DatabaseStorage implements IStorage {
     return result[0];
   }
   async createProject(project: InsertProject): Promise<Project> { 
-    // Ensure all required fields have proper values even if they're not provided
-    const projectData = {
-      ...project,
-      name: project.name,
-      clientId: project.clientId,
-      description: project.description ?? null,
-      status: project.status || "not_started",
-      startDate: project.startDate || new Date(),
-      endDate: project.endDate || null,
-      budget: project.budget || null,
-      createdAt: new Date()
-    };
-    
-    const [result] = await db
-      .insert(schema.projects)
-      .values(projectData)
-      .returning();
-    return result;
+    try {
+      console.log("DatabaseStorage - Creating project with data:", project);
+      
+      // Ensure all required fields have proper values
+      const projectData = {
+        name: project.name,
+        clientId: project.clientId,
+        description: project.description ?? null,
+        status: project.status || "not_started",
+        startDate: project.startDate || new Date(),
+        endDate: project.endDate || null,
+        budget: project.budget ?? null,
+        createdAt: new Date()
+      };
+      
+      console.log("DatabaseStorage - Processed project data:", projectData);
+      
+      const [result] = await db
+        .insert(schema.projects)
+        .values(projectData)
+        .returning();
+      
+      console.log("DatabaseStorage - Project created successfully:", result);
+      return result;
+    } catch (error) {
+      console.error("DatabaseStorage - Error creating project:", error);
+      throw error;
+    }
   }
   async updateProject(id: number, project: Partial<InsertProject>): Promise<Project | undefined> { 
     const [result] = await db

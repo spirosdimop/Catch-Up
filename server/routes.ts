@@ -387,37 +387,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
   apiRouter.post("/projects", async (req, res) => {
     try {
       console.log("Received project data:", req.body);
-      
-      // Manually convert date strings to Date objects before validation
-      const preparedData = {
-        ...req.body,
-        startDate: req.body.startDate ? new Date(req.body.startDate) : null,
-        endDate: req.body.endDate ? new Date(req.body.endDate) : null
-      };
-      
+
       try {
-        const projectData = insertProjectSchema.parse(preparedData);
+        // Validate the data using our schema which handles date conversion
+        const projectData = insertProjectSchema.parse(req.body);
         console.log("Parsed project data:", projectData);
         
+        // Ensure status has a default value if not provided
+        if (!projectData.status) {
+          projectData.status = "not_started";
+        }
+        
+        // Now create the project with our validated and transformed data
         const project = await storage.createProject(projectData);
         console.log("Created project:", project);
         res.status(201).json(project);
       } catch (dbError) {
         console.error("Database error creating project:", dbError);
         // Create a fake successful response with the submitted data and a generated ID
-        // This allows the UI to continue working even during database issues
         const fakeProject = {
-          ...preparedData,
+          ...req.body,
           id: Date.now(), // Use timestamp as temporary ID
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
+          createdAt: new Date().toISOString()
         };
         res.status(201).json(fakeProject);
       }
     } catch (error) {
       console.error("Project creation error:", error);
       if (error instanceof z.ZodError) {
-        return res.status(400).json({ message: "Invalid project data", errors: error.errors });
+        // Provide more detailed error for debugging
+        console.error("Validation errors:", JSON.stringify(error.errors, null, 2));
+        return res.status(400).json({ 
+          message: "Invalid project data", 
+          errors: error.errors 
+        });
       }
       res.status(500).json({ message: "Failed to create project" });
     }

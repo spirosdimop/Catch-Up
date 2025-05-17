@@ -165,30 +165,24 @@ export default function Projects() {
 
   // Handle project form submission
   const handleSubmit = (data: any) => {
-    // Parse date strings to Date objects to ensure proper conversion
-    const parseDate = (dateValue: string | Date | null | undefined) => {
-      if (!dateValue) return null;
-      try {
-        // Create a proper Date object that can be safely converted to ISO string
-        if (typeof dateValue === 'string') {
-          return new Date(dateValue);
-        }
-        return dateValue;
-      } catch (e) {
-        console.error("Failed to parse date:", e);
-        return null;
-      }
-    };
+    console.log("Form data received:", data);
     
-    // Convert form data to InsertProject format
+    // Convert form data to InsertProject format with properly formatted dates
     const projectData: InsertProject = {
       name: data.name,
       clientId: data.clientId,
       description: data.description || null,
       status: data.status,
-      // Parse dates properly to ensure they're valid Date objects
-      startDate: parseDate(data.startDate),
-      endDate: parseDate(data.endDate),
+      
+      // Convert date strings to ISO strings or null
+      startDate: data.startDate ? 
+        (typeof data.startDate === 'string' ? data.startDate : data.startDate.toISOString())
+        : null,
+        
+      endDate: data.endDate ? 
+        (typeof data.endDate === 'string' ? data.endDate : data.endDate.toISOString())
+        : null,
+        
       budget: data.budget || null
     };
     
