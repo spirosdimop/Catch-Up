@@ -41,9 +41,11 @@ interface TaskFormProps {
   projectId: number;
   onSubmit: (data: TaskFormValues) => void;
   isSubmitting: boolean;
+  allProjects?: {id: number; name: string}[];
+  showProjectSelect?: boolean;
 }
 
-export default function TaskForm({ defaultValues, projectId, onSubmit, isSubmitting }: TaskFormProps) {
+export default function TaskForm({ defaultValues, projectId, onSubmit, isSubmitting, allProjects = [], showProjectSelect = false }: TaskFormProps) {
   // Set up form with validation
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
@@ -187,7 +189,37 @@ export default function TaskForm({ defaultValues, projectId, onSubmit, isSubmitt
           )}
         />
 
-        <input type="hidden" {...form.register("projectId")} value={projectId} />
+        {showProjectSelect && allProjects.length > 0 ? (
+          <FormField
+            control={form.control}
+            name="projectId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Project</FormLabel>
+                <Select
+                  onValueChange={(value) => field.onChange(parseInt(value))}
+                  defaultValue={field.value.toString()}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select project" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {allProjects.map(project => (
+                      <SelectItem key={project.id} value={project.id.toString()}>
+                        {project.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        ) : (
+          <input type="hidden" {...form.register("projectId")} value={projectId} />
+        )}
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isSubmitting}>
