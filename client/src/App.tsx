@@ -30,6 +30,7 @@ import Profile from "@/pages/profile";
 import ProfileRedesign from "@/pages/profile-redesign";
 import PublicProfile from "@/pages/public-profile";
 import AIAssistant from "@/pages/ai-assistant";
+import AppointmentsPage from "@/pages/appointments";
 
 import Projects from "@/pages/Projects";
 import ProjectDetail from "@/pages/project";
@@ -143,6 +144,7 @@ function Router() {
         <Route path="/projects/:id" component={ProjectDetail} />
         <Route path="/ai-assistant" component={AIAssistant} />
         <Route path="/settings" component={Settings} />
+        <Route path="/appointments" component={AppointmentsPage} />
         <Route component={NotFound} />
       </Switch>
     </AppShell>
