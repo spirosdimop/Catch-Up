@@ -76,7 +76,10 @@ const UpcomingTasks = ({ tasks }: { tasks: Task[] }) => {
     if (diffDays === 0) return <span className="text-amber-500">Today</span>;
     if (diffDays === 1) return <span className="text-amber-400">Tomorrow</span>;
     if (diffDays < 7) return <span className="text-blue-500">{diffDays} days</span>;
-    return format(dueDate, 'MMM d');
+    // Make sure dueDate is a valid Date object before formatting
+    return dueDate instanceof Date && !isNaN(dueDate.getTime()) 
+      ? format(dueDate, 'MMM d') 
+      : <span className="text-gray-500">Invalid date</span>;
   };
   
   return (
