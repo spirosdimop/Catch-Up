@@ -32,7 +32,6 @@ import {
   insertAutoResponseSchema
 } from "@shared/schema";
 import { z } from "zod";
-import { registerBookingRoutes } from "./routes/bookings";
 import { registerPublicProfileRoutes } from "./routes/publicProfile";
 import aiRoutes from "./routes/ai";
 
@@ -2389,9 +2388,6 @@ Remember: The most helpful thing you can do is direct users to the specialized t
   });
 
   app.use("/api", apiRouter);
-  
-  // Register booking routes for client appointment scheduling
-  registerBookingRoutes(app);
   
   // Register public profile routes
   registerPublicProfileRoutes(app);

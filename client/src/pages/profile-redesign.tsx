@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import BookingModal from "@/components/BookingModal";
 import { 
   UserCircle, 
   Mail, 
@@ -36,6 +37,7 @@ export default function ProfileRedesign() {
   const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [isEditingServices, setIsEditingServices] = useState(false);
   const [locationValue, setLocationValue] = useState("");
+  const [isBookingFormOpen, setIsBookingFormOpen] = useState(false);
   const [services, setServices] = useState<Array<{
     name: string;
     description?: string;
@@ -841,12 +843,21 @@ export default function ProfileRedesign() {
           <Button 
             className="bg-[#0a2342] hover:bg-[#1d4ed8]"
             size="lg"
-            onClick={() => setLocation("/calendar")}
+            onClick={() => setIsBookingFormOpen(true)}
           >
             <CalendarDays className="h-5 w-5 mr-2" />
             Book a Session
           </Button>
         </div>
+        
+        {/* Booking Form */}
+        <BookingModal 
+          isOpen={isBookingFormOpen} 
+          onClose={() => setIsBookingFormOpen(false)}
+          services={services}
+          professionalName={`${user.firstName} ${user.lastName}`}
+          professionalId={user.id || ""}
+        />
       </div>
       
       {/* About section */}
