@@ -34,7 +34,15 @@ export default function ProfileRedesign() {
   const [copied, setCopied] = useState(false);
   const [isEditingInsights, setIsEditingInsights] = useState(false);
   const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [isEditingServices, setIsEditingServices] = useState(false);
   const [locationValue, setLocationValue] = useState("");
+  const [services, setServices] = useState<Array<{
+    name: string;
+    description?: string;
+    duration: number;
+    price: number;
+    locationType?: string;
+  }>>([]);
   const [customInsights, setCustomInsights] = useState<{
     label: string;
     value: string | number;
@@ -55,6 +63,11 @@ export default function ProfileRedesign() {
       
       // Initialize location value from user data
       setLocationValue(user.serviceArea || "");
+      
+      // Initialize services from user data
+      if (user.services && user.services.length > 0) {
+        setServices(user.services);
+      }
       
       // Initialize custom insights from user data if available
       if (user.customInsights) {
@@ -241,6 +254,50 @@ export default function ProfileRedesign() {
       toast({
         title: "Insights Saved",
         description: "Your profile insights have been updated",
+        variant: "default",
+      });
+    }
+  };
+  
+  // Service management functions
+  const addNewService = () => {
+    setServices(prev => [
+      ...prev,
+      {
+        name: "New Service",
+        description: "Enter a description for this service",
+        duration: 60,
+        price: 0,
+        locationType: "In-person"
+      }
+    ]);
+  };
+  
+  const updateServiceField = (index: number, field: string, value: any) => {
+    setServices(prev => 
+      prev.map((service, i) => 
+        i === index ? { ...service, [field]: value } : service
+      )
+    );
+  };
+  
+  const removeService = (index: number) => {
+    setServices(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  const saveServices = () => {
+    if (user) {
+      // Update the user data with the modified services
+      updateUser({
+        ...user,
+        services
+      });
+      
+      setIsEditingServices(false);
+      
+      toast({
+        title: "Services Updated",
+        description: "Your services have been updated successfully",
         variant: "default",
       });
     }
