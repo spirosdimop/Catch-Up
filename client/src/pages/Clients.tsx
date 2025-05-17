@@ -16,7 +16,13 @@ export default function Clients() {
   const [searchTerm, setSearchTerm] = useState("");
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isCleanupDialogOpen, setIsCleanupDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+  const [cleanupResults, setCleanupResults] = useState<{
+    unconnected: { count: number; deleted: number; results: any[] };
+    duplicates: { count: number; duplicateEmails: number; deleted: number; results: any[] };
+    totalDeleted: number;
+  } | null>(null);
 
   // Fetch clients
   const { data: clients, isLoading, refetch } = useQuery<Client[]>({
@@ -122,13 +128,48 @@ export default function Clients() {
         description: "The client has been deleted successfully.",
       });
     },
-    onError: (error) => {
-      console.error("Error deleting client:", error);
+  });
+  
+  // Client cleanup mutation
+  const cleanupClientsMutation = useMutation({
+    mutationFn: async () => {
+      console.log("Starting client database cleanup...");
+      const res = await apiRequest("POST", "/api/clients/cleanup");
+      const data = await res.json();
+      console.log("Cleanup results:", data);
+      return data;
+    },
+    onSuccess: (data) => {
+      console.log("Client cleanup completed successfully:", data);
+      
+      // Store the results for display
+      setCleanupResults(data);
+      
+      // Properly invalidate the cache
+      queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
+      
+      // Explicitly refetch to ensure fresh data
+      refetch();
+      
+      // Close the dialog
+      setIsCleanupDialogOpen(false);
+      
+      // Show success message
       toast({
-        title: "Error deleting client",
+        title: "Client database cleaned",
+        description: `Removed ${data.totalDeleted} unnecessary clients`,
+      });
+    },
+    onError: (error) => {
+      console.error("Error cleaning up clients:", error);
+      toast({
+        title: "Error cleaning up clients",
         description: error.message,
         variant: "destructive",
       });
+      
+      // Close the dialog
+      setIsCleanupDialogOpen(false);
     },
   });
 
@@ -165,7 +206,11 @@ export default function Clients() {
             Manage your client relationships and contacts
           </p>
         </div>
-        <div className="mt-4 md:mt-0">
+        <div className="mt-4 md:mt-0 flex space-x-2">
+          <Button variant="outline" onClick={() => setIsCleanupDialogOpen(true)}>
+            <TrashIcon className="mr-2 h-4 w-4" />
+            Clean Up Clients
+          </Button>
           <Button onClick={() => {
             setSelectedClient(null);
             setIsAddDialogOpen(true);
