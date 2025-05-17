@@ -10,7 +10,7 @@ export default function AppointmentsPage() {
   const [selectedTab, setSelectedTab] = useState<'pending' | 'accepted' | 'declined' | 'all'>('pending');
   const { toast } = useToast();
 
-  // Use React Query to fetch bookings
+  // Use React Query to fetch bookings directly from API
   const { 
     data: bookings = [], 
     isLoading, 
@@ -20,9 +20,18 @@ export default function AppointmentsPage() {
     queryKey: ['/api/bookings'],
     queryFn: async () => {
       try {
-        const data = await getAllBookings();
+        const response = await fetch('/api/bookings');
+        if (!response.ok) {
+          throw new Error('Failed to fetch bookings');
+        }
+        const data = await response.json();
         console.log("Loaded bookings:", data);
-        return data;
+        
+        // Ensure IDs are strings for consistency
+        return data.map((booking: any) => ({
+          ...booking,
+          id: booking.id.toString()
+        }));
       } catch (error) {
         console.error("Error loading bookings:", error);
         throw error;
@@ -33,13 +42,22 @@ export default function AppointmentsPage() {
   // Handle accepting a booking
   const handleAccept = async (bookingId: string) => {
     try {
-      const updatedBooking = await updateBooking(bookingId, { status: "accepted" });
-      if (updatedBooking) {
+      const response = await fetch(`/api/bookings/${bookingId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: "accepted" })
+      });
+      
+      if (response.ok) {
         toast({
           title: "Booking Accepted",
           description: "The client will be notified about your response.",
         });
         refetchBookings();
+      } else {
+        throw new Error('Failed to update booking');
       }
     } catch (error) {
       console.error("Error accepting booking:", error);
@@ -54,13 +72,22 @@ export default function AppointmentsPage() {
   // Handle declining a booking
   const handleDecline = async (bookingId: string) => {
     try {
-      const updatedBooking = await updateBooking(bookingId, { status: "declined" });
-      if (updatedBooking) {
+      const response = await fetch(`/api/bookings/${bookingId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: "declined" })
+      });
+      
+      if (response.ok) {
         toast({
           title: "Booking Declined",
           description: "The client will be notified about your response.",
         });
         refetchBookings();
+      } else {
+        throw new Error('Failed to update booking');
       }
     } catch (error) {
       console.error("Error declining booking:", error);
