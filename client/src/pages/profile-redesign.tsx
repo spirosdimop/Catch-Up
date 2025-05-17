@@ -33,6 +33,8 @@ export default function ProfileRedesign() {
   const [profileLink, setProfileLink] = useState<string>("");
   const [copied, setCopied] = useState(false);
   const [isEditingInsights, setIsEditingInsights] = useState(false);
+  const [isEditingLocation, setIsEditingLocation] = useState(false);
+  const [locationValue, setLocationValue] = useState("");
   const [customInsights, setCustomInsights] = useState<{
     label: string;
     value: string | number;
@@ -50,6 +52,9 @@ export default function ProfileRedesign() {
         : `user-${user.id}`);
         
       setProfileLink(`${baseUrl}/p/${username}`);
+      
+      // Initialize location value from user data
+      setLocationValue(user.serviceArea || "");
       
       // Initialize custom insights from user data if available
       if (user.customInsights) {
@@ -275,9 +280,63 @@ export default function ProfileRedesign() {
                 <Phone className="h-5 w-5 mr-2 text-blue-300" />
                 <span>{user.phone}</span>
               </div>
-              <div className="flex items-center">
+              <div className="flex items-center relative">
                 <MapPin className="h-5 w-5 mr-2 text-blue-300" />
-                <span>{user.serviceArea}</span>
+                {isEditingLocation ? (
+                  <div className="flex items-center">
+                    <Input
+                      value={locationValue}
+                      onChange={(e) => setLocationValue(e.target.value)}
+                      className="w-56 h-8 text-sm py-1 text-white bg-transparent border-blue-300"
+                    />
+                    <div className="flex ml-2">
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-7 px-2 text-blue-200 hover:text-white hover:bg-blue-700"
+                        onClick={() => {
+                          if (user) {
+                            updateUser({ ...user, serviceArea: locationValue });
+                            setIsEditingLocation(false);
+                            toast({
+                              title: "Location Updated",
+                              description: "Your location has been updated successfully",
+                              variant: "default",
+                            });
+                          }
+                        }}
+                      >
+                        Save
+                      </Button>
+                      <Button 
+                        size="sm" 
+                        variant="ghost" 
+                        className="h-7 px-2 text-blue-200 hover:text-white hover:bg-blue-700"
+                        onClick={() => {
+                          setLocationValue(user.serviceArea || "");
+                          setIsEditingLocation(false);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex items-center">
+                    <span>{user.serviceArea}</span>
+                    <Button 
+                      size="sm" 
+                      variant="ghost" 
+                      className="h-7 w-7 ml-2 p-0 text-blue-200 hover:text-white hover:bg-blue-700"
+                      onClick={() => setIsEditingLocation(true)}
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M12 20h9"></path>
+                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                      </svg>
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
