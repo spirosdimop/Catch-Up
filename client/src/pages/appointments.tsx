@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, X, Calendar, Clock, User, Phone, CalendarClock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { getAllBookings, updateBooking, deleteBooking, BookingRequest } from "@/lib/bookingStorage";
+import { getAllBookings, updateBooking, deleteBooking, addBooking, BookingRequest } from "@/lib/bookingStorage";
 import { useQuery } from "@tanstack/react-query";
 
 export default function AppointmentsPage() {

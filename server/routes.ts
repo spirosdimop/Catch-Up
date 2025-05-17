@@ -2393,8 +2393,9 @@ Remember: The most helpful thing you can do is direct users to the specialized t
   // Register public profile routes
   registerPublicProfileRoutes(app);
   
-  // Register AI routes
+  // Register API routes
   app.use("/api/ai", aiRoutes);
+  app.use("/api/bookings", bookingsRoutes);
   
   const httpServer = createServer(app);
   return httpServer;
