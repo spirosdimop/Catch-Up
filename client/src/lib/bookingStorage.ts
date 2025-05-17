@@ -22,14 +22,17 @@ const BOOKINGS_STORAGE_KEY = 'app_booking_requests';
 export async function getAllBookings(): Promise<BookingRequest[]> {
   try {
     // Try to get bookings from API first
-    const response = await apiRequest('/api/bookings');
+    const response = await fetch('/api/bookings');
     
-    if (response && Array.isArray(response)) {
-      // Convert any numeric IDs to strings for consistency
-      return response.map(booking => ({
-        ...booking,
-        id: booking.id.toString(),
-      }));
+    if (response.ok) {
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        // Convert any numeric IDs to strings for consistency
+        return data.map(booking => ({
+          ...booking,
+          id: booking.id.toString(),
+        }));
+      }
     }
     
     // If API fails or returns unexpected format, try localStorage
@@ -43,15 +46,20 @@ export async function getAllBookings(): Promise<BookingRequest[]> {
 // Get bookings by professional ID
 export async function getBookingsByProfessional(professionalId: string): Promise<BookingRequest[]> {
   try {
-    // Try to get bookings from API first
-    const response = await apiRequest(`/api/bookings/professional/${professionalId}`);
+    // Try to get all bookings from API first
+    const response = await fetch('/api/bookings');
     
-    if (response && Array.isArray(response)) {
-      // Convert any numeric IDs to strings for consistency
-      return response.map(booking => ({
-        ...booking,
-        id: booking.id.toString(),
-      }));
+    if (response.ok) {
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        // Filter by professionalId and convert any numeric IDs to strings for consistency
+        return data
+          .filter(booking => booking.professionalId === professionalId)
+          .map(booking => ({
+            ...booking,
+            id: booking.id.toString(),
+          }));
+      }
     }
     
     // If API fails, filter local bookings by professionalId
@@ -86,16 +94,20 @@ export async function addBooking(booking: Omit<BookingRequest, 'id'>): Promise<B
 
     // Try to save to API first
     try {
-      const response = await apiRequest('/api/bookings', {
+      const response = await fetch('/api/bookings', {
         method: 'POST',
-        data: newBooking
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(newBooking)
       });
       
-      if (response && response.id) {
+      if (response.ok) {
+        const data = await response.json();
         // Successfully saved to API, return the response
         return {
-          ...response,
-          id: response.id.toString() // Ensure ID is string
+          ...data,
+          id: data.id.toString() // Ensure ID is string
         };
       }
     } catch (apiError) {
@@ -131,16 +143,20 @@ export async function updateBooking(
   try {
     // Try to update in API first
     try {
-      const response = await apiRequest(`/api/bookings/${bookingId}`, {
+      const response = await fetch(`/api/bookings/${bookingId}`, {
         method: 'PATCH',
-        data: updates
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updates)
       });
       
-      if (response && response.id) {
+      if (response.ok) {
+        const data = await response.json();
         // Successfully updated in API
         return {
-          ...response,
-          id: response.id.toString() // Ensure ID is string
+          ...data,
+          id: data.id.toString() // Ensure ID is string
         };
       }
     } catch (apiError) {
