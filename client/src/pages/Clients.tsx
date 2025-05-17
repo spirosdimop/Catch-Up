@@ -175,10 +175,35 @@ export default function Clients() {
 
   // Handle client form submission
   const handleSubmit = (data: InsertClient) => {
-    if (selectedClient) {
-      updateClientMutation.mutate({ id: selectedClient.id, client: data });
-    } else {
-      createClientMutation.mutate(data);
+    try {
+      console.log("Form submitted with data:", data);
+      
+      // Make sure all fields exist and have proper types
+      const sanitizedData = {
+        name: data.name,
+        email: data.email,
+        phone: data.phone || null,
+        company: data.company || null,
+        address: data.address || null
+      };
+      
+      console.log("Sanitized data:", sanitizedData);
+      
+      if (selectedClient) {
+        updateClientMutation.mutate({ 
+          id: selectedClient.id, 
+          client: sanitizedData 
+        });
+      } else {
+        createClientMutation.mutate(sanitizedData);
+      }
+    } catch (error) {
+      console.error("Error in form submission:", error);
+      toast({
+        title: "Error processing form",
+        description: error instanceof Error ? error.message : "Unknown error occurred",
+        variant: "destructive",
+      });
     }
   };
 
