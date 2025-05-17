@@ -34,6 +34,7 @@ import {
 import { z } from "zod";
 import { registerPublicProfileRoutes } from "./routes/publicProfile";
 import aiRoutes from "./routes/ai";
+import bookingsRoutes from "./routes/bookings";
 
 // Helper functions for navigation tracking
 function getDisplayNameForPath(path: string): string {
