@@ -373,32 +373,58 @@ export class DatabaseStorage implements IStorage {
   
   // Get clients with duplicate email addresses
   async getDuplicateClients(): Promise<Client[]> {
-    // Get all clients
-    const allClients = await this.getClients();
-    
-    // Create a map to track emails
-    const emailMap = new Map<string, number>();
-    const duplicateEmails = new Set<string>();
-    
-    // Find duplicate emails
-    allClients.forEach(client => {
-      const email = client.email.toLowerCase().trim();
-      if (emailMap.has(email)) {
-        duplicateEmails.add(email);
-      } else {
-        emailMap.set(email, client.id);
+    // First approach: Use a SQL query with GROUP BY to identify duplicate emails
+    try {
+      // Find email addresses that appear more than once (case-insensitive)
+      const duplicateEmailsResult = await db.execute(
+        sql`SELECT LOWER(TRIM(email)) as normalized_email 
+            FROM ${schema.clients} 
+            GROUP BY normalized_email 
+            HAVING COUNT(*) > 1`
+      );
+      
+      // Extract the duplicate emails
+      const duplicateEmails = duplicateEmailsResult.rows.map(row => row.normalized_email as string);
+      
+      if (duplicateEmails.length === 0) {
+        return []; // No duplicates found
       }
-    });
-    
-    // If no duplicates, return empty array
-    if (duplicateEmails.size === 0) {
-      return [];
+      
+      // Get all clients with duplicate emails
+      return await db
+        .select()
+        .from(schema.clients)
+        .where(
+          sql`LOWER(TRIM(${schema.clients.email})) IN (${sql.join(
+            duplicateEmails.map(email => sql`${email}`),
+            sql`, `
+          )})`
+        );
+    } catch (error) {
+      console.error("Error finding duplicate clients:", error);
+      
+      // Fallback approach: Use client-side filtering (less efficient but more reliable)
+      const allClients = await this.getClients();
+      
+      // Create a map to track emails
+      const emailMap = new Map<string, number>();
+      const duplicateEmails = new Set<string>();
+      
+      // Find duplicate emails
+      allClients.forEach(client => {
+        const email = client.email.toLowerCase().trim();
+        if (emailMap.has(email)) {
+          duplicateEmails.add(email);
+        } else {
+          emailMap.set(email, client.id);
+        }
+      });
+      
+      // Return clients with duplicate emails
+      return allClients.filter(client => 
+        duplicateEmails.has(client.email.toLowerCase().trim())
+      );
     }
-    
-    // Return all clients with duplicate emails
-    return allClients.filter(client => 
-      duplicateEmails.has(client.email.toLowerCase().trim())
-    );
   }
   
   async getProjects(): Promise<Project[]> { 
