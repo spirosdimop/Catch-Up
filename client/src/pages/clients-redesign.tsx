@@ -468,57 +468,11 @@ const ClientsRedesign = () => {
     if (!selectedClient) return;
     
     try {
-      // Display a static error message since we know this client has dependencies
-      setIsDeleteConfirmOpen(false);
-      
-      setDeleteErrorDetails({
-        detail: "This client has bookings, events, or other records associated with them and cannot be deleted until these are removed.",
-        restrictions: [
-          { type: "events", count: 1, message: "This client has calendar events or bookings scheduled." }
-        ],
-        recommendations: [
-          "Cancel or delete any bookings or events linked to this client",
-          "Remove any projects or tasks associated with this client",
-          "Archive the client instead of deleting if you need to keep their records"
-        ]
-      });
-      
-      // Show the error dialog
-      setIsDeleteErrorOpen(true);
-      return;
-                  
-      // The code below is disabled temporarily until we fix the API endpoint
-      /* 
-      // First, check if the client can be deleted by checking dependencies
-      const checkResponse = await fetch(`/api/clients/${selectedClient.id}/check-dependencies`);
-      
-      if (!checkResponse.ok) {
-        throw new Error("Failed to check client dependencies");
-      }
-      
-      const checkResult = await checkResponse.json();
-      console.log("Dependencies check result:", checkResult);
-      
-      if (!checkResult.canDelete) {
-        // If client can't be deleted, show the error dialog
-        setIsDeleteConfirmOpen(false);
-        
-        console.log("Client dependencies found:", checkResult);
-        
-        setDeleteErrorDetails({
-          detail: "This client has bookings, events, or other records associated with them and cannot be deleted until these are removed.",
-          restrictions: checkResult.restrictions,
-          recommendations: checkResult.recommendations
-        });
-        
-        // Show the error dialog
-        setIsDeleteErrorOpen(true);
-        return;
-      }
-      
-      // If we can delete, proceed with deletion
+      // First, attempt to delete the client
       const response = await apiRequest("DELETE", `/api/clients/${selectedClient.id}`);
+      
       if (response.ok) {
+        // Success - client deleted
         queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
         toast({
           title: "Client deleted successfully",
@@ -527,26 +481,39 @@ const ClientsRedesign = () => {
         setIsDeleteConfirmOpen(false);
         setIsDetailsOpen(false);
       } else {
-        const errorData = await response.json();
-        
-        if (response.status === 400 && errorData.detail) {
-          // Close the delete confirmation dialog
-          setIsDeleteConfirmOpen(false);
+        // Handle error response
+        try {
+          const errorData = await response.json();
           
-          // For any unexpected constraint errors
-          setDeleteErrorDetails({
-            detail: errorData.detail,
-            restrictions: errorData.restrictions,
-            recommendations: errorData.recommendations
-          });
-          
-          // Open the error dialog
-          setIsDeleteErrorOpen(true);
-        } else {
-          throw new Error(errorData.message || 'Failed to delete client');
+          // Check if error is due to dependencies
+          if (response.status === 409 || (response.status === 400 && errorData.detail)) {
+            // Close the delete confirmation dialog
+            setIsDeleteConfirmOpen(false);
+            
+            // For constraint errors (dependencies)
+            setDeleteErrorDetails({
+              detail: errorData.detail || "This client has bookings, events, or other records associated with them and cannot be deleted until these are removed.",
+              restrictions: errorData.restrictions || [
+                { type: "dependency", count: 1, message: "This client has records that depend on it." }
+              ],
+              recommendations: errorData.recommendations || [
+                "Cancel or delete any bookings or events linked to this client",
+                "Remove any projects or tasks associated with this client",
+                "Archive the client instead of deleting if you need to keep their records"
+              ]
+            });
+            
+            // Open the error dialog
+            setIsDeleteErrorOpen(true);
+          } else {
+            throw new Error(errorData.message || 'Failed to delete client');
+          }
+        } catch (jsonError) {
+          // If response is not valid JSON
+          throw new Error('Failed to delete client. Server returned an invalid response.');
         }
       }
-      */
+    
     } catch (error) {
       console.error('Error deleting client:', error);
       toast({
