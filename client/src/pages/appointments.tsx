@@ -117,188 +117,202 @@ export default function AppointmentsPage() {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-3xl font-bold mb-6">Appointment Requests</h1>
-      
-      {/* Status tabs */}
-      <div className="flex space-x-2 mb-6">
-        <Button 
-          variant={selectedTab === 'pending' ? "default" : "outline"}
-          onClick={() => setSelectedTab('pending')}
-        >
-          Pending
-        </Button>
-        <Button 
-          variant={selectedTab === 'accepted' ? "default" : "outline"}
-          onClick={() => setSelectedTab('accepted')}
-        >
-          Accepted
-        </Button>
-        <Button 
-          variant={selectedTab === 'declined' ? "default" : "outline"}
-          onClick={() => setSelectedTab('declined')}
-        >
-          Declined
-        </Button>
-        <Button 
-          variant={selectedTab === 'all' ? "default" : "outline"}
-          onClick={() => setSelectedTab('all')}
-        >
-          All
-        </Button>
-      </div>
-
-      {/* For testing - Clear all bookings */}
-      <div className="mb-6">
-        <Button
-          variant="outline"
-          onClick={() => {
-            localStorage.removeItem('app_booking_requests');
-            refetchBookings();
-            toast({
-              title: "Local Bookings Cleared",
-              description: "All locally stored booking requests have been cleared.",
-            });
-          }}
-        >
-          Clear Local Bookings
-        </Button>
+      {/* Booking Management Section */}
+      <div className="mb-10 bg-white rounded-lg shadow-sm border border-gray-100 p-6">
+        <h1 className="text-2xl font-bold mb-4">Booking Request Management</h1>
+        <p className="text-gray-600 mb-4">Manage incoming booking requests from clients. Accept or decline appointments and view booking details.</p>
         
-        <Button
-          variant="outline"
-          className="ml-2"
-          onClick={async () => {
-            // Add a sample booking for testing
-            try {
-              const testBooking = {
-                externalId: Date.now().toString(),
-                clientName: "Test Client",
-                clientPhone: "555-123-4567",
-                serviceName: "Test Service",
-                servicePrice: "$100",
-                date: "2025-05-30",
-                time: "10:00 AM",
-                status: "confirmed" as const,
-                professionalId: "1",
-                createdAt: new Date().toISOString(),
-                notes: "This is a test booking"
-              };
-              
-              await addBooking(testBooking);
+        {/* Status tabs */}
+        <div className="flex flex-wrap space-x-2 mb-6">
+          <Button 
+            variant={selectedTab === 'pending' ? "default" : "outline"}
+            onClick={() => setSelectedTab('pending')}
+            className="mb-2"
+          >
+            Pending Requests
+          </Button>
+          <Button 
+            variant={selectedTab === 'accepted' ? "default" : "outline"}
+            onClick={() => setSelectedTab('accepted')}
+            className="mb-2"
+          >
+            Accepted
+          </Button>
+          <Button 
+            variant={selectedTab === 'declined' ? "default" : "outline"}
+            onClick={() => setSelectedTab('declined')}
+            className="mb-2"
+          >
+            Declined
+          </Button>
+          <Button 
+            variant={selectedTab === 'all' ? "default" : "outline"}
+            onClick={() => setSelectedTab('all')}
+            className="mb-2"
+          >
+            All Bookings
+          </Button>
+        </div>
+
+        {/* For testing - Clear all bookings */}
+        <div className="flex flex-wrap gap-2 pt-2 border-t border-gray-100">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              localStorage.removeItem('app_booking_requests');
               refetchBookings();
-              
               toast({
-                title: "Test Booking Added",
-                description: "A test booking has been added for demonstration.",
+                title: "Local Bookings Cleared",
+                description: "All locally stored booking requests have been cleared.",
               });
-            } catch (error) {
-              console.error("Error adding test booking:", error);
-              toast({
-                title: "Error",
-                description: "Failed to add test booking",
-                variant: "destructive",
-              });
-            }
-          }}
-        >
-          Add Test Booking
-        </Button>
+            }}
+          >
+            Clear Local Bookings
+          </Button>
+          
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              // Add a sample booking for testing
+              try {
+                const testBooking = {
+                  externalId: Date.now().toString(),
+                  clientName: "Test Client",
+                  clientPhone: "555-123-4567",
+                  serviceName: "Test Service",
+                  servicePrice: "$100",
+                  date: "2025-05-30",
+                  time: "10:00 AM",
+                  status: "confirmed" as const,
+                  professionalId: "1",
+                  createdAt: new Date().toISOString(),
+                  notes: "This is a test booking"
+                };
+                
+                await addBooking(testBooking);
+                refetchBookings();
+                
+                toast({
+                  title: "Test Booking Added",
+                  description: "A test booking has been added for demonstration.",
+                });
+              } catch (error) {
+                console.error("Error adding test booking:", error);
+                toast({
+                  title: "Error",
+                  description: "Failed to add test booking",
+                  variant: "destructive",
+                });
+              }
+            }}
+          >
+            Add Test Booking
+          </Button>
+        </div>
       </div>
 
-      {filteredBookings.length === 0 ? (
-        <div className="bg-gray-50 p-8 text-center rounded-lg border border-gray-200">
-          <CalendarClock className="w-12 h-12 mx-auto text-gray-400 mb-4" />
-          <h3 className="text-xl font-medium mb-2">No {selectedTab} appointments</h3>
-          <p className="text-gray-500">
-            {selectedTab === 'pending' 
-              ? "You don't have any pending appointment requests." 
-              : selectedTab === 'accepted' 
-                ? "You haven't accepted any appointments yet." 
-                : selectedTab === 'declined' 
-                  ? "You haven't declined any appointments." 
-                  : "You don't have any appointments."}
-          </p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBookings.map((booking) => (
-            <Card key={booking.id} className="p-5 shadow-sm">
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-lg font-bold flex items-center">
-                    <User className="w-4 h-4 mr-2" />
-                    {booking.clientName}
-                  </h3>
-                  <p className="text-sm text-gray-500 flex items-center mt-1">
-                    <Phone className="w-4 h-4 mr-2" />
-                    {booking.clientPhone}
-                  </p>
+      {/* All Bookings Section */}
+      <div>
+        <h2 className="text-2xl font-bold mb-6">All {selectedTab !== 'all' ? selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1) : ''} Bookings</h2>
+        
+        {filteredBookings.length === 0 ? (
+          <div className="bg-gray-50 p-8 text-center rounded-lg border border-gray-200">
+            <CalendarClock className="w-12 h-12 mx-auto text-gray-400 mb-4" />
+            <h3 className="text-xl font-medium mb-2">No {selectedTab} appointments</h3>
+            <p className="text-gray-500">
+              {selectedTab === 'pending' 
+                ? "You don't have any pending appointment requests." 
+                : selectedTab === 'accepted' 
+                  ? "You haven't accepted any appointments yet." 
+                  : selectedTab === 'declined' 
+                    ? "You haven't declined any appointments." 
+                    : "You don't have any appointments."}
+            </p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredBookings.map((booking) => (
+              <Card key={booking.id} className="p-5 shadow-sm">
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <h3 className="text-lg font-bold flex items-center">
+                      <User className="w-4 h-4 mr-2" />
+                      {booking.clientName}
+                    </h3>
+                    <p className="text-sm text-gray-500 flex items-center mt-1">
+                      <Phone className="w-4 h-4 mr-2" />
+                      {booking.clientPhone}
+                    </p>
+                  </div>
+                  <div className={`text-xs font-semibold px-2 py-1 rounded ${
+                    booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                    booking.status === 'accepted' || booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                  </div>
                 </div>
-                <div className={`text-xs font-semibold px-2 py-1 rounded ${
-                  booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                  booking.status === 'accepted' ? 'bg-green-100 text-green-800' :
-                  'bg-red-100 text-red-800'
-                }`}>
-                  {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                
+                {booking.serviceName && (
+                  <div className="mb-3 bg-gray-50 p-2 rounded">
+                    <p className="font-medium">{booking.serviceName}</p>
+                    {booking.servicePrice && (
+                      <p className="text-sm text-gray-700">{booking.servicePrice}</p>
+                    )}
+                  </div>
+                )}
+                
+                <div className="mb-4">
+                  <div className="flex items-center mb-1">
+                    <Calendar className="w-4 h-4 mr-2 text-gray-500" />
+                    <span className="text-sm">
+                      {booking.date}
+                    </span>
+                  </div>
+                  <div className="flex items-center">
+                    <Clock className="w-4 h-4 mr-2 text-gray-500" />
+                    <span className="text-sm">{booking.time}</span>
+                  </div>
                 </div>
-              </div>
-              
-              {booking.serviceName && (
-                <div className="mb-3 bg-gray-50 p-2 rounded">
-                  <p className="font-medium">{booking.serviceName}</p>
-                  {booking.servicePrice && (
-                    <p className="text-sm text-gray-700">{booking.servicePrice}</p>
-                  )}
+                
+                {booking.notes && (
+                  <div className="mb-4 p-2 bg-gray-50 rounded text-sm">
+                    <p className="font-medium mb-1">Notes:</p>
+                    <p>{booking.notes}</p>
+                  </div>
+                )}
+                
+                <div className="text-xs text-gray-500 mb-4">
+                  Requested on {formatDate(booking.createdAt || new Date().toISOString())}
                 </div>
-              )}
-              
-              <div className="mb-4">
-                <div className="flex items-center mb-1">
-                  <Calendar className="w-4 h-4 mr-2 text-gray-500" />
-                  <span className="text-sm">
-                    {booking.date}
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-2 text-gray-500" />
-                  <span className="text-sm">{booking.time}</span>
-                </div>
-              </div>
-              
-              {booking.notes && (
-                <div className="mb-4 p-2 bg-gray-50 rounded text-sm">
-                  <p className="font-medium mb-1">Notes:</p>
-                  <p>{booking.notes}</p>
-                </div>
-              )}
-              
-              <div className="text-xs text-gray-500 mb-4">
-                Requested on {formatDate(booking.createdAt)}
-              </div>
-              
-              {booking.status === 'pending' && (
-                <div className="flex space-x-2">
-                  <Button 
-                    variant="default" 
-                    className="w-full"
-                    onClick={() => handleAccept(booking.id)}
-                  >
-                    <Check className="w-4 h-4 mr-2" />
-                    Accept
-                  </Button>
-                  <Button 
-                    variant="outline" 
-                    className="w-full"
-                    onClick={() => handleDecline(booking.id)}
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Decline
-                  </Button>
-                </div>
-              )}
-            </Card>
-          ))}
-        </div>
-      )}
+                
+                {(booking.status === 'pending') && (
+                  <div className="flex space-x-2">
+                    <Button 
+                      variant="default" 
+                      className="w-full"
+                      onClick={() => handleAccept(booking.id)}
+                    >
+                      <Check className="w-4 h-4 mr-2" />
+                      Accept
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      className="w-full"
+                      onClick={() => handleDecline(booking.id)}
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Decline
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
