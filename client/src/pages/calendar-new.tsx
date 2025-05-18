@@ -678,29 +678,38 @@ const CalendarNew = () => {
               type="button" 
               className="bg-[#0a2342] hover:bg-[#1d4ed8]"
               onClick={() => {
-                // Create start and end dates with correct time
-                const startDate = new Date(newEventFormData.startDate);
-                const endDate = new Date(newEventFormData.endDate);
+                // Ensure we have a title (use default if empty)
+                const eventTitle = newEventFormData.title.trim() || "New Event";
                 
-                if (newEventFormData.startTime) {
-                  const [hours, minutes] = newEventFormData.startTime.split(':').map(Number);
+                // Update the form data with the title
+                const updatedFormData = {
+                  ...newEventFormData,
+                  title: eventTitle
+                };
+                
+                // Create start and end dates with correct time
+                const startDate = new Date(updatedFormData.startDate);
+                const endDate = new Date(updatedFormData.endDate);
+                
+                if (updatedFormData.startTime) {
+                  const [hours, minutes] = updatedFormData.startTime.split(':').map(Number);
                   startDate.setHours(hours, minutes);
                 }
                 
-                if (newEventFormData.endTime) {
-                  const [hours, minutes] = newEventFormData.endTime.split(':').map(Number);
+                if (updatedFormData.endTime) {
+                  const [hours, minutes] = updatedFormData.endTime.split(':').map(Number);
                   endDate.setHours(hours, minutes);
                 }
                 
                 // Format event data for API submission, matching exactly what the backend expects
                 const eventData = {
-                  title: newEventFormData.title,
-                  description: newEventFormData.description || null,
+                  title: eventTitle, // Use the title we validated above
+                  description: updatedFormData.description || null,
                   // Format startTime and endTime as ISO strings
                   startTime: startDate.toISOString(),
                   endTime: endDate.toISOString(),
                   // Map type to eventType - ensure it's one of the valid enum values
-                  eventType: newEventFormData.type === "event" ? "busy" : (newEventFormData.type || "busy"),
+                  eventType: updatedFormData.type === "event" ? "busy" : (updatedFormData.type || "busy"),
                   // Include userId and isConfirmed
                   userId: "user-1", // Would be dynamic in a real app
                   isConfirmed: true,
@@ -731,12 +740,22 @@ const CalendarNew = () => {
                   ...localEvent,
                   id: Date.now(), // Use temporary ID for local events
                   start: startDate, // For BigCalendar display
-                  end: endDate     // For BigCalendar display
+                  end: endDate,     // For BigCalendar display
+                  title: eventData.title || "New Event" // Ensure title is always set
                 };
                 
                 // Add to local events state first for immediate display
                 // Type assertion to fix compatibility issues
                 setLocalEvents(prevEvents => [...prevEvents, newLocalEvent as CalendarEvent]);
+                
+                // Close the dialog immediately to improve UX
+                setIsAddEventModalOpen(false);
+                
+                // Show feedback to the user
+                toast({
+                  title: "Event Created",
+                  description: "Your event has been added to the calendar.",
+                });
                 
                 // Then try to save to server
                 createEventMutation.mutate(eventData, {
