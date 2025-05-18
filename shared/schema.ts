@@ -236,20 +236,36 @@ export const bookingStatusEnum = pgEnum("booking_status", [
   "emergency",
 ]);
 
+// Booking type enum
+export const bookingTypeEnum = pgEnum("booking_type", [
+  "meeting",
+  "consultation",
+  "appointment",
+  "follow_up",
+  "check_in"
+]);
+
 // Bookings schema
 export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
+  date: text("date").notNull(),
+  time: text("time").notNull(),
+  duration: integer("duration"),
+  type: bookingTypeEnum("type").notNull().default("meeting"),
+  status: bookingStatusEnum("status").notNull().default("confirmed"),
+  location: text("location"),
+  notes: text("notes"),
+  clientId: integer("client_id").notNull().references(() => clients.id), // Required reference to clients table
+  serviceId: text("service_id").notNull(),
+  priority: text("priority").default("normal"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
   externalId: text("external_id").notNull(), // Client-side ID
   clientName: text("client_name").notNull(),
   clientPhone: text("client_phone").notNull(),
   serviceName: text("service_name"),
   servicePrice: text("service_price"),
-  date: text("date").notNull(),
-  time: text("time").notNull(),
-  notes: text("notes"),
-  status: bookingStatusEnum("status").notNull().default("confirmed"),
   professionalId: text("professional_id").notNull(), // Points to a user
-  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 export const insertBookingSchema = createInsertSchema(bookings).pick({
@@ -260,8 +276,14 @@ export const insertBookingSchema = createInsertSchema(bookings).pick({
   servicePrice: true,
   date: true,
   time: true,
+  duration: true,
+  type: true,
+  location: true,
   notes: true,
   status: true,
+  clientId: true,
+  serviceId: true,
+  priority: true,
   professionalId: true,
 });
 
