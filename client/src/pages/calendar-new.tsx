@@ -313,8 +313,26 @@ const CalendarNew = () => {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(apiEventData),
       });
-      if (!response.ok) throw new Error('Failed to update event');
-      return response.json();
+      
+      if (!response.ok) {
+        // Try to parse error message if possible
+        try {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to update event');
+        } catch (parseError) {
+          // If response is not valid JSON
+          throw new Error(`Failed to update event: ${response.status} ${response.statusText}`);
+        }
+      }
+      
+      // For successful responses, safely parse JSON
+      try {
+        return await response.json();
+      } catch (parseError) {
+        // In case of empty response body or invalid JSON
+        console.log('Response was ok but could not parse JSON');
+        return { id: eventData.id, ...apiEventData };
+      }
     },
     onSuccess: () => {
       toast({
@@ -894,14 +912,15 @@ const CalendarNew = () => {
                     // Log the data being sent
                     console.log("Updating event with data:", editEventData);
                     
-                    // Make sure dates are properly set
+                    // Create a properly formatted event object for the API
                     const cleanedEventData = {
                       ...editEventData,
-                      // Ensure both the 'start'/'end' (for calendar display) fields
-                      // and 'startTime'/'endTime' (for API) are properly set
-                      startTime: editEventData.start,
-                      endTime: editEventData.end
+                      // Use a valid event type
+                      eventType: editEventData.type || "busy"
                     };
+                    
+                    // Add specific logging to help with debugging
+                    console.log("Sending event update with ID:", cleanedEventData.id);
                     
                     updateEventMutation.mutate(cleanedEventData);
                   }
