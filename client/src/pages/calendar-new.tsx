@@ -250,7 +250,7 @@ const CalendarNew = () => {
     startTime: '09:00',
     endDate: format(new Date(), 'yyyy-MM-dd'),
     endTime: '10:00',
-    type: 'event'
+    type: 'busy' // Using a valid eventType value from the enum
   });
   const { toast } = useToast();
   
