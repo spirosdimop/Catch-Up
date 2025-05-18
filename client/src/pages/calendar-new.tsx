@@ -682,7 +682,7 @@ const CalendarNew = () => {
                   startTime: startDate.toISOString(),
                   endTime: endDate.toISOString(),
                   // Map type to eventType - ensure it's one of the valid enum values
-                  eventType: newEventFormData.type || "busy",
+                  eventType: newEventFormData.type === "event" ? "busy" : (newEventFormData.type || "busy"),
                   // Include userId and isConfirmed
                   userId: "user-1", // Would be dynamic in a real app
                   isConfirmed: true,
