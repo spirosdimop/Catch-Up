@@ -268,7 +268,14 @@ export default function Profile() {
       providerId: user?.id?.toString() || '1', // Use default if undefined
       duration: selectedServiceData.duration,
       location: selectedServiceData.locationType || 'office',
-      price: selectedServiceData.price
+      price: selectedServiceData.price,
+      // Adding the required clientId field (using client ID 2 for testing)
+      clientId: 2, // Use an existing client ID from our database
+      externalId: Date.now().toString(), // Generate unique external ID
+      type: "meeting", // Set a default booking type
+      status: "confirmed", // Set default status
+      priority: "normal", // Set default priority
+      serviceId: "1" // Set default service ID as string (required by schema)
     });
     
     // The form will be reset in the useBooking hook's onSuccess handler
