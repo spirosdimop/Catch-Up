@@ -915,7 +915,13 @@ const CalendarNew = () => {
                     // Create a properly formatted event object for the API
                     const cleanedEventData = {
                       ...editEventData,
-                      // Use a valid event type
+                      // Format as needed by the API with proper data types
+                      title: editEventData.title,
+                      description: editEventData.description || null,
+                      // Set startTime and endTime as ISO strings
+                      startTime: editEventData.start.toISOString(),
+                      endTime: editEventData.end.toISOString(),
+                      // Use a valid event type value from our enum
                       eventType: editEventData.type || "busy"
                     };
                     

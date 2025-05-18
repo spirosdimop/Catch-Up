@@ -1040,7 +1040,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  apiRouter.put("/events/:id", async (req, res) => {
+  apiRouter.patch("/events/:id", async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
