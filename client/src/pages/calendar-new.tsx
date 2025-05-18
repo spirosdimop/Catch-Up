@@ -59,9 +59,12 @@ interface CalendarEvent {
   endTime?: Date | string;   // For API
   eventType?: string;
   type?: string;
-  description?: string;
+  description?: string | null;
   attendees?: number;
   isConfirmed?: boolean;
+  location?: string | null;
+  clientName?: string | null;
+  color?: string | null;
 }
 
 // Upcoming tasks component
@@ -290,10 +293,25 @@ const CalendarNew = () => {
   // Update event mutation
   const updateEventMutation = useMutation({
     mutationFn: async (eventData: CalendarEvent) => {
+      // Format the event data for the backend API
+      const apiEventData = {
+        title: eventData.title,
+        description: eventData.description || null,
+        startTime: eventData.start.toISOString(), // Use start for API's startTime
+        endTime: eventData.end.toISOString(),     // Use end for API's endTime
+        location: eventData.location || null,
+        clientName: eventData.clientName || null,
+        isConfirmed: eventData.isConfirmed || true,
+        eventType: eventData.eventType || 'busy',
+        color: eventData.color || null
+      };
+      
+      console.log("Sending update with data:", apiEventData);
+      
       const response = await fetch(`/api/events/${eventData.id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(eventData),
+        body: JSON.stringify(apiEventData),
       });
       if (!response.ok) throw new Error('Failed to update event');
       return response.json();
@@ -699,7 +717,8 @@ const CalendarNew = () => {
                 };
                 
                 // Add to local events state first for immediate display
-                setLocalEvents(prevEvents => [...prevEvents, newLocalEvent]);
+                // Type assertion to fix compatibility issues
+                setLocalEvents(prevEvents => [...prevEvents, newLocalEvent as CalendarEvent]);
                 
                 // Then try to save to server
                 createEventMutation.mutate(eventData, {
@@ -872,7 +891,19 @@ const CalendarNew = () => {
                 className="bg-[#0a2342] hover:bg-[#1d4ed8]"
                 onClick={() => {
                   if (editEventData) {
-                    updateEventMutation.mutate(editEventData);
+                    // Log the data being sent
+                    console.log("Updating event with data:", editEventData);
+                    
+                    // Make sure dates are properly set
+                    const cleanedEventData = {
+                      ...editEventData,
+                      // Ensure both the 'start'/'end' (for calendar display) fields
+                      // and 'startTime'/'endTime' (for API) are properly set
+                      startTime: editEventData.start,
+                      endTime: editEventData.end
+                    };
+                    
+                    updateEventMutation.mutate(cleanedEventData);
                   }
                 }}
               >
