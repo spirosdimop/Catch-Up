@@ -492,7 +492,7 @@ export const BookingsFixed = () => {
               {filteredBookings.map((booking) => (
                 <div key={booking.id} className="flex items-center p-3 bg-gray-50 rounded-md hover:bg-gray-100">
                   <div className="flex-1">
-                    <p className="font-medium">{booking.time} - {booking.client.name}</p>
+                    <p className="font-medium">{booking.time} - {booking.clientName}</p>
                     <p className="text-sm text-gray-500">{booking.type}</p>
                   </div>
                   <DropdownMenu>
