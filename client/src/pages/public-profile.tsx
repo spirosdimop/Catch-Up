@@ -200,12 +200,19 @@ const PublicProfile = () => {
         },
         body: JSON.stringify({
           date: formattedDate,
-          timeSlot: timeValue,
+          time: timeValue,
           duration: profile?.services.find(s => s.id === selectedService)?.duration || 60,
           type: "meeting",
+          status: "pending",
           clientId,
-          serviceId: selectedService,
-          notes: formData.notes,
+          serviceId: selectedService?.toString() || "1",
+          professionalId: "1",
+          externalId: Date.now().toString(),
+          clientName: formData.name,
+          clientPhone: formData.phone || "",
+          serviceName: profile?.services.find(s => s.id === selectedService)?.name || "Service",
+          servicePrice: `$${profile?.services.find(s => s.id === selectedService)?.price || 0}`,
+          notes: formData.notes || "",
         }),
       });
 
