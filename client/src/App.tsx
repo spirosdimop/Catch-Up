@@ -17,12 +17,7 @@ import ClientsRedesign from "@/pages/clients-redesign";
 import Settings from "@/pages/settings";
 import Messages from "@/pages/messages";
 import MessagesRedesign from "@/pages/messages-redesign";
-import Bookings from "@/pages/bookings";
-import BookingsRedesign from "@/pages/bookings-redesign";
-import BookingManagement from "@/pages/booking-management";
-import BookingsTab from "@/pages/bookings-tab";
-import BookingsTabUpdated from "@/pages/bookings-tab-updated";
-import { BookingsFixed } from "@/pages/bookings-fixed";
+
 import Calendar from "@/pages/calendar";
 import CalendarNew from "@/pages/calendar-new";
 import CalendarSimple from "@/pages/calendar-simple";
@@ -128,11 +123,7 @@ function Router() {
         <Route path="/dashboard-original" component={Dashboard} />
         <Route path="/clients" component={ClientsRedesign} />
         <Route path="/clients-original" component={Clients} />
-        <Route path="/bookings" component={BookingsFixed} />
-        <Route path="/bookings-new" component={BookingsTabUpdated} />
-        <Route path="/bookings-original" component={Bookings} />
-        <Route path="/bookings-old" component={BookingsRedesign} />
-        <Route path="/booking-management" component={BookingManagement} />
+        <Route path="/appointments" component={AppointmentsPage} />
         <Route path="/messages" component={MessagesRedesign} />
         <Route path="/messages-original" component={Messages} />
         <Route path="/calendar" component={CalendarNew} />
@@ -144,7 +135,6 @@ function Router() {
         <Route path="/projects/:id" component={ProjectDetail} />
         <Route path="/ai-assistant" component={AIAssistant} />
         <Route path="/settings" component={Settings} />
-        <Route path="/appointments" component={AppointmentsPage} />
         <Route component={NotFound} />
       </Switch>
     </AppShell>

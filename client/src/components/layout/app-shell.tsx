@@ -59,7 +59,7 @@ export function AppShell({
     {
       icon: <Phone className="h-5 w-5" />,
       label: "Appointments",
-      href: "/bookings",
+      href: "/appointments",
       badge: 3 // New appointments notification
     },
     {
