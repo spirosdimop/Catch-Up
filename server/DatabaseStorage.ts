@@ -420,6 +420,10 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error("Error finding duplicate clients:", error);
       
+      if (error instanceof Error) {
+        throw new Error(`Database error: ${error.message}`);
+      }
+      
       // Fallback approach: Use client-side filtering (less efficient but more reliable)
       const allClients = await this.getClients();
       

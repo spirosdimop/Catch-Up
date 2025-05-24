@@ -37,6 +37,13 @@ export function AppShell({
   const { user } = useUser();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   
+  // Clean up side effects
+  useEffect(() => {
+    return () => {
+      setSidebarOpen(false);
+    };
+  }, []);
+  
   // Navigation items for the sidebar
   const navItems = [
     {

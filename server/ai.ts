@@ -45,7 +45,7 @@ export async function generateTaskSuggestions(
   const tasksJson = JSON.stringify(userTasks);
 
   const prompt = `Based on the user's current tasks and priorities, suggest 3-5 additional tasks that would help them make progress.
-  
+
 Current Tasks:
 ${tasksJson}
 
@@ -61,7 +61,7 @@ Format your response as a valid JSON array only.`;
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+      model: "gpt-4", // Using stable GPT-4 model
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
       max_tokens: 1000,
@@ -70,12 +70,12 @@ Format your response as a valid JSON array only.`;
 
     const content = response.choices[0].message.content;
     const parsedContent = JSON.parse(content || "{}");
-    
+
     // Extract tasks array from the response if it's wrapped in an object
     const suggestions = Array.isArray(parsedContent) 
       ? parsedContent 
       : (parsedContent.tasks || parsedContent.suggestions || []);
-    
+
     return suggestions;
   } catch (error: any) {
     console.error("Error generating task suggestions:", error);
@@ -141,7 +141,7 @@ Respond with JSON in this format:
 
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+      model: "gpt-4", // Using stable GPT-4 model
       messages: [{ role: "user", content: prompt }],
       temperature: 0.7,
       max_tokens: 1000,
@@ -170,7 +170,7 @@ export async function processCommand(command: string): Promise<any> {
   try {
     // Prompt for OpenAI to classify and extract data from the command
     const prompt = `Parse the following user command and identify the intended action. 
-    
+
 User command: "${command}"
 
 Classify the command into one of these categories:
@@ -204,7 +204,7 @@ Respond with a JSON object in the following format:
 Only include the relevant fields based on the identified action. If action is "unknown", include a helpful result message suggesting valid commands.`;
 
     const response = await openai.chat.completions.create({
-      model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024
+      model: "gpt-4", // Using stable GPT-4 model
       messages: [{ role: "user", content: prompt }],
       temperature: 0.3,
       max_tokens: 1000,
@@ -213,7 +213,7 @@ Only include the relevant fields based on the identified action. If action is "u
 
     const content = response.choices[0].message.content;
     const parsedResponse = JSON.parse(content || "{}");
-    
+
     // Handle different command types
     switch (parsedResponse.action) {
       case "create_task":
@@ -224,7 +224,7 @@ Only include the relevant fields based on the identified action. If action is "u
           task: parsedResponse.task,
           result: `Created new ${parsedResponse.task.priority} priority task: ${parsedResponse.task.title}`
         };
-        
+
       case "update_settings":
         if (parsedResponse.setting) {
           const result = await updateSettings(parsedResponse.setting.name, parsedResponse.setting.value);
@@ -235,7 +235,7 @@ Only include the relevant fields based on the identified action. If action is "u
           };
         }
         break;
-        
+
       case "create_message":
         if (parsedResponse.message) {
           const result = await createMessage(
@@ -250,7 +250,7 @@ Only include the relevant fields based on the identified action. If action is "u
           };
         }
         break;
-        
+
       case "unknown":
       default:
         return {
@@ -259,7 +259,7 @@ Only include the relevant fields based on the identified action. If action is "u
           result: parsedResponse.result || "I'm not sure how to process that command. Try asking me to create a task, update a setting, or send a message."
         };
     }
-    
+
     return parsedResponse;
   } catch (error: any) {
     console.error("Error processing command:", error);

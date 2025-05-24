@@ -11,8 +11,9 @@ export function cn(...inputs: ClassValue[]) {
 export function formatDate(date: Date | string | null | undefined): string {
   if (!date) return "—";
   
-  // Convert string dates to Date objects
-  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  try {
+    // Convert string dates to Date objects
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
   
   // Check if the date is valid before formatting
   if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
