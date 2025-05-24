@@ -285,6 +285,14 @@ export const insertBookingSchema = createInsertSchema(bookings).pick({
   serviceId: true,
   priority: true,
   professionalId: true,
+}).extend({
+  // Make some fields optional for flexibility
+  duration: z.number().optional(),
+  location: z.string().optional(),
+  notes: z.string().optional(),
+  serviceName: z.string().optional(),
+  servicePrice: z.string().optional(),
+  priority: z.string().optional(),
 });
 
 // Type exports

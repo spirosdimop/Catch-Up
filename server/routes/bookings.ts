@@ -2,6 +2,7 @@ import { Router } from "express";
 import { bookings, insertBookingSchema } from "@shared/schema";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
+import { ZodError } from "zod";
 
 const router = Router();
 
@@ -34,12 +35,34 @@ router.get("/:id", async (req, res) => {
 // Create a new booking
 router.post("/", async (req, res) => {
   try {
-    const bookingData = insertBookingSchema.parse(req.body);
+    console.log("Received booking data:", req.body);
+    
+    // Transform the data to match schema expectations
+    const transformedData = {
+      ...req.body,
+      clientId: parseInt(req.body.clientId) || 1, // Default client if not provided
+      serviceId: req.body.serviceId || "default-service",
+      professionalId: req.body.professionalId || "1",
+      externalId: req.body.externalId || Date.now().toString(),
+      duration: req.body.duration ? parseInt(req.body.duration) : 60,
+      status: req.body.status || "pending",
+      type: req.body.type || "meeting"
+    };
+    
+    const bookingData = insertBookingSchema.parse(transformedData);
     const [newBooking] = await db.insert(bookings).values(bookingData).returning();
     res.status(201).json(newBooking);
   } catch (error) {
     console.error("Error creating booking:", error);
-    res.status(400).json({ message: "Failed to create booking" });
+    if (error instanceof ZodError) {
+      console.error("Validation errors:", error.errors);
+      res.status(400).json({ 
+        message: "Validation failed", 
+        errors: error.errors 
+      });
+    } else {
+      res.status(400).json({ message: "Failed to create booking" });
+    }
   }
 });
 

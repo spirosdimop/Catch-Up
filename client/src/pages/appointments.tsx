@@ -126,6 +126,9 @@ export default function AppointmentsPage() {
   // Filter bookings based on selected tab
   const filteredBookings = bookings.filter(booking => {
     if (selectedTab === 'all') return true;
+    if (selectedTab === 'pending') return booking.status === 'pending';
+    if (selectedTab === 'accepted') return booking.status === 'confirmed' || booking.status === 'accepted';
+    if (selectedTab === 'declined') return booking.status === 'canceled' || booking.status === 'declined';
     return booking.status === selectedTab;
   });
 
