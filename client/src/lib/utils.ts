@@ -1,3 +1,4 @@
+
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { apiRequest } from "./queryClient";
@@ -14,18 +15,22 @@ export function formatDate(date: Date | string | null | undefined): string {
   try {
     // Convert string dates to Date objects
     const dateObj = typeof date === 'string' ? new Date(date) : date;
-  
-  // Check if the date is valid before formatting
-  if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
-    console.error("Invalid date:", date);
+    
+    // Check if the date is valid before formatting
+    if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) {
+      console.error("Invalid date:", date);
+      return "Invalid date";
+    }
+    
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+    }).format(dateObj);
+  } catch (error) {
+    console.error("Error formatting date:", error);
     return "Invalid date";
   }
-  
-  return new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  }).format(dateObj);
 }
 
 export function formatTime(date: Date): string {
