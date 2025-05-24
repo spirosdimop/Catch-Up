@@ -203,7 +203,7 @@ const PublicProfile = () => {
           time: timeValue,
           duration: profile?.services.find(s => s.id === selectedService)?.duration || 60,
           type: "meeting",
-          status: "pending",
+          status: "confirmed",
           clientId,
           serviceId: selectedService?.toString() || "1",
           professionalId: "1",

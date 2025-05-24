@@ -40,13 +40,20 @@ router.post("/", async (req, res) => {
     // Transform the data to match schema expectations
     const transformedData = {
       ...req.body,
-      clientId: parseInt(req.body.clientId) || 1, // Default client if not provided
-      serviceId: req.body.serviceId || "default-service",
+      clientId: req.body.clientId ? parseInt(req.body.clientId) : 1, // Default client if not provided
+      serviceId: req.body.serviceId || "1",
       professionalId: req.body.professionalId || "1",
       externalId: req.body.externalId || Date.now().toString(),
       duration: req.body.duration ? parseInt(req.body.duration) : 60,
-      status: req.body.status || "pending",
-      type: req.body.type || "meeting"
+      status: req.body.status || "confirmed",
+      type: req.body.type || "meeting",
+      clientName: req.body.clientName || "Client",
+      clientPhone: req.body.clientPhone || "",
+      serviceName: req.body.serviceName || "",
+      servicePrice: req.body.servicePrice || "",
+      location: req.body.location || "",
+      notes: req.body.notes || "",
+      priority: req.body.priority || "normal"
     };
     
     const bookingData = insertBookingSchema.parse(transformedData);
