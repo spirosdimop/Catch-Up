@@ -32,6 +32,8 @@ import {
 export default function AppointmentsPage() {
   const [selectedTab, setSelectedTab] = useState<'pending' | 'accepted' | 'declined' | 'all'>('pending');
   const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
   const { toast } = useToast();
 
   // Use React Query to fetch bookings directly from API
@@ -169,7 +171,11 @@ export default function AppointmentsPage() {
             <Grid3X3 className={`h-4 w-4 ${viewMode === 'grid' ? 'text-blue-600' : 'text-gray-500'}`} />
             Grid
           </Button>
-          <Button className="bg-blue-600 hover:bg-blue-700" size="sm">
+          <Button 
+            className="bg-blue-600 hover:bg-blue-700" 
+            size="sm"
+            onClick={() => setShowCreateDialog(true)}
+          >
             <Plus className="h-4 w-4 mr-1" /> 
             Create Booking
           </Button>
@@ -189,13 +195,54 @@ export default function AppointmentsPage() {
                 New booking requests that need your attention
               </CardDescription>
             </div>
-            <Button variant="outline" size="sm" className="border-gray-300">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              className="border-gray-300"
+              onClick={() => setShowFilter(!showFilter)}
+            >
               <Filter className="h-4 w-4 mr-1" /> Filter
             </Button>
           </div>
         </CardHeader>
         
         <CardContent className="p-5">
+          {/* Filter section */}
+          {showFilter && (
+            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+              <h3 className="text-sm font-medium mb-3">Filter Options</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="text-xs text-gray-600 mb-1 block">Date Range</label>
+                  <select className="w-full p-2 border rounded text-sm">
+                    <option>All Dates</option>
+                    <option>Today</option>
+                    <option>This Week</option>
+                    <option>This Month</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 mb-1 block">Service Type</label>
+                  <select className="w-full p-2 border rounded text-sm">
+                    <option>All Services</option>
+                    <option>Consultation</option>
+                    <option>Meeting</option>
+                    <option>Follow-up</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-600 mb-1 block">Priority</label>
+                  <select className="w-full p-2 border rounded text-sm">
+                    <option>All Priorities</option>
+                    <option>High</option>
+                    <option>Normal</option>
+                    <option>Low</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          )}
+          
           {/* Status tabs */}
           <div className="flex flex-wrap space-x-2 mb-6 border-b border-gray-100 pb-4">
             <Button 
@@ -497,6 +544,66 @@ export default function AppointmentsPage() {
           </div>
         )}
       </div>
+      
+      {/* Simple Create Booking Dialog */}
+      {showCreateDialog && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <h2 className="text-xl font-semibold mb-4">Create New Booking</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium mb-1">Client Name</label>
+                <input type="text" className="w-full p-2 border rounded" placeholder="Enter client name" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Service</label>
+                <select className="w-full p-2 border rounded">
+                  <option>Select a service</option>
+                  <option>Consultation</option>
+                  <option>Meeting</option>
+                  <option>Follow-up</option>
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Date</label>
+                  <input type="date" className="w-full p-2 border rounded" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Time</label>
+                  <input type="time" className="w-full p-2 border rounded" />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Notes</label>
+                <textarea className="w-full p-2 border rounded" rows={3} placeholder="Optional notes"></textarea>
+              </div>
+            </div>
+            <div className="flex gap-3 mt-6">
+              <Button 
+                variant="outline" 
+                className="flex-1"
+                onClick={() => setShowCreateDialog(false)}
+              >
+                Cancel
+              </Button>
+              <Button 
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+                onClick={() => {
+                  toast({
+                    title: "Booking Created",
+                    description: "New booking has been created successfully.",
+                  });
+                  setShowCreateDialog(false);
+                  refetchBookings();
+                }}
+              >
+                Create Booking
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
