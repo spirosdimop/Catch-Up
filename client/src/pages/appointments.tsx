@@ -64,7 +64,7 @@ export default function AppointmentsPage() {
   });
 
   // Handle accepting a booking
-  const handleAccept = async (bookingId: string) => {
+  const handleAccept = async (bookingId: string | number) => {
     try {
       const response = await fetch(`/api/bookings/${bookingId}`, {
         method: 'PATCH',
@@ -94,7 +94,7 @@ export default function AppointmentsPage() {
   };
 
   // Handle declining a booking
-  const handleDecline = async (bookingId: string) => {
+  const handleDecline = async (bookingId: string | number) => {
     try {
       const response = await fetch(`/api/bookings/${bookingId}`, {
         method: 'PATCH',
