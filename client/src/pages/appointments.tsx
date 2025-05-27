@@ -550,35 +550,58 @@ export default function AppointmentsPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4">
             <h2 className="text-xl font-semibold mb-4">Create New Booking</h2>
-            <div className="space-y-4">
+            <form className="booking-form space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Client Name</label>
-                <input type="text" className="w-full p-2 border rounded" placeholder="Enter client name" />
+                <input 
+                  name="clientName"
+                  type="text" 
+                  className="w-full p-2 border rounded" 
+                  placeholder="Enter client name"
+                  required 
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Service</label>
-                <select className="w-full p-2 border rounded">
-                  <option>Select a service</option>
-                  <option>Consultation</option>
-                  <option>Meeting</option>
-                  <option>Follow-up</option>
+                <select name="serviceName" className="w-full p-2 border rounded" required>
+                  <option value="">Select a service</option>
+                  <option value="Web Development">Web Development</option>
+                  <option value="App Development">App Development</option>
+                  <option value="Consultation">Consultation</option>
+                  <option value="Project Planning">Project Planning</option>
+                  <option value="Technical Support">Technical Support</option>
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="block text-sm font-medium mb-1">Date</label>
-                  <input type="date" className="w-full p-2 border rounded" />
+                  <input 
+                    name="date"
+                    type="date" 
+                    className="w-full p-2 border rounded"
+                    required 
+                  />
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Time</label>
-                  <input type="time" className="w-full p-2 border rounded" />
+                  <input 
+                    name="time"
+                    type="time" 
+                    className="w-full p-2 border rounded"
+                    required 
+                  />
                 </div>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Notes</label>
-                <textarea className="w-full p-2 border rounded" rows={3} placeholder="Optional notes"></textarea>
+                <textarea 
+                  name="notes"
+                  className="w-full p-2 border rounded" 
+                  rows={3} 
+                  placeholder="Optional notes"
+                ></textarea>
               </div>
-            </div>
+            </form>
             <div className="flex gap-3 mt-6">
               <Button 
                 variant="outline" 
@@ -589,13 +612,49 @@ export default function AppointmentsPage() {
               </Button>
               <Button 
                 className="flex-1 bg-blue-600 hover:bg-blue-700"
-                onClick={() => {
-                  toast({
-                    title: "Booking Created",
-                    description: "New booking has been created successfully.",
-                  });
-                  setShowCreateDialog(false);
-                  refetchBookings();
+                onClick={async () => {
+                  const form = document.querySelector('.booking-form') as HTMLFormElement;
+                  const formData = new FormData(form);
+                  
+                  const bookingData = {
+                    clientName: formData.get('clientName') as string,
+                    serviceName: formData.get('serviceName') as string,
+                    date: formData.get('date') as string,
+                    time: formData.get('time') as string,
+                    notes: formData.get('notes') as string,
+                    clientPhone: "",
+                    professionalId: "1",
+                    externalId: Date.now().toString(),
+                    clientId: 1,
+                    serviceId: "1"
+                  };
+                  
+                  try {
+                    const response = await fetch('/api/bookings', {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                      },
+                      body: JSON.stringify(bookingData)
+                    });
+                    
+                    if (response.ok) {
+                      toast({
+                        title: "Booking Created",
+                        description: "New booking has been created successfully.",
+                      });
+                      setShowCreateDialog(false);
+                      refetchBookings();
+                    } else {
+                      throw new Error('Failed to create booking');
+                    }
+                  } catch (error) {
+                    toast({
+                      title: "Error",
+                      description: "Failed to create booking. Please try again.",
+                      variant: "destructive",
+                    });
+                  }
                 }}
               >
                 Create Booking
