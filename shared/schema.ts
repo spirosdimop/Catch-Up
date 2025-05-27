@@ -230,6 +230,9 @@ export const insertInvoiceItemSchema = createInsertSchema(invoiceItems).pick({
 
 // Booking status enum
 export const bookingStatusEnum = pgEnum("booking_status", [
+  "pending",
+  "accepted", 
+  "declined",
   "confirmed",
   "rescheduled",
   "canceled",
@@ -252,7 +255,7 @@ export const bookings = pgTable("bookings", {
   time: text("time").notNull(),
   duration: integer("duration"),
   type: bookingTypeEnum("type").notNull().default("meeting"),
-  status: bookingStatusEnum("status").notNull().default("confirmed"),
+  status: bookingStatusEnum("status").notNull().default("pending"),
   location: text("location"),
   notes: text("notes"),
   clientId: integer("client_id").notNull().references(() => clients.id), // Required reference to clients table

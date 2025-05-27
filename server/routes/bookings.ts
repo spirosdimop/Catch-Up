@@ -41,7 +41,7 @@ router.post("/", async (req, res) => {
       time: req.body.time || "10:00 AM",
       duration: parseInt(req.body.duration) || 60,
       type: "meeting",
-      status: "confirmed",
+      status: "pending",
       location: req.body.location || "",
       notes: req.body.notes || "",
       clientId: parseInt(req.body.clientId) || 1,
