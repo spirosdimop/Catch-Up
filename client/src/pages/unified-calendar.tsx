@@ -174,7 +174,7 @@ export default function UnifiedCalendar() {
       invoices.forEach((invoice: any) => {
         try {
           const dueDate = new Date(invoice.dueDate);
-          const clientName = getClientName(invoice.clientId, clients || []);
+          const clientName = getClientName(invoice.clientId, Array.isArray(clients) ? clients : []);
           
           allEvents.push({
             id: `invoice-${invoice.id}`,
@@ -355,7 +355,7 @@ export default function UnifiedCalendar() {
               <CalendarIcon size={20} className="text-green-600" />
               <div>
                 <p className="text-sm text-gray-600">Bookings</p>
-                <p className="text-lg font-semibold">{bookings?.length || 0}</p>
+                <p className="text-lg font-semibold">{Array.isArray(bookings) ? bookings.length : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -367,7 +367,7 @@ export default function UnifiedCalendar() {
               <CheckSquare size={20} className="text-amber-600" />
               <div>
                 <p className="text-sm text-gray-600">Tasks</p>
-                <p className="text-lg font-semibold">{tasks?.length || 0}</p>
+                <p className="text-lg font-semibold">{Array.isArray(tasks) ? tasks.length : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -379,7 +379,7 @@ export default function UnifiedCalendar() {
               <Briefcase size={20} className="text-blue-600" />
               <div>
                 <p className="text-sm text-gray-600">Projects</p>
-                <p className="text-lg font-semibold">{projects?.length || 0}</p>
+                <p className="text-lg font-semibold">{Array.isArray(projects) ? projects.length : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -391,7 +391,7 @@ export default function UnifiedCalendar() {
               <DollarSign size={20} className="text-red-600" />
               <div>
                 <p className="text-sm text-gray-600">Invoices</p>
-                <p className="text-lg font-semibold">{invoices?.length || 0}</p>
+                <p className="text-lg font-semibold">{Array.isArray(invoices) ? invoices.length : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -403,7 +403,7 @@ export default function UnifiedCalendar() {
               <Clock size={20} className="text-purple-600" />
               <div>
                 <p className="text-sm text-gray-600">Events</p>
-                <p className="text-lg font-semibold">{events?.length || 0}</p>
+                <p className="text-lg font-semibold">{Array.isArray(events) ? events.length : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -438,7 +438,7 @@ export default function UnifiedCalendar() {
                   case 'task':
                     return `Task: ${data.title}\nPriority: ${data.priority}\nStatus: ${data.status}`;
                   case 'project':
-                    return `Project: ${data.name}\nStatus: ${data.status}\nClient: ${getClientName(data.clientId, clients)}`;
+                    return `Project: ${data.name}\nStatus: ${data.status}\nClient: ${getClientName(data.clientId, Array.isArray(clients) ? clients : [])}`;
                   case 'invoice':
                     return `Invoice: ${data.invoiceNumber}\nAmount: €${data.amount}\nStatus: ${data.status}`;
                   default:
