@@ -12,13 +12,15 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Users, Briefcase, DollarSign, CheckSquare, Filter } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 // Create a date-fns localizer for React Big Calendar
@@ -140,29 +142,39 @@ export default function CalendarPage() {
     },
   });
 
-  // Query to fetch events
+  // Query to fetch all data sources
   const { data: events = [], isLoading: eventsLoading, isError: eventsError } = useQuery({
     queryKey: ['/api/events'],
-    staleTime: 60000, // 1 minute
+    staleTime: 60000,
   });
-  
-  // Query to fetch clients for linking
-  const { data: clients = [] } = useQuery<Client[]>({
-    queryKey: ['/api/clients'],
-    staleTime: 300000, // 5 minutes
+
+  const { data: bookings = [], isLoading: bookingsLoading } = useQuery({
+    queryKey: ['/api/bookings'],
+    staleTime: 60000,
   });
-  
-  // Query to fetch projects for linking
-  const { data: projects = [] } = useQuery<Project[]>({
+
+  const { data: tasks = [], isLoading: tasksLoading } = useQuery({
+    queryKey: ['/api/tasks'],
+    staleTime: 60000,
+  });
+
+  const { data: projects = [], isLoading: projectsLoading } = useQuery({
     queryKey: ['/api/projects'],
-    staleTime: 300000, // 5 minutes
+    staleTime: 60000,
   });
-  
-  // Query to fetch invoices for linking
-  const { data: invoices = [] } = useQuery<Invoice[]>({
+
+  const { data: invoices = [], isLoading: invoicesLoading } = useQuery({
     queryKey: ['/api/invoices'],
-    staleTime: 300000, // 5 minutes
+    staleTime: 60000,
   });
+
+  const { data: clients = [], isLoading: clientsLoading } = useQuery({
+    queryKey: ['/api/clients'],
+    staleTime: 60000,
+  });
+
+  // Check if any data is still loading
+  const isLoading = eventsLoading || bookingsLoading || tasksLoading || projectsLoading || invoicesLoading || clientsLoading;
 
   // Mutation to create event
   const createEventMutation = useMutation({
