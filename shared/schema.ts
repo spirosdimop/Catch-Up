@@ -149,12 +149,9 @@ export const insertTaskSchema = createInsertSchema(tasks)
     deadline: true,
     completed: true,
   })
-  .transform((data) => {
-    // Convert string dates to Date objects for the database
-    return {
-      ...data,
-      deadline: data.deadline ? new Date(data.deadline) : null,
-    };
+  .extend({
+    deadline: z.string().optional().nullable()
+      .transform((val) => val ? new Date(val) : null),
   });
 
 // Time entry schema
