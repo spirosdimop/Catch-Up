@@ -776,32 +776,74 @@ export default function CalendarPage() {
                   ) : (
                     <div className="space-y-4">
                       {currentMonthData.events.map((event: any) => (
-                        <div
-                          key={event.id}
-                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
-                          onClick={() => handleSelectEvent({
-                            ...event,
-                            start: new Date(event.startTime),
-                            end: new Date(event.endTime)
-                          })}
-                        >
-                          <div className="flex-1">
-                            <h3 className="font-medium">{event.title}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {format(new Date(event.startTime), 'MMM dd, yyyy • h:mm a')}
-                              {event.location && ` • ${event.location}`}
-                            </p>
-                            {event.description && (
-                              <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant={event.isConfirmed ? "default" : "secondary"}>
-                              {event.isConfirmed ? "Confirmed" : "Pending"}
-                            </Badge>
-                            <Badge variant="outline">{event.eventType}</Badge>
-                          </div>
-                        </div>
+                        <Popover key={event.id}>
+                          <PopoverTrigger asChild>
+                            <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                              <div className="flex-1">
+                                <h3 className="font-medium">{event.title}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  {format(new Date(event.startTime), 'MMM dd, yyyy • h:mm a')}
+                                  {event.location && ` • ${event.location}`}
+                                </p>
+                                {event.description && (
+                                  <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={event.isConfirmed ? "default" : "secondary"}>
+                                  {event.isConfirmed ? "Confirmed" : "Pending"}
+                                </Badge>
+                                <Badge variant="outline">{event.eventType}</Badge>
+                              </div>
+                            </div>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold">{event.title}</h4>
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleSelectEvent({
+                                    ...event,
+                                    start: new Date(event.startTime),
+                                    end: new Date(event.endTime)
+                                  })}
+                                >
+                                  Edit
+                                </Button>
+                              </div>
+                              <div className="space-y-2 text-sm">
+                                <div>
+                                  <span className="font-medium">Date:</span> {format(new Date(event.startTime), 'MMM dd, yyyy')}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Time:</span> {format(new Date(event.startTime), 'h:mm a')} - {format(new Date(event.endTime), 'h:mm a')}
+                                </div>
+                                {event.location && (
+                                  <div>
+                                    <span className="font-medium">Location:</span> {event.location}
+                                  </div>
+                                )}
+                                {event.clientName && (
+                                  <div>
+                                    <span className="font-medium">Client:</span> {event.clientName}
+                                  </div>
+                                )}
+                                {event.description && (
+                                  <div>
+                                    <span className="font-medium">Description:</span> {event.description}
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="font-medium">Type:</span> {event.eventType}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Status:</span> {event.isConfirmed ? "Confirmed" : "Pending"}
+                                </div>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       ))}
                     </div>
                   )}
@@ -825,32 +867,79 @@ export default function CalendarPage() {
                   ) : (
                     <div className="space-y-4">
                       {currentMonthData.bookings.map((booking: any) => (
-                        <div
-                          key={booking.id}
-                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
-                        >
-                          <div className="flex-1">
-                            <h3 className="font-medium">{booking.clientName}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {format(new Date(booking.date), 'MMM dd, yyyy')} • {booking.time}
-                              {booking.service && ` • ${booking.service}`}
-                            </p>
-                            {booking.location && (
-                              <p className="text-sm text-muted-foreground mt-1">{booking.location}</p>
-                            )}
-                            {booking.notes && (
-                              <p className="text-sm text-muted-foreground mt-1">{booking.notes}</p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant={booking.status === 'confirmed' ? "default" : booking.status === 'pending' ? "secondary" : "destructive"}>
-                              {booking.status}
-                            </Badge>
-                            {booking.phone && (
-                              <Badge variant="outline">{booking.phone}</Badge>
-                            )}
-                          </div>
-                        </div>
+                        <Popover key={booking.id}>
+                          <PopoverTrigger asChild>
+                            <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                              <div className="flex-1">
+                                <h3 className="font-medium">{booking.clientName}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  {format(new Date(booking.date), 'MMM dd, yyyy')} • {booking.time}
+                                  {booking.service && ` • ${booking.service}`}
+                                </p>
+                                {booking.location && (
+                                  <p className="text-sm text-muted-foreground mt-1">{booking.location}</p>
+                                )}
+                                {booking.notes && (
+                                  <p className="text-sm text-muted-foreground mt-1">{booking.notes}</p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={booking.status === 'confirmed' ? "default" : booking.status === 'pending' ? "secondary" : "destructive"}>
+                                  {booking.status}
+                                </Badge>
+                                {booking.phone && (
+                                  <Badge variant="outline">{booking.phone}</Badge>
+                                )}
+                              </div>
+                            </div>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold">Booking Details</h4>
+                              </div>
+                              <div className="space-y-2 text-sm">
+                                <div>
+                                  <span className="font-medium">Client:</span> {booking.clientName}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Date:</span> {format(new Date(booking.date), 'MMM dd, yyyy')}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Time:</span> {booking.time}
+                                </div>
+                                {booking.service && (
+                                  <div>
+                                    <span className="font-medium">Service:</span> {booking.service}
+                                  </div>
+                                )}
+                                {booking.location && (
+                                  <div>
+                                    <span className="font-medium">Location:</span> {booking.location}
+                                  </div>
+                                )}
+                                {booking.phone && (
+                                  <div>
+                                    <span className="font-medium">Phone:</span> {booking.phone}
+                                  </div>
+                                )}
+                                {booking.email && (
+                                  <div>
+                                    <span className="font-medium">Email:</span> {booking.email}
+                                  </div>
+                                )}
+                                {booking.notes && (
+                                  <div>
+                                    <span className="font-medium">Notes:</span> {booking.notes}
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="font-medium">Status:</span> {booking.status}
+                                </div>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       ))}
                     </div>
                   )}
@@ -874,28 +963,66 @@ export default function CalendarPage() {
                   ) : (
                     <div className="space-y-4">
                       {currentMonthData.tasks.map((task: any) => (
-                        <div
-                          key={task.id}
-                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
-                        >
-                          <div className="flex-1">
-                            <h3 className="font-medium">{task.title}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Due: {format(new Date(task.deadline), 'MMM dd, yyyy')}
-                              {task.projectId && ` • Project ID: ${task.projectId}`}
-                            </p>
-                            {task.description && (
-                              <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant={task.completed ? "default" : "secondary"}>
-                              {task.completed ? "Completed" : "Pending"}
-                            </Badge>
-                            <Badge variant="outline">{task.status}</Badge>
-                            <Badge variant="outline">{task.priority}</Badge>
-                          </div>
-                        </div>
+                        <Popover key={task.id}>
+                          <PopoverTrigger asChild>
+                            <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                              <div className="flex-1">
+                                <h3 className="font-medium">{task.title}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  Due: {format(new Date(task.deadline), 'MMM dd, yyyy')}
+                                  {task.projectId && ` • Project ID: ${task.projectId}`}
+                                </p>
+                                {task.description && (
+                                  <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={task.completed ? "default" : "secondary"}>
+                                  {task.completed ? "Completed" : "Pending"}
+                                </Badge>
+                                <Badge variant="outline">{task.status}</Badge>
+                                <Badge variant="outline">{task.priority}</Badge>
+                              </div>
+                            </div>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold">Task Details</h4>
+                              </div>
+                              <div className="space-y-2 text-sm">
+                                <div>
+                                  <span className="font-medium">Title:</span> {task.title}
+                                </div>
+                                {task.description && (
+                                  <div>
+                                    <span className="font-medium">Description:</span> {task.description}
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="font-medium">Due Date:</span> {format(new Date(task.deadline), 'MMM dd, yyyy')}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Status:</span> {task.status}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Priority:</span> {task.priority}
+                                </div>
+                                <div>
+                                  <span className="font-medium">Completed:</span> {task.completed ? "Yes" : "No"}
+                                </div>
+                                {task.projectId && (
+                                  <div>
+                                    <span className="font-medium">Project ID:</span> {task.projectId}
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="font-medium">Created:</span> {format(new Date(task.createdAt), 'MMM dd, yyyy')}
+                                </div>
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       ))}
                     </div>
                   )}
@@ -919,30 +1046,69 @@ export default function CalendarPage() {
                   ) : (
                     <div className="space-y-4">
                       {currentMonthData.projects.map((project: any) => (
-                        <div
-                          key={project.id}
-                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
-                        >
-                          <div className="flex-1">
-                            <h3 className="font-medium">{project.name}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              Start: {format(new Date(project.startDate), 'MMM dd, yyyy')}
-                              {project.endDate && ` • End: ${format(new Date(project.endDate), 'MMM dd, yyyy')}`}
-                              {project.clientId && ` • Client ID: ${project.clientId}`}
-                            </p>
-                            {project.description && (
-                              <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Badge variant={project.status === 'completed' ? "default" : project.status === 'in_progress' ? "secondary" : "outline"}>
-                              {project.status}
-                            </Badge>
-                            {project.budget && (
-                              <Badge variant="outline">${project.budget}</Badge>
-                            )}
-                          </div>
-                        </div>
+                        <Popover key={project.id}>
+                          <PopoverTrigger asChild>
+                            <div className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer">
+                              <div className="flex-1">
+                                <h3 className="font-medium">{project.name}</h3>
+                                <p className="text-sm text-muted-foreground">
+                                  Start: {format(new Date(project.startDate), 'MMM dd, yyyy')}
+                                  {project.endDate && ` • End: ${format(new Date(project.endDate), 'MMM dd, yyyy')}`}
+                                  {project.clientId && ` • Client ID: ${project.clientId}`}
+                                </p>
+                                {project.description && (
+                                  <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Badge variant={project.status === 'completed' ? "default" : project.status === 'in_progress' ? "secondary" : "outline"}>
+                                  {project.status}
+                                </Badge>
+                                {project.budget && (
+                                  <Badge variant="outline">${project.budget}</Badge>
+                                )}
+                              </div>
+                            </div>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-80">
+                            <div className="space-y-3">
+                              <div className="flex items-center justify-between">
+                                <h4 className="font-semibold">Project Details</h4>
+                              </div>
+                              <div className="space-y-2 text-sm">
+                                <div>
+                                  <span className="font-medium">Name:</span> {project.name}
+                                </div>
+                                {project.description && (
+                                  <div>
+                                    <span className="font-medium">Description:</span> {project.description}
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="font-medium">Start Date:</span> {format(new Date(project.startDate), 'MMM dd, yyyy')}
+                                </div>
+                                {project.endDate && (
+                                  <div>
+                                    <span className="font-medium">End Date:</span> {format(new Date(project.endDate), 'MMM dd, yyyy')}
+                                  </div>
+                                )}
+                                <div>
+                                  <span className="font-medium">Status:</span> {project.status}
+                                </div>
+                                {project.budget && (
+                                  <div>
+                                    <span className="font-medium">Budget:</span> ${project.budget}
+                                  </div>
+                                )}
+                                {project.clientId && (
+                                  <div>
+                                    <span className="font-medium">Client ID:</span> {project.clientId}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </PopoverContent>
+                        </Popover>
                       ))}
                     </div>
                   )}
