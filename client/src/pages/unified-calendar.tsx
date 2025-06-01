@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar';
 import { format, parseISO, startOfWeek, getDay, parse, add, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { enUS } from 'date-fns/locale';
@@ -46,6 +46,7 @@ export default function UnifiedCalendar() {
   const [showFilters, setShowFilters] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState('calendar');
+  const [isMobile, setIsMobile] = useState(false);
   const [filters, setFilters] = useState({
     showBookings: true,
     showTasks: true,
@@ -53,6 +54,18 @@ export default function UnifiedCalendar() {
     showEvents: true,
     showInvoices: true,
   });
+
+  // Check for mobile screen size
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Fetch all data sources
   const { data: events = [], isLoading: eventsLoading } = useQuery({
@@ -274,7 +287,7 @@ export default function UnifiedCalendar() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-3 md:p-6 space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Unified Calendar</h1>
@@ -430,9 +443,9 @@ export default function UnifiedCalendar() {
 
       {/* Month Navigation */}
       <Card className="mb-6">
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold">
+        <CardContent className="p-3 md:p-4">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <h2 className="text-lg md:text-xl font-semibold">
               {format(currentDate, 'MMMM yyyy')}
             </h2>
             <div className="flex gap-2">
@@ -440,13 +453,16 @@ export default function UnifiedCalendar() {
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentDate(add(currentDate, { months: -1 }))}
+                className="text-xs md:text-sm"
               >
-                ← Previous
+                <span className="hidden sm:inline">← Previous</span>
+                <span className="sm:hidden">←</span>
               </Button>
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentDate(new Date())}
+                className="text-xs md:text-sm"
               >
                 Today
               </Button>
@@ -454,8 +470,10 @@ export default function UnifiedCalendar() {
                 variant="outline"
                 size="sm"
                 onClick={() => setCurrentDate(add(currentDate, { months: 1 }))}
+                className="text-xs md:text-sm"
               >
-                Next →
+                <span className="hidden sm:inline">Next →</span>
+                <span className="sm:hidden">→</span>
               </Button>
             </div>
           </div>
@@ -464,33 +482,38 @@ export default function UnifiedCalendar() {
 
       {/* Calendar with Tabs */}
       <Card>
-        <CardContent className="p-6">
+        <CardContent className="p-3 md:p-6">
           <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="calendar" className="flex items-center gap-2">
-                <CalendarIcon className="h-4 w-4" />
-                Calendar
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-1">
+              <TabsTrigger value="calendar" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                <CalendarIcon className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="hidden sm:inline">Calendar</span>
+                <span className="sm:hidden">Cal</span>
               </TabsTrigger>
-              <TabsTrigger value="events" className="flex items-center gap-2">
-                <Clock className="h-4 w-4" />
-                Events ({currentMonthData.events.length})
+              <TabsTrigger value="events" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                <Clock className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="hidden sm:inline">Events ({currentMonthData.events.length})</span>
+                <span className="sm:hidden">E({currentMonthData.events.length})</span>
               </TabsTrigger>
-              <TabsTrigger value="bookings" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Bookings ({currentMonthData.bookings.length})
+              <TabsTrigger value="bookings" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                <Users className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="hidden sm:inline">Bookings ({currentMonthData.bookings.length})</span>
+                <span className="sm:hidden">B({currentMonthData.bookings.length})</span>
               </TabsTrigger>
-              <TabsTrigger value="tasks" className="flex items-center gap-2">
-                <CheckSquare className="h-4 w-4" />
-                Tasks ({currentMonthData.tasks.length})
+              <TabsTrigger value="tasks" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                <CheckSquare className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="hidden sm:inline">Tasks ({currentMonthData.tasks.length})</span>
+                <span className="sm:hidden">T({currentMonthData.tasks.length})</span>
               </TabsTrigger>
-              <TabsTrigger value="projects" className="flex items-center gap-2">
-                <Briefcase className="h-4 w-4" />
-                Projects ({currentMonthData.projects.length})
+              <TabsTrigger value="projects" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
+                <Briefcase className="h-3 w-3 md:h-4 md:w-4" />
+                <span className="hidden sm:inline">Projects ({currentMonthData.projects.length})</span>
+                <span className="sm:hidden">P({currentMonthData.projects.length})</span>
               </TabsTrigger>
             </TabsList>
 
             <TabsContent value="calendar" className="mt-6">
-              <div style={{ height: '600px' }}>
+              <div className="calendar-container" style={{ height: isMobile ? '400px' : '600px' }}>
                 <Calendar
                   localizer={localizer}
                   events={calendarEvents}
@@ -506,7 +529,8 @@ export default function UnifiedCalendar() {
                   showMultiDayTimes
                   step={30}
                   timeslots={2}
-                  views={['month', 'week', 'day', 'agenda']}
+                  views={isMobile ? ['month', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+                  className="responsive-calendar"
                   tooltipAccessor={(event: any) => {
                     const type = event.resource?.type || 'event';
                     const data = event.resource?.data || {};
