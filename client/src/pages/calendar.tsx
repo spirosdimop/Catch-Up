@@ -110,6 +110,10 @@ export default function CalendarPage() {
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState('calendar');
+  
+  // Debug logging
+  console.log('Calendar render - activeTab:', activeTab);
+  console.log('Calendar render - currentMonthData:', currentMonthData);
   const { toast } = useToast();
   
   // State for filters
@@ -412,43 +416,56 @@ export default function CalendarPage() {
 
   // Filter data by current displayed month
   const currentMonthData = useMemo(() => {
-    const monthStart = startOfMonth(currentDate);
-    const monthEnd = endOfMonth(currentDate);
-    
-    // Filter events for current month
-    const monthEvents = events ? (events as any[]).filter(event => {
-      const eventDate = new Date(event.startTime);
-      return eventDate >= monthStart && eventDate <= monthEnd;
-    }) : [];
-    
-    // Filter bookings for current month
-    const monthBookings = bookings ? (bookings as any[]).filter(booking => {
-      const bookingDate = new Date(booking.date);
-      return bookingDate >= monthStart && bookingDate <= monthEnd;
-    }) : [];
-    
-    // Filter tasks for current month (by deadline)
-    const monthTasks = tasks ? (tasks as any[]).filter(task => {
-      if (!task.deadline) return false;
-      const taskDate = new Date(task.deadline);
-      return taskDate >= monthStart && taskDate <= monthEnd;
-    }) : [];
-    
-    // Filter projects for current month (by start or end date)
-    const monthProjects = projects ? (projects as any[]).filter(project => {
-      const startDate = new Date(project.startDate);
-      const endDate = project.endDate ? new Date(project.endDate) : null;
-      return (startDate >= monthStart && startDate <= monthEnd) ||
-             (endDate && endDate >= monthStart && endDate <= monthEnd) ||
-             (startDate <= monthStart && (!endDate || endDate >= monthEnd));
-    }) : [];
-    
-    return {
-      events: monthEvents,
-      bookings: monthBookings,
-      tasks: monthTasks,
-      projects: monthProjects
-    };
+    try {
+      const monthStart = startOfMonth(currentDate);
+      const monthEnd = endOfMonth(currentDate);
+      
+      // Filter events for current month
+      const monthEvents = events && Array.isArray(events) ? events.filter((event: any) => {
+        if (!event.startTime) return false;
+        const eventDate = new Date(event.startTime);
+        return eventDate >= monthStart && eventDate <= monthEnd;
+      }) : [];
+      
+      // Filter bookings for current month
+      const monthBookings = bookings && Array.isArray(bookings) ? bookings.filter((booking: any) => {
+        if (!booking.date) return false;
+        const bookingDate = new Date(booking.date);
+        return bookingDate >= monthStart && bookingDate <= monthEnd;
+      }) : [];
+      
+      // Filter tasks for current month (by deadline)
+      const monthTasks = tasks && Array.isArray(tasks) ? tasks.filter((task: any) => {
+        if (!task.deadline) return false;
+        const taskDate = new Date(task.deadline);
+        return taskDate >= monthStart && taskDate <= monthEnd;
+      }) : [];
+      
+      // Filter projects for current month (by start or end date)
+      const monthProjects = projects && Array.isArray(projects) ? projects.filter((project: any) => {
+        if (!project.startDate) return false;
+        const startDate = new Date(project.startDate);
+        const endDate = project.endDate ? new Date(project.endDate) : null;
+        return (startDate >= monthStart && startDate <= monthEnd) ||
+               (endDate && endDate >= monthStart && endDate <= monthEnd) ||
+               (startDate <= monthStart && (!endDate || endDate >= monthEnd));
+      }) : [];
+      
+      return {
+        events: monthEvents,
+        bookings: monthBookings,
+        tasks: monthTasks,
+        projects: monthProjects
+      };
+    } catch (error) {
+      console.error('Error filtering calendar data:', error);
+      return {
+        events: [],
+        bookings: [],
+        tasks: [],
+        projects: []
+      };
+    }
   }, [currentDate, events, bookings, tasks, projects]);
 
   // Handle event selection
