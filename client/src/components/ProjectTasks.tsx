@@ -202,7 +202,7 @@ export default function ProjectTasks({ projectId }: ProjectTasksProps) {
         status: data.status,
         priority: data.priority,
         projectId: parseInt(data.projectId),
-        deadline: data.deadline ? new Date(data.deadline) : null,
+        deadline: data.deadline || null, // Send as string, backend will convert to Date
         completed: data.completed || false
       };
       
