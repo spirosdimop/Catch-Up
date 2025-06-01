@@ -22,6 +22,7 @@ import Calendar from "@/pages/calendar";
 import CalendarNew from "@/pages/calendar-new";
 import CalendarSimple from "@/pages/calendar-simple";
 import UnifiedCalendar from "@/pages/unified-calendar-clean";
+import CatchUpAISettings from "@/pages/catchup-settings";
 import Profile from "@/pages/profile";
 import ProfileRedesign from "@/pages/profile-redesign";
 import PublicProfile from "@/pages/public-profile";
@@ -137,6 +138,7 @@ function Router() {
         <Route path="/projects/:id" component={ProjectDetail} />
         <Route path="/ai-assistant" component={AIAssistant} />
         <Route path="/settings" component={Settings} />
+        <Route path="/catchup-settings" component={CatchUpAISettings} />
         <Route component={NotFound} />
       </Switch>
     </AppShell>
