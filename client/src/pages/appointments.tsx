@@ -14,13 +14,14 @@ import {
   ChevronRight,
   BellRing,
   List,
-  Grid3X3
+  Grid3X3,
+  ChevronLeft
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { getAllBookings, updateBooking, deleteBooking, addBooking, BookingRequest } from "@/lib/bookingStorage";
 import { useQuery } from "@tanstack/react-query";
-import { format, parseISO } from "date-fns";
+import { format, parseISO, startOfMonth, endOfMonth, eachDayOfInterval, isSameMonth, isToday, isSameDay } from "date-fns";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -31,9 +32,10 @@ import {
 
 export default function AppointmentsPage() {
   const [selectedTab, setSelectedTab] = useState<'pending' | 'accepted' | 'declined' | 'all'>('pending');
-  const [viewMode, setViewMode] = useState<'list' | 'grid'>('grid');
+  const [viewMode, setViewMode] = useState<'list' | 'grid' | 'calendar'>('grid');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
   const { toast } = useToast();
 
   // Use React Query to fetch bookings directly from API
@@ -144,6 +146,110 @@ export default function AppointmentsPage() {
     }).format(date);
   };
 
+  // Calendar helper functions
+  const monthStart = startOfMonth(currentDate);
+  const monthEnd = endOfMonth(currentDate);
+  const calendarDays = eachDayOfInterval({ start: monthStart, end: monthEnd });
+
+  const getBookingsForDate = (date: Date) => {
+    return filteredBookings.filter(booking => {
+      const bookingDate = new Date(booking.date);
+      return isSameDay(bookingDate, date);
+    });
+  };
+
+  const renderCalendarView = () => {
+    const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    
+    return (
+      <Card className="mt-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle className="flex items-center gap-2">
+              <Calendar size={20} />
+              Calendar View
+            </CardTitle>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1))}
+              >
+                <ChevronLeft size={16} />
+              </Button>
+              <span className="text-lg font-medium min-w-[140px] text-center">
+                {format(currentDate, 'MMMM yyyy')}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1))}
+              >
+                <ChevronRight size={16} />
+              </Button>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-7 gap-1 mb-4">
+            {weekDays.map(day => (
+              <div key={day} className="p-2 text-center text-sm font-medium text-gray-500">
+                {day}
+              </div>
+            ))}
+          </div>
+          
+          <div className="grid grid-cols-7 gap-1">
+            {Array.from({ length: monthStart.getDay() }).map((_, index) => (
+              <div key={`empty-${index}`} className="p-2 h-24"></div>
+            ))}
+            
+            {calendarDays.map(day => {
+              const dayBookings = getBookingsForDate(day);
+              const isCurrentMonth = isSameMonth(day, currentDate);
+              const isDayToday = isToday(day);
+              
+              return (
+                <div
+                  key={day.toISOString()}
+                  className={`p-2 h-24 border border-gray-200 ${
+                    !isCurrentMonth ? 'bg-gray-50 text-gray-400' : 'bg-white'
+                  } ${isDayToday ? 'bg-blue-50 border-blue-300' : ''}`}
+                >
+                  <div className={`text-sm font-medium mb-1 ${isDayToday ? 'text-blue-600' : ''}`}>
+                    {format(day, 'd')}
+                  </div>
+                  
+                  <div className="space-y-1">
+                    {dayBookings.slice(0, 2).map(booking => (
+                      <div
+                        key={booking.id}
+                        className={`text-xs p-1 rounded truncate ${
+                          booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                          booking.status === 'confirmed' || booking.status === 'accepted' ? 'bg-green-100 text-green-800' :
+                          'bg-red-100 text-red-800'
+                        }`}
+                        title={`${booking.clientName} - ${booking.time}`}
+                      >
+                        {booking.time} - {booking.clientName}
+                      </div>
+                    ))}
+                    
+                    {dayBookings.length > 2 && (
+                      <div className="text-xs text-gray-500">
+                        +{dayBookings.length - 2} more
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return (
     <div className="container mx-auto py-8">
       {/* Main dashboard header */}
@@ -170,6 +276,15 @@ export default function AppointmentsPage() {
           >
             <Grid3X3 className={`h-4 w-4 ${viewMode === 'grid' ? 'text-blue-600' : 'text-gray-500'}`} />
             Grid
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm"
+            className="flex items-center gap-1 border-gray-300"
+            onClick={() => setViewMode('calendar')}
+          >
+            <Calendar className={`h-4 w-4 ${viewMode === 'calendar' ? 'text-blue-600' : 'text-gray-500'}`} />
+            Calendar
           </Button>
           <Button 
             className="bg-blue-600 hover:bg-blue-700" 
@@ -388,22 +503,17 @@ export default function AppointmentsPage() {
 
       {/* All Bookings Section */}
       <div>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">
-            All {selectedTab !== 'all' ? selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1) : ''} Bookings
-          </h2>
-          <div className="flex items-center space-x-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-            >
-              <Calendar className="h-4 w-4 mr-1" /> 
-              Calendar View
-            </Button>
+        {viewMode !== 'calendar' && (
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">
+              All {selectedTab !== 'all' ? selectedTab.charAt(0).toUpperCase() + selectedTab.slice(1) : ''} Bookings
+            </h2>
           </div>
-        </div>
+        )}
         
-        {filteredBookings.length === 0 ? (
+        {viewMode === 'calendar' ? (
+          renderCalendarView()
+        ) : filteredBookings.length === 0 ? (
           <div className="bg-gray-50 p-8 text-center rounded-lg border border-gray-200">
             <CalendarClock className="w-12 h-12 mx-auto text-gray-400 mb-4" />
             <h3 className="text-xl font-medium mb-2">No {selectedTab} appointments</h3>
