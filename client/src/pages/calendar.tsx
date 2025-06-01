@@ -110,10 +110,6 @@ export default function CalendarPage() {
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState('calendar');
-  
-  // Debug logging
-  console.log('Calendar render - activeTab:', activeTab);
-  console.log('Calendar render - currentMonthData:', currentMonthData);
   const { toast } = useToast();
   
   // State for filters
@@ -660,29 +656,79 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="calendar" className="flex items-center gap-2">
+        <div className="w-full">
+          <div className="flex border-b border-border bg-muted p-1 rounded-lg">
+            <button
+              onClick={() => {
+                console.log('Calendar tab clicked');
+                setActiveTab('calendar');
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                activeTab === 'calendar' 
+                  ? 'bg-background text-foreground shadow-sm' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+              }`}
+            >
               <CalendarIcon className="h-4 w-4" />
               Calendar
-            </TabsTrigger>
-            <TabsTrigger value="events" className="flex items-center gap-2">
+            </button>
+            <button
+              onClick={() => {
+                console.log('Events tab clicked');
+                setActiveTab('events');
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                activeTab === 'events' 
+                  ? 'bg-background text-foreground shadow-sm' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+              }`}
+            >
               <Clock className="h-4 w-4" />
               Events ({currentMonthData.events.length})
-            </TabsTrigger>
-            <TabsTrigger value="bookings" className="flex items-center gap-2">
+            </button>
+            <button
+              onClick={() => {
+                console.log('Bookings tab clicked');
+                setActiveTab('bookings');
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                activeTab === 'bookings' 
+                  ? 'bg-background text-foreground shadow-sm' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+              }`}
+            >
               <Users className="h-4 w-4" />
               Bookings ({currentMonthData.bookings.length})
-            </TabsTrigger>
-            <TabsTrigger value="tasks" className="flex items-center gap-2">
+            </button>
+            <button
+              onClick={() => {
+                console.log('Tasks tab clicked');
+                setActiveTab('tasks');
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                activeTab === 'tasks' 
+                  ? 'bg-background text-foreground shadow-sm' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+              }`}
+            >
               <CheckSquare className="h-4 w-4" />
               Tasks ({currentMonthData.tasks.length})
-            </TabsTrigger>
-            <TabsTrigger value="projects" className="flex items-center gap-2">
+            </button>
+            <button
+              onClick={() => {
+                console.log('Projects tab clicked');
+                setActiveTab('projects');
+              }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-md transition-colors ${
+                activeTab === 'projects' 
+                  ? 'bg-background text-foreground shadow-sm' 
+                  : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
+              }`}
+            >
               <Briefcase className="h-4 w-4" />
               Projects ({currentMonthData.projects.length})
-            </TabsTrigger>
-          </TabsList>
+            </button>
+          </div>
 
           <div className="mt-6">
             <div className="mb-4 flex items-center justify-between">
@@ -714,7 +760,7 @@ export default function CalendarPage() {
               </div>
             </div>
 
-            <TabsContent value="calendar" className="mt-0">
+            {activeTab === 'calendar' && (
               <Card className="border rounded-lg shadow">
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
@@ -775,9 +821,9 @@ export default function CalendarPage() {
                   )}
                 </CardContent>
               </Card>
-            </TabsContent>
+            )}
 
-            <TabsContent value="events" className="mt-0">
+            {activeTab === 'events' && (
               <Card>
                 <CardHeader>
                   <CardTitle>Events for {format(currentDate, 'MMMM yyyy')}</CardTitle>
@@ -866,9 +912,9 @@ export default function CalendarPage() {
                   )}
                 </CardContent>
               </Card>
-            </TabsContent>
+            )}
 
-            <TabsContent value="bookings" className="mt-0">
+            {activeTab === 'bookings' && (
               <Card>
                 <CardHeader>
                   <CardTitle>Bookings for {format(currentDate, 'MMMM yyyy')}</CardTitle>
@@ -962,9 +1008,9 @@ export default function CalendarPage() {
                   )}
                 </CardContent>
               </Card>
-            </TabsContent>
+            )}
 
-            <TabsContent value="tasks" className="mt-0">
+            {activeTab === 'tasks' && (
               <Card>
                 <CardHeader>
                   <CardTitle>Tasks Due in {format(currentDate, 'MMMM yyyy')}</CardTitle>
@@ -1045,9 +1091,9 @@ export default function CalendarPage() {
                   )}
                 </CardContent>
               </Card>
-            </TabsContent>
+            )}
 
-            <TabsContent value="projects" className="mt-0">
+            {activeTab === 'projects' && (
               <Card>
                 <CardHeader>
                   <CardTitle>Projects Active in {format(currentDate, 'MMMM yyyy')}</CardTitle>
@@ -1131,9 +1177,9 @@ export default function CalendarPage() {
                   )}
                 </CardContent>
               </Card>
-            </TabsContent>
+            )}
           </div>
-        </Tabs>
+        </div>
       </div>
 
       {/* Event Dialog */}
