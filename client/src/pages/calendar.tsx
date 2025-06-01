@@ -603,28 +603,13 @@ export default function CalendarPage() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3">
-            <Tabs 
-              defaultValue="month" 
-              value={selectedView} 
-              onValueChange={setSelectedView}
-              className="w-[300px]"
-            >
-              <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="month">Month</TabsTrigger>
-                <TabsTrigger value="week">Week</TabsTrigger>
-                <TabsTrigger value="day">Day</TabsTrigger>
-              </TabsList>
-            </Tabs>
-            
             <div className="flex gap-2">
               <Button 
                 variant="outline"
                 onClick={() => setShowFilters(true)}
                 className="flex items-center gap-1"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-filter">
-                  <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
-                </svg>
+                <Filter className="h-4 w-4" />
                 Filter
                 {(filters.eventTypes.length > 0 || filters.clients.length > 0 || 
                  filters.projects.length > 0 || filters.onlyConfirmed) && (
@@ -714,7 +699,35 @@ export default function CalendarPage() {
 
             <TabsContent value="calendar" className="mt-0">
               <Card className="border rounded-lg shadow">
-                <CardContent className="p-4 overflow-hidden h-[calc(100vh-300px)]">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle>Calendar View</CardTitle>
+                    <div className="flex gap-1">
+                      <Button
+                        variant={selectedView === 'month' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSelectedView('month')}
+                      >
+                        Month
+                      </Button>
+                      <Button
+                        variant={selectedView === 'week' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSelectedView('week')}
+                      >
+                        Week
+                      </Button>
+                      <Button
+                        variant={selectedView === 'day' ? 'default' : 'outline'}
+                        size="sm"
+                        onClick={() => setSelectedView('day')}
+                      >
+                        Day
+                      </Button>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-4 overflow-hidden h-[calc(100vh-350px)]">
                   {eventsLoading ? (
                     <div className="flex justify-center items-center h-full">
                       <p>Loading calendar...</p>
