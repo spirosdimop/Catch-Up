@@ -6,9 +6,10 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, Clock, Users, Briefcase, CheckSquare, Filter, Plus } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Users, Briefcase, CheckSquare, Filter, Plus, ChevronDown } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 // Create localizer
@@ -264,45 +265,39 @@ export default function UnifiedCalendar() {
         </div>
       </div>
 
-      {/* Create New Item Buttons */}
+      {/* Create New Item Button */}
       <Card>
         <CardHeader>
           <CardTitle>Quick Actions</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Button
-              onClick={handleCreateBooking}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
-            >
-              <Plus size={16} />
-              New Booking
-            </Button>
-            
-            <Button
-              onClick={handleCreateTask}
-              className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700"
-            >
-              <Plus size={16} />
-              New Task
-            </Button>
-            
-            <Button
-              onClick={handleCreateProject}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
-            >
-              <Plus size={16} />
-              New Project
-            </Button>
-            
-            <Button
-              onClick={handleCreateEvent}
-              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
-            >
-              <Plus size={16} />
-              New Event
-            </Button>
-          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700">
+                <Plus size={16} />
+                Add New
+                <ChevronDown size={16} />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-48">
+              <DropdownMenuItem onClick={handleCreateBooking} className="flex items-center gap-2">
+                <CalendarIcon size={16} className="text-green-600" />
+                New Booking
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleCreateTask} className="flex items-center gap-2">
+                <CheckSquare size={16} className="text-amber-600" />
+                New Task
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleCreateProject} className="flex items-center gap-2">
+                <Briefcase size={16} className="text-blue-600" />
+                New Project
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleCreateEvent} className="flex items-center gap-2">
+                <Clock size={16} className="text-purple-600" />
+                New Event
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </CardContent>
       </Card>
 
