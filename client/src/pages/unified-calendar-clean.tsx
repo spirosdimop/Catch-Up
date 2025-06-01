@@ -29,7 +29,6 @@ const eventColors = {
   booking: '#10B981', // Green
   task: '#F59E0B', // Amber
   project: '#3B82F6', // Blue
-  invoice: '#EF4444', // Red
   event: '#8B5CF6', // Purple
 };
 
@@ -70,8 +69,6 @@ export default function UnifiedCalendar() {
     queryKey: ['/api/projects'],
     staleTime: 60000,
   });
-
-
 
   const { data: clients = [], isLoading: clientsLoading } = useQuery({
     queryKey: ['/api/clients'],
@@ -165,8 +162,6 @@ export default function UnifiedCalendar() {
       });
     }
 
-
-
     // Add calendar events
     if (filters.showEvents && events && Array.isArray(events)) {
       events.forEach((event: any) => {
@@ -217,6 +212,27 @@ export default function UnifiedCalendar() {
     }));
   };
 
+  // Create new item handlers
+  const handleCreateBooking = () => {
+    // Navigate to booking creation
+    window.location.href = '/appointments';
+  };
+
+  const handleCreateTask = () => {
+    // You can add task creation logic here
+    console.log('Create new task');
+  };
+
+  const handleCreateProject = () => {
+    // Navigate to project creation
+    window.location.href = '/projects';
+  };
+
+  const handleCreateEvent = () => {
+    // You can add event creation logic here
+    console.log('Create new event');
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -233,7 +249,7 @@ export default function UnifiedCalendar() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Unified Calendar</h1>
-          <p className="text-gray-600">All your bookings, tasks, projects, and deadlines in one view</p>
+          <p className="text-gray-600">All your bookings, tasks, projects, and events in one view</p>
         </div>
         
         <div className="flex items-center gap-4">
@@ -248,6 +264,48 @@ export default function UnifiedCalendar() {
         </div>
       </div>
 
+      {/* Create New Item Buttons */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <Button
+              onClick={handleCreateBooking}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700"
+            >
+              <Plus size={16} />
+              New Booking
+            </Button>
+            
+            <Button
+              onClick={handleCreateTask}
+              className="flex items-center gap-2 bg-amber-600 hover:bg-amber-700"
+            >
+              <Plus size={16} />
+              New Task
+            </Button>
+            
+            <Button
+              onClick={handleCreateProject}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus size={16} />
+              New Project
+            </Button>
+            
+            <Button
+              onClick={handleCreateEvent}
+              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700"
+            >
+              <Plus size={16} />
+              New Event
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Filters */}
       {showFilters && (
         <Card>
@@ -255,7 +313,7 @@ export default function UnifiedCalendar() {
             <CardTitle>Filter Calendar Items</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               <div className="flex items-center space-x-2">
                 <Checkbox
                   id="bookings"
@@ -294,18 +352,6 @@ export default function UnifiedCalendar() {
               
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="invoices"
-                  checked={filters.showInvoices}
-                  onCheckedChange={() => toggleFilter('showInvoices')}
-                />
-                <label htmlFor="invoices" className="flex items-center gap-2 text-sm">
-                  <div className="w-3 h-3 rounded" style={{ backgroundColor: eventColors.invoice }}></div>
-                  Invoices
-                </label>
-              </div>
-              
-              <div className="flex items-center space-x-2">
-                <Checkbox
                   id="events"
                   checked={filters.showEvents}
                   onCheckedChange={() => toggleFilter('showEvents')}
@@ -321,7 +367,7 @@ export default function UnifiedCalendar() {
       )}
 
       {/* Calendar Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-2">
@@ -353,18 +399,6 @@ export default function UnifiedCalendar() {
               <div>
                 <p className="text-sm text-gray-600">Projects</p>
                 <p className="text-lg font-semibold">{Array.isArray(projects) ? projects.length : 0}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center gap-2">
-              <DollarSign size={20} className="text-red-600" />
-              <div>
-                <p className="text-sm text-gray-600">Invoices</p>
-                <p className="text-lg font-semibold">{Array.isArray(invoices) ? invoices.length : 0}</p>
               </div>
             </div>
           </CardContent>
@@ -412,8 +446,6 @@ export default function UnifiedCalendar() {
                     return `Task: ${data.title}\nPriority: ${data.priority}\nStatus: ${data.status}`;
                   case 'project':
                     return `Project: ${data.name}\nStatus: ${data.status}\nClient: ${getClientName(data.clientId, Array.isArray(clients) ? clients : [])}`;
-                  case 'invoice':
-                    return `Invoice: ${data.invoiceNumber}\nAmount: €${data.amount}\nStatus: ${data.status}`;
                   default:
                     return event.title;
                 }

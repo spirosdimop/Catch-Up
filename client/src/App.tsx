@@ -21,7 +21,7 @@ import MessagesRedesign from "@/pages/messages-redesign";
 import Calendar from "@/pages/calendar";
 import CalendarNew from "@/pages/calendar-new";
 import CalendarSimple from "@/pages/calendar-simple";
-import UnifiedCalendar from "@/pages/unified-calendar";
+import UnifiedCalendar from "@/pages/unified-calendar-clean";
 import Profile from "@/pages/profile";
 import ProfileRedesign from "@/pages/profile-redesign";
 import PublicProfile from "@/pages/public-profile";
