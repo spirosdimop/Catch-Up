@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar';
-import { format, parseISO, startOfWeek, getDay, parse, add, endOfMonth, startOfDay, endOfDay } from 'date-fns';
+import { format, parseISO, startOfWeek, getDay, parse, add, endOfMonth, startOfDay, endOfDay, startOfMonth, isSameMonth } from 'date-fns';
 import { enUS } from 'date-fns/locale';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { queryClient } from '@/lib/queryClient';
@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Calendar as CalendarIcon, Clock, Users, Briefcase, DollarSign, CheckSquare, Filter } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Users, Briefcase, DollarSign, CheckSquare, Filter, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -108,6 +108,8 @@ export default function CalendarPage() {
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedSlot, setSelectedSlot] = useState<{ start: Date; end: Date } | null>(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [activeTab, setActiveTab] = useState('calendar');
   const { toast } = useToast();
   
   // State for filters
@@ -408,6 +410,47 @@ export default function CalendarPage() {
     });
   }, [events, filters]);
 
+  // Filter data by current displayed month
+  const currentMonthData = useMemo(() => {
+    const monthStart = startOfMonth(currentDate);
+    const monthEnd = endOfMonth(currentDate);
+    
+    // Filter events for current month
+    const monthEvents = events ? (events as any[]).filter(event => {
+      const eventDate = new Date(event.startTime);
+      return eventDate >= monthStart && eventDate <= monthEnd;
+    }) : [];
+    
+    // Filter bookings for current month
+    const monthBookings = bookings ? (bookings as any[]).filter(booking => {
+      const bookingDate = new Date(booking.date);
+      return bookingDate >= monthStart && bookingDate <= monthEnd;
+    }) : [];
+    
+    // Filter tasks for current month (by deadline)
+    const monthTasks = tasks ? (tasks as any[]).filter(task => {
+      if (!task.deadline) return false;
+      const taskDate = new Date(task.deadline);
+      return taskDate >= monthStart && taskDate <= monthEnd;
+    }) : [];
+    
+    // Filter projects for current month (by start or end date)
+    const monthProjects = projects ? (projects as any[]).filter(project => {
+      const startDate = new Date(project.startDate);
+      const endDate = project.endDate ? new Date(project.endDate) : null;
+      return (startDate >= monthStart && startDate <= monthEnd) ||
+             (endDate && endDate >= monthStart && endDate <= monthEnd) ||
+             (startDate <= monthStart && (!endDate || endDate >= monthEnd));
+    }) : [];
+    
+    return {
+      events: monthEvents,
+      bookings: monthBookings,
+      tasks: monthTasks,
+      projects: monthProjects
+    };
+  }, [currentDate, events, bookings, tasks, projects]);
+
   // Handle event selection
   const handleSelectEvent = useCallback((event: CalendarEvent) => {
     setSelectedEvent(event);
@@ -615,36 +658,286 @@ export default function CalendarPage() {
           </div>
         </div>
 
-        <Card className="border rounded-lg shadow">
-          <CardContent className="p-4 overflow-hidden h-[calc(100vh-200px)]">
-            {eventsLoading ? (
-              <div className="flex justify-center items-center h-full">
-                <p>Loading calendar...</p>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="calendar" className="flex items-center gap-2">
+              <CalendarIcon className="h-4 w-4" />
+              Calendar
+            </TabsTrigger>
+            <TabsTrigger value="events" className="flex items-center gap-2">
+              <Clock className="h-4 w-4" />
+              Events ({currentMonthData.events.length})
+            </TabsTrigger>
+            <TabsTrigger value="bookings" className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Bookings ({currentMonthData.bookings.length})
+            </TabsTrigger>
+            <TabsTrigger value="tasks" className="flex items-center gap-2">
+              <CheckSquare className="h-4 w-4" />
+              Tasks ({currentMonthData.tasks.length})
+            </TabsTrigger>
+            <TabsTrigger value="projects" className="flex items-center gap-2">
+              <Briefcase className="h-4 w-4" />
+              Projects ({currentMonthData.projects.length})
+            </TabsTrigger>
+          </TabsList>
+
+          <div className="mt-6">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-lg font-semibold">
+                {format(currentDate, 'MMMM yyyy')}
+              </h2>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentDate(add(currentDate, { months: -1 }))}
+                >
+                  ← Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentDate(new Date())}
+                >
+                  Today
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentDate(add(currentDate, { months: 1 }))}
+                >
+                  Next →
+                </Button>
               </div>
-            ) : eventsError ? (
-              <div className="flex justify-center items-center h-full">
-                <p>Error loading events. Please try again later.</p>
-              </div>
-            ) : (
-              <Calendar
-                localizer={localizer as any}
-                events={calendarEvents}
-                defaultView={Views.MONTH}
-                views={['month', 'week', 'day']}
-                view={selectedView as any}
-                onView={(view) => setSelectedView(view)}
-                selectable
-                onSelectEvent={handleSelectEvent}
-                onSelectSlot={handleSelectSlot}
-                eventPropGetter={eventPropGetter}
-                step={30}
-                showMultiDayTimes
-                popup
-                style={{ height: '100%' }}
-              />
-            )}
-          </CardContent>
-        </Card>
+            </div>
+
+            <TabsContent value="calendar" className="mt-0">
+              <Card className="border rounded-lg shadow">
+                <CardContent className="p-4 overflow-hidden h-[calc(100vh-300px)]">
+                  {eventsLoading ? (
+                    <div className="flex justify-center items-center h-full">
+                      <p>Loading calendar...</p>
+                    </div>
+                  ) : eventsError ? (
+                    <div className="flex justify-center items-center h-full">
+                      <p>Error loading events. Please try again later.</p>
+                    </div>
+                  ) : (
+                    <Calendar
+                      localizer={localizer as any}
+                      events={calendarEvents}
+                      defaultView={Views.MONTH}
+                      views={['month', 'week', 'day']}
+                      view={selectedView as any}
+                      onView={(view) => setSelectedView(view)}
+                      date={currentDate}
+                      onNavigate={(date) => setCurrentDate(date)}
+                      selectable
+                      onSelectEvent={handleSelectEvent}
+                      onSelectSlot={handleSelectSlot}
+                      eventPropGetter={eventPropGetter}
+                      step={30}
+                      showMultiDayTimes
+                      popup
+                      style={{ height: '100%' }}
+                    />
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="events" className="mt-0">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Events for {format(currentDate, 'MMMM yyyy')}</CardTitle>
+                  <CardDescription>
+                    {currentMonthData.events.length} events scheduled this month
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {currentMonthData.events.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">
+                      No events scheduled for this month
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {currentMonthData.events.map((event: any) => (
+                        <div
+                          key={event.id}
+                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 cursor-pointer"
+                          onClick={() => handleSelectEvent({
+                            ...event,
+                            start: new Date(event.startTime),
+                            end: new Date(event.endTime)
+                          })}
+                        >
+                          <div className="flex-1">
+                            <h3 className="font-medium">{event.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {format(new Date(event.startTime), 'MMM dd, yyyy • h:mm a')}
+                              {event.location && ` • ${event.location}`}
+                            </p>
+                            {event.description && (
+                              <p className="text-sm text-muted-foreground mt-1">{event.description}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={event.isConfirmed ? "default" : "secondary"}>
+                              {event.isConfirmed ? "Confirmed" : "Pending"}
+                            </Badge>
+                            <Badge variant="outline">{event.eventType}</Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="bookings" className="mt-0">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Bookings for {format(currentDate, 'MMMM yyyy')}</CardTitle>
+                  <CardDescription>
+                    {currentMonthData.bookings.length} bookings scheduled this month
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {currentMonthData.bookings.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">
+                      No bookings scheduled for this month
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {currentMonthData.bookings.map((booking: any) => (
+                        <div
+                          key={booking.id}
+                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+                        >
+                          <div className="flex-1">
+                            <h3 className="font-medium">{booking.clientName}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {format(new Date(booking.date), 'MMM dd, yyyy')} • {booking.time}
+                              {booking.service && ` • ${booking.service}`}
+                            </p>
+                            {booking.location && (
+                              <p className="text-sm text-muted-foreground mt-1">{booking.location}</p>
+                            )}
+                            {booking.notes && (
+                              <p className="text-sm text-muted-foreground mt-1">{booking.notes}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={booking.status === 'confirmed' ? "default" : booking.status === 'pending' ? "secondary" : "destructive"}>
+                              {booking.status}
+                            </Badge>
+                            {booking.phone && (
+                              <Badge variant="outline">{booking.phone}</Badge>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="tasks" className="mt-0">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Tasks Due in {format(currentDate, 'MMMM yyyy')}</CardTitle>
+                  <CardDescription>
+                    {currentMonthData.tasks.length} tasks due this month
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {currentMonthData.tasks.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">
+                      No tasks due this month
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {currentMonthData.tasks.map((task: any) => (
+                        <div
+                          key={task.id}
+                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+                        >
+                          <div className="flex-1">
+                            <h3 className="font-medium">{task.title}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Due: {format(new Date(task.deadline), 'MMM dd, yyyy')}
+                              {task.projectId && ` • Project ID: ${task.projectId}`}
+                            </p>
+                            {task.description && (
+                              <p className="text-sm text-muted-foreground mt-1">{task.description}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={task.completed ? "default" : "secondary"}>
+                              {task.completed ? "Completed" : "Pending"}
+                            </Badge>
+                            <Badge variant="outline">{task.status}</Badge>
+                            <Badge variant="outline">{task.priority}</Badge>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="projects" className="mt-0">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Projects Active in {format(currentDate, 'MMMM yyyy')}</CardTitle>
+                  <CardDescription>
+                    {currentMonthData.projects.length} projects active this month
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {currentMonthData.projects.length === 0 ? (
+                    <p className="text-muted-foreground text-center py-8">
+                      No projects active this month
+                    </p>
+                  ) : (
+                    <div className="space-y-4">
+                      {currentMonthData.projects.map((project: any) => (
+                        <div
+                          key={project.id}
+                          className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
+                        >
+                          <div className="flex-1">
+                            <h3 className="font-medium">{project.name}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              Start: {format(new Date(project.startDate), 'MMM dd, yyyy')}
+                              {project.endDate && ` • End: ${format(new Date(project.endDate), 'MMM dd, yyyy')}`}
+                              {project.clientId && ` • Client ID: ${project.clientId}`}
+                            </p>
+                            {project.description && (
+                              <p className="text-sm text-muted-foreground mt-1">{project.description}</p>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Badge variant={project.status === 'completed' ? "default" : project.status === 'in_progress' ? "secondary" : "outline"}>
+                              {project.status}
+                            </Badge>
+                            {project.budget && (
+                              <Badge variant="outline">${project.budget}</Badge>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </div>
+        </Tabs>
       </div>
 
       {/* Event Dialog */}
