@@ -21,6 +21,7 @@ import MessagesRedesign from "@/pages/messages-redesign";
 import Calendar from "@/pages/calendar";
 import CalendarNew from "@/pages/calendar-new";
 import CalendarSimple from "@/pages/calendar-simple";
+import UnifiedCalendar from "@/pages/unified-calendar";
 import Profile from "@/pages/profile";
 import ProfileRedesign from "@/pages/profile-redesign";
 import PublicProfile from "@/pages/public-profile";
@@ -126,7 +127,8 @@ function Router() {
         <Route path="/appointments" component={AppointmentsPage} />
         <Route path="/messages" component={MessagesRedesign} />
         <Route path="/messages-original" component={Messages} />
-        <Route path="/calendar" component={CalendarNew} />
+        <Route path="/calendar" component={UnifiedCalendar} />
+        <Route path="/calendar-new" component={CalendarNew} />
         <Route path="/calendar-original" component={Calendar} />
         <Route path="/calendar-simple" component={CalendarSimple} />
         <Route path="/profile" component={ProfileRedesign} />

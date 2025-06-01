@@ -89,7 +89,7 @@ export default function UnifiedCalendar() {
     const allEvents: any[] = [];
 
     // Add bookings
-    if (filters.showBookings && Array.isArray(bookings)) {
+    if (filters.showBookings && bookings && Array.isArray(bookings)) {
       bookings.forEach((booking: any) => {
         try {
           const bookingDate = new Date(booking.date);
@@ -118,7 +118,7 @@ export default function UnifiedCalendar() {
     }
 
     // Add tasks with deadlines
-    if (filters.showTasks && Array.isArray(tasks)) {
+    if (filters.showTasks && tasks && Array.isArray(tasks)) {
       tasks.forEach((task: any) => {
         if (task.deadline) {
           try {
@@ -143,7 +143,7 @@ export default function UnifiedCalendar() {
     }
 
     // Add project dates
-    if (filters.showProjects && Array.isArray(projects)) {
+    if (filters.showProjects && projects && Array.isArray(projects)) {
       projects.forEach((project: any) => {
         if (project.startDate) {
           try {
@@ -170,11 +170,11 @@ export default function UnifiedCalendar() {
     }
 
     // Add invoice due dates
-    if (filters.showInvoices && Array.isArray(invoices)) {
+    if (filters.showInvoices && invoices && Array.isArray(invoices)) {
       invoices.forEach((invoice: any) => {
         try {
           const dueDate = new Date(invoice.dueDate);
-          const clientName = getClientName(invoice.clientId, clients);
+          const clientName = getClientName(invoice.clientId, clients || []);
           
           allEvents.push({
             id: `invoice-${invoice.id}`,
@@ -195,7 +195,7 @@ export default function UnifiedCalendar() {
     }
 
     // Add calendar events
-    if (filters.showEvents && Array.isArray(events)) {
+    if (filters.showEvents && events && Array.isArray(events)) {
       events.forEach((event: any) => {
         try {
           allEvents.push({
