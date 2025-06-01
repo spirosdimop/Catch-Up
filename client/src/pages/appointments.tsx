@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { 
   Check, 
   X, 
@@ -15,7 +16,8 @@ import {
   BellRing,
   List,
   Grid3X3,
-  ChevronLeft
+  ChevronLeft,
+  Search
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
@@ -36,6 +38,7 @@ export default function AppointmentsPage() {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showFilter, setShowFilter] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
 
   // Use React Query to fetch bookings directly from API
@@ -127,13 +130,32 @@ export default function AppointmentsPage() {
     }
   };
 
-  // Filter bookings based on selected tab
+  // Filter bookings based on selected tab and search query
   const filteredBookings = bookings.filter(booking => {
-    if (selectedTab === 'all') return true;
-    if (selectedTab === 'pending') return booking.status === 'pending';
-    if (selectedTab === 'accepted') return booking.status === 'confirmed' || booking.status === 'accepted';
-    if (selectedTab === 'declined') return booking.status === 'canceled' || booking.status === 'declined';
-    return booking.status === selectedTab;
+    // Filter by status
+    let statusMatch = true;
+    if (selectedTab !== 'all') {
+      if (selectedTab === 'pending') statusMatch = booking.status === 'pending';
+      else if (selectedTab === 'accepted') statusMatch = booking.status === 'confirmed' || booking.status === 'accepted';
+      else if (selectedTab === 'declined') statusMatch = booking.status === 'canceled' || booking.status === 'declined';
+      else statusMatch = booking.status === selectedTab;
+    }
+
+    // Filter by search query
+    let searchMatch = true;
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      searchMatch = 
+        (booking.clientName && booking.clientName.toLowerCase().includes(query)) ||
+        (booking.clientPhone && booking.clientPhone.toLowerCase().includes(query)) ||
+        (booking.serviceName && booking.serviceName.toLowerCase().includes(query)) ||
+        (booking.location && booking.location.toLowerCase().includes(query)) ||
+        (booking.notes && booking.notes.toLowerCase().includes(query)) ||
+        booking.date.includes(query) ||
+        booking.time.includes(query);
+    }
+
+    return statusMatch && searchMatch;
   });
 
   // Format date for display
@@ -259,6 +281,16 @@ export default function AppointmentsPage() {
           <p className="text-gray-600 mt-1">Manage your appointments and booking requests</p>
         </div>
         <div className="flex items-center space-x-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <Input
+              type="text"
+              placeholder="Search appointments..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 w-64"
+            />
+          </div>
           <Button 
             variant="outline" 
             size="sm"
