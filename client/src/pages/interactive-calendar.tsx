@@ -589,7 +589,7 @@ function EditFormComponent({ itemType, initialData, clients, projects, onSave, o
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">No Client</SelectItem>
+                        <SelectItem value="none">No Client</SelectItem>
                         {clients.map((client: any) => (
                           <SelectItem key={client.id} value={client.id.toString()}>
                             {client.name}
