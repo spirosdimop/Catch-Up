@@ -208,20 +208,23 @@ export function Header({ onMenuToggle }: HeaderProps) {
             </Badge>
             
             <div className="relative">
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="relative"
-                onClick={() => {
+              <button 
+                className="relative p-2 text-gray-400 hover:text-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 rounded-md"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
                   console.log('Notification button clicked, current state:', showNotifications);
                   setShowNotifications(!showNotifications);
                 }}
+                type="button"
               >
-                <Bell className="h-5 w-5 text-gray-400" />
+                <Bell className="h-5 w-5" />
                 {notificationCount > 0 && (
-                  <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-amber-500"></span>
+                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                    {notificationCount}
+                  </span>
                 )}
-              </Button>
+              </button>
               
               {showNotifications && (
                 <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-md shadow-lg border border-gray-200 z-50">
