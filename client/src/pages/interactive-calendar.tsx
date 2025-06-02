@@ -76,6 +76,511 @@ const eventColors = {
   event: '#8B5CF6', // Purple
 };
 
+// Edit Form Component
+interface EditFormProps {
+  itemType: string;
+  initialData?: any;
+  clients: any[];
+  onSave: (data: any) => void;
+  onCancel: () => void;
+}
+
+function EditFormComponent({ itemType, initialData, clients, onSave, onCancel }: EditFormProps) {
+  const getFormSchema = () => {
+    switch (itemType) {
+      case 'event':
+        return eventFormSchema;
+      case 'booking':
+        return bookingFormSchema;
+      case 'task':
+        return taskFormSchema;
+      case 'project':
+        return projectFormSchema;
+      default:
+        return eventFormSchema;
+    }
+  };
+
+  const getDefaultValues = () => {
+    if (initialData) {
+      switch (itemType) {
+        case 'event':
+          return {
+            title: initialData.title || '',
+            description: initialData.description || '',
+            startTime: initialData.startTime ? format(new Date(initialData.startTime), "yyyy-MM-dd'T'HH:mm") : '',
+            endTime: initialData.endTime ? format(new Date(initialData.endTime), "yyyy-MM-dd'T'HH:mm") : '',
+            location: initialData.location || '',
+          };
+        case 'booking':
+          return {
+            clientName: initialData.clientName || '',
+            serviceName: initialData.serviceName || '',
+            date: initialData.date ? format(new Date(initialData.date), 'yyyy-MM-dd') : '',
+            time: initialData.time || '',
+            duration: initialData.duration || 60,
+          };
+        case 'task':
+          return {
+            title: initialData.title || '',
+            description: initialData.description || '',
+            deadline: initialData.deadline ? format(new Date(initialData.deadline), 'yyyy-MM-dd') : '',
+            priority: initialData.priority || '',
+            status: initialData.status || '',
+          };
+        case 'project':
+          return {
+            name: initialData.name || '',
+            description: initialData.description || '',
+            startDate: initialData.startDate ? format(new Date(initialData.startDate), 'yyyy-MM-dd') : '',
+            endDate: initialData.endDate ? format(new Date(initialData.endDate), 'yyyy-MM-dd') : '',
+            status: initialData.status || '',
+            clientId: initialData.clientId || undefined,
+          };
+        default:
+          return {};
+      }
+    }
+
+    // Default values for new items
+    switch (itemType) {
+      case 'event':
+        return { title: '', description: '', startTime: '', endTime: '', location: '' };
+      case 'booking':
+        return { clientName: '', serviceName: '', date: '', time: '', duration: 60 };
+      case 'task':
+        return { title: '', description: '', deadline: '', priority: '', status: '' };
+      case 'project':
+        return { name: '', description: '', startDate: '', endDate: '', status: '', clientId: undefined };
+      default:
+        return {};
+    }
+  };
+
+  const form = useForm({
+    resolver: zodResolver(getFormSchema()),
+    defaultValues: getDefaultValues() as any,
+  });
+
+  const handleSubmit = (data: any) => {
+    const formattedData = { ...data };
+    
+    // Add ID if editing existing item
+    if (initialData?.id) {
+      formattedData.id = initialData.id;
+    }
+
+    // Format data based on item type
+    switch (itemType) {
+      case 'event':
+        formattedData.startTime = new Date(data.startTime).toISOString();
+        formattedData.endTime = new Date(data.endTime).toISOString();
+        break;
+      case 'booking':
+        formattedData.date = new Date(data.date).toISOString().split('T')[0];
+        formattedData.duration = parseInt(data.duration);
+        break;
+      case 'task':
+        formattedData.deadline = new Date(data.deadline).toISOString();
+        break;
+      case 'project':
+        formattedData.startDate = new Date(data.startDate).toISOString();
+        if (data.endDate) {
+          formattedData.endDate = new Date(data.endDate).toISOString();
+        }
+        if (data.clientId && data.clientId !== '') {
+          formattedData.clientId = parseInt(data.clientId);
+        }
+        break;
+    }
+
+    onSave(formattedData);
+  };
+
+  return (
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+        {itemType === 'event' && (
+          <>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Event Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter event title" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Enter event description" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="startTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Time</FormLabel>
+                    <FormControl>
+                      <Input type="datetime-local" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="endTime"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Time</FormLabel>
+                    <FormControl>
+                      <Input type="datetime-local" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter location" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
+
+        {itemType === 'booking' && (
+          <>
+            <FormField
+              control={form.control}
+              name="clientName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Client Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter client name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="serviceName"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Service Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter service name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="date"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="time"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Time</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="duration"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Duration (minutes)</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="number" 
+                      placeholder="60" 
+                      {...field}
+                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
+        )}
+
+        {itemType === 'task' && (
+          <>
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Task Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter task title" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Enter task description" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="deadline"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Deadline</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Priority</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select priority" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="low">Low</SelectItem>
+                        <SelectItem value="medium">Medium</SelectItem>
+                        <SelectItem value="high">High</SelectItem>
+                        <SelectItem value="urgent">Urgent</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="todo">To Do</SelectItem>
+                        <SelectItem value="in-progress">In Progress</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </>
+        )}
+
+        {itemType === 'project' && (
+          <>
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter project name" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Enter project description" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="startDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Start Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="endDate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>End Date</FormLabel>
+                    <FormControl>
+                      <Input type="date" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Status</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="planning">Planning</SelectItem>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="on-hold">On Hold</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="clientId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Client</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value ? field.value.toString() : ""}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select client" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">No Client</SelectItem>
+                        {clients.map((client: any) => (
+                          <SelectItem key={client.id} value={client.id.toString()}>
+                            {client.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </>
+        )}
+
+        <div className="flex gap-2 justify-end pt-4">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit">
+            {initialData?.id ? 'Update' : 'Create'} {itemType}
+          </Button>
+        </div>
+      </form>
+    </Form>
+  );
+}
+
 export default function InteractiveCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedView, setSelectedView] = useState('month');
@@ -622,16 +1127,40 @@ export default function InteractiveCalendar() {
             )}
             
             {editMode && (
-              <div className="text-center py-8">
-                <p className="text-gray-600">Edit form will be implemented here based on the item type</p>
-                <Button
-                  variant="outline"
-                  onClick={() => setEditMode(false)}
-                  className="mt-4"
-                >
-                  Cancel Edit
-                </Button>
-              </div>
+              <EditFormComponent
+                itemType={itemType}
+                initialData={selectedItem}
+                clients={Array.isArray(clients) ? clients : []}
+                onSave={(data) => {
+                  if (selectedItem?.id) {
+                    // Update existing item
+                    updateMutations[itemType as keyof typeof updateMutations].mutate(data);
+                  } else {
+                    // Create new item
+                    switch (itemType) {
+                      case 'event':
+                        createEventMutation.mutate(data);
+                        break;
+                      case 'booking':
+                        createBookingMutation.mutate(data);
+                        break;
+                      case 'task':
+                        createTaskMutation.mutate(data);
+                        break;
+                      case 'project':
+                        createProjectMutation.mutate(data);
+                        break;
+                    }
+                  }
+                }}
+                onCancel={() => {
+                  setEditMode(false);
+                  if (!selectedItem?.id) {
+                    setShowDetailDialog(false);
+                    setShowAddDialog(false);
+                  }
+                }}
+              />
             )}
           </div>
         </DialogContent>
