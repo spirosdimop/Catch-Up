@@ -55,70 +55,121 @@ export function Header({ onMenuToggle }: HeaderProps) {
   // Calculate notifications
   const notifications: Array<{
     id: string;
-    type: string;
+    type: 'urgent' | 'reminder' | 'info' | 'task';
+    category: string;
     title: string;
     description: string;
     time: string;
     icon: any;
+    priority: 'high' | 'medium' | 'low';
   }> = [];
   const now = new Date();
 
-  // Add upcoming events (today and tomorrow)
-  if (Array.isArray(events)) {
-    events.forEach((event: any) => {
-      if (event.startDate) {
-        const eventDate = parseISO(event.startDate);
-        if (isToday(eventDate) || isTomorrow(eventDate)) {
-          notifications.push({
-            id: `event-${event.id}`,
-            type: 'event',
-            title: event.title,
-            description: isToday(eventDate) ? 'Today' : 'Tomorrow',
-            time: format(eventDate, 'h:mm a'),
-            icon: Calendar
-          });
-        }
-      }
-    });
-  }
-
-  // Add upcoming bookings (today and tomorrow)
-  if (Array.isArray(bookings)) {
-    bookings.forEach((booking: any) => {
-      if (booking.date) {
-        const bookingDate = parseISO(booking.date);
-        if (isToday(bookingDate) || isTomorrow(bookingDate)) {
-          notifications.push({
-            id: `booking-${booking.id}`,
-            type: 'booking',
-            title: `Client appointment`,
-            description: `${isToday(bookingDate) ? 'Today' : 'Tomorrow'} at ${booking.time}`,
-            time: booking.time,
-            icon: Calendar
-          });
-        }
-      }
-    });
-  }
-
-  // Add overdue tasks
+  // Add overdue tasks (HIGH PRIORITY)
   if (Array.isArray(tasks)) {
     tasks.forEach((task: any) => {
       if (task.deadline && task.status !== 'completed') {
         const deadline = parseISO(task.deadline);
         if (isPast(deadline)) {
           notifications.push({
-            id: `task-${task.id}`,
-            type: 'overdue',
-            title: task.title,
-            description: `Overdue since ${format(deadline, 'MMM dd')}`,
+            id: `task-overdue-${task.id}`,
+            type: 'urgent',
+            category: 'Tasks',
+            title: `Overdue: ${task.title}`,
+            description: `Past due since ${format(deadline, 'MMM dd')}`,
             time: '',
-            icon: AlertTriangle
+            icon: AlertTriangle,
+            priority: 'high'
           });
         }
       }
     });
   }
+
+  // Add today's events and meetings (MEDIUM PRIORITY)
+  if (Array.isArray(events)) {
+    events.forEach((event: any) => {
+      if (event.startDate) {
+        const eventDate = parseISO(event.startDate);
+        if (isToday(eventDate)) {
+          notifications.push({
+            id: `event-today-${event.id}`,
+            type: 'reminder',
+            category: 'Calendar',
+            title: `Today: ${event.title}`,
+            description: `Scheduled for ${format(eventDate, 'h:mm a')}`,
+            time: format(eventDate, 'h:mm a'),
+            icon: Calendar,
+            priority: 'medium'
+          });
+        }
+      }
+    });
+  }
+
+  // Add today's client appointments (HIGH PRIORITY)
+  if (Array.isArray(bookings)) {
+    bookings.forEach((booking: any) => {
+      if (booking.date) {
+        const bookingDate = parseISO(booking.date);
+        if (isToday(bookingDate)) {
+          notifications.push({
+            id: `booking-today-${booking.id}`,
+            type: 'reminder',
+            category: 'Clients',
+            title: 'Client appointment today',
+            description: `Meeting scheduled at ${booking.time}`,
+            time: booking.time,
+            icon: Clock,
+            priority: 'high'
+          });
+        }
+      }
+    });
+  }
+
+  // Add upcoming deadlines (within next 3 days) (MEDIUM PRIORITY)
+  if (Array.isArray(tasks)) {
+    tasks.forEach((task: any) => {
+      if (task.deadline && task.status !== 'completed') {
+        const deadline = parseISO(task.deadline);
+        const daysUntil = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        if (daysUntil > 0 && daysUntil <= 3) {
+          notifications.push({
+            id: `task-deadline-${task.id}`,
+            type: 'reminder',
+            category: 'Tasks',
+            title: `Due ${daysUntil === 1 ? 'tomorrow' : `in ${daysUntil} days`}: ${task.title}`,
+            description: `Deadline: ${format(deadline, 'MMM dd')}`,
+            time: '',
+            icon: Clock,
+            priority: 'medium'
+          });
+        }
+      }
+    });
+  }
+
+  // Add system notifications (placeholder for future features)
+  const systemNotifications = [
+    {
+      id: 'system-welcome',
+      type: 'info' as const,
+      category: 'System',
+      title: 'Welcome to FreelanceFlow',
+      description: 'Complete your profile setup for better recommendations',
+      time: '',
+      icon: Bot,
+      priority: 'low' as const
+    }
+  ];
+
+  // Add system notifications to the list
+  notifications.push(...systemNotifications);
+
+  // Sort notifications by priority (high, medium, low)
+  const priorityOrder = { high: 0, medium: 1, low: 2 };
+  notifications.sort((a, b) => priorityOrder[a.priority] - priorityOrder[b.priority]);
 
   const notificationCount = notifications.length;
 
@@ -184,21 +235,47 @@ export function Header({ onMenuToggle }: HeaderProps) {
                     {notifications.length === 0 ? (
                       <div className="flex flex-col items-center py-8 text-center">
                         <Bell className="h-8 w-8 text-gray-300 mb-2" />
-                        <span className="text-sm text-gray-500">No notifications</span>
+                        <span className="text-sm text-gray-500">All caught up!</span>
+                        <span className="text-xs text-gray-400">No notifications right now</span>
                       </div>
                     ) : (
                       notifications.map((notification) => {
                         const IconComponent = notification.icon;
+                        const getPriorityColor = (priority: string, type: string) => {
+                          if (type === 'urgent') return 'text-red-500';
+                          if (priority === 'high') return 'text-orange-500';
+                          if (priority === 'medium') return 'text-blue-500';
+                          return 'text-gray-500';
+                        };
+                        
+                        const getBorderColor = (priority: string, type: string) => {
+                          if (type === 'urgent') return 'border-l-red-500';
+                          if (priority === 'high') return 'border-l-orange-500';
+                          if (priority === 'medium') return 'border-l-blue-500';
+                          return 'border-l-gray-300';
+                        };
+
                         return (
-                          <div key={notification.id} className="p-3 border-b border-gray-50 hover:bg-gray-50">
+                          <div 
+                            key={notification.id} 
+                            className={`p-3 border-b border-gray-50 hover:bg-gray-50 border-l-2 ${getBorderColor(notification.priority, notification.type)}`}
+                          >
                             <div className="flex items-start gap-3 w-full">
-                              <IconComponent className={`h-4 w-4 mt-0.5 ${
-                                notification.type === 'overdue' ? 'text-red-500' : 'text-blue-500'
-                              }`} />
+                              <IconComponent className={`h-4 w-4 mt-0.5 ${getPriorityColor(notification.priority, notification.type)}`} />
                               <div className="flex-1 min-w-0">
-                                <span className="font-medium text-sm block truncate text-gray-900">
-                                  {notification.title}
-                                </span>
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="font-medium text-sm block truncate text-gray-900">
+                                    {notification.title}
+                                  </span>
+                                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${
+                                    notification.type === 'urgent' ? 'bg-red-100 text-red-700' :
+                                    notification.priority === 'high' ? 'bg-orange-100 text-orange-700' :
+                                    notification.priority === 'medium' ? 'bg-blue-100 text-blue-700' :
+                                    'bg-gray-100 text-gray-600'
+                                  }`}>
+                                    {notification.category}
+                                  </span>
+                                </div>
                                 <span className="text-xs text-gray-500 block">
                                   {notification.description}
                                   {notification.time && ` • ${notification.time}`}
