@@ -1,15 +1,99 @@
-import { useState, useMemo } from 'react';
-import { format, startOfMonth, endOfMonth, isWithinInterval, add } from 'date-fns';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useMemo, useEffect } from 'react';
+import { Calendar, dateFnsLocalizer } from 'react-big-calendar';
+import { format, parseISO, startOfWeek, getDay, parse, add, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
+import { enUS } from 'date-fns/locale';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { queryClient } from '@/lib/queryClient';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, Clock, Users, Briefcase, CheckSquare } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Calendar as CalendarIcon, Clock, Users, Briefcase, CheckSquare, Filter, Search, Plus, Edit, Eye } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
+import 'react-big-calendar/lib/css/react-big-calendar.css';
+
+// Create localizer for react-big-calendar
+const locales = {
+  'en-US': enUS,
+};
+
+const localizer = dateFnsLocalizer({
+  format,
+  parse,
+  startOfWeek,
+  getDay,
+  locales,
+});
+
+// Form schemas
+const eventFormSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().optional(),
+  startTime: z.string().min(1, 'Start time is required'),
+  endTime: z.string().min(1, 'End time is required'),
+  location: z.string().optional(),
+});
+
+const bookingFormSchema = z.object({
+  clientName: z.string().min(1, 'Client name is required'),
+  serviceName: z.string().min(1, 'Service name is required'),
+  date: z.string().min(1, 'Date is required'),
+  time: z.string().min(1, 'Time is required'),
+  duration: z.number().min(1, 'Duration is required'),
+});
+
+const taskFormSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  description: z.string().optional(),
+  deadline: z.string().min(1, 'Deadline is required'),
+  priority: z.string().optional(),
+  status: z.string().optional(),
+});
+
+const projectFormSchema = z.object({
+  name: z.string().min(1, 'Project name is required'),
+  description: z.string().optional(),
+  startDate: z.string().min(1, 'Start date is required'),
+  endDate: z.string().optional(),
+  status: z.string().optional(),
+  clientId: z.number().optional(),
+});
+
+// Color scheme for different item types
+const eventColors = {
+  booking: '#10B981', // Green
+  task: '#F59E0B', // Amber
+  project: '#3B82F6', // Blue
+  event: '#8B5CF6', // Purple
+};
 
 export default function SimpleCalendar() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [activeTab, setActiveTab] = useState('events');
+  const [selectedView, setSelectedView] = useState('month');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
+  const [showAddDialog, setShowAddDialog] = useState(false);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [itemType, setItemType] = useState('');
+  const [editMode, setEditMode] = useState(false);
+  const [filters, setFilters] = useState({
+    showBookings: true,
+    showTasks: true,
+    showProjects: true,
+    showEvents: true,
+  });
+
+  const { toast } = useToast();
 
   // Fetch all data sources
   const { data: events = [], isLoading: eventsLoading } = useQuery({
