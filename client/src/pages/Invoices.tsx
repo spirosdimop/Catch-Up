@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import InvoiceForm from "@/components/InvoiceForm";
 import {
   Table,
@@ -280,6 +280,9 @@ export default function Invoices() {
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>Create New Invoice</DialogTitle>
+            <DialogDescription>
+              Create a new invoice for your client. Fill in the project details and add line items for services rendered.
+            </DialogDescription>
           </DialogHeader>
           <InvoiceForm
             clients={clients || []}
@@ -295,6 +298,9 @@ export default function Invoices() {
         <DialogContent className="sm:max-w-xl">
           <DialogHeader>
             <DialogTitle>Edit Invoice</DialogTitle>
+            <DialogDescription>
+              Update the invoice details, line items, and status. Changes will be saved automatically.
+            </DialogDescription>
           </DialogHeader>
           {selectedInvoice && (
             <InvoiceForm
