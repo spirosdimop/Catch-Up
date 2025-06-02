@@ -477,8 +477,8 @@ function EditFormComponent({ itemType, initialData, clients, projects, onSave, o
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="to-do">To Do</SelectItem>
-                        <SelectItem value="in-progress">In Progress</SelectItem>
+                        <SelectItem value="to_do">To Do</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
                         <SelectItem value="review">Review</SelectItem>
                         <SelectItem value="completed">Completed</SelectItem>
                       </SelectContent>
