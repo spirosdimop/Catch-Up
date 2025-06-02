@@ -57,6 +57,7 @@ const taskFormSchema = z.object({
   deadline: z.string().min(1, 'Deadline is required'),
   priority: z.string().optional(),
   status: z.string().optional(),
+  projectId: z.number().min(1, 'Project is required'),
 });
 
 const projectFormSchema = z.object({
@@ -407,6 +408,31 @@ function EditFormComponent({ itemType, initialData, clients, onSave, onCancel }:
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="projectId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Project</FormLabel>
+                  <Select onValueChange={(value) => field.onChange(parseInt(value))} defaultValue={field.value?.toString()}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select project" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {Array.isArray(projects) && projects.map((project: any) => (
+                        <SelectItem key={project.id} value={project.id.toString()}>
+                          {project.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
