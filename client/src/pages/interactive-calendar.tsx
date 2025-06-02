@@ -944,6 +944,9 @@ export default function InteractiveCalendar() {
             <DialogContent className="max-w-md">
               <DialogHeader>
                 <DialogTitle>Add New Item</DialogTitle>
+                <DialogDescription>
+                  Choose what type of item you'd like to add to your calendar.
+                </DialogDescription>
               </DialogHeader>
               <div className="grid grid-cols-2 gap-4 p-4">
                 <Button
@@ -1092,6 +1095,9 @@ export default function InteractiveCalendar() {
             <DialogTitle>
               {editMode ? `Edit ${itemType}` : `${itemType} Details`}
             </DialogTitle>
+            <DialogDescription>
+              {editMode ? `Update the ${itemType} information below.` : `View detailed information about this ${itemType}.`}
+            </DialogDescription>
           </DialogHeader>
           <div className="p-4">
             {selectedItem && !editMode && (

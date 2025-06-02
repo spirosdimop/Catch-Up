@@ -185,6 +185,9 @@ export default function TaskList({ tasks }: TaskListProps) {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Add New Task</DialogTitle>
+            <DialogDescription>
+              Create a new task and assign it to a project. Fill in the details below.
+            </DialogDescription>
           </DialogHeader>
           <TaskForm
             projects={projects || []}
