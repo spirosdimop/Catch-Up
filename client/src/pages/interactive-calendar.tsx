@@ -192,6 +192,7 @@ function EditFormComponent({ itemType, initialData, clients, onSave, onCancel }:
         if (data.priority) {
           formattedData.priority = data.priority.toLowerCase();
         }
+        console.log('Task form data before send:', formattedData);
         break;
       case 'project':
         formattedData.startDate = new Date(data.startDate).toISOString();
@@ -871,7 +872,8 @@ export default function InteractiveCalendar() {
         setEditMode(false);
         setShowDetailDialog(false);
       },
-      onError: () => {
+      onError: (error: any) => {
+        console.error('Task update error:', error);
         toast({ title: 'Failed to update task', variant: 'destructive' });
       },
     }),
