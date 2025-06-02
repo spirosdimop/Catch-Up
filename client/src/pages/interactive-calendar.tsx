@@ -831,35 +831,51 @@ export default function InteractiveCalendar() {
 
   const updateMutations = {
     event: useMutation({
-      mutationFn: (data: any) => apiRequest(`/api/events/${data.id}`, 'PUT', data),
+      mutationFn: (data: any) => apiRequest(`/api/events/${data.id}`, 'PATCH', data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['/api/events'] });
         toast({ title: 'Event updated successfully!' });
+        setEditMode(false);
         setShowDetailDialog(false);
+      },
+      onError: () => {
+        toast({ title: 'Failed to update event', variant: 'destructive' });
       },
     }),
     booking: useMutation({
-      mutationFn: (data: any) => apiRequest(`/api/bookings/${data.id}`, 'PUT', data),
+      mutationFn: (data: any) => apiRequest(`/api/bookings/${data.id}`, 'PATCH', data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['/api/bookings'] });
         toast({ title: 'Booking updated successfully!' });
+        setEditMode(false);
         setShowDetailDialog(false);
+      },
+      onError: () => {
+        toast({ title: 'Failed to update booking', variant: 'destructive' });
       },
     }),
     task: useMutation({
-      mutationFn: (data: any) => apiRequest(`/api/tasks/${data.id}`, 'PUT', data),
+      mutationFn: (data: any) => apiRequest(`/api/tasks/${data.id}`, 'PATCH', data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
         toast({ title: 'Task updated successfully!' });
+        setEditMode(false);
         setShowDetailDialog(false);
+      },
+      onError: () => {
+        toast({ title: 'Failed to update task', variant: 'destructive' });
       },
     }),
     project: useMutation({
-      mutationFn: (data: any) => apiRequest(`/api/projects/${data.id}`, 'PUT', data),
+      mutationFn: (data: any) => apiRequest(`/api/projects/${data.id}`, 'PATCH', data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
         toast({ title: 'Project updated successfully!' });
+        setEditMode(false);
         setShowDetailDialog(false);
+      },
+      onError: () => {
+        toast({ title: 'Failed to update project', variant: 'destructive' });
       },
     }),
   };
