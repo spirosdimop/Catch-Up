@@ -181,7 +181,17 @@ function EditFormComponent({ itemType, initialData, clients, onSave, onCancel }:
         formattedData.duration = parseInt(data.duration);
         break;
       case 'task':
-        formattedData.deadline = new Date(data.deadline).toISOString();
+        if (data.deadline) {
+          formattedData.deadline = new Date(data.deadline).toISOString();
+        }
+        // Status values already match backend enum values
+        if (data.status) {
+          formattedData.status = data.status;
+        }
+        // Map frontend priority values to backend enum values
+        if (data.priority) {
+          formattedData.priority = data.priority.toLowerCase();
+        }
         break;
       case 'project':
         formattedData.startDate = new Date(data.startDate).toISOString();
@@ -439,10 +449,10 @@ function EditFormComponent({ itemType, initialData, clients, onSave, onCancel }:
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="todo">To Do</SelectItem>
+                        <SelectItem value="to-do">To Do</SelectItem>
                         <SelectItem value="in-progress">In Progress</SelectItem>
+                        <SelectItem value="review">Review</SelectItem>
                         <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -527,11 +537,10 @@ function EditFormComponent({ itemType, initialData, clients, onSave, onCancel }:
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="planning">Planning</SelectItem>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="on-hold">On Hold</SelectItem>
+                        <SelectItem value="not_started">Not Started</SelectItem>
+                        <SelectItem value="in_progress">In Progress</SelectItem>
+                        <SelectItem value="on_hold">On Hold</SelectItem>
                         <SelectItem value="completed">Completed</SelectItem>
-                        <SelectItem value="cancelled">Cancelled</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
