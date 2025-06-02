@@ -29,6 +29,7 @@ type HeaderProps = {
 };
 
 export function Header({ onMenuToggle }: HeaderProps) {
+  const [showNotifications, setShowNotifications] = useState(false);
 
   // Get current language from app settings
   const { settings } = useAppSettings();
@@ -155,68 +156,84 @@ export function Header({ onMenuToggle }: HeaderProps) {
               {currentLanguageDisplay}
             </Badge>
             
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="relative">
-                  <Bell className="h-5 w-5 text-gray-400" />
-                  {notificationCount > 0 && (
-                    <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-amber-500"></span>
-                  )}
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-80">
-                <DropdownMenuLabel className="flex items-center justify-between">
-                  Notifications
-                  {notificationCount > 0 && (
-                    <Badge variant="secondary" className="ml-2">
-                      {notificationCount}
-                    </Badge>
-                  )}
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                
-                {notifications.length === 0 ? (
-                  <DropdownMenuItem disabled>
-                    <div className="flex flex-col items-center py-4 text-center">
-                      <Bell className="h-8 w-8 text-gray-300 mb-2" />
-                      <span className="text-sm text-muted-foreground">No notifications</span>
-                    </div>
-                  </DropdownMenuItem>
-                ) : (
-                  notifications.map((notification) => {
-                    const IconComponent = notification.icon;
-                    return (
-                      <DropdownMenuItem key={notification.id} className="p-3">
-                        <div className="flex items-start gap-3 w-full">
-                          <IconComponent className={`h-4 w-4 mt-0.5 ${
-                            notification.type === 'overdue' ? 'text-red-500' : 'text-blue-500'
-                          }`} />
-                          <div className="flex-1 min-w-0">
-                            <span className="font-medium text-sm block truncate">
-                              {notification.title}
-                            </span>
-                            <span className="text-xs text-muted-foreground block">
-                              {notification.description}
-                              {notification.time && ` • ${notification.time}`}
-                            </span>
+            <div className="relative">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="relative"
+                onClick={() => setShowNotifications(!showNotifications)}
+              >
+                <Bell className="h-5 w-5 text-gray-400" />
+                {notificationCount > 0 && (
+                  <span className="absolute top-1 right-1 block h-2 w-2 rounded-full bg-amber-500"></span>
+                )}
+              </Button>
+              
+              {showNotifications && (
+                <div className="absolute right-0 top-full mt-2 w-80 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+                  <div className="flex items-center justify-between p-3 border-b border-gray-100">
+                    <span className="font-semibold text-gray-900">Notifications</span>
+                    {notificationCount > 0 && (
+                      <Badge variant="secondary" className="ml-2">
+                        {notificationCount}
+                      </Badge>
+                    )}
+                  </div>
+                  
+                  <div className="max-h-96 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <div className="flex flex-col items-center py-8 text-center">
+                        <Bell className="h-8 w-8 text-gray-300 mb-2" />
+                        <span className="text-sm text-gray-500">No notifications</span>
+                      </div>
+                    ) : (
+                      notifications.map((notification) => {
+                        const IconComponent = notification.icon;
+                        return (
+                          <div key={notification.id} className="p-3 border-b border-gray-50 hover:bg-gray-50">
+                            <div className="flex items-start gap-3 w-full">
+                              <IconComponent className={`h-4 w-4 mt-0.5 ${
+                                notification.type === 'overdue' ? 'text-red-500' : 'text-blue-500'
+                              }`} />
+                              <div className="flex-1 min-w-0">
+                                <span className="font-medium text-sm block truncate text-gray-900">
+                                  {notification.title}
+                                </span>
+                                <span className="text-xs text-gray-500 block">
+                                  {notification.description}
+                                  {notification.time && ` • ${notification.time}`}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      </DropdownMenuItem>
-                    );
-                  })
-                )}
-                
-                {notifications.length > 0 && (
-                  <>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="text-center justify-center">
-                      <Calendar className="h-4 w-4 mr-2" />
-                      View calendar
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+                        );
+                      })
+                    )}
+                  </div>
+                  
+                  {notifications.length > 0 && (
+                    <div className="p-3 border-t border-gray-100">
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        className="w-full justify-center"
+                        onClick={() => setShowNotifications(false)}
+                      >
+                        <Calendar className="h-4 w-4 mr-2" />
+                        View calendar
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
+              
+              {showNotifications && (
+                <div 
+                  className="fixed inset-0 z-40" 
+                  onClick={() => setShowNotifications(false)}
+                />
+              )}
+            </div>
           </div>
         </div>
       </div>
