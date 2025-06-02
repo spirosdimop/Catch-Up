@@ -22,6 +22,7 @@ import Calendar from "@/pages/calendar";
 import CalendarNew from "@/pages/calendar-new";
 import CalendarSimple from "@/pages/calendar-simple";
 import UnifiedCalendar from "@/pages/unified-calendar-clean";
+import SimpleCalendar from "@/pages/simple-calendar";
 import CatchUpAISettings from "@/pages/catchup-settings";
 import Profile from "@/pages/profile";
 import ProfileRedesign from "@/pages/profile-redesign";
@@ -128,7 +129,8 @@ function Router() {
         <Route path="/appointments" component={AppointmentsPage} />
         <Route path="/messages" component={MessagesRedesign} />
         <Route path="/messages-original" component={Messages} />
-        <Route path="/calendar" component={UnifiedCalendar} />
+        <Route path="/calendar" component={SimpleCalendar} />
+        <Route path="/unified-calendar" component={UnifiedCalendar} />
         <Route path="/calendar-new" component={CalendarNew} />
         <Route path="/calendar-original" component={Calendar} />
         <Route path="/calendar-simple" component={CalendarSimple} />

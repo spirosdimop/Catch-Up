@@ -483,8 +483,8 @@ export default function UnifiedCalendar() {
       {/* Calendar with Tabs */}
       <Card>
         <CardContent className="p-3 md:p-6">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-1">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 md:grid-cols-5 gap-1 mb-6">
               <TabsTrigger value="calendar" className="flex items-center gap-1 md:gap-2 text-xs md:text-sm">
                 <CalendarIcon className="h-3 w-3 md:h-4 md:w-4" />
                 <span className="hidden sm:inline">Calendar</span>
@@ -513,7 +513,7 @@ export default function UnifiedCalendar() {
             </TabsList>
 
             <TabsContent value="calendar" className="mt-6">
-              <div className="calendar-container" style={{ height: isMobile ? '400px' : '600px' }}>
+              <div style={{ height: isMobile ? '400px' : '600px', position: 'relative', zIndex: 1 }}>
                 <Calendar
                   localizer={localizer}
                   events={calendarEvents}
@@ -526,28 +526,10 @@ export default function UnifiedCalendar() {
                   eventPropGetter={eventPropGetter}
                   onSelectEvent={handleSelectEvent}
                   popup
-                  showMultiDayTimes
                   step={30}
                   timeslots={2}
                   views={isMobile ? ['month', 'agenda'] : ['month', 'week', 'day', 'agenda']}
-                  className="responsive-calendar"
-                  tooltipAccessor={(event: any) => {
-                    const type = event.resource?.type || 'event';
-                    const data = event.resource?.data || {};
-                    
-                    switch (type) {
-                      case 'booking':
-                        return `Booking: ${data.clientName}\nService: ${data.serviceName}\nTime: ${data.time}`;
-                      case 'task':
-                        return `Task: ${data.title}\nPriority: ${data.priority}\nStatus: ${data.status}`;
-                      case 'project':
-                        return `Project: ${data.name}\nStatus: ${data.status}\nClient: ${getClientName(data.clientId, Array.isArray(clients) ? clients : [])}`;
-                      case 'invoice':
-                        return `Invoice: ${data.invoiceNumber}\nAmount: €${data.amount}\nStatus: ${data.status}`;
-                      default:
-                        return event.title;
-                    }
-                  }}
+                  style={{ height: '100%' }}
                 />
               </div>
             </TabsContent>
