@@ -13,6 +13,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Calendar as CalendarIcon, Clock, Users, Briefcase, CheckSquare, Filter, Search, Plus, Edit, Eye } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -86,6 +87,7 @@ export default function SimpleCalendar() {
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [itemType, setItemType] = useState('');
   const [editMode, setEditMode] = useState(false);
+  const [activeTab, setActiveTab] = useState('events');
   const [filters, setFilters] = useState({
     showBookings: true,
     showTasks: true,
