@@ -82,11 +82,12 @@ interface EditFormProps {
   itemType: string;
   initialData?: any;
   clients: any[];
+  projects: any[];
   onSave: (data: any) => void;
   onCancel: () => void;
 }
 
-function EditFormComponent({ itemType, initialData, clients, onSave, onCancel }: EditFormProps) {
+function EditFormComponent({ itemType, initialData, clients, projects, onSave, onCancel }: EditFormProps) {
   const getFormSchema = () => {
     switch (itemType) {
       case 'event':
@@ -1198,6 +1199,7 @@ export default function InteractiveCalendar() {
                 itemType={itemType}
                 initialData={selectedItem}
                 clients={Array.isArray(clients) ? clients : []}
+                projects={Array.isArray(projects) ? projects : []}
                 onSave={(data) => {
                   if (selectedItem?.id) {
                     // Update existing item
