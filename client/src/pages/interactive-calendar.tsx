@@ -792,7 +792,7 @@ export default function InteractiveCalendar() {
 
   // Mutations for CRUD operations
   const createEventMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/events', 'POST', data),
+    mutationFn: (data: any) => apiRequest('POST', '/api/events', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/events'] });
       toast({ title: 'Event created successfully!' });
@@ -804,7 +804,7 @@ export default function InteractiveCalendar() {
   });
 
   const createBookingMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/bookings', 'POST', data),
+    mutationFn: (data: any) => apiRequest('POST', '/api/bookings', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/bookings'] });
       toast({ title: 'Booking created successfully!' });
@@ -816,7 +816,7 @@ export default function InteractiveCalendar() {
   });
 
   const createTaskMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/tasks', 'POST', data),
+    mutationFn: (data: any) => apiRequest('POST', '/api/tasks', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       toast({ title: 'Task created successfully!' });
@@ -828,7 +828,7 @@ export default function InteractiveCalendar() {
   });
 
   const createProjectMutation = useMutation({
-    mutationFn: (data: any) => apiRequest('/api/projects', 'POST', data),
+    mutationFn: (data: any) => apiRequest('POST', '/api/projects', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       toast({ title: 'Project created successfully!' });
@@ -841,7 +841,7 @@ export default function InteractiveCalendar() {
 
   const updateMutations = {
     event: useMutation({
-      mutationFn: (data: any) => apiRequest(`/api/events/${data.id}`, 'PATCH', data),
+      mutationFn: (data: any) => apiRequest('PATCH', `/api/events/${data.id}`, data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['/api/events'] });
         toast({ title: 'Event updated successfully!' });
@@ -853,7 +853,7 @@ export default function InteractiveCalendar() {
       },
     }),
     booking: useMutation({
-      mutationFn: (data: any) => apiRequest(`/api/bookings/${data.id}`, 'PATCH', data),
+      mutationFn: (data: any) => apiRequest('PATCH', `/api/bookings/${data.id}`, data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['/api/bookings'] });
         toast({ title: 'Booking updated successfully!' });
@@ -865,7 +865,7 @@ export default function InteractiveCalendar() {
       },
     }),
     task: useMutation({
-      mutationFn: (data: any) => apiRequest(`/api/tasks/${data.id}`, 'PATCH', data),
+      mutationFn: (data: any) => apiRequest('PATCH', `/api/tasks/${data.id}`, data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
         toast({ title: 'Task updated successfully!' });
@@ -878,7 +878,7 @@ export default function InteractiveCalendar() {
       },
     }),
     project: useMutation({
-      mutationFn: (data: any) => apiRequest(`/api/projects/${data.id}`, 'PATCH', data),
+      mutationFn: (data: any) => apiRequest('PATCH', `/api/projects/${data.id}`, data),
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
         toast({ title: 'Project updated successfully!' });
