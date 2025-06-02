@@ -427,7 +427,7 @@ function EditFormComponent({ itemType, initialData, clients, projects, onSave, o
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {Array.isArray(projects) && projects.map((project: any) => (
+                      {Array.isArray(projects) && projects.filter(project => project.id).map((project: any) => (
                         <SelectItem key={project.id} value={project.id.toString()}>
                           {project.name}
                         </SelectItem>
@@ -590,7 +590,7 @@ function EditFormComponent({ itemType, initialData, clients, projects, onSave, o
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="none">No Client</SelectItem>
-                        {clients.map((client: any) => (
+                        {Array.isArray(clients) && clients.filter(client => client.id).map((client: any) => (
                           <SelectItem key={client.id} value={client.id.toString()}>
                             {client.name}
                           </SelectItem>
