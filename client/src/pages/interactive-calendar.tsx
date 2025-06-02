@@ -824,6 +824,8 @@ export default function InteractiveCalendar() {
       queryClient.invalidateQueries({ queryKey: ['/api/events'] });
       toast({ title: 'Event created successfully!' });
       setShowAddDialog(false);
+      setShowDetailDialog(false);
+      setEditMode(false);
     },
     onError: () => {
       toast({ title: 'Failed to create event', variant: 'destructive' });
@@ -836,6 +838,8 @@ export default function InteractiveCalendar() {
       queryClient.invalidateQueries({ queryKey: ['/api/bookings'] });
       toast({ title: 'Booking created successfully!' });
       setShowAddDialog(false);
+      setShowDetailDialog(false);
+      setEditMode(false);
     },
     onError: () => {
       toast({ title: 'Failed to create booking', variant: 'destructive' });
@@ -848,6 +852,8 @@ export default function InteractiveCalendar() {
       queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
       toast({ title: 'Task created successfully!' });
       setShowAddDialog(false);
+      setShowDetailDialog(false);
+      setEditMode(false);
     },
     onError: () => {
       toast({ title: 'Failed to create task', variant: 'destructive' });
@@ -860,6 +866,8 @@ export default function InteractiveCalendar() {
       queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
       toast({ title: 'Project created successfully!' });
       setShowAddDialog(false);
+      setShowDetailDialog(false);
+      setEditMode(false);
     },
     onError: () => {
       toast({ title: 'Failed to create project', variant: 'destructive' });
