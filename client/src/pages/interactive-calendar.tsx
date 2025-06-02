@@ -955,6 +955,8 @@ export default function InteractiveCalendar() {
                     setItemType('event');
                     setEditMode(true);
                     setSelectedItem(null);
+                    setShowAddDialog(false);
+                    setShowDetailDialog(true);
                   }}
                   className="flex flex-col items-center gap-2 h-20"
                 >
@@ -967,6 +969,8 @@ export default function InteractiveCalendar() {
                     setItemType('booking');
                     setEditMode(true);
                     setSelectedItem(null);
+                    setShowAddDialog(false);
+                    setShowDetailDialog(true);
                   }}
                   className="flex flex-col items-center gap-2 h-20"
                 >
@@ -979,6 +983,8 @@ export default function InteractiveCalendar() {
                     setItemType('task');
                     setEditMode(true);
                     setSelectedItem(null);
+                    setShowAddDialog(false);
+                    setShowDetailDialog(true);
                   }}
                   className="flex flex-col items-center gap-2 h-20"
                 >
@@ -991,6 +997,8 @@ export default function InteractiveCalendar() {
                     setItemType('project');
                     setEditMode(true);
                     setSelectedItem(null);
+                    setShowAddDialog(false);
+                    setShowDetailDialog(true);
                   }}
                   className="flex flex-col items-center gap-2 h-20"
                 >
