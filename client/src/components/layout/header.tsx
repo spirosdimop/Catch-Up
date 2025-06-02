@@ -212,7 +212,10 @@ export function Header({ onMenuToggle }: HeaderProps) {
                 variant="ghost" 
                 size="icon" 
                 className="relative"
-                onClick={() => setShowNotifications(!showNotifications)}
+                onClick={() => {
+                  console.log('Notification button clicked, current state:', showNotifications);
+                  setShowNotifications(!showNotifications);
+                }}
               >
                 <Bell className="h-5 w-5 text-gray-400" />
                 {notificationCount > 0 && (
