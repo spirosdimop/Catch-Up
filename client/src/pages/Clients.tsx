@@ -422,6 +422,190 @@ export default function Clients() {
         </DialogContent>
       </Dialog>
 
+      {/* Client Details Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Client Details</DialogTitle>
+          </DialogHeader>
+          {selectedClient && (
+            <div className="space-y-6">
+              {/* Basic Information */}
+              <div className="bg-gray-50 p-4 rounded-lg">
+                <h3 className="text-lg font-semibold mb-4">Basic Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="flex items-center">
+                    <UserIcon className="h-5 w-5 mr-2 text-gray-500" />
+                    <span className="font-medium">{selectedClient.name}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <MailIcon className="h-5 w-5 mr-2 text-gray-500" />
+                    <span>{selectedClient.email}</span>
+                  </div>
+                  {selectedClient.phone && (
+                    <div className="flex items-center">
+                      <PhoneIcon className="h-5 w-5 mr-2 text-gray-500" />
+                      <span>{selectedClient.phone}</span>
+                    </div>
+                  )}
+                  {selectedClient.company && (
+                    <div className="flex items-center">
+                      <BuildingIcon className="h-5 w-5 mr-2 text-gray-500" />
+                      <span>{selectedClient.company}</span>
+                    </div>
+                  )}
+                  {selectedClient.address && (
+                    <div className="flex items-center col-span-2">
+                      <MapPinIcon className="h-5 w-5 mr-2 text-gray-500" />
+                      <span>{selectedClient.address}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Connections */}
+              {(() => {
+                const connections = getClientConnections(selectedClient.id);
+                return (
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Connections</h3>
+                    
+                    {/* Projects */}
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="flex items-center mb-3">
+                        <FolderIcon className="h-5 w-5 mr-2 text-blue-600" />
+                        <h4 className="font-medium text-blue-900">Projects ({connections.projects.length})</h4>
+                      </div>
+                      {connections.projects.length > 0 ? (
+                        <div className="space-y-2">
+                          {connections.projects.map((project: any) => (
+                            <div key={project.id} className="bg-white p-3 rounded border">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h5 className="font-medium">{project.name}</h5>
+                                  {project.description && (
+                                    <p className="text-sm text-gray-600 mt-1">{project.description}</p>
+                                  )}
+                                </div>
+                                <span className={`px-2 py-1 text-xs rounded-full ${
+                                  project.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                  project.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                                  project.status === 'on_hold' ? 'bg-yellow-100 text-yellow-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {project.status.replace('_', ' ')}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-blue-700 italic">No projects assigned to this client</p>
+                      )}
+                    </div>
+
+                    {/* Tasks */}
+                    <div className="bg-green-50 p-4 rounded-lg">
+                      <div className="flex items-center mb-3">
+                        <CheckSquareIcon className="h-5 w-5 mr-2 text-green-600" />
+                        <h4 className="font-medium text-green-900">Tasks ({connections.tasks.length})</h4>
+                      </div>
+                      {connections.tasks.length > 0 ? (
+                        <div className="space-y-2">
+                          {connections.tasks.map((task: any) => (
+                            <div key={task.id} className="bg-white p-3 rounded border">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h5 className="font-medium">{task.title}</h5>
+                                  {task.description && (
+                                    <p className="text-sm text-gray-600 mt-1">{task.description}</p>
+                                  )}
+                                  {task.deadline && (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                      Due: {new Date(task.deadline).toLocaleDateString()}
+                                    </p>
+                                  )}
+                                </div>
+                                <div className="flex flex-col items-end space-y-1">
+                                  <span className={`px-2 py-1 text-xs rounded-full ${
+                                    task.status === 'completed' ? 'bg-green-100 text-green-800' :
+                                    task.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
+                                    task.status === 'review' ? 'bg-purple-100 text-purple-800' :
+                                    'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {task.status.replace('_', ' ')}
+                                  </span>
+                                  <span className={`px-2 py-1 text-xs rounded-full ${
+                                    task.priority === 'urgent' ? 'bg-red-100 text-red-800' :
+                                    task.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                                    task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-gray-100 text-gray-800'
+                                  }`}>
+                                    {task.priority}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-green-700 italic">No tasks assigned to this client</p>
+                      )}
+                    </div>
+
+                    {/* Invoices */}
+                    <div className="bg-purple-50 p-4 rounded-lg">
+                      <div className="flex items-center mb-3">
+                        <FileTextIcon className="h-5 w-5 mr-2 text-purple-600" />
+                        <h4 className="font-medium text-purple-900">Invoices ({connections.invoices.length})</h4>
+                      </div>
+                      {connections.invoices.length > 0 ? (
+                        <div className="space-y-2">
+                          {connections.invoices.map((invoice: any) => (
+                            <div key={invoice.id} className="bg-white p-3 rounded border">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h5 className="font-medium">#{invoice.invoiceNumber}</h5>
+                                  <p className="text-sm text-gray-600">
+                                    Amount: ${invoice.amount}
+                                  </p>
+                                  <p className="text-xs text-gray-500">
+                                    Due: {new Date(invoice.dueDate).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <span className={`px-2 py-1 text-xs rounded-full ${
+                                  invoice.status === 'paid' ? 'bg-green-100 text-green-800' :
+                                  invoice.status === 'sent' ? 'bg-blue-100 text-blue-800' :
+                                  invoice.status === 'overdue' ? 'bg-red-100 text-red-800' :
+                                  invoice.status === 'canceled' ? 'bg-gray-100 text-gray-800' :
+                                  'bg-yellow-100 text-yellow-800'
+                                }`}>
+                                  {invoice.status}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-purple-700 italic">No invoices for this client</p>
+                      )}
+                    </div>
+
+                    {/* Summary */}
+                    <div className="bg-gray-100 p-4 rounded-lg">
+                      <h4 className="font-medium mb-2">Summary</h4>
+                      <p className="text-sm text-gray-700">
+                        This client has {connections.totalConnections} total connections: {connections.projects.length} projects, {connections.tasks.length} tasks, and {connections.invoices.length} invoices.
+                      </p>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
       {/* Edit Client Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="sm:max-w-md">
