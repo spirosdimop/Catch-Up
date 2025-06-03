@@ -227,6 +227,22 @@ export default function Settings() {
                 </div>
 
                 <div className="space-y-2">
+                  <Label htmlFor="timeFormat">Time Format</Label>
+                  <Select 
+                    value={user?.timeFormat || '12'} 
+                    onValueChange={(value: '12' | '24') => updateUser({ timeFormat: value })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="12">12-hour (9:30 AM)</SelectItem>
+                      <SelectItem value="24">24-hour (09:30)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
                   <Label htmlFor="aiGreeting">AI Greeting Message</Label>
                   <Textarea
                     id="aiGreeting"

@@ -16,6 +16,7 @@ export interface UserData {
   voicemailMessage?: string;
   smsFollowUpMessage?: string;
   availabilityHours?: string; // JSON string with availability hours
+  timeFormat?: '12' | '24'; // User preference for time format
   customInsights?: Array<{
     label: string;
     value: string | number;

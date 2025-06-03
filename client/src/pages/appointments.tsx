@@ -32,6 +32,7 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { useUser } from "@/lib/userContext";
+import { formatTime, getTimeInputType, generateTimeOptions } from "@/lib/timeUtils";
 
 export default function AppointmentsPage() {
   const [selectedTab, setSelectedTab] = useState<'pending' | 'accepted' | 'declined' | 'all'>('pending');
@@ -614,7 +615,7 @@ export default function AppointmentsPage() {
                       </div>
                       <div className="flex items-center">
                         <Clock className="w-4 h-4 mr-2 text-gray-500" />
-                        <span className="text-sm">{booking.time}</span>
+                        <span className="text-sm">{formatTime(booking.time, user)}</span>
                       </div>
                     </div>
                     
