@@ -52,43 +52,152 @@ router.post("/", async (req, res) => {
     // If no clientId provided or it's the default 1, try to find existing client
     if (!clientId || clientId === 1) {
       try {
-        // First try exact case-insensitive match on combined name
         const allClients = await db.select().from(clients);
-        let matchingClient = allClients.find(client => {
-          const fullName = `${client.firstName} ${client.lastName}`.trim();
-          return fullName.toLowerCase() === clientName.trim().toLowerCase();
-        });
+        let matchingClient = null;
         
-        // If no exact match, try fuzzy matching by normalizing names
+        // Parse incoming name for individual field matching
+        const nameParts = clientName.trim().split(' ');
+        const searchFirstName = nameParts[0] || clientName;
+        const searchLastName = nameParts.slice(1).join(' ') || '';
+        
+        // Priority 1: Exact phone number match (highest confidence)
+        if (clientPhone) {
+          const normalizedPhone = clientPhone.replace(/\D/g, ''); // Remove non-digits
+          if (normalizedPhone.length >= 10) {
+            matchingClient = allClients.find(client => {
+              if (!client.phone) return false;
+              const clientNormalizedPhone = client.phone.replace(/\D/g, '');
+              return clientNormalizedPhone === normalizedPhone;
+            });
+            
+            if (matchingClient) {
+              console.log(`Found client by phone match: "${clientPhone}" -> "${matchingClient.firstName} ${matchingClient.lastName}" (ID ${matchingClient.id})`);
+            }
+          }
+        }
+        
+        // Priority 2: Exact email match (high confidence)
+        if (!matchingClient && clientEmail) {
+          matchingClient = allClients.find(client => {
+            return client.email && client.email.toLowerCase() === clientEmail.toLowerCase();
+          });
+          
+          if (matchingClient) {
+            console.log(`Found client by email match: "${clientEmail}" -> "${matchingClient.firstName} ${matchingClient.lastName}" (ID ${matchingClient.id})`);
+          }
+        }
+        
+        // Priority 3: First name + Last name exact match (medium confidence)
+        if (!matchingClient && searchFirstName && searchLastName) {
+          matchingClient = allClients.find(client => {
+            return client.firstName.toLowerCase() === searchFirstName.toLowerCase() &&
+                   client.lastName.toLowerCase() === searchLastName.toLowerCase();
+          });
+          
+          if (matchingClient) {
+            console.log(`Found client by first+last name match: "${searchFirstName} ${searchLastName}" -> "${matchingClient.firstName} ${matchingClient.lastName}" (ID ${matchingClient.id})`);
+          }
+        }
+        
+        // Priority 4: Full name exact match (medium confidence)
+        if (!matchingClient) {
+          matchingClient = allClients.find(client => {
+            const fullName = `${client.firstName} ${client.lastName}`.trim();
+            return fullName.toLowerCase() === clientName.trim().toLowerCase();
+          });
+          
+          if (matchingClient) {
+            console.log(`Found client by full name exact match: "${clientName}" -> "${matchingClient.firstName} ${matchingClient.lastName}" (ID ${matchingClient.id})`);
+          }
+        }
+        
+        // Priority 5: First name exact match only (lower confidence)
+        if (!matchingClient && searchFirstName) {
+          matchingClient = allClients.find(client => {
+            return client.firstName.toLowerCase() === searchFirstName.toLowerCase();
+          });
+          
+          if (matchingClient) {
+            console.log(`Found client by first name match: "${searchFirstName}" -> "${matchingClient.firstName} ${matchingClient.lastName}" (ID ${matchingClient.id})`);
+          }
+        }
+        
+        // Priority 6: Last name exact match only (lower confidence)  
+        if (!matchingClient && searchLastName) {
+          matchingClient = allClients.find(client => {
+            return client.lastName.toLowerCase() === searchLastName.toLowerCase();
+          });
+          
+          if (matchingClient) {
+            console.log(`Found client by last name match: "${searchLastName}" -> "${matchingClient.firstName} ${matchingClient.lastName}" (ID ${matchingClient.id})`);
+          }
+        }
+        
+        // Priority 7: Fuzzy name matching (lowest confidence)
         if (!matchingClient) {
           const normalizedSearchName = clientName.trim().toLowerCase().replace(/\s+/g, ' ');
           
           matchingClient = allClients.find(client => {
             const fullName = `${client.firstName} ${client.lastName}`.trim();
             const normalizedClientName = fullName.toLowerCase().replace(/\s+/g, ' ');
-            return normalizedClientName === normalizedSearchName ||
-                   normalizedClientName.includes(normalizedSearchName) ||
+            return normalizedClientName.includes(normalizedSearchName) ||
                    normalizedSearchName.includes(normalizedClientName);
           });
+          
+          if (matchingClient) {
+            console.log(`Found client by fuzzy name match: "${clientName}" -> "${matchingClient.firstName} ${matchingClient.lastName}" (ID ${matchingClient.id})`);
+          }
         }
         
         if (matchingClient) {
           clientId = matchingClient.id;
-          const fullName = `${matchingClient.firstName} ${matchingClient.lastName}`.trim();
-          console.log(`Auto-matched client "${clientName}" to "${fullName}" (ID ${clientId})`);
         } else {
-          // If this is a profile page booking (has clientEmail), create a temporary client entry
-          if (isFromProfile && clientEmail) {
-            // Split client name into first and last name
-            const nameParts = clientName.trim().split(' ');
-            const firstName = nameParts[0] || clientName;
-            const lastName = nameParts.slice(1).join(' ') || '';
+          // Create new client only if no match found at all
+          if (isFromProfile) {
+            // Before creating, do one final check for potential duplicates
+            let potentialDuplicate = false;
+            let duplicateReason = '';
+            
+            // Check for similar phone numbers
+            if (clientPhone) {
+              const normalizedPhone = clientPhone.replace(/\D/g, '');
+              if (normalizedPhone.length >= 10) {
+                const similarPhone = allClients.find(client => {
+                  if (!client.phone) return false;
+                  const clientNormalizedPhone = client.phone.replace(/\D/g, '');
+                  // Check if phone numbers are very similar (within 1-2 digits)
+                  return clientNormalizedPhone.length >= 10 && 
+                         Math.abs(clientNormalizedPhone.length - normalizedPhone.length) <= 2;
+                });
+                if (similarPhone) {
+                  potentialDuplicate = true;
+                  duplicateReason = `similar phone number to "${similarPhone.firstName} ${similarPhone.lastName}" (${similarPhone.phone})`;
+                }
+              }
+            }
+            
+            // Check for similar names with same first or last name
+            if (!potentialDuplicate) {
+              const similarName = allClients.find(client => {
+                const firstMatch = client.firstName.toLowerCase() === searchFirstName.toLowerCase();
+                const lastMatch = searchLastName && client.lastName.toLowerCase() === searchLastName.toLowerCase();
+                return firstMatch || lastMatch;
+              });
+              if (similarName) {
+                potentialDuplicate = true;
+                duplicateReason = `similar name to "${similarName.firstName} ${similarName.lastName}"`;
+              }
+            }
+            
+            if (potentialDuplicate) {
+              console.log(`Potential duplicate detected for "${clientName}" - ${duplicateReason}. Creating anyway with note.`);
+            }
             
             const [newClient] = await db
               .insert(clients)
               .values({
-                firstName,
-                lastName,
+                firstName: searchFirstName,
+                lastName: searchLastName,
                 email: clientEmail,
                 phone: clientPhone || null,
                 company: null,
@@ -98,9 +207,9 @@ router.post("/", async (req, res) => {
               .returning();
             
             clientId = newClient.id;
-            console.log(`Created new client "${clientName}" (ID ${clientId}) for profile booking`);
+            console.log(`Created new client "${searchFirstName} ${searchLastName}" (ID ${clientId}) for profile booking${potentialDuplicate ? ' - flagged as potential duplicate' : ''}`);
           } else {
-            console.log(`No client found matching name "${clientName}"`);
+            console.log(`No client found matching "${clientName}" across all fields`);
             clientId = 1; // fallback to default for internal bookings
           }
         }
