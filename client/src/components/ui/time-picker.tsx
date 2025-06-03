@@ -20,7 +20,13 @@ export function TimePicker({ value, onChange, disabled, className }: TimePickerP
 
   // Debug log to check user timeFormat
   console.log('TimePicker - user timeFormat:', user?.timeFormat);
-  console.log('TimePicker - full user object:', user);
+  
+  // Force component to re-render when timeFormat changes
+  const [componentKey, setComponentKey] = useState(0);
+  
+  useEffect(() => {
+    setComponentKey(prev => prev + 1);
+  }, [user?.timeFormat]);
 
   // Parse initial value
   useEffect(() => {
@@ -61,13 +67,15 @@ export function TimePicker({ value, onChange, disabled, className }: TimePickerP
     onChange(timeString);
   }, [selectedHour, selectedMinute, isAM, user?.timeFormat, onChange]);
 
-  // Force 24-hour format detection
+  // Force 24-hour format detection with explicit checking
   const is24HourFormat = user?.timeFormat === '24';
+  console.log('TimePicker - is24HourFormat:', is24HourFormat);
   
   if (is24HourFormat) {
     // Use HTML time input for 24-hour format
     return (
       <Input
+        key={`time-picker-24h-${componentKey}`}
         type="time"
         value={value || '09:00'}
         onChange={(e) => onChange(e.target.value)}

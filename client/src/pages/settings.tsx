@@ -233,8 +233,6 @@ export default function Settings() {
                     onValueChange={(value: '12' | '24') => {
                       console.log('Settings: Updating timeFormat to:', value);
                       updateUser({ timeFormat: value });
-                      // Force a page refresh to ensure components re-render
-                      setTimeout(() => window.location.reload(), 100);
                     }}
                   >
                     <SelectTrigger>
