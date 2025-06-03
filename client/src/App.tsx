@@ -125,8 +125,8 @@ function Router() {
   return (
     <AppShell>
       <Switch>
-        <Route path="/dashboard" component={DashboardRedesign} />
-        <Route path="/dashboard-original" component={Dashboard} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/dashboard-simple" component={DashboardRedesign} />
         <Route path="/clients" component={Clients} />
         <Route path="/clients-redesign" component={ClientsRedesign} />
         <Route path="/appointments" component={AppointmentsPage} />
