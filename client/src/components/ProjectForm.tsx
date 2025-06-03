@@ -152,8 +152,15 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
             <FormItem>
               <FormLabel>Client</FormLabel>
               <Select 
-                onValueChange={(value) => field.onChange(value === "personal" ? null : parseInt(value))}
-                value={field.value ? field.value.toString() : "personal"}
+                onValueChange={(value) => {
+                  if (value === "personal") {
+                    field.onChange(null);
+                  } else {
+                    const numValue = parseInt(value);
+                    field.onChange(isNaN(numValue) ? null : numValue);
+                  }
+                }}
+                value={field.value === null || field.value === undefined ? "personal" : field.value.toString()}
               >
                 <FormControl>
                   <SelectTrigger>
