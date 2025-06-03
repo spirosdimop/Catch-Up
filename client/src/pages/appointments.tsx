@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useUser } from "@/lib/userContext";
 import { formatTime, getTimeInputType, generateTimeOptions } from "@/lib/timeUtils";
+import { TimePicker } from "@/components/ui/time-picker";
 
 export default function AppointmentsPage() {
   const [selectedTab, setSelectedTab] = useState<'pending' | 'accepted' | 'declined' | 'all'>('pending');
@@ -741,23 +742,15 @@ export default function AppointmentsPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Time {user?.timeFormat && `(${user.timeFormat}h format)`}</label>
-                  {user?.timeFormat === '24' ? (
-                    <input 
-                      name="time"
-                      type="time" 
-                      className="w-full p-2 border rounded"
-                      required 
-                    />
-                  ) : (
-                    <select name="time" className="w-full p-2 border rounded" required>
-                      <option value="">Select time</option>
-                      {generateTimeOptions(user, 8, 20).map((timeOption) => (
-                        <option key={timeOption} value={timeOption}>
-                          {timeOption}
-                        </option>
-                      ))}
-                    </select>
-                  )}
+                  <TimePicker
+                    value=""
+                    onChange={(time) => {
+                      const timeInput = document.querySelector('input[name="time"]') as HTMLInputElement;
+                      if (timeInput) timeInput.value = time;
+                    }}
+                    className="w-full"
+                  />
+                  <input name="time" type="hidden" required />
                 </div>
               </div>
               <div>
