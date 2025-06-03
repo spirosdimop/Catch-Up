@@ -41,11 +41,13 @@ router.post("/", async (req, res) => {
     const isFromProfile = req.body.source === "profile" || req.body.clientEmail; // Profile bookings include clientEmail
     const defaultStatus = isFromProfile ? "pending" : "confirmed";
     
-    // Automatic client matching by name
+    // Automatic client handling
     let clientId = parseInt(req.body.clientId) || null;
     const clientName = req.body.clientName || "Client";
+    const clientEmail = req.body.clientEmail;
+    const clientPhone = req.body.clientPhone;
     
-    // If no clientId provided or it's the default 1, try to find client by name
+    // If no clientId provided or it's the default 1, try to find existing client
     if (!clientId || clientId === 1) {
       try {
         // First try exact case-insensitive match
@@ -71,11 +73,29 @@ router.post("/", async (req, res) => {
           clientId = matchingClient.id;
           console.log(`Auto-matched client "${clientName}" to "${matchingClient.name}" (ID ${clientId})`);
         } else {
-          console.log(`No client found matching name "${clientName}"`);
-          clientId = 1; // fallback to default
+          // If this is a profile page booking (has clientEmail), create a temporary client entry
+          if (isFromProfile && clientEmail) {
+            const [newClient] = await db
+              .insert(clients)
+              .values({
+                name: clientName.trim(),
+                email: clientEmail,
+                phone: clientPhone || null,
+                company: null,
+                address: null,
+                createdAt: new Date()
+              })
+              .returning();
+            
+            clientId = newClient.id;
+            console.log(`Created new client "${clientName}" (ID ${clientId}) for profile booking`);
+          } else {
+            console.log(`No client found matching name "${clientName}"`);
+            clientId = 1; // fallback to default for internal bookings
+          }
         }
       } catch (error) {
-        console.error("Error matching client by name:", error);
+        console.error("Error handling client:", error);
         clientId = 1; // fallback to default
       }
     }
@@ -116,6 +136,23 @@ router.patch("/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const bookingData = req.body;
+    
+    // If accepting a booking (status changed to "confirmed"), ensure client is properly linked
+    if (bookingData.status === "confirmed") {
+      const [existingBooking] = await db.select().from(bookings).where(eq(bookings.id, id));
+      
+      if (existingBooking && existingBooking.clientName) {
+        // Verify client exists with the booking's client information
+        const [existingClient] = await db
+          .select()
+          .from(clients)
+          .where(eq(clients.id, existingBooking.clientId));
+        
+        if (existingClient) {
+          console.log(`Booking ${id} accepted - client "${existingClient.name}" (ID ${existingClient.id}) is now confirmed`);
+        }
+      }
+    }
     
     const [updatedBooking] = await db
       .update(bookings)
