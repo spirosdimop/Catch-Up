@@ -97,9 +97,6 @@ const defaultQuickActions: QuickAction[] = [
   { id: 'new-client', label: 'New Client', icon: <UsersIcon className="h-4 w-4" />, href: '/clients', visible: true },
   { id: 'new-project', label: 'New Project', icon: <FolderIcon className="h-4 w-4" />, href: '/projects', visible: true },
   { id: 'new-booking', label: 'Schedule Meeting', icon: <CalendarPlusIcon className="h-4 w-4" />, href: '/calendar', visible: true },
-  { id: 'new-invoice', label: 'Create Invoice', icon: <FileTextIcon className="h-4 w-4" />, href: '/invoices', visible: true },
-  { id: 'view-reports', label: 'View Reports', icon: <BarChart3Icon className="h-4 w-4" />, href: '/reports', visible: true },
-  { id: 'send-message', label: 'Send Message', icon: <MessageSquareIcon className="h-4 w-4" />, href: '/messages', visible: true },
 ];
 
 export default function Dashboard() {
