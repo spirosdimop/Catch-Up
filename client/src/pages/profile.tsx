@@ -45,7 +45,8 @@ export default function Profile() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [reviewForm, setReviewForm] = useState({ name: "", rating: 5, comment: "" });
   const [bookingForm, setBookingForm] = useState({
-    name: "",
+    firstName: "",
+    lastName: "",
     email: "",
     phone: "",
     date: format(new Date(), 'yyyy-MM-dd'),
@@ -77,7 +78,8 @@ export default function Profile() {
   useEffect(() => {
     setResetFormCallback(() => () => {
       setBookingForm({
-        name: "",
+        firstName: "",
+        lastName: "",
         email: "",
         phone: "",
         date: format(new Date(), 'yyyy-MM-dd'),
@@ -260,8 +262,10 @@ export default function Profile() {
     // We need to make sure we include clientEmail and providerId as required by BookingData interface
     const bookingData = {
       serviceName: selectedServiceData.name,
-      clientName: bookingForm.name,
-      clientEmail: bookingForm.email, // Required by BookingData interface - this will trigger "pending" status
+      clientName: `${bookingForm.firstName} ${bookingForm.lastName}`,
+      clientFirstName: bookingForm.firstName,
+      clientLastName: bookingForm.lastName,
+      clientEmail: bookingForm.email || null, // Optional email
       clientPhone: bookingForm.phone,
       date: bookingForm.date,
       time: bookingForm.time,
@@ -620,13 +624,24 @@ export default function Profile() {
                     <form onSubmit={handleBookingSubmit} className="space-y-5">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-2">
-                          <Label htmlFor="name">Full Name</Label>
+                          <Label htmlFor="firstName">First Name</Label>
                           <Input 
-                            id="name" 
-                            name="name" 
-                            value={bookingForm.name} 
+                            id="firstName" 
+                            name="firstName" 
+                            value={bookingForm.firstName || ''} 
                             onChange={handleInputChange} 
-                            placeholder="Enter your full name" 
+                            placeholder="Enter your first name" 
+                            required
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label htmlFor="lastName">Last Name</Label>
+                          <Input 
+                            id="lastName" 
+                            name="lastName" 
+                            value={bookingForm.lastName || ''} 
+                            onChange={handleInputChange} 
+                            placeholder="Enter your last name" 
                             required 
                           />
                         </div>
@@ -646,7 +661,7 @@ export default function Profile() {
                       </div>
                       
                       <div className="space-y-2">
-                        <Label htmlFor="email">Email Address</Label>
+                        <Label htmlFor="email">Email Address (optional)</Label>
                         <Input 
                           id="email" 
                           name="email" 
@@ -654,7 +669,6 @@ export default function Profile() {
                           value={bookingForm.email} 
                           onChange={handleInputChange} 
                           placeholder="Enter your email address" 
-                          required 
                         />
                       </div>
                       
