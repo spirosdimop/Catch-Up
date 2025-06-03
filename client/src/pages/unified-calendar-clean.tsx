@@ -646,7 +646,18 @@ function TaskEditForm({ task, onSubmit, isSubmitting }: any) {
     description: task.description || '',
     priority: task.priority || 'medium',
     status: task.status || 'todo',
-    deadline: task.deadline ? task.deadline.split('T')[0] : ''
+    deadline: task.deadline ? task.deadline.split('T')[0] : '',
+    projectId: task.projectId || null,
+    clientId: task.clientId || null
+  });
+
+  // Fetch projects and clients for linking
+  const { data: projects = [] } = useQuery({
+    queryKey: ['/api/projects'],
+  });
+
+  const { data: clients = [] } = useQuery({
+    queryKey: ['/api/clients'],
   });
 
   const handleSubmit = (e: any) => {
@@ -712,6 +723,47 @@ function TaskEditForm({ task, onSubmit, isSubmitting }: any) {
           value={formData.deadline}
           onChange={(e) => setFormData({...formData, deadline: e.target.value})}
         />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Project</Label>
+          <Select 
+            value={formData.projectId?.toString() || ""} 
+            onValueChange={(value) => setFormData({...formData, projectId: value ? parseInt(value) : null})}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select project (optional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">No project</SelectItem>
+              {projects.map((project: any) => (
+                <SelectItem key={project.id} value={project.id.toString()}>
+                  {project.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Client</Label>
+          <Select 
+            value={formData.clientId?.toString() || ""} 
+            onValueChange={(value) => setFormData({...formData, clientId: value ? parseInt(value) : null})}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select client (optional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">No client</SelectItem>
+              {clients.map((client: any) => (
+                <SelectItem key={client.id} value={client.id.toString()}>
+                  {client.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
       
       <div className="flex gap-2">

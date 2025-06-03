@@ -67,6 +67,18 @@ export default function ProjectTasks({ projectId }: ProjectTasksProps) {
     }
   });
 
+  // Fetch all clients for linking functionality
+  const { data: allClients = [] } = useQuery({
+    queryKey: ['/api/clients'],
+    queryFn: async () => {
+      const response = await fetch('/api/clients');
+      if (!response.ok) {
+        throw new Error("Failed to fetch clients");
+      }
+      return response.json();
+    }
+  });
+
   // Fetch tasks for this project
   const { data: tasks = [], isLoading, refetch } = useQuery<Task[]>({
     queryKey: ['/api/tasks', projectId],
@@ -371,6 +383,10 @@ export default function ProjectTasks({ projectId }: ProjectTasksProps) {
           </DialogHeader>
           <TaskForm
             projectId={projectId}
+            allProjects={allProjects}
+            allClients={allClients}
+            showProjectSelect={true}
+            showClientSelect={true}
             onSubmit={handleSubmit}
             isSubmitting={createTaskMutation.isPending}
           />
@@ -386,6 +402,10 @@ export default function ProjectTasks({ projectId }: ProjectTasksProps) {
           {selectedTask && (
             <TaskForm
               projectId={projectId}
+              allProjects={allProjects}
+              allClients={allClients}
+              showProjectSelect={true}
+              showClientSelect={true}
               onSubmit={handleSubmit}
               isSubmitting={updateTaskMutation.isPending}
               defaultValues={selectedTask}
@@ -403,11 +423,13 @@ export default function ProjectTasks({ projectId }: ProjectTasksProps) {
           {selectedTask && (
             <TaskForm
               projectId={projectId}
+              allProjects={allProjects.filter(p => p.id !== projectId)} // Exclude current project
+              allClients={allClients}
+              showProjectSelect={true}
+              showClientSelect={true}
               onSubmit={handleSubmit}
               isSubmitting={updateTaskMutation.isPending}
               defaultValues={selectedTask}
-              allProjects={allProjects.filter(p => p.id !== projectId)} // Exclude current project
-              showProjectSelect={true}
             />
           )}
         </DialogContent>
