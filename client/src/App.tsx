@@ -31,6 +31,7 @@ import ProfileRedesign from "@/pages/profile-redesign";
 import PublicProfile from "@/pages/public-profile";
 
 import AppointmentsPage from "@/pages/appointments";
+import AIAssistant from "@/pages/ai-assistant";
 
 import Projects from "@/pages/Projects";
 import ProjectDetail from "@/pages/project";
@@ -140,7 +141,7 @@ function Router() {
         <Route path="/profile-original" component={Profile} />
         <Route path="/projects" component={Projects} />
         <Route path="/projects/:id" component={ProjectDetail} />
-
+        <Route path="/ai-assistant" component={AIAssistant} />
         <Route path="/settings" component={Settings} />
         <Route path="/catchup-settings" component={CatchUpAISettings} />
         <Route component={NotFound} />

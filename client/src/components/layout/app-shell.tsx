@@ -9,7 +9,7 @@ import {
   Settings,
   User,
   Star,
-
+  Bot,
   Menu,
   X,
   ChevronRight,
@@ -78,7 +78,11 @@ export function AppShell({
       label: "Projects",
       href: "/projects"
     },
-
+    {
+      icon: <Bot className="h-5 w-5" />,
+      label: "AI Assistant",
+      href: "/ai-assistant"
+    },
     {
       icon: <Settings className="h-5 w-5" />,
       label: "Settings",
