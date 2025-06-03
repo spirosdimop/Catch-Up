@@ -35,13 +35,19 @@ router.get("/:id", async (req, res) => {
 // Create a new booking
 router.post("/", async (req, res) => {
   try {
-    // Create booking data directly without schema validation
+    // Determine booking status based on source
+    // Profile page bookings (from public clients) need confirmation - set to "pending"
+    // Calendar/Appointments page bookings (internal) are auto-accepted - set to "confirmed"
+    const isFromProfile = req.body.source === "profile" || req.body.clientEmail; // Profile bookings include clientEmail
+    const defaultStatus = isFromProfile ? "pending" : "confirmed";
+    
+    // Create booking data with proper type casting
     const bookingData = {
       date: req.body.date || new Date().toISOString().split('T')[0],
       time: req.body.time || "10:00 AM",
       duration: parseInt(req.body.duration) || 60,
-      type: "meeting",
-      status: "pending",
+      type: (req.body.type === "consultation" || req.body.type === "appointment" || req.body.type === "follow_up" || req.body.type === "check_in") ? req.body.type : "meeting",
+      status: (req.body.status || defaultStatus) as "pending" | "accepted" | "declined" | "confirmed" | "rescheduled" | "canceled" | "emergency",
       location: req.body.location || "",
       notes: req.body.notes || "",
       clientId: parseInt(req.body.clientId) || 1,
@@ -59,7 +65,10 @@ router.post("/", async (req, res) => {
     res.status(201).json(newBooking);
   } catch (error) {
     console.error("Error creating booking:", error);
-    res.status(400).json({ message: "Failed to create booking", error: error.message });
+    res.status(400).json({ 
+      message: "Failed to create booking", 
+      error: error instanceof Error ? error.message : "Unknown error" 
+    });
   }
 });
 

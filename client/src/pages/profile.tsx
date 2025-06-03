@@ -260,7 +260,7 @@ export default function Profile() {
     const bookingData = {
       serviceName: selectedServiceData.name,
       clientName: bookingForm.name,
-      clientEmail: bookingForm.email, // Required by BookingData interface
+      clientEmail: bookingForm.email, // Required by BookingData interface - this will trigger "pending" status
       clientPhone: bookingForm.phone,
       date: bookingForm.date,
       time: bookingForm.time,
@@ -272,7 +272,7 @@ export default function Profile() {
       // Additional fields for backend
       externalId: Date.now().toString(),
       type: "meeting",
-      status: "confirmed",
+      source: "profile", // Explicitly mark as profile booking for backend logic
       clientId: 2, // Using a known client ID that exists in the database
       serviceId: "1", // Required string by the database schema
       priority: "normal"
