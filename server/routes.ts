@@ -565,21 +565,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
 
     try {
-      // Parse the request body with the original schema but make everything optional
-      const projectData = z.object({
-        name: z.string().optional(),
-        description: z.string().nullable().optional(),
-        clientId: z.number().optional(),
-        status: z.enum([
-          ProjectStatus.NOT_STARTED,
-          ProjectStatus.IN_PROGRESS,
-          ProjectStatus.ON_HOLD,
-          ProjectStatus.COMPLETED
-        ]).optional(),
-        startDate: z.string().nullable().optional().transform(val => val ? new Date(val) : null),
-        endDate: z.string().nullable().optional().transform(val => val ? new Date(val) : null),
-        budget: z.number().nullable().optional()
-      }).parse(req.body);
+      console.log("Received project update data:", req.body);
+      
+      // Manual validation and transformation to handle all data types properly
+      const { name, description, clientId, status, startDate, endDate, budget } = req.body;
+      
+      const projectData: any = {};
+      
+      if (name !== undefined) projectData.name = name;
+      if (description !== undefined) projectData.description = description || null;
+      if (clientId !== undefined) projectData.clientId = clientId || null; // Allow null for personal projects
+      if (status !== undefined) projectData.status = status;
+      if (startDate !== undefined) projectData.startDate = startDate ? new Date(startDate) : null;
+      if (endDate !== undefined) projectData.endDate = endDate ? new Date(endDate) : null;
+      if (budget !== undefined) projectData.budget = budget ? Number(budget) : null;
       
       console.log("Updating project with data:", projectData);
       
