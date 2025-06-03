@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Client, InsertClient } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { PlusIcon, SearchIcon, PencilIcon, MailIcon, PhoneIcon, EyeIcon, FolderIcon, CheckSquareIcon, FileTextIcon, MessageCircleIcon } from "lucide-react";
+import { PlusIcon, SearchIcon, PencilIcon, MailIcon, PhoneIcon, EyeIcon, FolderIcon, CheckSquareIcon, FileTextIcon, MessageCircleIcon, UserIcon, BuildingIcon, MapPinIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -263,7 +263,6 @@ export default function Clients() {
         </div>
         <div className="mt-4 md:mt-0 flex space-x-2">
           <Button variant="outline" onClick={() => setIsCleanupDialogOpen(true)}>
-            <TrashIcon className="mr-2 h-4 w-4" />
             Clean Up Clients
           </Button>
           <Button onClick={() => {

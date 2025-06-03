@@ -125,8 +125,8 @@ function Router() {
       <Switch>
         <Route path="/dashboard" component={DashboardRedesign} />
         <Route path="/dashboard-original" component={Dashboard} />
-        <Route path="/clients" component={ClientsRedesign} />
-        <Route path="/clients-original" component={Clients} />
+        <Route path="/clients" component={Clients} />
+        <Route path="/clients-redesign" component={ClientsRedesign} />
         <Route path="/appointments" component={AppointmentsPage} />
         <Route path="/messages" component={MessagesRedesign} />
         <Route path="/messages-original" component={Messages} />
