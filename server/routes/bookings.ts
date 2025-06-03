@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { bookings, insertBookingSchema } from "@shared/schema";
+import { bookings, clients, insertBookingSchema } from "@shared/schema";
 import { db } from "../db";
-import { eq } from "drizzle-orm";
+import { eq, ilike } from "drizzle-orm";
 import { ZodError } from "zod";
 
 const router = Router();
@@ -41,6 +41,31 @@ router.post("/", async (req, res) => {
     const isFromProfile = req.body.source === "profile" || req.body.clientEmail; // Profile bookings include clientEmail
     const defaultStatus = isFromProfile ? "pending" : "confirmed";
     
+    // Automatic client matching by name
+    let clientId = parseInt(req.body.clientId) || null;
+    const clientName = req.body.clientName || "Client";
+    
+    // If no clientId provided or it's the default 1, try to find client by name
+    if (!clientId || clientId === 1) {
+      try {
+        const [matchingClient] = await db
+          .select()
+          .from(clients)
+          .where(ilike(clients.name, clientName.trim()));
+        
+        if (matchingClient) {
+          clientId = matchingClient.id;
+          console.log(`Auto-matched client "${clientName}" to ID ${clientId}`);
+        } else {
+          console.log(`No client found matching name "${clientName}"`);
+          clientId = 1; // fallback to default
+        }
+      } catch (error) {
+        console.error("Error matching client by name:", error);
+        clientId = 1; // fallback to default
+      }
+    }
+    
     // Create booking data with proper type casting
     const bookingData = {
       date: req.body.date || new Date().toISOString().split('T')[0],
@@ -50,11 +75,11 @@ router.post("/", async (req, res) => {
       status: (req.body.status || defaultStatus) as "pending" | "accepted" | "declined" | "confirmed" | "rescheduled" | "canceled" | "emergency",
       location: req.body.location || "",
       notes: req.body.notes || "",
-      clientId: parseInt(req.body.clientId) || 1,
+      clientId: clientId,
       serviceId: req.body.serviceId || "1",
       priority: req.body.priority || "normal",
       externalId: req.body.externalId || Date.now().toString(),
-      clientName: req.body.clientName || "Client",
+      clientName: clientName,
       clientPhone: req.body.clientPhone || "",
       serviceName: req.body.serviceName || "",
       servicePrice: req.body.servicePrice || "",
