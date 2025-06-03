@@ -425,12 +425,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
             if (clientProjects.length > 0) {
               duplicateResults.push({
                 id: dupeClient.id,
-                name: dupeClient.name,
-                email: dupeClient.email,
+                name: `${dupeClient.firstName} ${dupeClient.lastName}`,
+                email: dupeClient.email || '',
                 deleted: false,
                 reason: "duplicate_with_projects",
                 keepId: keepClient.id,
-                keepName: keepClient.name,
+                keepName: `${keepClient.firstName} ${keepClient.lastName}`,
                 error: "Client has associated projects and cannot be deleted"
               });
               continue;
@@ -440,22 +440,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const deleted = await storage.deleteClient(dupeClient.id);
             duplicateResults.push({
               id: dupeClient.id,
-              name: dupeClient.name,
-              email: dupeClient.email,
+              name: `${dupeClient.firstName} ${dupeClient.lastName}`,
+              email: dupeClient.email || '',
               deleted,
               reason: "duplicate",
               keepId: keepClient.id,
-              keepName: keepClient.name
+              keepName: `${keepClient.firstName} ${keepClient.lastName}`
             });
           } catch (error) {
             duplicateResults.push({
               id: dupeClient.id,
-              name: dupeClient.name,
-              email: dupeClient.email,
+              name: `${dupeClient.firstName} ${dupeClient.lastName}`,
+              email: dupeClient.email || '',
               deleted: false,
               reason: "duplicate",
               keepId: keepClient.id,
-              keepName: keepClient.name,
+              keepName: `${keepClient.firstName} ${keepClient.lastName}`,
               error: error instanceof Error ? error.message : String(error)
             });
           }

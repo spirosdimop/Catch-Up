@@ -370,170 +370,251 @@ export default function Dashboard() {
         </Button>
       </div>
 
-      {/* Stats overview - redesigned metrics */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3 mb-8">
-        <motion.div variants={itemVariants} className="bg-[#1F2A40] text-white rounded-xl shadow-md p-5 flex flex-col">
-          <div className="flex items-center mb-3">
-            <div className="p-2 rounded-full bg-catchup-primary/20">
-              <CalendarIcon className="h-5 w-5 text-[#00C2D1]" />
-            </div>
-            <h3 className="ml-3 font-medium">Appointments Today</h3>
-          </div>
-          <div className="mt-auto">
-            <div className="flex items-baseline">
-              <span className="text-3xl font-bold">0</span>
-              <span className="text-2xl font-bold text-gray-500 ml-1">hrs</span>
-            </div>
-            <div className="flex justify-between items-center mt-2">
-              <span className="text-xs text-gray-400">WORKING HOURS TODAY</span>
-              <span className="text-xs text-gray-400">0 MEETINGS</span>
-            </div>
-          </div>
-        </motion.div>
-        
-        <motion.div variants={itemVariants} className="bg-[#24344D] text-white rounded-xl shadow-md p-5 flex flex-col">
-          <div className="flex items-center mb-3">
-            <div className="p-2 rounded-full bg-catchup-primary/20">
-              <TrendingUpIcon className="h-5 w-5 text-[#10B981]" />
-            </div>
-            <h3 className="ml-3 font-medium">Upcoming Schedule</h3>
-          </div>
-          <div className="mt-auto">
-            <div className="flex items-baseline">
-              <span className="text-3xl font-bold">0</span>
-              <span className="text-2xl font-bold text-gray-500 ml-1">hrs</span>
-            </div>
-            <div className="flex justify-between items-center mt-2">
-              <span className="text-xs text-gray-400">PLANNED AVAILABILITY</span>
-              <span className="text-xs text-gray-400">0 MEETINGS</span>
-            </div>
-          </div>
-        </motion.div>
-        
-        <motion.div variants={itemVariants} className="bg-[#1F2A40] text-white rounded-xl shadow-md p-5 flex flex-col">
-          <div className="flex items-center mb-3">
-            <div className="p-2 rounded-full bg-catchup-primary/20">
-              <BellIcon className="h-5 w-5 text-[#FFC700]" />
-            </div>
-            <h3 className="ml-3 font-medium">Availability Today</h3>
-          </div>
-          <div className="flex-1 flex flex-col justify-center items-center py-3">
-            <div className="rounded-full bg-[#1A2235] h-16 w-16 flex items-center justify-center mb-2">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 8V12L15 15" stroke="#6B7280" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <circle cx="12" cy="12" r="9" stroke="#6B7280" strokeWidth="2"/>
-              </svg>
-            </div>
-            <p className="text-xs text-gray-400 text-center mt-2">YOU'LL BE FREE FOR 24 HRS</p>
-            <p className="text-xs text-gray-500 text-center">EXCEPTIONALLY BLOCKED UNTIL TODAY</p>
-          </div>
-          <button className="mt-3 bg-[#3A4D6C] text-white text-sm py-2 rounded-lg hover:bg-[#4A5D7C] transition-colors">
-            UNAVAILABLE TODAY
-          </button>
-        </motion.div>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Missed Calls Card */}
+      {/* Stats overview - conditionally rendered */}
+      {widgets.find(w => w.id === 'stats')?.visible && (
         <motion.div 
           variants={itemVariants}
-          className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
-          style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
+          className="mb-8"
         >
-          <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-            <h3 className="font-semibold text-lg text-gray-800 flex items-center">
-              <PhoneIcon className="mr-2 h-5 w-5 text-catchup-primary" />
-              Missed Calls
-            </h3>
-            <span className="text-sm text-gray-500 hover:underline cursor-pointer">
-              Show missing only
-            </span>
-          </div>
-          <div className="divide-y divide-gray-100">
-            {/* Missed Call Item 1 */}
-            <div className="p-5">
-              <div className="flex justify-between mb-1">
-                <h4 className="font-medium text-gray-900">Wilhelm Sequim</h4>
-                <span className="text-sm text-red-500">Extend missing reply</span>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+            <div className="bg-[#1F2A40] text-white rounded-xl shadow-md p-5 flex flex-col">
+              <div className="flex items-center mb-3">
+                <div className="p-2 rounded-full bg-catchup-primary/20">
+                  <CalendarIcon className="h-5 w-5 text-[#00C2D1]" />
+                </div>
+                <h3 className="ml-3 font-medium">Appointments Today</h3>
               </div>
-              <div className="flex justify-between mb-3">
-                <span className="text-sm text-gray-500">DATE REQUESTED</span>
-                <span className="text-sm text-gray-500">TIME REQUESTED</span>
-                <span className="text-sm text-gray-500">ACTION</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">03-08-2025</span>
-                <span className="text-sm font-medium">6:00 AM - 6:00 AM</span>
-                <button className="text-sm text-catchup-primary font-medium">Message →</button>
-              </div>
-            </div>
-            
-            {/* Missed Call Item 2 */}
-            <div className="p-5">
-              <div className="flex justify-between mb-1">
-                <h4 className="font-medium text-gray-900">Johan Green</h4>
-                <span className="text-sm text-red-500">5 voicemails</span>
-              </div>
-              <div className="flex justify-between mb-3">
-                <span className="text-sm text-gray-500">DATE</span>
-                <span className="text-sm text-gray-500">TIME REQUESTED</span>
-                <span className="text-sm text-gray-500">ACTION</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium">May 11, 2025</span>
-                <span className="text-sm font-medium">8:00 AM - 1:00 PM</span>
-                <button className="text-sm text-catchup-primary font-medium">Message →</button>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* AI Assistant Card */}
-        <motion.div 
-          variants={itemVariants}
-          className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
-          style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
-        >
-          <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-            <h3 className="font-semibold text-lg text-gray-800 flex items-center">
-              <Bot className="mr-2 h-5 w-5 text-catchup-primary" />
-              AI Assistant
-            </h3>
-          </div>
-          <div className="p-4">
-            {/* Reschedule Appointment */}
-            <div className="bg-gray-50 rounded-lg p-4 mb-3">
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="font-medium text-gray-900">Reschedule Appointment</h4>
-                <button className="text-xs bg-blue-500 text-white px-3 py-1 rounded-full">Approve</button>
-              </div>
-              <p className="text-sm text-gray-600 mb-1">Appointment rescheduled at client's request:</p>
-              <p className="text-sm text-gray-500">Rescheduled from 10/23/2025 to 11/05/2025</p>
-            </div>
-            
-            {/* Follow-up Message */}
-            <div className="bg-gray-50 rounded-lg p-4">
-              <div className="flex justify-between items-center mb-2">
-                <h4 className="font-medium text-gray-900">Send Follow Up Message</h4>
-                <div className="flex space-x-1">
-                  <button className="text-xs bg-gray-100 text-gray-600 px-3 py-1 rounded-full">Out</button>
-                  <button className="text-xs bg-blue-500 text-white px-3 py-1 rounded-full">Edit</button>
+              <div className="mt-auto">
+                <div className="flex items-baseline">
+                  <span className="text-3xl font-bold">{appointmentsToday}</span>
+                  <span className="text-2xl font-bold text-gray-500 ml-1">scheduled</span>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-xs text-gray-400">WORKING HOURS TODAY</span>
+                  <span className="text-xs text-gray-400">{hoursInHHMM}</span>
                 </div>
               </div>
-              <p className="text-sm text-gray-600">Send automated status on client call</p>
-              <p className="text-xs italic text-gray-500 mt-1">Appointment has been created for October 11</p>
+            </div>
+            
+            <div className="bg-[#24344D] text-white rounded-xl shadow-md p-5 flex flex-col">
+              <div className="flex items-center mb-3">
+                <div className="p-2 rounded-full bg-catchup-primary/20">
+                  <TrendingUpIcon className="h-5 w-5 text-[#10B981]" />
+                </div>
+                <h3 className="ml-3 font-medium">Active Projects</h3>
+              </div>
+              <div className="mt-auto">
+                <div className="flex items-baseline">
+                  <span className="text-3xl font-bold">{activeProjectsCount}</span>
+                  <span className="text-2xl font-bold text-gray-500 ml-1">active</span>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-xs text-gray-400">DUE THIS WEEK</span>
+                  <span className="text-xs text-gray-400">{projectsDueThisWeek}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="bg-[#1F2A40] text-white rounded-xl shadow-md p-5 flex flex-col">
+              <div className="flex items-center mb-3">
+                <div className="p-2 rounded-full bg-catchup-primary/20">
+                  <CheckSquareIcon className="h-5 w-5 text-[#FFC700]" />
+                </div>
+                <h3 className="ml-3 font-medium">Task Progress</h3>
+              </div>
+              <div className="mt-auto">
+                <div className="flex items-baseline">
+                  <span className="text-3xl font-bold">{taskCompletionPercentage}%</span>
+                  <span className="text-2xl font-bold text-gray-500 ml-1">complete</span>
+                </div>
+                <div className="flex justify-between items-center mt-2">
+                  <span className="text-xs text-gray-400">TASKS COMPLETED</span>
+                  <span className="text-xs text-gray-400">{taskCompletionRatio}</span>
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>
+      )}
+
+      {/* Customizable Widget Grid */}
+      <div className="space-y-6">
+        {/* Missed Calls Widget */}
+        {widgets.find(w => w.id === 'missed-calls')?.visible && (
+          <motion.div 
+            variants={itemVariants}
+            className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
+            style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
+          >
+            <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+              <h3 className="font-semibold text-lg text-gray-800 flex items-center">
+                <PhoneIcon className="mr-2 h-5 w-5 text-catchup-primary" />
+                Recent Communications
+              </h3>
+              <Link href="/messages">
+                <Button variant="ghost" size="sm" className="text-sm text-gray-500 hover:underline">
+                  View All
+                </Button>
+              </Link>
+            </div>
+            <div className="p-6">
+              <p className="text-gray-500 text-center py-8">
+                No recent missed calls or messages. All communications are up to date.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* AI Assistant Widget */}
+        {widgets.find(w => w.id === 'ai-assistant')?.visible && (
+          <motion.div 
+            variants={itemVariants}
+            className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
+            style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
+          >
+            <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+              <h3 className="font-semibold text-lg text-gray-800 flex items-center">
+                <Bot className="mr-2 h-5 w-5 text-catchup-primary" />
+                AI Assistant
+              </h3>
+              <Link href="/ai-assistant">
+                <Button variant="ghost" size="sm" className="text-sm text-gray-500 hover:underline">
+                  Open Assistant
+                </Button>
+              </Link>
+            </div>
+            <div className="p-6">
+              <div className="text-center py-8">
+                <Bot className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <p className="text-gray-500 mb-4">
+                  Your AI assistant is ready to help with scheduling, client management, and task automation.
+                </p>
+                <Link href="/ai-assistant">
+                  <Button className="bg-catchup-primary hover:bg-catchup-primary/90">
+                    Start Conversation
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Recent Projects Widget */}
+        {widgets.find(w => w.id === 'recent-projects')?.visible && (
+          <motion.div 
+            variants={itemVariants}
+            className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
+            style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
+          >
+            <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+              <h3 className="font-semibold text-lg text-gray-800 flex items-center">
+                <FolderIcon className="mr-2 h-5 w-5 text-catchup-primary" />
+                Recent Projects
+              </h3>
+              <Link href="/projects">
+                <Button variant="ghost" size="sm" className="text-sm text-gray-500 hover:underline">
+                  View All
+                </Button>
+              </Link>
+            </div>
+            <div className="p-6">
+              {projectsWithClients && projectsWithClients.length > 0 ? (
+                <div className="space-y-3">
+                  {projectsWithClients.slice(0, 3).map((project) => (
+                    <div key={project.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div>
+                        <h4 className="font-medium text-gray-900">{project.name}</h4>
+                        <p className="text-sm text-gray-500">
+                          {project.client ? `${project.client.firstName} ${project.client.lastName}` : 'Personal Project'}
+                        </p>
+                      </div>
+                      <Badge 
+                        variant={project.status === 'completed' ? 'default' : 'secondary'}
+                        className={project.status === 'in_progress' ? 'bg-blue-100 text-blue-800' : ''}
+                      >
+                        {project.status.replace('_', ' ')}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-8">
+                  No projects yet. Create your first project to get started.
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Tasks Widget */}
+        {widgets.find(w => w.id === 'tasks')?.visible && (
+          <motion.div 
+            variants={itemVariants}
+            className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
+            style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
+          >
+            <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+              <h3 className="font-semibold text-lg text-gray-800 flex items-center">
+                <CheckSquareIcon className="mr-2 h-5 w-5 text-catchup-primary" />
+                Upcoming Tasks
+              </h3>
+              <Link href="/tasks">
+                <Button variant="ghost" size="sm" className="text-sm text-gray-500 hover:underline">
+                  View All
+                </Button>
+              </Link>
+            </div>
+            <div className="p-6">
+              {tasksWithProjects && tasksWithProjects.length > 0 ? (
+                <div className="space-y-3">
+                  {tasksWithProjects
+                    .filter(task => !task.completed)
+                    .slice(0, 5)
+                    .map((task) => (
+                    <div key={task.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                      <div className="flex items-center space-x-3">
+                        <div className="flex-shrink-0">
+                          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                        </div>
+                        <div>
+                          <h4 className="font-medium text-gray-900">{task.title}</h4>
+                          {task.project && (
+                            <p className="text-sm text-gray-500">{task.project.name}</p>
+                          )}
+                        </div>
+                      </div>
+                      <Badge 
+                        variant={task.priority === 'urgent' ? 'destructive' : 'secondary'}
+                        className={
+                          task.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                          task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : ''
+                        }
+                      >
+                        {task.priority}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500 text-center py-8">
+                  No pending tasks. You're all caught up!
+                </p>
+              )}
+            </div>
+          </motion.div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Calendar Card */}
-        <motion.div 
-          variants={itemVariants} 
-          className="lg:col-span-2 bg-white rounded-xl overflow-hidden border border-gray-100"
-          style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
-        >
+      {/* Calendar and Suggestions Grid */}
+      {(widgets.find(w => w.id === 'calendar')?.visible || widgets.find(w => w.id === 'suggestions')?.visible) && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Calendar Card */}
+          {widgets.find(w => w.id === 'calendar')?.visible && (
+            <motion.div 
+              variants={itemVariants} 
+              className="lg:col-span-2 bg-white rounded-xl overflow-hidden border border-gray-100"
+              style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
+            >
           <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
             <div className="flex items-center">
               <h3 className="font-semibold text-lg text-gray-800">May 20%</h3>
@@ -640,46 +721,39 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-        </motion.div>
+            </motion.div>
+          )}
 
-        {/* Suggestions Card */}
-        <motion.div 
-          variants={itemVariants}
-          className="bg-white rounded-xl overflow-hidden border border-gray-100"
-          style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
-        >
-          <div className="border-b border-gray-100 px-6 py-4">
-            <h3 className="font-semibold text-lg text-gray-800">Suggestions</h3>
-          </div>
-          <div className="p-4 space-y-6">
-            {/* Suggestion 1 */}
-            <div>
-              <div className="flex justify-between items-start mb-2">
-                <h4 className="font-medium text-gray-900">Reschedule Appointment</h4>
-                <button className="text-xs text-blue-500 font-medium">Approve</button>
+          {/* Suggestions Card */}
+          {widgets.find(w => w.id === 'suggestions')?.visible && (
+            <motion.div 
+              variants={itemVariants}
+              className="bg-white rounded-xl overflow-hidden border border-gray-100"
+              style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
+            >
+              <div className="border-b border-gray-100 px-6 py-4">
+                <h3 className="font-semibold text-lg text-gray-800 flex items-center">
+                  <Lightbulb className="mr-2 h-5 w-5 text-catchup-primary" />
+                  AI Suggestions
+                </h3>
               </div>
-              <p className="text-sm text-gray-500 mb-4">Approve 5:00 pm time that fits both your schedule</p>
-              <div className="text-xs text-gray-400 flex items-center justify-between">
-                <span>TUESDAY, AUGUST 14, 2025 - 5:00 PM</span>
-                <button className="text-xs text-blue-500">Edit</button>
+              <div className="p-6">
+                <div className="text-center py-8">
+                  <Lightbulb className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <p className="text-gray-500 mb-4">
+                    AI suggestions will appear here to help optimize your workflow and client interactions.
+                  </p>
+                  <Link href="/ai-assistant">
+                    <Button variant="outline" size="sm">
+                      Get AI Suggestions
+                    </Button>
+                  </Link>
+                </div>
               </div>
-            </div>
-
-            {/* Suggestion 2 */}
-            <div>
-              <div className="flex justify-between items-start mb-2">
-                <h4 className="font-medium text-gray-900">Send Follow Up Message</h4>
-                <button className="text-xs text-blue-500 font-medium">Edit</button>
-              </div>
-              <p className="text-sm text-gray-500 mb-4">Improve profits on all technical. Hanan</p>
-              <div className="text-xs text-gray-400 flex items-center justify-between">
-                <span>CUSTOMER HASN'T REPLIED</span>
-                <button className="text-xs text-blue-500">Dismiss</button>
-              </div>
-            </div>
-          </div>
-        </motion.div>
-      </div>
+            </motion.div>
+          )}
+        </div>
+      )}
     </motion.div>
   );
 }
