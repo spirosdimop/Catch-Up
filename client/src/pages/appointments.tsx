@@ -740,7 +740,7 @@ export default function AppointmentsPage() {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-1">Time</label>
+                  <label className="block text-sm font-medium mb-1">Time {user?.timeFormat && `(${user.timeFormat}h format)`}</label>
                   {user?.timeFormat === '24' ? (
                     <input 
                       name="time"

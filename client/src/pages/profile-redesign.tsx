@@ -109,6 +109,7 @@ export default function ProfileRedesign() {
         locationType: "remote",
         serviceArea: "Global - Remote Sessions",
         profileImageUrl: "",
+        timeFormat: "12",
         // Stats for the demo
         stats: {
           clientsHelped: 124,

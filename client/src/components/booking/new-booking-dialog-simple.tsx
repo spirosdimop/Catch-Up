@@ -134,13 +134,12 @@ export function NewBookingDialog({ open, onOpenChange }: NewBookingDialogProps) 
   useEffect(() => {
     if (selectedDate && selectedService) {
       // Generate time slots (this would normally come from an API)
-      const slots = [];
       const service = services.find(s => s.id === selectedService);
       const duration = service?.duration || 60;
       
       // Generate time slots using the utility function
       const timeOptions = generateTimeOptions(user, 9, 17, 30);
-      slots = timeOptions.map(timeOption => ({
+      const slots = timeOptions.map(timeOption => ({
         id: timeOption,
         time: timeOption,
         available: Math.random() > 0.3, // Randomly mark some as unavailable
