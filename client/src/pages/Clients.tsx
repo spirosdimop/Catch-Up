@@ -560,11 +560,53 @@ export default function Clients() {
                       )}
                     </div>
 
+                    {/* Bookings */}
+                    <div className="bg-orange-50 p-4 rounded-lg">
+                      <div className="flex items-center mb-3">
+                        <CalendarIcon className="h-5 w-5 mr-2 text-orange-600" />
+                        <h4 className="font-medium text-orange-900">Bookings ({connections.bookings.length})</h4>
+                      </div>
+                      {connections.bookings.length > 0 ? (
+                        <div className="space-y-2">
+                          {connections.bookings.map((booking: any) => (
+                            <div key={booking.id} className="bg-white p-3 rounded border">
+                              <div className="flex justify-between items-start">
+                                <div>
+                                  <h5 className="font-medium">{booking.type || 'Consultation'}</h5>
+                                  <p className="text-sm text-gray-600">
+                                    {new Date(booking.date).toLocaleDateString()} at {booking.time}
+                                  </p>
+                                  {booking.description && (
+                                    <p className="text-sm text-gray-600 mt-1">{booking.description}</p>
+                                  )}
+                                  {booking.duration && (
+                                    <p className="text-xs text-gray-500 mt-1">
+                                      Duration: {booking.duration} minutes
+                                    </p>
+                                  )}
+                                </div>
+                                <span className={`px-2 py-1 text-xs rounded-full ${
+                                  booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
+                                  booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                  booking.status === 'canceled' ? 'bg-red-100 text-red-800' :
+                                  'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {booking.status}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-orange-700 italic">No bookings for this client</p>
+                      )}
+                    </div>
+
                     {/* Summary */}
                     <div className="bg-gray-100 p-4 rounded-lg">
                       <h4 className="font-medium mb-2">Summary</h4>
                       <p className="text-sm text-gray-700">
-                        This client has {connections.totalConnections} total connections: {connections.projects.length} projects, {connections.tasks.length} tasks, and {connections.invoices.length} invoices.
+                        This client has {connections.totalConnections} total connections: {connections.projects.length} projects, {connections.tasks.length} tasks, {connections.invoices.length} invoices, and {connections.bookings.length} bookings.
                       </p>
                     </div>
                   </div>
