@@ -38,8 +38,10 @@ router.post("/", async (req, res) => {
     // Determine booking status based on source
     // Profile page bookings (from public clients) need confirmation - set to "pending"
     // Calendar/Appointments page bookings (internal) are auto-accepted - set to "confirmed"
-    const isFromProfile = req.body.source === "profile" || req.body.clientEmail; // Profile bookings include clientEmail
+    const isFromProfile = req.body.source === "profile" || Boolean(req.body.clientEmail); // Profile bookings include clientEmail
     const defaultStatus = isFromProfile ? "pending" : "confirmed";
+    
+    console.log(`Booking request - source: ${req.body.source}, clientEmail: ${req.body.clientEmail}, isFromProfile: ${isFromProfile}`);
     
     // Automatic client handling
     let clientId = parseInt(req.body.clientId) || null;
