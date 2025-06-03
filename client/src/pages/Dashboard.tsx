@@ -1,5 +1,6 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Project, Client, Task, TimeEntry, Event, Booking } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
 import { calculateWeeklySummary } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
@@ -103,6 +104,7 @@ const defaultQuickActions: QuickAction[] = [
 export default function Dashboard() {
   const { user } = useUser();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [isWideMobile, setIsWideMobile] = useState(false);
   const [isCustomizing, setIsCustomizing] = useState(false);
   const [widgets, setWidgets] = useState<DashboardWidget[]>(() => {
@@ -212,6 +214,48 @@ export default function Dashboard() {
   const appointmentsToday = todayBookings.length;
   const bookingsThisWeek = thisWeekBookings.length;
   const pendingFollowups = bookings?.filter(b => b.status === 'confirmed').length || 0;
+
+  // Task completion mutation
+  const updateTaskMutation = useMutation({
+    mutationFn: async ({ taskId, completed }: { taskId: number; completed: boolean }) => {
+      return apiRequest(`/api/tasks/${taskId}`, 'PATCH', { completed });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      toast({
+        title: "Task updated",
+        description: "Task status has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update task. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Project status mutation
+  const updateProjectMutation = useMutation({
+    mutationFn: async ({ projectId, status }: { projectId: number; status: string }) => {
+      return apiRequest(`/api/projects/${projectId}`, 'PATCH', { status });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      toast({
+        title: "Project updated",
+        description: "Project status has been updated successfully.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update project. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
 
   // Calculate statistics
   const activeProjectsCount = projects?.filter(p => p.status === 'in_progress').length || 0;
@@ -592,27 +636,51 @@ export default function Dashboard() {
                     .filter(task => !task.completed)
                     .slice(0, 5)
                     .map((task) => (
-                    <div key={task.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div key={task.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                       <div className="flex items-center space-x-3">
                         <div className="flex-shrink-0">
-                          <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                          <button
+                            onClick={() => updateTaskMutation.mutate({ taskId: task.id, completed: !task.completed })}
+                            disabled={updateTaskMutation.isPending}
+                            className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors ${
+                              task.completed 
+                                ? 'bg-green-500 border-green-500 text-white' 
+                                : 'border-gray-300 hover:border-green-400'
+                            } ${updateTaskMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                          >
+                            {task.completed && (
+                              <CheckSquareIcon className="w-3 h-3" />
+                            )}
+                          </button>
                         </div>
-                        <div>
-                          <h4 className="font-medium text-gray-900">{task.title}</h4>
+                        <div className={task.completed ? 'opacity-50' : ''}>
+                          <h4 className={`font-medium text-gray-900 ${task.completed ? 'line-through' : ''}`}>
+                            {task.title}
+                          </h4>
                           {task.project && (
                             <p className="text-sm text-gray-500">{task.project.name}</p>
                           )}
+                          {task.deadline && (
+                            <p className="text-xs text-gray-400">
+                              Due: {new Date(task.deadline).toLocaleDateString()}
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <Badge 
-                        variant={task.priority === 'urgent' ? 'destructive' : 'secondary'}
-                        className={
-                          task.priority === 'high' ? 'bg-orange-100 text-orange-800' :
-                          task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : ''
-                        }
-                      >
-                        {task.priority}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge 
+                          variant={task.priority === 'urgent' ? 'destructive' : 'secondary'}
+                          className={
+                            task.priority === 'high' ? 'bg-orange-100 text-orange-800' :
+                            task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : ''
+                          }
+                        >
+                          {task.priority}
+                        </Badge>
+                        {updateTaskMutation.isPending && (
+                          <RefreshCwIcon className="w-4 h-4 animate-spin text-gray-400" />
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -683,7 +751,7 @@ export default function Dashboard() {
                       <div className="h-3 w-3 rounded-full bg-catchup-primary flex-shrink-0"></div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          {booking.description || 'Appointment'}
+                          {booking.type ? booking.type.charAt(0).toUpperCase() + booking.type.slice(1).replace('_', ' ') : 'Appointment'}
                         </p>
                         <p className="text-xs text-gray-500">
                           {booking.time} • {booking.duration || '30'} min
