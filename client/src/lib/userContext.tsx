@@ -85,7 +85,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
     const storedUser = localStorage.getItem('userData');
     if (storedUser) {
       try {
-        setUserState(JSON.parse(storedUser));
+        const userData = JSON.parse(storedUser);
+        // Ensure timeFormat has a default value
+        if (!userData.timeFormat) {
+          userData.timeFormat = '12';
+        }
+        setUserState(userData);
       } catch (error) {
         console.error('Failed to parse user data from localStorage', error);
       }

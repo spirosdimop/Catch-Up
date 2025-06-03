@@ -60,7 +60,10 @@ export function TimePicker({ value, onChange, disabled, className }: TimePickerP
     onChange(timeString);
   }, [selectedHour, selectedMinute, isAM, user?.timeFormat, onChange]);
 
-  if (user?.timeFormat === '24') {
+  // Force 24-hour format detection
+  const is24HourFormat = user?.timeFormat === '24';
+  
+  if (is24HourFormat) {
     // Use HTML time input for 24-hour format
     return (
       <Input
