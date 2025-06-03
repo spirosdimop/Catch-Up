@@ -15,7 +15,17 @@ import {
   CalendarPlusIcon,
   RefreshCwIcon,
   UserIcon,
-  Bot
+  Bot,
+  Settings,
+  Eye,
+  EyeOff,
+  Edit3,
+  Save,
+  X,
+  FileTextIcon,
+  UsersIcon,
+  FolderIcon,
+  BarChart3Icon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,10 +33,13 @@ import StatCard from "@/components/StatCard";
 import ProjectTable from "@/components/ProjectTable";
 import TaskList from "@/components/TaskList";
 import TimeTrackingWidget from "@/components/TimeTrackingWidget";
-import ReminderSummary from "@/components/InvoiceSummary"; // Component was renamed but file name remains the same
+import ReminderSummary from "@/components/InvoiceSummary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useUser } from "@/lib/userContext";
 import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
+import { useToast } from "@/hooks/use-toast";
 
 // Animation variants for staggered fade-in of cards
 const containerVariants = {
@@ -52,9 +65,55 @@ const itemVariants = {
   }
 };
 
+// Dashboard customization types
+interface DashboardWidget {
+  id: string;
+  title: string;
+  visible: boolean;
+  order: number;
+  icon: React.ReactNode;
+}
+
+interface QuickAction {
+  id: string;
+  label: string;
+  icon: React.ReactNode;
+  href?: string;
+  onClick?: () => void;
+  visible: boolean;
+}
+
+const defaultWidgets: DashboardWidget[] = [
+  { id: 'stats', title: 'Statistics', visible: true, order: 1, icon: <BarChart3Icon className="h-4 w-4" /> },
+  { id: 'missed-calls', title: 'Missed Calls', visible: true, order: 2, icon: <PhoneIcon className="h-4 w-4" /> },
+  { id: 'ai-assistant', title: 'AI Assistant', visible: true, order: 3, icon: <Bot className="h-4 w-4" /> },
+  { id: 'calendar', title: 'Calendar', visible: true, order: 4, icon: <CalendarIcon className="h-4 w-4" /> },
+  { id: 'recent-projects', title: 'Recent Projects', visible: true, order: 5, icon: <FolderIcon className="h-4 w-4" /> },
+  { id: 'tasks', title: 'Tasks', visible: true, order: 6, icon: <CheckSquareIcon className="h-4 w-4" /> },
+];
+
+const defaultQuickActions: QuickAction[] = [
+  { id: 'new-client', label: 'New Client', icon: <UsersIcon className="h-4 w-4" />, href: '/clients', visible: true },
+  { id: 'new-project', label: 'New Project', icon: <FolderIcon className="h-4 w-4" />, href: '/projects', visible: true },
+  { id: 'new-booking', label: 'Schedule Meeting', icon: <CalendarPlusIcon className="h-4 w-4" />, href: '/calendar', visible: true },
+  { id: 'new-invoice', label: 'Create Invoice', icon: <FileTextIcon className="h-4 w-4" />, href: '/invoices', visible: true },
+  { id: 'view-reports', label: 'View Reports', icon: <BarChart3Icon className="h-4 w-4" />, href: '/reports', visible: true },
+  { id: 'send-message', label: 'Send Message', icon: <MessageSquareIcon className="h-4 w-4" />, href: '/messages', visible: true },
+];
+
 export default function Dashboard() {
   const { user } = useUser();
+  const { toast } = useToast();
   const [isWideMobile, setIsWideMobile] = useState(false);
+  const [isCustomizing, setIsCustomizing] = useState(false);
+  const [widgets, setWidgets] = useState<DashboardWidget[]>(() => {
+    const saved = localStorage.getItem('dashboard-widgets');
+    return saved ? JSON.parse(saved) : defaultWidgets;
+  });
+  const [quickActions, setQuickActions] = useState<QuickAction[]>(() => {
+    const saved = localStorage.getItem('dashboard-quick-actions');
+    return saved ? JSON.parse(saved) : defaultQuickActions;
+  });
 
   // Update UI based on screen size
   useEffect(() => {
@@ -65,6 +124,43 @@ export default function Dashboard() {
     window.addEventListener('resize', checkScreenSize);
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []);
+
+  // Save customizations to localStorage
+  const saveCustomizations = () => {
+    localStorage.setItem('dashboard-widgets', JSON.stringify(widgets));
+    localStorage.setItem('dashboard-quick-actions', JSON.stringify(quickActions));
+    setIsCustomizing(false);
+    toast({
+      title: "Dashboard Updated",
+      description: "Your dashboard preferences have been saved.",
+    });
+  };
+
+  // Toggle widget visibility
+  const toggleWidget = (widgetId: string) => {
+    setWidgets(prev => prev.map(w => 
+      w.id === widgetId ? { ...w, visible: !w.visible } : w
+    ));
+  };
+
+  // Toggle quick action visibility
+  const toggleQuickAction = (actionId: string) => {
+    setQuickActions(prev => prev.map(a => 
+      a.id === actionId ? { ...a, visible: !a.visible } : a
+    ));
+  };
+
+  // Reset to defaults
+  const resetToDefaults = () => {
+    setWidgets(defaultWidgets);
+    setQuickActions(defaultQuickActions);
+    localStorage.removeItem('dashboard-widgets');
+    localStorage.removeItem('dashboard-quick-actions');
+    toast({
+      title: "Dashboard Reset",
+      description: "Dashboard has been reset to default layout.",
+    });
+  };
 
   // Get current date in nice format
   const today = new Date();
@@ -151,9 +247,9 @@ export default function Dashboard() {
       animate="visible"
       variants={containerVariants}
     >
-      {/* Header with welcome message and date */}
+      {/* Header with welcome message and customization */}
       <motion.div 
-        className="flex flex-col md:flex-row md:items-center md:justify-between mb-8"
+        className="flex flex-col md:flex-row md:items-center md:justify-between mb-6"
         variants={itemVariants}
       >
         <div>
@@ -164,26 +260,106 @@ export default function Dashboard() {
         </div>
 
         <div className="mt-4 md:mt-0 flex flex-wrap gap-3">
-          {/* Quick action shortcuts */}
-          <div className="flex md:hidden space-x-2 w-full">
-            <Button variant="outline" size="sm" className="flex-1 bg-white shadow-sm border-gray-200">
-              <PlusIcon className="mr-1 h-4 w-4" /> Booking
-            </Button>
-            <Button variant="outline" size="sm" className="flex-1 bg-white shadow-sm border-gray-200">
-              <MessageSquareIcon className="mr-1 h-4 w-4" /> Message
-            </Button>
-            <Button variant="outline" size="sm" className="flex-1 bg-white shadow-sm border-gray-200">
-              <RefreshCwIcon className="mr-1 h-4 w-4" /> Reschedule
-            </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsCustomizing(!isCustomizing)}
+            className="bg-white shadow-sm border-gray-200"
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            Customize Dashboard
+          </Button>
+        </div>
+      </motion.div>
+
+      {/* Customization Panel */}
+      {isCustomizing && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          className="mb-6 bg-white rounded-lg border border-gray-200 p-6"
+        >
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold">Customize Your Dashboard</h3>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={resetToDefaults}>
+                Reset to Defaults
+              </Button>
+              <Button size="sm" onClick={saveCustomizations}>
+                <Save className="mr-2 h-4 w-4" />
+                Save Changes
+              </Button>
+              <Button variant="ghost" size="sm" onClick={() => setIsCustomizing(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
-          {/* Desktop action buttons */}
-          <div className="hidden md:flex space-x-3">
-            <Button className="bg-catchup-primary hover:bg-catchup-primary/90 shadow-md">
-              <CalendarPlusIcon className="mr-2 h-4 w-4" />
-              Schedule New Event
-            </Button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Quick Actions Configuration */}
+            <div>
+              <h4 className="font-medium mb-3">Quick Actions</h4>
+              <div className="space-y-2">
+                {quickActions.map((action) => (
+                  <div key={action.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <div className="flex items-center gap-2">
+                      {action.icon}
+                      <span className="text-sm">{action.label}</span>
+                    </div>
+                    <Switch
+                      checked={action.visible}
+                      onCheckedChange={() => toggleQuickAction(action.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Widget Configuration */}
+            <div>
+              <h4 className="font-medium mb-3">Dashboard Widgets</h4>
+              <div className="space-y-2">
+                {widgets.map((widget) => (
+                  <div key={widget.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <div className="flex items-center gap-2">
+                      {widget.icon}
+                      <span className="text-sm">{widget.title}</span>
+                    </div>
+                    <Switch
+                      checked={widget.visible}
+                      onCheckedChange={() => toggleWidget(widget.id)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
+        </motion.div>
+      )}
+
+      {/* Quick Actions Bar */}
+      <motion.div 
+        className="mb-6 bg-white rounded-lg border border-gray-200 p-4"
+        variants={itemVariants}
+      >
+        <h3 className="text-sm font-medium text-gray-700 mb-3">Quick Actions</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+          {quickActions
+            .filter(action => action.visible)
+            .map((action) => (
+              <Link key={action.id} href={action.href || '#'}>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="w-full justify-start bg-gray-50 hover:bg-gray-100 border-gray-200"
+                  onClick={action.onClick}
+                >
+                  {action.icon}
+                  <span className="ml-2 text-xs">{action.label}</span>
+                </Button>
+              </Link>
+            ))}
         </div>
       </motion.div>
 

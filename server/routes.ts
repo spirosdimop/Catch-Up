@@ -363,11 +363,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Group duplicate clients by email for processing
       const clientsByEmail: Record<string, Client[]> = {};
       duplicateClients.forEach(client => {
-        const email = client.email.toLowerCase().trim();
-        if (!clientsByEmail[email]) {
-          clientsByEmail[email] = [];
+        if (client.email) {
+          const email = client.email.toLowerCase().trim();
+          if (!clientsByEmail[email]) {
+            clientsByEmail[email] = [];
+          }
+          clientsByEmail[email].push(client);
         }
-        clientsByEmail[email].push(client);
       });
       
       // Process and delete unconnected clients
@@ -377,16 +379,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const deleted = await storage.deleteClient(client.id);
             return {
               id: client.id,
-              name: client.name,
-              email: client.email,
+              name: `${client.firstName} ${client.lastName}`,
+              email: client.email || '',
               deleted,
               reason: "unconnected"
             };
           } catch (error) {
             return {
               id: client.id,
-              name: client.name,
-              email: client.email,
+              name: `${client.firstName} ${client.lastName}`,
+              email: client.email || '',
               deleted: false,
               error: error instanceof Error ? error.message : String(error),
               reason: "unconnected"
