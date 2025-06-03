@@ -54,14 +54,16 @@ export default function TaskForm({ defaultValues, projectId, onSubmit, isSubmitt
     resolver: zodResolver(taskFormSchema),
     defaultValues: defaultValues ? {
       ...defaultValues,
-      projectId: defaultValues.projectId || projectId,
+      projectId: defaultValues.projectId || projectId || null,
+      clientId: defaultValues.clientId || null,
       deadline: defaultValues.deadline ? format(new Date(defaultValues.deadline), "yyyy-MM-dd") : "",
     } : {
       title: "",
       description: "",
       status: "to_do",
       priority: "medium",
-      projectId: projectId,
+      projectId: projectId || null,
+      clientId: null,
       deadline: "",
       completed: false
     },
@@ -201,7 +203,7 @@ export default function TaskForm({ defaultValues, projectId, onSubmit, isSubmitt
                 <FormLabel>Project</FormLabel>
                 <Select
                   onValueChange={(value) => field.onChange(parseInt(value))}
-                  defaultValue={field.value.toString()}
+                  defaultValue={field.value?.toString()}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -220,8 +222,38 @@ export default function TaskForm({ defaultValues, projectId, onSubmit, isSubmitt
               </FormItem>
             )}
           />
-        ) : (
+        ) : projectId ? (
           <input type="hidden" {...form.register("projectId")} value={projectId} />
+        ) : null}
+
+        {showClientSelect && allClients.length > 0 && (
+          <FormField
+            control={form.control}
+            name="clientId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Client</FormLabel>
+                <Select
+                  onValueChange={(value) => field.onChange(parseInt(value))}
+                  defaultValue={field.value?.toString()}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select client" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {allClients.map(client => (
+                      <SelectItem key={client.id} value={client.id.toString()}>
+                        {client.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
         )}
 
         <div className="flex justify-end pt-4">
