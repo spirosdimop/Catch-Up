@@ -35,14 +35,11 @@ import { Client, Project, ProjectStatus } from "@shared/schema";
 const projectFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   description: z.string().nullable().optional(),
-  clientId: z.union([z.string(), z.number()]).nullable().optional().transform((val) => {
-    if (val === null || val === undefined || val === "personal") return null;
-    if (typeof val === "string") {
-      const num = parseInt(val);
-      return isNaN(num) ? null : num;
-    }
-    return typeof val === "number" ? val : null;
-  }), // Handle string-to-number conversion for client selection
+  clientId: z.preprocess((val) => {
+    if (val === null || val === undefined || val === "" || val === "personal") return null;
+    const num = Number(val);
+    return isNaN(num) ? null : num;
+  }, z.number().nullable().optional()), // Clean client ID handling
   startDate: z.union([z.date(), z.string(), z.null()]).optional(),
   endDate: z.union([z.date(), z.string(), z.null()]).optional(),
   budget: z.coerce.number().nullable().optional(),
@@ -165,16 +162,11 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
               <FormLabel>Client</FormLabel>
               <Select 
                 onValueChange={(value) => {
-                  console.log("Client selection changed to:", value, typeof value);
                   if (value === "personal") {
-                    console.log("Setting clientId to null (personal project)");
                     field.onChange(null);
                   } else {
-                    const numValue = parseInt(value);
-                    console.log("Parsing client value:", value, "->", numValue);
-                    field.onChange(isNaN(numValue) ? null : numValue);
+                    field.onChange(value);
                   }
-                  console.log("Current form values after change:", form.getValues());
                 }}
                 value={field.value === null || field.value === undefined ? "personal" : field.value.toString()}
               >
