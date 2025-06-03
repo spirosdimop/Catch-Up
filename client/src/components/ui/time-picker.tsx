@@ -18,6 +18,9 @@ export function TimePicker({ value, onChange, disabled, className }: TimePickerP
   const [selectedMinute, setSelectedMinute] = useState<number>(0);
   const [isAM, setIsAM] = useState<boolean>(true);
 
+  // Debug log to check user timeFormat
+  console.log('TimePicker - user timeFormat:', user?.timeFormat);
+
   // Parse initial value
   useEffect(() => {
     if (value) {
