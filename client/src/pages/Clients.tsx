@@ -55,8 +55,11 @@ export default function Clients() {
   });
 
   // Fetch bookings to show client-booking relationships
-  const { data: bookings = [] } = useQuery({
+  const { data: bookings = [], refetch: refetchBookings } = useQuery({
     queryKey: ['/api/bookings'],
+    staleTime: 0, // Always fetch fresh data
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true // Refetch when window regains focus
   });
 
   // Create client mutation
@@ -408,7 +411,7 @@ export default function Clients() {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center">
                     <UserIcon className="h-5 w-5 mr-2 text-gray-500" />
-                    <span className="font-medium">{selectedClient.name}</span>
+                    <span className="font-medium">{selectedClient.firstName} {selectedClient.lastName}</span>
                   </div>
                   <div className="flex items-center">
                     <MailIcon className="h-5 w-5 mr-2 text-gray-500" />
