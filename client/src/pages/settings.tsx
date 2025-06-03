@@ -34,6 +34,8 @@ import { Badge } from "@/components/ui/badge";
 import { useUser } from "@/lib/userContext";
 import { useAppSettings } from "@/lib/appSettingsContext";
 import { useToast } from "@/hooks/use-toast";
+import { EmailVerification } from "@/components/verification/EmailVerification";
+import { PhoneVerification } from "@/components/verification/PhoneVerification";
 
 export default function Settings() {
   const { user, updateUser } = useUser();
