@@ -2,14 +2,20 @@ import { useState, useMemo } from 'react';
 import { Calendar, dateFnsLocalizer, Views } from 'react-big-calendar';
 import { format, parseISO, startOfWeek, getDay, parse, add } from 'date-fns';
 import { enUS } from 'date-fns/locale';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Calendar as CalendarIcon, Clock, Users, Briefcase, CheckSquare, Filter, Plus, ChevronDown } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, Users, Briefcase, CheckSquare, Filter, Plus, ChevronDown, Edit, X } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { apiRequest } from '@/lib/queryClient';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 // Create localizer
@@ -48,6 +54,51 @@ export default function UnifiedCalendar() {
     showTasks: true,
     showProjects: true,
     showEvents: true,
+  });
+
+  // Edit modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  const [editingType, setEditingType] = useState('');
+  
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
+
+  // Update mutations for different item types
+  const updateProjectMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('PATCH', `/api/projects/${data.id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      toast({ title: 'Project updated successfully!' });
+      setShowEditModal(false);
+    },
+    onError: () => {
+      toast({ title: 'Failed to update project', variant: 'destructive' });
+    },
+  });
+
+  const updateTaskMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('PATCH', `/api/tasks/${data.id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+      toast({ title: 'Task updated successfully!' });
+      setShowEditModal(false);
+    },
+    onError: () => {
+      toast({ title: 'Failed to update task', variant: 'destructive' });
+    },
+  });
+
+  const updateEventMutation = useMutation({
+    mutationFn: (data: any) => apiRequest('PATCH', `/api/events/${data.id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['/api/events'] });
+      toast({ title: 'Event updated successfully!' });
+      setShowEditModal(false);
+    },
+    onError: () => {
+      toast({ title: 'Failed to update event', variant: 'destructive' });
+    },
   });
 
   // Fetch all data sources
@@ -200,11 +251,8 @@ export default function UnifiedCalendar() {
     };
   };
 
-  // Handle event selection
+  // Handle event selection - open inline edit modal
   const handleSelectEvent = (event: any) => {
-    console.log('Selected event:', event);
-    
-    // Route to appropriate edit page based on event type
     const eventType = event.resource?.type;
     const eventData = event.resource?.data;
     
@@ -213,26 +261,9 @@ export default function UnifiedCalendar() {
       return;
     }
     
-    switch (eventType) {
-      case 'project':
-        // Navigate to project edit page
-        window.location.href = `/projects?edit=${eventData.id}`;
-        break;
-      case 'task':
-        // Navigate to tasks page with task highlighted
-        window.location.href = `/tasks?edit=${eventData.id}`;
-        break;
-      case 'booking':
-        // Navigate to appointments page
-        window.location.href = `/appointments?edit=${eventData.id}`;
-        break;
-      case 'event':
-        // Navigate to calendar events page
-        window.location.href = `/calendar?edit=${eventData.id}`;
-        break;
-      default:
-        console.log('Unknown event type:', eventType);
-    }
+    setEditingItem(eventData);
+    setEditingType(eventType);
+    setShowEditModal(true);
   };
 
   // Toggle filters
@@ -479,6 +510,314 @@ export default function UnifiedCalendar() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Inline Edit Modal */}
+      <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit {editingType}</DialogTitle>
+            <DialogDescription>
+              Update the {editingType} information below.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editingItem && (
+            <div className="space-y-4">
+              {editingType === 'project' && (
+                <ProjectEditForm 
+                  project={editingItem} 
+                  clients={clients}
+                  onSubmit={(data) => updateProjectMutation.mutate(data)}
+                  isSubmitting={updateProjectMutation.isPending}
+                />
+              )}
+              
+              {editingType === 'task' && (
+                <TaskEditForm 
+                  task={editingItem}
+                  onSubmit={(data) => updateTaskMutation.mutate(data)}
+                  isSubmitting={updateTaskMutation.isPending}
+                />
+              )}
+              
+              {editingType === 'event' && (
+                <EventEditForm 
+                  event={editingItem}
+                  onSubmit={(data) => updateEventMutation.mutate(data)}
+                  isSubmitting={updateEventMutation.isPending}
+                />
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
+  );
+}
+
+// Simple edit forms for inline editing
+function ProjectEditForm({ project, clients, onSubmit, isSubmitting }: any) {
+  const [formData, setFormData] = useState({
+    id: project.id,
+    name: project.name || '',
+    description: project.description || '',
+    clientId: project.clientId || null,
+    status: project.status || 'in_progress',
+    startDate: project.startDate ? project.startDate.split('T')[0] : '',
+    endDate: project.endDate ? project.endDate.split('T')[0] : '',
+    budget: project.budget || ''
+  });
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    onSubmit({
+      ...formData,
+      clientId: formData.clientId || null,
+      budget: formData.budget ? Number(formData.budget) : null,
+      startDate: formData.startDate ? new Date(formData.startDate).toISOString() : null,
+      endDate: formData.endDate ? new Date(formData.endDate).toISOString() : null
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label>Project Name</Label>
+        <Input
+          value={formData.name}
+          onChange={(e) => setFormData({...formData, name: e.target.value})}
+          required
+        />
+      </div>
+      
+      <div>
+        <Label>Description</Label>
+        <Textarea
+          value={formData.description}
+          onChange={(e) => setFormData({...formData, description: e.target.value})}
+        />
+      </div>
+      
+      <div>
+        <Label>Client</Label>
+        <Select 
+          value={formData.clientId?.toString() || 'personal'}
+          onValueChange={(value) => setFormData({...formData, clientId: value === 'personal' ? null : Number(value)})}
+        >
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="personal">Personal Project</SelectItem>
+            {Array.isArray(clients) && clients.map((client: any) => (
+              <SelectItem key={client.id} value={client.id.toString()}>
+                {client.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Start Date</Label>
+          <Input
+            type="date"
+            value={formData.startDate}
+            onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+          />
+        </div>
+        <div>
+          <Label>End Date</Label>
+          <Input
+            type="date"
+            value={formData.endDate}
+            onChange={(e) => setFormData({...formData, endDate: e.target.value})}
+          />
+        </div>
+      </div>
+      
+      <div>
+        <Label>Budget</Label>
+        <Input
+          type="number"
+          value={formData.budget}
+          onChange={(e) => setFormData({...formData, budget: e.target.value})}
+        />
+      </div>
+      
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Updating...' : 'Update Project'}
+        </Button>
+        <Button type="button" variant="outline" onClick={() => setFormData(project)}>
+          Reset
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function TaskEditForm({ task, onSubmit, isSubmitting }: any) {
+  const [formData, setFormData] = useState({
+    id: task.id,
+    title: task.title || '',
+    description: task.description || '',
+    priority: task.priority || 'medium',
+    status: task.status || 'todo',
+    deadline: task.deadline ? task.deadline.split('T')[0] : ''
+  });
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    onSubmit({
+      ...formData,
+      deadline: formData.deadline ? new Date(formData.deadline).toISOString() : null
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label>Task Title</Label>
+        <Input
+          value={formData.title}
+          onChange={(e) => setFormData({...formData, title: e.target.value})}
+          required
+        />
+      </div>
+      
+      <div>
+        <Label>Description</Label>
+        <Textarea
+          value={formData.description}
+          onChange={(e) => setFormData({...formData, description: e.target.value})}
+        />
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Priority</Label>
+          <Select value={formData.priority} onValueChange={(value) => setFormData({...formData, priority: value})}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">Low</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <div>
+          <Label>Status</Label>
+          <Select value={formData.status} onValueChange={(value) => setFormData({...formData, status: value})}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="todo">To Do</SelectItem>
+              <SelectItem value="in_progress">In Progress</SelectItem>
+              <SelectItem value="completed">Completed</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+      
+      <div>
+        <Label>Deadline</Label>
+        <Input
+          type="date"
+          value={formData.deadline}
+          onChange={(e) => setFormData({...formData, deadline: e.target.value})}
+        />
+      </div>
+      
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Updating...' : 'Update Task'}
+        </Button>
+        <Button type="button" variant="outline" onClick={() => setFormData(task)}>
+          Reset
+        </Button>
+      </div>
+    </form>
+  );
+}
+
+function EventEditForm({ event, onSubmit, isSubmitting }: any) {
+  const [formData, setFormData] = useState({
+    id: event.id,
+    title: event.title || '',
+    description: event.description || '',
+    startTime: event.startTime ? new Date(event.startTime).toISOString().slice(0, 16) : '',
+    endTime: event.endTime ? new Date(event.endTime).toISOString().slice(0, 16) : '',
+    location: event.location || ''
+  });
+
+  const handleSubmit = (e: any) => {
+    e.preventDefault();
+    onSubmit({
+      ...formData,
+      startTime: formData.startTime ? new Date(formData.startTime).toISOString() : null,
+      endTime: formData.endTime ? new Date(formData.endTime).toISOString() : null
+    });
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <Label>Event Title</Label>
+        <Input
+          value={formData.title}
+          onChange={(e) => setFormData({...formData, title: e.target.value})}
+          required
+        />
+      </div>
+      
+      <div>
+        <Label>Description</Label>
+        <Textarea
+          value={formData.description}
+          onChange={(e) => setFormData({...formData, description: e.target.value})}
+        />
+      </div>
+      
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <Label>Start Time</Label>
+          <Input
+            type="datetime-local"
+            value={formData.startTime}
+            onChange={(e) => setFormData({...formData, startTime: e.target.value})}
+          />
+        </div>
+        <div>
+          <Label>End Time</Label>
+          <Input
+            type="datetime-local"
+            value={formData.endTime}
+            onChange={(e) => setFormData({...formData, endTime: e.target.value})}
+          />
+        </div>
+      </div>
+      
+      <div>
+        <Label>Location</Label>
+        <Input
+          value={formData.location}
+          onChange={(e) => setFormData({...formData, location: e.target.value})}
+        />
+      </div>
+      
+      <div className="flex gap-2">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Updating...' : 'Update Event'}
+        </Button>
+        <Button type="button" variant="outline" onClick={() => setFormData(event)}>
+          Reset
+        </Button>
+      </div>
+    </form>
   );
 }
