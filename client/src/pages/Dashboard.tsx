@@ -25,7 +25,8 @@ import {
   FileTextIcon,
   UsersIcon,
   FolderIcon,
-  BarChart3Icon
+  BarChart3Icon,
+  Lightbulb
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -733,13 +734,13 @@ export default function Dashboard() {
             >
               <div className="border-b border-gray-100 px-6 py-4">
                 <h3 className="font-semibold text-lg text-gray-800 flex items-center">
-                  <Lightbulb className="mr-2 h-5 w-5 text-catchup-primary" />
+                  <Bot className="mr-2 h-5 w-5 text-catchup-primary" />
                   AI Suggestions
                 </h3>
               </div>
               <div className="p-6">
                 <div className="text-center py-8">
-                  <Lightbulb className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                  <Bot className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                   <p className="text-gray-500 mb-4">
                     AI suggestions will appear here to help optimize your workflow and client interactions.
                   </p>
