@@ -742,15 +742,42 @@ export default function AppointmentsPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Time {user?.timeFormat && `(${user.timeFormat}h format)`}</label>
-                  <TimePicker
-                    value=""
-                    onChange={(time) => {
-                      const timeInput = document.querySelector('input[name="time"]') as HTMLInputElement;
-                      if (timeInput) timeInput.value = time;
-                    }}
-                    className="w-full"
-                  />
-                  <input name="time" type="hidden" required />
+                  {user?.timeFormat === '24' ? (
+                    <input 
+                      name="time"
+                      type="time" 
+                      className="w-full p-2 border rounded"
+                      defaultValue="09:00"
+                      required 
+                    />
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <select name="hour" className="p-2 border rounded" required>
+                        <option value="">Hour</option>
+                        {Array.from({ length: 12 }, (_, i) => i + 1).map(hour => (
+                          <option key={hour} value={hour}>{hour.toString().padStart(2, '0')}</option>
+                        ))}
+                      </select>
+                      <select name="minute" className="p-2 border rounded" required>
+                        <option value="">Min</option>
+                        <option value="00">00</option>
+                        <option value="15">15</option>
+                        <option value="30">30</option>
+                        <option value="45">45</option>
+                      </select>
+                      <div className="flex">
+                        <label className="flex items-center">
+                          <input type="radio" name="period" value="AM" className="mr-1" required />
+                          AM
+                        </label>
+                        <label className="flex items-center ml-2">
+                          <input type="radio" name="period" value="PM" className="mr-1" required />
+                          PM
+                        </label>
+                      </div>
+                      <input name="time" type="hidden" required />
+                    </div>
+                  )}
                 </div>
               </div>
               <div>
@@ -777,11 +804,24 @@ export default function AppointmentsPage() {
                   const form = document.querySelector('.booking-form') as HTMLFormElement;
                   const formData = new FormData(form);
                   
+                  // Handle time format based on user preference
+                  let timeValue = formData.get('time') as string;
+                  if (user?.timeFormat === '12') {
+                    // Combine hour, minute, and period for 12-hour format
+                    const hour = formData.get('hour') as string;
+                    const minute = formData.get('minute') as string;
+                    const period = formData.get('period') as string;
+                    
+                    if (hour && minute && period) {
+                      timeValue = `${hour.padStart(2, '0')}:${minute} ${period}`;
+                    }
+                  }
+                  
                   const bookingData = {
                     clientName: formData.get('clientName') as string,
                     serviceName: formData.get('serviceName') as string,
                     date: formData.get('date') as string,
-                    time: formData.get('time') as string,
+                    time: timeValue,
                     notes: formData.get('notes') as string,
                     clientPhone: "",
                     professionalId: "1",
