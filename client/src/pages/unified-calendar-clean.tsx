@@ -598,20 +598,7 @@ function ProjectEditForm({ project, clients, onSubmit, isSubmitting }: any) {
         />
       </div>
       
-      <div>
-        <Label>Client</Label>
-        <div className="p-2 bg-gray-50 rounded border text-sm text-gray-600">
-          {formData.clientId ? 
-            (Array.isArray(clients) ? 
-              clients.find((c: any) => c.id === formData.clientId)?.name || 'Unknown Client' : 
-              'Loading client...'
-            ) : 
-            'Personal Project'
-          }
-          <span className="text-xs block text-gray-400 mt-1">Client cannot be changed from calendar</span>
-        </div>
-      </div>
-      
+
       <div className="grid grid-cols-2 gap-4">
         <div>
           <Label>Start Date</Label>
