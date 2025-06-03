@@ -13,6 +13,8 @@ import {
   InsertInvoice,
   InvoiceItem,
   InsertInvoiceItem,
+  Booking,
+  InsertBooking,
   ProjectStatus,
   TaskStatus,
   TaskPriority,
@@ -150,6 +152,14 @@ export interface IStorage {
   createAutoResponse(response: InsertAutoResponse): Promise<AutoResponse>;
   updateAutoResponse(id: number, response: Partial<InsertAutoResponse>): Promise<AutoResponse | undefined>;
   deleteAutoResponse(id: number): Promise<boolean>;
+
+  // Booking related operations
+  getBookings(): Promise<Booking[]>;
+  getBookingsByClient(clientId: number): Promise<Booking[]>;
+  getBooking(id: number): Promise<Booking | undefined>;
+  createBooking(booking: InsertBooking): Promise<Booking>;
+  updateBooking(id: number, booking: Partial<InsertBooking>): Promise<Booking | undefined>;
+  deleteBooking(id: number): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {

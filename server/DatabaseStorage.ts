@@ -16,6 +16,8 @@ import {
   InsertInvoice,
   InvoiceItem,
   InsertInvoiceItem,
+  Booking,
+  InsertBooking,
   ServiceProvider,
   InsertServiceProvider,
   Service,
@@ -916,6 +918,61 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(schema.autoResponses)
       .where(eq(schema.autoResponses.id, id));
+    return result.rowCount ? result.rowCount > 0 : false;
+  }
+
+  // Booking related operations
+  async getBookings(): Promise<Booking[]> {
+    return await db
+      .select()
+      .from(schema.bookings)
+      .orderBy(desc(schema.bookings.createdAt));
+  }
+
+  async getBookingsByClient(clientId: number): Promise<Booking[]> {
+    return await db
+      .select()
+      .from(schema.bookings)
+      .where(eq(schema.bookings.clientId, clientId))
+      .orderBy(desc(schema.bookings.createdAt));
+  }
+
+  async getBooking(id: number): Promise<Booking | undefined> {
+    const [result] = await db
+      .select()
+      .from(schema.bookings)
+      .where(eq(schema.bookings.id, id));
+    return result;
+  }
+
+  async createBooking(booking: InsertBooking): Promise<Booking> {
+    const [result] = await db
+      .insert(schema.bookings)
+      .values({
+        ...booking,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      })
+      .returning();
+    return result;
+  }
+
+  async updateBooking(id: number, booking: Partial<InsertBooking>): Promise<Booking | undefined> {
+    const [result] = await db
+      .update(schema.bookings)
+      .set({
+        ...booking,
+        updatedAt: new Date()
+      })
+      .where(eq(schema.bookings.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteBooking(id: number): Promise<boolean> {
+    const result = await db
+      .delete(schema.bookings)
+      .where(eq(schema.bookings.id, id));
     return result.rowCount ? result.rowCount > 0 : false;
   }
 }

@@ -707,6 +707,7 @@ export const clientsRelations = relations(clients, ({ many }) => ({
   invoices: many(invoices),
   events: many(events),
   tasks: many(tasks),
+  bookings: many(bookings),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -762,6 +763,10 @@ export const bookingsRelations = relations(bookings, ({ one }) => ({
   professional: one(users, {
     fields: [bookings.professionalId],
     references: [users.id],
+  }),
+  client: one(clients, {
+    fields: [bookings.clientId],
+    references: [clients.id],
   }),
 }));
 
