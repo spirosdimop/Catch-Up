@@ -78,7 +78,13 @@ export default function TaskList({ tasks }: TaskListProps) {
   };
 
   const handleSubmit = (data: any) => {
-    createTaskMutation.mutate(data);
+    // Ensure default values for required enum fields
+    const sanitizedData = {
+      ...data,
+      status: data.status || "to_do",
+      priority: data.priority || "medium"
+    };
+    createTaskMutation.mutate(sanitizedData);
   };
 
   // Filter tasks based on the active tab

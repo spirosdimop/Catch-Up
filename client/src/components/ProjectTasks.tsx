@@ -199,8 +199,8 @@ export default function ProjectTasks({ projectId }: ProjectTasksProps) {
       const sanitizedData = {
         title: data.title,
         description: data.description || null,
-        status: data.status,
-        priority: data.priority,
+        status: data.status || "to_do", // Default to "to_do" if empty
+        priority: data.priority || "medium", // Default to "medium" if empty
         projectId: parseInt(data.projectId),
         deadline: data.deadline || null, // Send as string, backend will convert to Date
         completed: data.completed || false
