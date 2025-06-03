@@ -10,6 +10,13 @@ export const users = pgTable("users", {
   password: text("password").notNull(),
   name: text("name").notNull(),
   email: text("email").notNull(),
+  phone: text("phone"),
+  emailVerified: boolean("email_verified").default(false).notNull(),
+  phoneVerified: boolean("phone_verified").default(false).notNull(),
+  emailVerificationToken: text("email_verification_token"),
+  phoneVerificationToken: text("phone_verification_token"),
+  emailVerificationExpiry: timestamp("email_verification_expiry"),
+  phoneVerificationExpiry: timestamp("phone_verification_expiry"),
   avatarUrl: text("avatar_url"),
 });
 
@@ -18,6 +25,13 @@ export const insertUserSchema = createInsertSchema(users).pick({
   password: true,
   name: true,
   email: true,
+  phone: true,
+  emailVerified: true,
+  phoneVerified: true,
+  emailVerificationToken: true,
+  phoneVerificationToken: true,
+  emailVerificationExpiry: true,
+  phoneVerificationExpiry: true,
   avatarUrl: true,
 });
 

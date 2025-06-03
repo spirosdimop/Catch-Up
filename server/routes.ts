@@ -2388,6 +2388,157 @@ Remember: The most helpful thing you can do is direct users to the specialized t
     }
   });
 
+  // Email and Phone Verification endpoints
+  apiRouter.post("/verify/send-email", async (req, res) => {
+    try {
+      const { userId, email } = req.body;
+      
+      if (!userId || !email) {
+        return res.status(400).json({ message: "User ID and email are required" });
+      }
+      
+      // Generate verification token
+      const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      const expiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+      
+      // Update user with verification token
+      const user = await storage.getUserByUsername(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // TODO: Send actual email here using SendGrid or similar service
+      // For now, we'll just log the token for testing
+      console.log(`Email verification token for ${email}: ${token}`);
+      
+      // Store verification token in database
+      await storage.updateUser(user.id, {
+        emailVerificationToken: token,
+        emailVerificationExpiry: expiry
+      });
+      
+      res.json({ 
+        message: "Verification email sent successfully",
+        // In development, return the token for testing
+        ...(process.env.NODE_ENV === 'development' && { token })
+      });
+    } catch (error) {
+      console.error("Error sending verification email:", error);
+      res.status(500).json({ message: "Failed to send verification email" });
+    }
+  });
+  
+  apiRouter.post("/verify/email", async (req, res) => {
+    try {
+      const { userId, token } = req.body;
+      
+      if (!userId || !token) {
+        return res.status(400).json({ message: "User ID and token are required" });
+      }
+      
+      const user = await storage.getUserByUsername(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if token matches and hasn't expired
+      if (user.emailVerificationToken !== token) {
+        return res.status(400).json({ message: "Invalid verification token" });
+      }
+      
+      if (!user.emailVerificationExpiry || new Date() > user.emailVerificationExpiry) {
+        return res.status(400).json({ message: "Verification token has expired" });
+      }
+      
+      // Update user as verified
+      await storage.updateUser(user.id, {
+        emailVerified: true,
+        emailVerificationToken: null,
+        emailVerificationExpiry: null
+      });
+      
+      res.json({ message: "Email verified successfully" });
+    } catch (error) {
+      console.error("Error verifying email:", error);
+      res.status(500).json({ message: "Failed to verify email" });
+    }
+  });
+  
+  apiRouter.post("/verify/send-sms", async (req, res) => {
+    try {
+      const { userId, phone } = req.body;
+      
+      if (!userId || !phone) {
+        return res.status(400).json({ message: "User ID and phone number are required" });
+      }
+      
+      // Generate 6-digit verification code
+      const token = Math.floor(100000 + Math.random() * 900000).toString();
+      const expiry = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+      
+      // Update user with verification token
+      const user = await storage.getUserByUsername(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // TODO: Send actual SMS here using Twilio or similar service
+      // For now, we'll just log the token for testing
+      console.log(`SMS verification code for ${phone}: ${token}`);
+      
+      // Store verification token in database
+      await storage.updateUser(user.id, {
+        phoneVerificationToken: token,
+        phoneVerificationExpiry: expiry
+      });
+      
+      res.json({ 
+        message: "Verification SMS sent successfully",
+        // In development, return the token for testing
+        ...(process.env.NODE_ENV === 'development' && { token })
+      });
+    } catch (error) {
+      console.error("Error sending verification SMS:", error);
+      res.status(500).json({ message: "Failed to send verification SMS" });
+    }
+  });
+  
+  apiRouter.post("/verify/phone", async (req, res) => {
+    try {
+      const { userId, token } = req.body;
+      
+      if (!userId || !token) {
+        return res.status(400).json({ message: "User ID and token are required" });
+      }
+      
+      const user = await storage.getUserByUsername(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      // Check if token matches and hasn't expired
+      if (user.phoneVerificationToken !== token) {
+        return res.status(400).json({ message: "Invalid verification code" });
+      }
+      
+      if (!user.phoneVerificationExpiry || new Date() > user.phoneVerificationExpiry) {
+        return res.status(400).json({ message: "Verification code has expired" });
+      }
+      
+      // Update user as verified
+      await storage.updateUser(user.id, {
+        phoneVerified: true,
+        phoneVerificationToken: null,
+        phoneVerificationExpiry: null
+      });
+      
+      res.json({ message: "Phone number verified successfully" });
+    } catch (error) {
+      console.error("Error verifying phone:", error);
+      res.status(500).json({ message: "Failed to verify phone number" });
+    }
+  });
+
   // Booking endpoints
   // Booking endpoints removed - handled by dedicated bookings router at /api/bookings
 
