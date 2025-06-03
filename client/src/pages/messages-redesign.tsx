@@ -656,6 +656,21 @@ const MessagesRedesign = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor="emergency-toggle" className="text-sm text-muted-foreground">
+                    Auto-send this response
+                  </Label>
+                  <Switch
+                    id="emergency-toggle"
+                    checked={autoSendToggles.emergency}
+                    onCheckedChange={(checked) => {
+                      setAutoSendToggles(prev => ({
+                        ...prev,
+                        emergency: checked
+                      }));
+                    }}
+                  />
+                </div>
                 <Textarea 
                   placeholder="Enter your default emergency response here... Use {client} to include the client's name."
                   className="min-h-[100px] bg-white border-gray-200 text-[#0A2540]"
