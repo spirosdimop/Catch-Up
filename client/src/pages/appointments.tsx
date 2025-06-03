@@ -768,7 +768,8 @@ export default function AppointmentsPage() {
                     professionalId: "1",
                     externalId: Date.now().toString(),
                     clientId: 1,
-                    serviceId: "1"
+                    serviceId: "1",
+                    source: "appointments" // Mark as internal booking - backend will keep "confirmed" status
                   };
                   
                   try {

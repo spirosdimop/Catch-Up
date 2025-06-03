@@ -173,7 +173,7 @@ export function NewBookingDialog({ open, onOpenChange }: NewBookingDialogProps) 
         priority: data.priority,
         notes: data.notes || "",
         type: "meeting", // Default type
-        status: "confirmed", // Default status
+        source: "calendar", // Mark as calendar booking - backend will keep "confirmed" status
         duration: selectedService?.duration || 60 // Get duration from service or default to 60 minutes
       };
       
