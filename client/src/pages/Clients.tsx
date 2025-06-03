@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Client, InsertClient } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { PlusIcon, SearchIcon, TrashIcon, PencilIcon, UserIcon, MailIcon, PhoneIcon, BuildingIcon, MapPinIcon, EyeIcon, FolderIcon, CheckSquareIcon, FileTextIcon } from "lucide-react";
+import { PlusIcon, SearchIcon, PencilIcon, MailIcon, PhoneIcon, EyeIcon, FolderIcon, CheckSquareIcon, FileTextIcon, MessageCircleIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -309,21 +309,52 @@ export default function Clients() {
           ) : (
             filteredClients?.map(client => (
               <Card key={client.id} className="overflow-hidden">
-                <CardContent className="p-6 relative">
-                  <div className="absolute top-4 right-4 flex space-x-1">
+                <CardContent className="p-4">
+                  {/* Client Name */}
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">{client.name}</h3>
+                  
+                  {/* Email */}
+                  <div className="flex items-center text-gray-600 mb-2">
+                    <MailIcon className="h-4 w-4 mr-2" />
+                    <span className="text-sm">{client.email}</span>
+                  </div>
+
+                  {/* Phone Number */}
+                  {client.phone && (
+                    <div className="flex items-center text-gray-600 mb-4">
+                      <PhoneIcon className="h-4 w-4 mr-2" />
+                      <span className="text-sm">{client.phone}</span>
+                    </div>
+                  )}
+
+                  {/* Action Buttons */}
+                  <div className="flex justify-between items-center pt-3 border-t border-gray-200">
+                    <div className="flex space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSelectedClient(client);
+                          setIsViewDialogOpen(true);
+                        }}
+                        title="View Details"
+                      >
+                        <EyeIcon className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          // Message functionality - you can implement this
+                          toast({ title: "Message feature", description: "Message functionality to be implemented" });
+                        }}
+                        title="Send Message"
+                      >
+                        <MessageCircleIcon className="h-4 w-4" />
+                      </Button>
+                    </div>
                     <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => {
-                        setSelectedClient(client);
-                        setIsViewDialogOpen(true);
-                      }}
-                      title="View Details"
-                    >
-                      <EyeIcon className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       onClick={() => {
                         setSelectedClient(client);
@@ -333,74 +364,6 @@ export default function Clients() {
                     >
                       <PencilIcon className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteClient(client.id)}
-                      title="Delete Client"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                  
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">{client.name}</h3>
-                  
-                  <div className="space-y-2 text-sm">
-                    {client.company && (
-                      <div className="flex items-center text-gray-600">
-                        <BuildingIcon className="h-4 w-4 mr-2" />
-                        {client.company}
-                      </div>
-                    )}
-                    <div className="flex items-center text-gray-600">
-                      <MailIcon className="h-4 w-4 mr-2" />
-                      {client.email}
-                    </div>
-                    {client.phone && (
-                      <div className="flex items-center text-gray-600">
-                        <PhoneIcon className="h-4 w-4 mr-2" />
-                        {client.phone}
-                      </div>
-                    )}
-                    {client.address && (
-                      <div className="flex items-center text-gray-600">
-                        <MapPinIcon className="h-4 w-4 mr-2" />
-                        {client.address}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Client Connections */}
-                  <div className="mt-4 pt-4 border-t border-gray-200">
-                    <h4 className="text-sm font-medium text-gray-900 mb-2">Connected to:</h4>
-                    {(() => {
-                      const connections = getClientConnections(client.id);
-                      return (
-                        <div className="space-y-1 text-sm">
-                          {connections.projects.length > 0 && (
-                            <div className="flex items-center text-blue-600">
-                              <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
-                              {connections.projects.length} project{connections.projects.length !== 1 ? 's' : ''}
-                            </div>
-                          )}
-                          {connections.tasks.length > 0 && (
-                            <div className="flex items-center text-green-600">
-                              <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                              {connections.tasks.length} task{connections.tasks.length !== 1 ? 's' : ''}
-                            </div>
-                          )}
-                          {connections.invoices.length > 0 && (
-                            <div className="flex items-center text-purple-600">
-                              <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
-                              {connections.invoices.length} invoice{connections.invoices.length !== 1 ? 's' : ''}
-                            </div>
-                          )}
-                          {connections.totalConnections === 0 && (
-                            <div className="text-gray-500 italic">No connections yet</div>
-                          )}
-                        </div>
-                      );
-                    })()}
                   </div>
                 </CardContent>
               </Card>
