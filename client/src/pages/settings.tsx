@@ -297,21 +297,7 @@ export default function Settings() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="missedCallTemplate">Missed Call Message Template</Label>
-                <Textarea
-                  id="missedCallTemplate"
-                  value={missedCallTemplate}
-                  onChange={(e) => setMissedCallTemplate(e.target.value)}
-                  rows={3}
-                />
-                <div className="flex flex-wrap gap-2 mt-2">
-                  <Badge variant="outline">{'{client_name}'}</Badge>
-                  <Badge variant="outline">{'{booking_link}'}</Badge>
-                  <Badge variant="outline">{'{business_name}'}</Badge>
-                  <Badge variant="outline">{'{date}'}</Badge>
-                </div>
-              </div>
+
 
               <div className="space-y-3">
                 <Label>Follow-up Channels</Label>
