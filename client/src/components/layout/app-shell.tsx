@@ -9,7 +9,7 @@ import {
   Settings,
   User,
   Star,
-  Bot,
+
   Menu,
   X,
   ChevronRight,
@@ -17,7 +17,7 @@ import {
   FolderKanban
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { AIAssistantFloating } from "@/components/ai-assistant/floating-button";
+
 import { useUser } from "@/lib/userContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
@@ -78,11 +78,7 @@ export function AppShell({
       label: "Projects",
       href: "/projects"
     },
-    {
-      icon: <Bot className="h-5 w-5" />,
-      label: "AI Assistant",
-      href: "/ai-assistant"
-    },
+
     {
       icon: <Settings className="h-5 w-5" />,
       label: "Settings",
@@ -334,8 +330,7 @@ export function AppShell({
         </main>
       </div>
       
-      {/* AI Assistant Floating Button - accessible from all app pages */}
-      <AIAssistantFloating />
+
     </div>
   );
 }
