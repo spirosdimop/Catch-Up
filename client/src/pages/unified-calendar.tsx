@@ -265,6 +265,36 @@ export default function UnifiedCalendar() {
   // Handle event selection
   const handleSelectEvent = (event: any) => {
     console.log('Selected event:', event);
+    
+    // Route to appropriate edit page based on event type
+    const eventType = event.resource?.type;
+    const eventData = event.resource?.data;
+    
+    if (!eventType || !eventData) {
+      console.warn('No event type or data found');
+      return;
+    }
+    
+    switch (eventType) {
+      case 'project':
+        // Navigate to project edit page
+        window.location.href = `/projects?edit=${eventData.id}`;
+        break;
+      case 'task':
+        // Navigate to tasks page with task highlighted
+        window.location.href = `/tasks?edit=${eventData.id}`;
+        break;
+      case 'booking':
+        // Navigate to appointments page
+        window.location.href = `/appointments?edit=${eventData.id}`;
+        break;
+      case 'event':
+        // Navigate to calendar events page
+        window.location.href = `/calendar?edit=${eventData.id}`;
+        break;
+      default:
+        console.log('Unknown event type:', eventType);
+    }
   };
 
   // Toggle filters

@@ -1153,9 +1153,28 @@ export default function InteractiveCalendar() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setEditMode(true)}
+                      onClick={() => {
+                        // Navigate to appropriate edit page based on item type
+                        switch (itemType) {
+                          case 'project':
+                            window.location.href = `/projects?edit=${selectedItem.id}`;
+                            break;
+                          case 'task':
+                            window.location.href = `/tasks?edit=${selectedItem.id}`;
+                            break;
+                          case 'booking':
+                            window.location.href = `/appointments?edit=${selectedItem.id}`;
+                            break;
+                          case 'event':
+                            window.location.href = `/calendar?edit=${selectedItem.id}`;
+                            break;
+                          default:
+                            setEditMode(true); // Fallback to in-dialog editing
+                        }
+                      }}
                     >
                       <Edit className="h-4 w-4" />
+                      Edit
                     </Button>
                   </div>
                 </div>
