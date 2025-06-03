@@ -213,7 +213,8 @@ export default function ProjectTasks({ projectId }: ProjectTasksProps) {
         description: data.description || null,
         status: data.status || "to_do", // Default to "to_do" if empty
         priority: data.priority || "medium", // Default to "medium" if empty
-        projectId: parseInt(data.projectId),
+        projectId: data.projectId ? parseInt(data.projectId) : null,
+        clientId: data.clientId ? parseInt(data.clientId) : null,
         deadline: data.deadline || null, // Send as string, backend will convert to Date
         completed: data.completed || false
       };
