@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { Project, Client, Task, TimeEntry } from "@shared/schema";
+import { Project, Client, Task, TimeEntry, Event, Booking } from "@shared/schema";
 import { calculateWeeklySummary } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { Link } from "wouter";
@@ -26,7 +26,8 @@ import {
   UsersIcon,
   FolderIcon,
   BarChart3Icon,
-  Lightbulb
+  Lightbulb,
+  ExternalLinkIcon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -185,10 +186,32 @@ export default function Dashboard() {
     queryKey: ['/api/time-entries'],
   });
 
-  // Dummy data for appointments and bookings
-  const appointmentsToday = 2;
-  const bookingsThisWeek = 5;
-  const pendingFollowups = 3;
+  const { data: events } = useQuery<Event[]>({
+    queryKey: ['/api/events'],
+  });
+
+  const { data: bookings } = useQuery<Booking[]>({
+    queryKey: ['/api/bookings'],
+  });
+
+  // Calculate real statistics from booking data
+  const todayBookings = bookings?.filter(booking => {
+    const bookingDate = new Date(booking.date);
+    const today = new Date();
+    return bookingDate.toDateString() === today.toDateString();
+  }) || [];
+
+  const thisWeekBookings = bookings?.filter(booking => {
+    const bookingDate = new Date(booking.date);
+    const today = new Date();
+    const weekFromNow = new Date();
+    weekFromNow.setDate(today.getDate() + 7);
+    return bookingDate >= today && bookingDate <= weekFromNow;
+  }) || [];
+
+  const appointmentsToday = todayBookings.length;
+  const bookingsThisWeek = thisWeekBookings.length;
+  const pendingFollowups = bookings?.filter(b => b.status === 'confirmed').length || 0;
 
   // Calculate statistics
   const activeProjectsCount = projects?.filter(p => p.status === 'in_progress').length || 0;
@@ -610,30 +633,26 @@ export default function Dashboard() {
           {widgets.find(w => w.id === 'calendar')?.visible && (
             <motion.div 
               variants={itemVariants} 
-              className="lg:col-span-2 bg-white rounded-xl overflow-hidden border border-gray-100"
+              className="lg:col-span-2 bg-white rounded-xl overflow-hidden border border-gray-100 cursor-pointer hover:shadow-lg transition-shadow duration-200"
               style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
+              onClick={() => window.location.href = '/calendar'}
             >
           <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
             <div className="flex items-center">
-              <h3 className="font-semibold text-lg text-gray-800">May 20%</h3>
-              <button className="ml-2 p-1 rounded hover:bg-gray-100">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M8 4.5V11.5" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round"/>
-                  <path d="M4.5 8H11.5" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              </button>
-              <button className="ml-1 p-1 rounded hover:bg-gray-100">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M10 4L6 8L10 12" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
-              <button className="p-1 rounded hover:bg-gray-100">
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M6 4L10 8L6 12" stroke="#6B7280" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </button>
+              <h3 className="font-semibold text-lg text-gray-800 flex items-center">
+                <CalendarIcon className="mr-2 h-5 w-5 text-catchup-primary" />
+                Calendar
+              </h3>
+              <Badge variant="secondary" className="ml-3">
+                {bookingsThisWeek} this week
+              </Badge>
             </div>
-            <div className="text-xs text-gray-500">May '24</div>
+            <Button variant="ghost" size="sm" onClick={(e) => {
+              e.stopPropagation();
+              window.location.href = '/calendar';
+            }}>
+              <ExternalLinkIcon className="h-4 w-4" />
+            </Button>
           </div>
           
           {/* Calendar grid */}
