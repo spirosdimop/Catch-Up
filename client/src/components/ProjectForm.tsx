@@ -35,7 +35,14 @@ import { Client, Project, ProjectStatus } from "@shared/schema";
 const projectFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   description: z.string().nullable().optional(),
-  clientId: z.coerce.number().nullable().optional(), // Made optional for personal projects
+  clientId: z.union([z.string(), z.number()]).nullable().optional().transform((val) => {
+    if (val === null || val === undefined || val === "personal") return null;
+    if (typeof val === "string") {
+      const num = parseInt(val);
+      return isNaN(num) ? null : num;
+    }
+    return typeof val === "number" ? val : null;
+  }), // Handle string-to-number conversion for client selection
   startDate: z.union([z.date(), z.string(), z.null()]).optional(),
   endDate: z.union([z.date(), z.string(), z.null()]).optional(),
   budget: z.coerce.number().nullable().optional(),
