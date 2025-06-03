@@ -32,6 +32,11 @@ export default function TaskList({ tasks }: TaskListProps) {
     queryKey: ['/api/projects'],
   });
 
+  // Fetch clients for the task form
+  const { data: clients } = useQuery({
+    queryKey: ['/api/clients'],
+  });
+
   // Toggle task completion mutation
   const toggleTaskCompletionMutation = useMutation({
     mutationFn: async (id: number) => {
@@ -192,13 +197,14 @@ export default function TaskList({ tasks }: TaskListProps) {
           <DialogHeader>
             <DialogTitle>Add New Task</DialogTitle>
             <DialogDescription>
-              Create a new task and assign it to a project. Fill in the details below.
+              Create a new task and optionally assign it to a project or client. Fill in the details below.
             </DialogDescription>
           </DialogHeader>
           <TaskForm
-            projectId={projects && projects.length > 0 ? projects[0].id : 1}
             allProjects={projects || []}
+            allClients={clients || []}
             showProjectSelect={true}
+            showClientSelect={true}
             onSubmit={handleSubmit}
             isSubmitting={createTaskMutation.isPending}
           />
