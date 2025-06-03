@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import { format } from "date-fns";
 
 type Message = {
@@ -29,6 +31,7 @@ type Contact = {
 
 export default function Messages() {
   const [activeContact, setActiveContact] = useState<number | null>(1); // Default to first contact
+  const [autoSendEnabled, setAutoSendEnabled] = useState<boolean>(true);
   
   // Simulated contacts data
   const contacts: Contact[] = [
@@ -110,12 +113,22 @@ export default function Messages() {
   
   return (
     <div className="h-full flex flex-col">
-      <div className="p-6">
+      <div className="p-6 flex justify-between items-start">
         <PageTitle 
           title="Messages" 
           description="Communicate with your clients and team members" 
           icon={<MessageSquare className="h-6 w-6 text-primary" />}
         />
+        <div className="flex items-center space-x-2">
+          <Label htmlFor="auto-send-toggle" className="text-sm font-medium">
+            Auto-send messages
+          </Label>
+          <Switch
+            id="auto-send-toggle"
+            checked={autoSendEnabled}
+            onCheckedChange={setAutoSendEnabled}
+          />
+        </div>
       </div>
       
       <div className="flex-1 flex h-[calc(100vh-12rem)] overflow-hidden">
