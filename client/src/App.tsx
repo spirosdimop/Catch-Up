@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/ui/theme-provider";
 import { UserProvider } from "@/lib/userContext";
 import { AppSettingsProvider } from "@/lib/appSettingsContext";
 import AppShell from "@/components/layout/app-shell";
+import FloatingNotesWidget from "@/components/FloatingNotesWidget";
 import NotFound from "@/pages/not-found";
 // Import pages with correct casing
 import Dashboard from "@/pages/Dashboard";
@@ -156,6 +157,7 @@ function App() {
           <TooltipProvider>
             <Toaster />
             <Router />
+            <FloatingNotesWidget />
           </TooltipProvider>
         </UserProvider>
       </ThemeProvider>
