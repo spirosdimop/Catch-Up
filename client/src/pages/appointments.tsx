@@ -31,6 +31,7 @@ import {
   DropdownMenuLabel, 
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
+import { useUser } from "@/lib/userContext";
 
 export default function AppointmentsPage() {
   const [selectedTab, setSelectedTab] = useState<'pending' | 'accepted' | 'declined' | 'all'>('pending');
@@ -40,6 +41,7 @@ export default function AppointmentsPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
+  const { user } = useUser();
 
   // Use React Query to fetch bookings directly from API
   const { 
@@ -372,9 +374,18 @@ export default function AppointmentsPage() {
                   <label className="text-xs text-gray-600 mb-1 block">Service Type</label>
                   <select className="w-full p-2 border rounded text-sm">
                     <option>All Services</option>
-                    <option>Consultation</option>
-                    <option>Meeting</option>
-                    <option>Follow-up</option>
+                    {user?.services?.map((service, index) => (
+                      <option key={index} value={service.name}>
+                        {service.name}
+                      </option>
+                    ))}
+                    {(!user?.services || user.services.length === 0) && (
+                      <>
+                        <option>Consultation</option>
+                        <option>Meeting</option>
+                        <option>Follow-up</option>
+                      </>
+                    )}
                   </select>
                 </div>
                 <div>
@@ -707,11 +718,14 @@ export default function AppointmentsPage() {
                 <label className="block text-sm font-medium mb-1">Service</label>
                 <select name="serviceName" className="w-full p-2 border rounded" required>
                   <option value="">Select a service</option>
-                  <option value="Web Development">Web Development</option>
-                  <option value="App Development">App Development</option>
-                  <option value="Consultation">Consultation</option>
-                  <option value="Project Planning">Project Planning</option>
-                  <option value="Technical Support">Technical Support</option>
+                  {user?.services?.map((service, index) => (
+                    <option key={index} value={service.name}>
+                      {service.name} - {typeof service.duration === 'number' ? service.duration : service.duration} min - ${typeof service.price === 'number' ? service.price : service.price}
+                    </option>
+                  ))}
+                  {(!user?.services || user.services.length === 0) && (
+                    <option value="Consultation">Consultation (Default)</option>
+                  )}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-3">
