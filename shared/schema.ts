@@ -122,7 +122,8 @@ export const tasks = pgTable("tasks", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   description: text("description"),
-  projectId: integer("project_id").notNull(),
+  projectId: integer("project_id"), // Made optional to allow standalone tasks
+  clientId: integer("client_id"), // Added optional direct client connection
   status: taskStatusEnum("status").notNull().default("to_do"),
   priority: taskPriorityEnum("priority").notNull().default("medium"),
   deadline: timestamp("deadline"),
@@ -135,6 +136,7 @@ export const insertTaskSchema = createInsertSchema(tasks)
     title: true,
     description: true,
     projectId: true,
+    clientId: true,
     status: true,
     priority: true,
     deadline: true,
@@ -143,6 +145,8 @@ export const insertTaskSchema = createInsertSchema(tasks)
   .extend({
     deadline: z.string().optional().nullable()
       .transform((val) => val ? new Date(val) : null),
+    projectId: z.number().nullable().optional().transform((val) => val ?? null),
+    clientId: z.number().nullable().optional().transform((val) => val ?? null),
   });
 
 // Time entry schema
@@ -702,6 +706,7 @@ export const clientsRelations = relations(clients, ({ many }) => ({
   projects: many(projects),
   invoices: many(invoices),
   events: many(events),
+  tasks: many(tasks),
 }));
 
 export const projectsRelations = relations(projects, ({ one, many }) => ({
@@ -718,6 +723,10 @@ export const tasksRelations = relations(tasks, ({ one, many }) => ({
   project: one(projects, {
     fields: [tasks.projectId],
     references: [projects.id],
+  }),
+  client: one(clients, {
+    fields: [tasks.clientId],
+    references: [clients.id],
   }),
   timeEntries: many(timeEntries),
 }));

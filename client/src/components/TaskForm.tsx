@@ -29,7 +29,8 @@ const taskFormSchema = z.object({
   description: z.string().optional().nullable(),
   status: z.enum(["to_do", "in_progress", "review", "completed"]),
   priority: z.enum(["low", "medium", "high", "urgent"]),
-  projectId: z.number(),
+  projectId: z.number().nullable().optional(),
+  clientId: z.number().nullable().optional(),
   deadline: z.string().optional().nullable(),
   completed: z.boolean().default(false)
 });
@@ -38,14 +39,16 @@ type TaskFormValues = z.infer<typeof taskFormSchema>;
 
 interface TaskFormProps {
   defaultValues?: Task;
-  projectId: number;
+  projectId?: number;
   onSubmit: (data: TaskFormValues) => void;
   isSubmitting: boolean;
   allProjects?: {id: number; name: string}[];
+  allClients?: {id: number; name: string}[];
   showProjectSelect?: boolean;
+  showClientSelect?: boolean;
 }
 
-export default function TaskForm({ defaultValues, projectId, onSubmit, isSubmitting, allProjects = [], showProjectSelect = false }: TaskFormProps) {
+export default function TaskForm({ defaultValues, projectId, onSubmit, isSubmitting, allProjects = [], allClients = [], showProjectSelect = false, showClientSelect = false }: TaskFormProps) {
   // Set up form with validation
   const form = useForm<TaskFormValues>({
     resolver: zodResolver(taskFormSchema),
