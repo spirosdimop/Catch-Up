@@ -90,9 +90,9 @@ export default function TaskList({ tasks }: TaskListProps) {
   // Filter tasks based on the active tab
   const filteredTasks = tasks.filter(task => {
     if (activeTab === "all") return true;
-    if (activeTab === "todo") return task.status === "To Do" && !task.completed;
-    if (activeTab === "inprogress") return task.status === "In Progress" && !task.completed;
-    if (activeTab === "review") return task.status === "Review" && !task.completed;
+    if (activeTab === "todo") return task.status === "to_do" && !task.completed;
+    if (activeTab === "inprogress") return task.status === "in_progress" && !task.completed;
+    if (activeTab === "review") return task.status === "review" && !task.completed;
     if (activeTab === "completed") return task.completed;
     return true;
   });
@@ -160,9 +160,9 @@ export default function TaskList({ tasks }: TaskListProps) {
                     <span className="text-xs text-gray-500 flex items-center mr-3">
                       <Folder className="h-3 w-3 mr-1" /> {task.project?.name || 'Unknown Project'}
                     </span>
-                    {task.dueDate && (
+                    {task.deadline && (
                       <span className="text-xs text-gray-500 flex items-center">
-                        <Calendar className="h-3 w-3 mr-1" /> {formatDate(task.dueDate)}
+                        <Calendar className="h-3 w-3 mr-1" /> {formatDate(task.deadline)}
                       </span>
                     )}
                   </div>
@@ -196,7 +196,9 @@ export default function TaskList({ tasks }: TaskListProps) {
             </DialogDescription>
           </DialogHeader>
           <TaskForm
-            projects={projects || []}
+            projectId={projects && projects.length > 0 ? projects[0].id : 1}
+            allProjects={projects || []}
+            showProjectSelect={true}
             onSubmit={handleSubmit}
             isSubmitting={createTaskMutation.isPending}
           />

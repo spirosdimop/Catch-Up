@@ -108,12 +108,7 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
         },
   });
   
-  // Update form values when clients are loaded or changed
-  useEffect(() => {
-    if (!form.getValues().clientId && clients.length > 0) {
-      form.setValue('clientId', clients[0].id);
-    }
-  }, [clients, form]);
+
 
   return (
     <Form {...form}>
