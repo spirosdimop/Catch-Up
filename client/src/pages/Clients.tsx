@@ -54,6 +54,11 @@ export default function Clients() {
     queryKey: ['/api/invoices'],
   });
 
+  // Fetch bookings to show client-booking relationships
+  const { data: bookings = [] } = useQuery({
+    queryKey: ['/api/bookings'],
+  });
+
   // Create client mutation
   const createClientMutation = useMutation({
     mutationFn: async (client: InsertClient) => {
@@ -235,12 +240,14 @@ export default function Clients() {
     const clientProjects = projects.filter((project: any) => project.clientId === clientId);
     const clientTasks = tasks.filter((task: any) => task.clientId === clientId);
     const clientInvoices = invoices.filter((invoice: any) => invoice.clientId === clientId);
+    const clientBookings = bookings.filter((booking: any) => booking.clientId === clientId);
     
     return {
       projects: clientProjects,
       tasks: clientTasks,
       invoices: clientInvoices,
-      totalConnections: clientProjects.length + clientTasks.length + clientInvoices.length
+      bookings: clientBookings,
+      totalConnections: clientProjects.length + clientTasks.length + clientInvoices.length + clientBookings.length
     };
   };
 
