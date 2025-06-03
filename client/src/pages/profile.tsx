@@ -31,6 +31,7 @@ import {
 import { format, addDays, parseISO } from "date-fns";
 import { useUser } from "@/lib/userContext";
 import { EventTemplate, EventType, ServiceLocationType } from "@shared/schema";
+import { formatTime, generateTimeOptions, convertTo24Hour } from "@/lib/timeUtils";
 import { useBooking, TimeSlot } from "@/hooks/use-booking";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -709,7 +710,7 @@ export default function Profile() {
                               ) : (
                                 availableSlots.map((slot) => (
                                   <SelectItem key={slot.time} value={slot.formatted}>
-                                    {slot.formatted}
+                                    {formatTime(slot.formatted, user)}
                                   </SelectItem>
                                 ))
                               )}

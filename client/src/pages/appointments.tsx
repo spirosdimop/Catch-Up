@@ -741,12 +741,23 @@ export default function AppointmentsPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium mb-1">Time</label>
-                  <input 
-                    name="time"
-                    type="time" 
-                    className="w-full p-2 border rounded"
-                    required 
-                  />
+                  {user?.timeFormat === '24' ? (
+                    <input 
+                      name="time"
+                      type="time" 
+                      className="w-full p-2 border rounded"
+                      required 
+                    />
+                  ) : (
+                    <select name="time" className="w-full p-2 border rounded" required>
+                      <option value="">Select time</option>
+                      {generateTimeOptions(user, 8, 20).map((timeOption) => (
+                        <option key={timeOption} value={timeOption}>
+                          {timeOption}
+                        </option>
+                      ))}
+                    </select>
+                  )}
                 </div>
               </div>
               <div>

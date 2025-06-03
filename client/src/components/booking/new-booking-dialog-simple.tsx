@@ -39,6 +39,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { useUser } from '@/lib/userContext';
+import { formatTime, generateTimeOptions } from '@/lib/timeUtils';
 
 // Booking schema with zod validation
 const bookingSchema = z.object({
@@ -98,6 +100,7 @@ interface NewBookingDialogProps {
 export function NewBookingDialog({ open, onOpenChange }: NewBookingDialogProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { user } = useUser();
   
   // Create a form instance for the dialog
   const form = useForm<BookingFormValues>({
@@ -135,23 +138,13 @@ export function NewBookingDialog({ open, onOpenChange }: NewBookingDialogProps) 
       const service = services.find(s => s.id === selectedService);
       const duration = service?.duration || 60;
       
-      // Generate slots from 9am to 5pm
-      const startTime = 9;
-      const endTime = 17;
-      
-      for (let hour = startTime; hour < endTime; hour++) {
-        for (let minute = 0; minute < 60; minute += 30) {
-          // Skip if the slot doesn't fit in the day
-          if (hour === endTime - 1 && minute + duration > 60) continue;
-          
-          const time = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-          slots.push({
-            id: time,
-            time,
-            available: Math.random() > 0.3, // Randomly mark some as unavailable
-          });
-        }
-      }
+      // Generate time slots using the utility function
+      const timeOptions = generateTimeOptions(user, 9, 17, 30);
+      slots = timeOptions.map(timeOption => ({
+        id: timeOption,
+        time: timeOption,
+        available: Math.random() > 0.3, // Randomly mark some as unavailable
+      }));
       
       setTimeSlots(slots);
     }
