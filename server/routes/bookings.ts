@@ -74,14 +74,21 @@ router.post("/", async (req, res) => {
         
         if (matchingClient) {
           clientId = matchingClient.id;
-          console.log(`Auto-matched client "${clientName}" to "${matchingClient.name}" (ID ${clientId})`);
+          const fullName = `${matchingClient.firstName} ${matchingClient.lastName}`.trim();
+          console.log(`Auto-matched client "${clientName}" to "${fullName}" (ID ${clientId})`);
         } else {
           // If this is a profile page booking (has clientEmail), create a temporary client entry
           if (isFromProfile && clientEmail) {
+            // Split client name into first and last name
+            const nameParts = clientName.trim().split(' ');
+            const firstName = nameParts[0] || clientName;
+            const lastName = nameParts.slice(1).join(' ') || '';
+            
             const [newClient] = await db
               .insert(clients)
               .values({
-                name: clientName.trim(),
+                firstName,
+                lastName,
                 email: clientEmail,
                 phone: clientPhone || null,
                 company: null,

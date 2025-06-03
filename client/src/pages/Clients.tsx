@@ -201,8 +201,9 @@ export default function Clients() {
       
       // Make sure all fields exist and have proper types
       const sanitizedData = {
-        name: data.name,
-        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email || null,
         phone: data.phone || null,
         company: data.company || null,
         address: data.address || null
@@ -317,13 +318,15 @@ export default function Clients() {
               <Card key={client.id} className="overflow-hidden">
                 <CardContent className="p-4">
                   {/* Client Name */}
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">{client.name}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">{client.firstName} {client.lastName}</h3>
                   
                   {/* Email */}
-                  <div className="flex items-center text-gray-600 mb-2">
-                    <MailIcon className="h-4 w-4 mr-2" />
-                    <span className="text-sm">{client.email}</span>
-                  </div>
+                  {client.email && (
+                    <div className="flex items-center text-gray-600 mb-2">
+                      <MailIcon className="h-4 w-4 mr-2" />
+                      <span className="text-sm">{client.email}</span>
+                    </div>
+                  )}
 
                   {/* Phone Number */}
                   {client.phone && (
