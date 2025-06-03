@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { 
@@ -71,6 +72,15 @@ const MessagesRedesign = () => {
   });
   const [selectedResponse, setSelectedResponse] = useState<AutoResponse | null>(null);
   const [editMode, setEditMode] = useState(false);
+  
+  // State for auto-send toggles per template type
+  const [autoSendToggles, setAutoSendToggles] = useState<Record<string, boolean>>({
+    missed_call: true,
+    reschedule: true,
+    cancellation: true,
+    confirmation: true,
+    emergency: true
+  });
   
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -442,6 +452,21 @@ const MessagesRedesign = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor="missed-call-toggle" className="text-sm text-muted-foreground">
+                    Auto-send this response
+                  </Label>
+                  <Switch
+                    id="missed-call-toggle"
+                    checked={autoSendToggles.missed_call}
+                    onCheckedChange={(checked) => {
+                      setAutoSendToggles(prev => ({
+                        ...prev,
+                        missed_call: checked
+                      }));
+                    }}
+                  />
+                </div>
                 <Textarea 
                   placeholder="Enter your default missed call response here... Use {client} to include the client's name."
                   className="min-h-[100px] bg-white border-gray-200 text-[#0A2540]"
@@ -478,6 +503,21 @@ const MessagesRedesign = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor="reschedule-toggle" className="text-sm text-muted-foreground">
+                    Auto-send this response
+                  </Label>
+                  <Switch
+                    id="reschedule-toggle"
+                    checked={autoSendToggles.reschedule}
+                    onCheckedChange={(checked) => {
+                      setAutoSendToggles(prev => ({
+                        ...prev,
+                        reschedule: checked
+                      }));
+                    }}
+                  />
+                </div>
                 <Textarea 
                   placeholder="Enter your default reschedule response here... Use {client} and {date} to personalize."
                   className="min-h-[100px] bg-white border-gray-200 text-[#0A2540]"
@@ -514,6 +554,21 @@ const MessagesRedesign = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor="cancellation-toggle" className="text-sm text-muted-foreground">
+                    Auto-send this response
+                  </Label>
+                  <Switch
+                    id="cancellation-toggle"
+                    checked={autoSendToggles.cancellation}
+                    onCheckedChange={(checked) => {
+                      setAutoSendToggles(prev => ({
+                        ...prev,
+                        cancellation: checked
+                      }));
+                    }}
+                  />
+                </div>
                 <Textarea 
                   placeholder="Enter your default cancellation response here... Use {client} to include the client's name."
                   className="min-h-[100px] bg-white border-gray-200 text-[#0A2540]"
@@ -550,6 +605,21 @@ const MessagesRedesign = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                <div className="flex items-center justify-between mb-2">
+                  <Label htmlFor="confirmation-toggle" className="text-sm text-muted-foreground">
+                    Auto-send this response
+                  </Label>
+                  <Switch
+                    id="confirmation-toggle"
+                    checked={autoSendToggles.confirmation}
+                    onCheckedChange={(checked) => {
+                      setAutoSendToggles(prev => ({
+                        ...prev,
+                        confirmation: checked
+                      }));
+                    }}
+                  />
+                </div>
                 <Textarea 
                   placeholder="Enter your default confirmation response here... Use {client} and {date} to personalize."
                   className="min-h-[100px] bg-white border-gray-200 text-[#0A2540]"
