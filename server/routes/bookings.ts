@@ -48,14 +48,28 @@ router.post("/", async (req, res) => {
     // If no clientId provided or it's the default 1, try to find client by name
     if (!clientId || clientId === 1) {
       try {
-        const [matchingClient] = await db
+        // First try exact case-insensitive match
+        let [matchingClient] = await db
           .select()
           .from(clients)
           .where(ilike(clients.name, clientName.trim()));
         
+        // If no exact match, try fuzzy matching by normalizing names
+        if (!matchingClient) {
+          const normalizedSearchName = clientName.trim().toLowerCase().replace(/\s+/g, ' ');
+          const allClients = await db.select().from(clients);
+          
+          matchingClient = allClients.find(client => {
+            const normalizedClientName = client.name.toLowerCase().replace(/\s+/g, ' ');
+            return normalizedClientName === normalizedSearchName ||
+                   normalizedClientName.includes(normalizedSearchName) ||
+                   normalizedSearchName.includes(normalizedClientName);
+          });
+        }
+        
         if (matchingClient) {
           clientId = matchingClient.id;
-          console.log(`Auto-matched client "${clientName}" to ID ${clientId}`);
+          console.log(`Auto-matched client "${clientName}" to "${matchingClient.name}" (ID ${clientId})`);
         } else {
           console.log(`No client found matching name "${clientName}"`);
           clientId = 1; // fallback to default
