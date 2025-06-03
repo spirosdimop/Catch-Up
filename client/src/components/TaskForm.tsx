@@ -108,7 +108,7 @@ export default function TaskForm({ defaultValues, projectId, onSubmit, isSubmitt
                 <FormLabel>Status</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -135,7 +135,7 @@ export default function TaskForm({ defaultValues, projectId, onSubmit, isSubmitt
                 <FormLabel>Priority</FormLabel>
                 <Select
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  value={field.value}
                 >
                   <FormControl>
                     <SelectTrigger>
