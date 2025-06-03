@@ -655,86 +655,136 @@ export default function Dashboard() {
             </Button>
           </div>
           
-          {/* Calendar grid */}
-          <div className="p-4">
-            <div className="grid grid-cols-7 gap-2 text-center text-sm font-medium mb-2">
-              <div>Sun</div>
-              <div>Mon</div>
-              <div>Tue</div>
-              <div>Wed</div>
-              <div>Thu</div>
-              <div>Fri</div>
-              <div>Sat</div>
+          {/* Interactive Calendar Content */}
+          <div className="p-6">
+            {/* Current Month Display */}
+            <div className="text-center mb-6">
+              <h4 className="text-xl font-semibold text-gray-800">
+                {today.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+              </h4>
+              <p className="text-sm text-gray-500 mt-1">
+                {today.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric' })}
+              </p>
             </div>
-            
-            <div className="grid grid-cols-7 gap-2 text-center">
-              {/* Week 1 */}
-              <div className="text-gray-400 p-2">28</div>
-              <div className="text-gray-400 p-2">29</div>
-              <div className="text-gray-400 p-2">30</div>
-              <div className="p-2 rounded">1</div>
-              <div className="p-2 rounded">2</div>
-              <div className="p-2 rounded">3</div>
-              <div className="p-2 rounded">4</div>
+
+            {/* Today's Appointments Section */}
+            <div className="mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h5 className="font-medium text-gray-700">Today's Appointments</h5>
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  {appointmentsToday}
+                </Badge>
+              </div>
               
-              {/* Week 2 */}
-              <div className="p-2 rounded">5</div>
-              <div className="p-2 rounded">6</div>
-              <div className="p-2 rounded">7</div>
-              <div className="p-2 rounded">8</div>
-              <div className="p-2 rounded">9</div>
-              <div className="p-2 rounded">10</div>
-              <div className="p-2 rounded">11</div>
-              
-              {/* Week 3 */}
-              <div className="p-2 rounded">12</div>
-              <div className="p-2 rounded">13</div>
-              <div className="p-2 font-bold">14</div>
-              <div className="p-2 bg-catchup-primary text-white rounded-full">15</div>
-              <div className="p-2 rounded">16</div>
-              <div className="p-2 rounded">17</div>
-              <div className="p-2 rounded">18</div>
-              
-              {/* Week 4 */}
-              <div className="p-2 rounded">19</div>
-              <div className="p-2 rounded">20</div>
-              <div className="p-2 rounded">21</div>
-              <div className="p-2 rounded">22</div>
-              <div className="p-2 rounded">23</div>
-              <div className="p-2 rounded">24</div>
-              <div className="p-2 rounded">25</div>
-              
-              {/* Week 5 */}
-              <div className="p-2 rounded">26</div>
-              <div className="p-2 rounded">27</div>
-              <div className="p-2 rounded">28</div>
-              <div className="p-2 rounded">29</div>
-              <div className="p-2 rounded">30</div>
-              <div className="text-gray-400 p-2">1</div>
-              <div className="text-gray-400 p-2">2</div>
+              {todayBookings.length > 0 ? (
+                <div className="space-y-3">
+                  {todayBookings.slice(0, 3).map((booking) => (
+                    <div key={booking.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                      <div className="h-3 w-3 rounded-full bg-catchup-primary flex-shrink-0"></div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">
+                          {booking.description || 'Appointment'}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {booking.time} • {booking.duration || '30'} min
+                        </p>
+                      </div>
+                      <Badge 
+                        variant={booking.status === 'confirmed' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {booking.status}
+                      </Badge>
+                    </div>
+                  ))}
+                  {todayBookings.length > 3 && (
+                    <p className="text-xs text-gray-500 text-center py-2">
+                      +{todayBookings.length - 3} more appointments today
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="text-center py-6 bg-gray-50 rounded-lg">
+                  <CalendarIcon className="mx-auto h-8 w-8 text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500">No appointments today</p>
+                  <p className="text-xs text-gray-400 mt-1">Your schedule is clear</p>
+                </div>
+              )}
             </div>
-            
-            <div className="mt-6 flex justify-between border-t border-gray-100 pt-4">
-              <div className="text-sm text-gray-500">May 2025</div>
-              <div className="text-sm text-gray-500">May 2022</div>
-            </div>
-            
-            {/* Appointment on calendar */}
-            <div className="mt-8 border-t border-gray-100 pt-4">
-              <div className="text-xs text-gray-500 mb-2">WED 15</div>
-              <div className="flex gap-4 items-start">
-                <div className="mt-1 h-2 w-2 rounded-full bg-catchup-primary"></div>
-                <div>
-                  <h4 className="font-medium">Sean Dillion</h4>
-                  <p className="text-xs text-gray-500 mt-1">POTENTIAL CLIENT • ONLINE</p>
-                  <div className="mt-2 text-sm font-medium flex items-center gap-1">
-                    <span>Team Pitch | 5:00pm</span>
+
+            {/* Weekly Overview */}
+            <div className="mb-6 pt-4 border-t border-gray-100">
+              <div className="flex items-center justify-between mb-3">
+                <h5 className="font-medium text-gray-700">This Week</h5>
+                <Badge variant="outline" className="text-xs">
+                  {bookingsThisWeek} total
+                </Badge>
+              </div>
+              
+              {thisWeekBookings.length > 0 ? (
+                <div className="space-y-2">
+                  <div className="text-sm text-gray-600">
+                    Next: <span className="font-medium">
+                      {new Date(thisWeekBookings[0]?.date).toLocaleDateString('en-US', { 
+                        weekday: 'short', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                    </span> at {thisWeekBookings[0]?.time}
                   </div>
-                  <div className="mt-4 flex gap-2">
-                    <button className="px-4 py-2 bg-catchup-primary text-white text-sm rounded-lg">Team Reschedule Time</button>
-                    <button className="px-4 py-2 border border-gray-200 text-gray-600 text-sm rounded-lg">Cancel</button>
+                  
+                  {/* Weekly booking distribution */}
+                  <div className="grid grid-cols-7 gap-1 mt-3">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day, index) => {
+                      const dayBookings = thisWeekBookings.filter(booking => {
+                        const bookingDay = new Date(booking.date).getDay();
+                        return bookingDay === index;
+                      });
+                      
+                      return (
+                        <div key={day} className="text-center">
+                          <div className="text-xs text-gray-500 mb-1">{day}</div>
+                          <div className={`w-6 h-6 mx-auto rounded-full flex items-center justify-center text-xs ${
+                            dayBookings.length > 0 
+                              ? 'bg-catchup-primary text-white' 
+                              : 'bg-gray-100 text-gray-400'
+                          }`}>
+                            {dayBookings.length || ''}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
+              ) : (
+                <p className="text-sm text-gray-500">No bookings this week</p>
+              )}
+            </div>
+
+            {/* Quick Actions */}
+            <div className="pt-4 border-t border-gray-100">
+              <div className="grid grid-cols-2 gap-3">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.location.href = '/calendar';
+                  }}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  View Calendar
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    window.location.href = '/calendar';
+                  }}
+                >
+                  <CalendarPlusIcon className="mr-2 h-4 w-4" />
+                  New Booking
+                </Button>
               </div>
             </div>
           </div>
