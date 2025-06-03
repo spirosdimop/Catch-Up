@@ -31,7 +31,7 @@ type Contact = {
 
 export default function Messages() {
   const [activeContact, setActiveContact] = useState<number | null>(1); // Default to first contact
-  const [autoSendEnabled, setAutoSendEnabled] = useState<boolean>(true);
+  const [autoSendSettings, setAutoSendSettings] = useState<Record<number, boolean>>({});
   
   // Simulated contacts data
   const contacts: Contact[] = [
@@ -113,22 +113,12 @@ export default function Messages() {
   
   return (
     <div className="h-full flex flex-col">
-      <div className="p-6 flex justify-between items-start">
+      <div className="p-6">
         <PageTitle 
           title="Messages" 
           description="Communicate with your clients and team members" 
           icon={<MessageSquare className="h-6 w-6 text-primary" />}
         />
-        <div className="flex items-center space-x-2">
-          <Label htmlFor="auto-send-toggle" className="text-sm font-medium">
-            Auto-send messages
-          </Label>
-          <Switch
-            id="auto-send-toggle"
-            checked={autoSendEnabled}
-            onCheckedChange={setAutoSendEnabled}
-          />
-        </div>
       </div>
       
       <div className="flex-1 flex h-[calc(100vh-12rem)] overflow-hidden">
@@ -309,17 +299,38 @@ export default function Messages() {
               </ScrollArea>
               
               {/* Message input */}
-              <div className="p-4 border-t flex items-center space-x-2">
-                <Input 
-                  placeholder="Type your message..." 
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
-                  className="flex-1"
-                />
-                <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
-                  <Send className="h-4 w-4 mr-2" /> Send
-                </Button>
+              <div className="border-t">
+                <div className="p-2 border-b flex justify-end">
+                  <div className="flex items-center space-x-2">
+                    <Label htmlFor={`auto-send-${activeContact}`} className="text-xs text-muted-foreground">
+                      Auto-send
+                    </Label>
+                    <Switch
+                      id={`auto-send-${activeContact}`}
+                      checked={autoSendSettings[activeContact || 0] ?? true}
+                      onCheckedChange={(checked) => {
+                        if (activeContact) {
+                          setAutoSendSettings(prev => ({
+                            ...prev,
+                            [activeContact]: checked
+                          }));
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="p-4 flex items-center space-x-2">
+                  <Input 
+                    placeholder="Type your message..." 
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="flex-1"
+                  />
+                  <Button onClick={handleSendMessage} disabled={!newMessage.trim()}>
+                    <Send className="h-4 w-4 mr-2" /> Send
+                  </Button>
+                </div>
               </div>
             </>
           ) : (
