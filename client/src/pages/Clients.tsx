@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Client, InsertClient } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { PlusIcon, SearchIcon, PencilIcon, MailIcon, PhoneIcon, EyeIcon, FolderIcon, CheckSquareIcon, FileTextIcon, MessageCircleIcon, UserIcon, BuildingIcon, MapPinIcon } from "lucide-react";
+import { PlusIcon, SearchIcon, PencilIcon, MailIcon, PhoneIcon, EyeIcon, FolderIcon, CheckSquareIcon, FileTextIcon, MessageCircleIcon, UserIcon, BuildingIcon, MapPinIcon, CalendarIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
