@@ -165,12 +165,16 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
               <FormLabel>Client</FormLabel>
               <Select 
                 onValueChange={(value) => {
+                  console.log("Client selection changed to:", value, typeof value);
                   if (value === "personal") {
+                    console.log("Setting clientId to null (personal project)");
                     field.onChange(null);
                   } else {
                     const numValue = parseInt(value);
+                    console.log("Parsing client value:", value, "->", numValue);
                     field.onChange(isNaN(numValue) ? null : numValue);
                   }
+                  console.log("Current form values after change:", form.getValues());
                 }}
                 value={field.value === null || field.value === undefined ? "personal" : field.value.toString()}
               >
