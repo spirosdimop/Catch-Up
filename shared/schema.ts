@@ -24,8 +24,9 @@ export const insertUserSchema = createInsertSchema(users).pick({
 // Client schema
 export const clients = pgTable("clients", {
   id: serial("id").primaryKey(),
-  name: text("name").notNull(),
-  email: text("email").notNull(),
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email"),
   phone: text("phone"),
   company: text("company"),
   address: text("address"),
@@ -33,7 +34,8 @@ export const clients = pgTable("clients", {
 });
 
 export const insertClientSchema = createInsertSchema(clients).pick({
-  name: true,
+  firstName: true,
+  lastName: true,
   email: true,
   phone: true,
   company: true,

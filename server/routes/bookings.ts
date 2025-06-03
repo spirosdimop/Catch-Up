@@ -52,19 +52,20 @@ router.post("/", async (req, res) => {
     // If no clientId provided or it's the default 1, try to find existing client
     if (!clientId || clientId === 1) {
       try {
-        // First try exact case-insensitive match
-        let [matchingClient] = await db
-          .select()
-          .from(clients)
-          .where(ilike(clients.name, clientName.trim()));
+        // First try exact case-insensitive match on combined name
+        const allClients = await db.select().from(clients);
+        let matchingClient = allClients.find(client => {
+          const fullName = `${client.firstName} ${client.lastName}`.trim();
+          return fullName.toLowerCase() === clientName.trim().toLowerCase();
+        });
         
         // If no exact match, try fuzzy matching by normalizing names
         if (!matchingClient) {
           const normalizedSearchName = clientName.trim().toLowerCase().replace(/\s+/g, ' ');
-          const allClients = await db.select().from(clients);
           
           matchingClient = allClients.find(client => {
-            const normalizedClientName = client.name.toLowerCase().replace(/\s+/g, ' ');
+            const fullName = `${client.firstName} ${client.lastName}`.trim();
+            const normalizedClientName = fullName.toLowerCase().replace(/\s+/g, ' ');
             return normalizedClientName === normalizedSearchName ||
                    normalizedClientName.includes(normalizedSearchName) ||
                    normalizedSearchName.includes(normalizedClientName);
