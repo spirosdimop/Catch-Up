@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Client, InsertClient } from "@shared/schema";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import { PlusIcon, SearchIcon, TrashIcon, PencilIcon, UserIcon, MailIcon, PhoneIcon, BuildingIcon, MapPinIcon } from "lucide-react";
+import { PlusIcon, SearchIcon, TrashIcon, PencilIcon, UserIcon, MailIcon, PhoneIcon, BuildingIcon, MapPinIcon, EyeIcon, FolderIcon, CheckSquareIcon, FileTextIcon } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +17,7 @@ export default function Clients() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isCleanupDialogOpen, setIsCleanupDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [cleanupResults, setCleanupResults] = useState<{
     unconnected: { count: number; deleted: number; results: any[] };
@@ -36,6 +37,21 @@ export default function Clients() {
     staleTime: 0, // Always fetch fresh data
     refetchOnMount: true, // Refetch when component mounts
     refetchOnWindowFocus: true // Refetch when window regains focus
+  });
+
+  // Fetch projects to show client-project relationships
+  const { data: projects = [] } = useQuery({
+    queryKey: ['/api/projects'],
+  });
+
+  // Fetch tasks to show client-task relationships
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['/api/tasks'],
+  });
+
+  // Fetch invoices to show client-invoice relationships
+  const { data: invoices = [] } = useQuery({
+    queryKey: ['/api/invoices'],
   });
 
   // Create client mutation
@@ -214,6 +230,20 @@ export default function Clients() {
     }
   };
 
+  // Helper function to get client connections
+  const getClientConnections = (clientId: number) => {
+    const clientProjects = projects.filter((project: any) => project.clientId === clientId);
+    const clientTasks = tasks.filter((task: any) => task.clientId === clientId);
+    const clientInvoices = invoices.filter((invoice: any) => invoice.clientId === clientId);
+    
+    return {
+      projects: clientProjects,
+      tasks: clientTasks,
+      invoices: clientInvoices,
+      totalConnections: clientProjects.length + clientTasks.length + clientInvoices.length
+    };
+  };
+
   // Filter clients based on search term
   const filteredClients = clients?.filter(client => 
     searchTerm === "" || 
@@ -286,8 +316,20 @@ export default function Clients() {
                       size="sm"
                       onClick={() => {
                         setSelectedClient(client);
+                        setIsViewDialogOpen(true);
+                      }}
+                      title="View Details"
+                    >
+                      <EyeIcon className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        setSelectedClient(client);
                         setIsEditDialogOpen(true);
                       }}
+                      title="Edit Client"
                     >
                       <PencilIcon className="h-4 w-4" />
                     </Button>
@@ -295,6 +337,7 @@ export default function Clients() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDeleteClient(client.id)}
+                      title="Delete Client"
                     >
                       <TrashIcon className="h-4 w-4" />
                     </Button>
@@ -325,6 +368,39 @@ export default function Clients() {
                         {client.address}
                       </div>
                     )}
+                  </div>
+
+                  {/* Client Connections */}
+                  <div className="mt-4 pt-4 border-t border-gray-200">
+                    <h4 className="text-sm font-medium text-gray-900 mb-2">Connected to:</h4>
+                    {(() => {
+                      const connections = getClientConnections(client.id);
+                      return (
+                        <div className="space-y-1 text-sm">
+                          {connections.projects.length > 0 && (
+                            <div className="flex items-center text-blue-600">
+                              <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                              {connections.projects.length} project{connections.projects.length !== 1 ? 's' : ''}
+                            </div>
+                          )}
+                          {connections.tasks.length > 0 && (
+                            <div className="flex items-center text-green-600">
+                              <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                              {connections.tasks.length} task{connections.tasks.length !== 1 ? 's' : ''}
+                            </div>
+                          )}
+                          {connections.invoices.length > 0 && (
+                            <div className="flex items-center text-purple-600">
+                              <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                              {connections.invoices.length} invoice{connections.invoices.length !== 1 ? 's' : ''}
+                            </div>
+                          )}
+                          {connections.totalConnections === 0 && (
+                            <div className="text-gray-500 italic">No connections yet</div>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </CardContent>
               </Card>
