@@ -35,10 +35,7 @@ import { Client, Project, ProjectStatus } from "@shared/schema";
 const projectFormSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   description: z.string().nullable().optional(),
-  clientId: z.coerce.number({
-    required_error: "Client is required",
-    invalid_type_error: "Client is required",
-  }),
+  clientId: z.coerce.number().nullable().optional(), // Made optional for personal projects
   startDate: z.union([z.date(), z.string(), z.null()]).optional(),
   endDate: z.union([z.date(), z.string(), z.null()]).optional(),
   budget: z.coerce.number().nullable().optional(),
@@ -103,7 +100,7 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
       : {
           name: "",
           description: "",
-          clientId: clients.length > 0 ? clients[0].id : undefined,
+          clientId: null, // Default to personal project
           startDate: todayISOString, // Always use today's date for new projects
           endDate: null,
           budget: undefined,
@@ -158,30 +155,23 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
           name="clientId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Client*</FormLabel>
+              <FormLabel>Client</FormLabel>
               <Select 
-                onValueChange={(value) => field.onChange(parseInt(value))}
-                value={field.value?.toString() || (clients.length > 0 ? clients[0].id.toString() : "")}
+                onValueChange={(value) => field.onChange(value === "personal" ? null : parseInt(value))}
+                value={field.value ? field.value.toString() : "personal"}
               >
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a client">
-                      {field.value && clients.length > 0 
-                        ? clients.find(c => c.id === field.value)?.name || "Select a client"
-                        : clients.length > 0 ? clients[0].name : "Select a client"}
-                    </SelectValue>
+                    <SelectValue placeholder="Select client or personal project" />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  {clients.length === 0 ? (
-                    <SelectItem value="" disabled>No clients available</SelectItem>
-                  ) : (
-                    clients.map((client) => (
-                      <SelectItem key={client.id} value={client.id.toString()}>
-                        {client.name}
-                      </SelectItem>
-                    ))
-                  )}
+                  <SelectItem value="personal">Personal Project</SelectItem>
+                  {clients.map((client) => (
+                    <SelectItem key={client.id} value={client.id.toString()}>
+                      {client.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <FormMessage />

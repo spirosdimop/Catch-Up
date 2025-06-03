@@ -53,7 +53,7 @@ export const projects = pgTable("projects", {
   id: serial("id").primaryKey(),
   name: text("name").notNull(),
   description: text("description"),
-  clientId: integer("client_id").notNull(),
+  clientId: integer("client_id"), // Made optional for personal projects
   status: projectStatusEnum("status").notNull().default("not_started"),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
@@ -101,7 +101,7 @@ export const insertProjectSchema = createInsertSchema(projects)
     return {
       ...data,
       name: data.name,
-      clientId: data.clientId,
+      clientId: data.clientId ?? null, // Allow null for personal projects
       description: data.description ?? null,
       status: data.status,
       startDate: parseDate(data.startDate),
