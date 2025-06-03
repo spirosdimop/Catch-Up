@@ -74,6 +74,36 @@ export default function AppointmentsPage() {
     }
   });
 
+  // Fetch projects for project selection
+  const { data: projects = [] } = useQuery({
+    queryKey: ['/api/projects'],
+    queryFn: async () => {
+      const response = await fetch('/api/projects');
+      if (!response.ok) throw new Error('Failed to fetch projects');
+      return response.json();
+    }
+  });
+
+  // Fetch tasks for task selection
+  const { data: tasks = [] } = useQuery({
+    queryKey: ['/api/tasks'],
+    queryFn: async () => {
+      const response = await fetch('/api/tasks');
+      if (!response.ok) throw new Error('Failed to fetch tasks');
+      return response.json();
+    }
+  });
+
+  // Fetch clients for client selection
+  const { data: clients = [] } = useQuery({
+    queryKey: ['/api/clients'],
+    queryFn: async () => {
+      const response = await fetch('/api/clients');
+      if (!response.ok) throw new Error('Failed to fetch clients');
+      return response.json();
+    }
+  });
+
   // Handle accepting a booking
   const handleAccept = async (bookingId: string | number) => {
     try {
@@ -717,6 +747,17 @@ export default function AppointmentsPage() {
                 />
               </div>
               <div>
+                <label className="block text-sm font-medium mb-1">Client</label>
+                <select name="clientId" className="w-full p-2 border rounded" required>
+                  <option value="">Select a client</option>
+                  {clients.map((client: any) => (
+                    <option key={client.id} value={client.id}>
+                      {client.firstName} {client.lastName} {client.email && `(${client.email})`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
                 <label className="block text-sm font-medium mb-1">Service</label>
                 <select name="serviceName" className="w-full p-2 border rounded" required>
                   <option value="">Select a service</option>
@@ -728,6 +769,28 @@ export default function AppointmentsPage() {
                   {(!user?.services || user.services.length === 0) && (
                     <option value="Consultation">Consultation (Default)</option>
                   )}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Project (Optional)</label>
+                <select name="projectId" className="w-full p-2 border rounded">
+                  <option value="">No project selected</option>
+                  {projects.map((project: any) => (
+                    <option key={project.id} value={project.id}>
+                      {project.name} {project.status && `(${project.status})`}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">Task (Optional)</label>
+                <select name="taskId" className="w-full p-2 border rounded">
+                  <option value="">No task selected</option>
+                  {tasks.map((task: any) => (
+                    <option key={task.id} value={task.id}>
+                      {task.title} {task.status && `(${task.status})`}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div className="grid grid-cols-2 gap-3">
@@ -817,6 +880,10 @@ export default function AppointmentsPage() {
                     }
                   }
                   
+                  const selectedClientId = formData.get('clientId') as string;
+                  const selectedProjectId = formData.get('projectId') as string;
+                  const selectedTaskId = formData.get('taskId') as string;
+                  
                   const bookingData = {
                     clientName: formData.get('clientName') as string,
                     serviceName: formData.get('serviceName') as string,
@@ -826,7 +893,9 @@ export default function AppointmentsPage() {
                     clientPhone: "",
                     professionalId: "1",
                     externalId: Date.now().toString(),
-                    clientId: 1,
+                    clientId: selectedClientId ? parseInt(selectedClientId) : 1,
+                    projectId: selectedProjectId ? parseInt(selectedProjectId) : null,
+                    taskId: selectedTaskId ? parseInt(selectedTaskId) : null,
                     serviceId: "1",
                     source: "appointments" // Mark as internal booking - backend will keep "confirmed" status
                   };

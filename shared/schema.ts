@@ -253,6 +253,8 @@ export const bookings = pgTable("bookings", {
   location: text("location"),
   notes: text("notes"),
   clientId: integer("client_id").notNull().references(() => clients.id), // Required reference to clients table
+  projectId: integer("project_id").references(() => projects.id), // Optional reference to projects table
+  taskId: integer("task_id").references(() => tasks.id), // Optional reference to tasks table
   serviceId: text("service_id").notNull(),
   priority: text("priority").default("normal"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -279,6 +281,8 @@ export const insertBookingSchema = createInsertSchema(bookings).pick({
   notes: true,
   status: true,
   clientId: true,
+  projectId: true,
+  taskId: true,
   serviceId: true,
   priority: true,
   professionalId: true,
@@ -290,6 +294,8 @@ export const insertBookingSchema = createInsertSchema(bookings).pick({
   serviceName: z.string().optional(),
   servicePrice: z.string().optional(),
   priority: z.string().optional(),
+  projectId: z.number().optional(),
+  taskId: z.number().optional(),
 });
 
 // Type exports
