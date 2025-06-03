@@ -71,43 +71,34 @@ export const insertProjectSchema = createInsertSchema(projects)
     endDate: true,
     budget: true,
   })
-  .transform((data) => {
-    // Convert string dates to Date objects for the database
-    // Using explicit TypeScript typings for clarity
-    const parseDate = (date: Date | string | null | undefined): Date | null => {
-      if (!date) return null;
-      
-      // If it's already a Date object, return it directly
-      if (date instanceof Date) {
-        return isNaN(date.getTime()) ? null : date;
-      }
-      
-      // If it's a string, attempt to parse it
-      if (typeof date === 'string') {
-        try {
-          const parsedDate = new Date(date);
-          return isNaN(parsedDate.getTime()) ? null : parsedDate;
-        } catch (e) {
-          console.error("Failed to parse date:", e);
-          return null;
+  .extend({
+    startDate: z.union([z.string(), z.date()]).nullable().optional()
+      .transform((val) => {
+        if (!val) return null;
+        if (typeof val === 'string') {
+          try {
+            const date = new Date(val);
+            return isNaN(date.getTime()) ? null : date;
+          } catch {
+            return null;
+          }
         }
-      }
-      
-      // If we get here, it's an invalid format
-      return null;
-    };
-
-    // Transform the data with our parsed dates
-    return {
-      ...data,
-      name: data.name,
-      clientId: data.clientId ?? null, // Allow null for personal projects
-      description: data.description ?? null,
-      status: data.status,
-      startDate: parseDate(data.startDate),
-      endDate: parseDate(data.endDate),
-      budget: data.budget ?? null,
-    };
+        return val instanceof Date && !isNaN(val.getTime()) ? val : null;
+      }),
+    endDate: z.union([z.string(), z.date()]).nullable().optional()
+      .transform((val) => {
+        if (!val) return null;
+        if (typeof val === 'string') {
+          try {
+            const date = new Date(val);
+            return isNaN(date.getTime()) ? null : date;
+          } catch {
+            return null;
+          }
+        }
+        return val instanceof Date && !isNaN(val.getTime()) ? val : null;
+      }),
+    clientId: z.number().nullable().optional().transform((val) => val ?? null), // Allow null for personal projects
   });
 
 // Task status enum

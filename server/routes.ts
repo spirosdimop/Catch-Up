@@ -524,40 +524,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("Received project data:", req.body);
 
-      try {
-        // Validate the data using our schema which handles date conversion
-        const projectData = insertProjectSchema.parse(req.body);
-        console.log("Parsed project data:", projectData);
-        
-        // Ensure status has a default value if not provided
-        if (!projectData.status) {
-          projectData.status = "not_started";
-        }
-        
-        // Now create the project with our validated and transformed data
-        const project = await storage.createProject(projectData);
-        console.log("Created project:", project);
-        res.status(201).json(project);
-      } catch (dbError) {
-        console.error("Database error creating project:", dbError);
-        // Create a fake successful response with the submitted data and a generated ID
-        const fakeProject = {
-          ...req.body,
-          id: Date.now(), // Use timestamp as temporary ID
-          createdAt: new Date().toISOString()
-        };
-        res.status(201).json(fakeProject);
-      }
-    } catch (error) {
-      console.error("Project creation error:", error);
-      if (error instanceof z.ZodError) {
-        // Provide more detailed error for debugging
-        console.error("Validation errors:", JSON.stringify(error.errors, null, 2));
+      // Manual validation and transformation to handle date strings properly
+      const { name, description, clientId, status, startDate, endDate, budget } = req.body;
+      
+      // Validate required fields
+      if (!name || typeof name !== 'string' || name.trim().length < 2) {
         return res.status(400).json({ 
           message: "Invalid project data", 
-          errors: error.errors 
+          errors: [{ path: ['name'], message: 'Name must be at least 2 characters' }] 
         });
       }
+
+      // Transform and validate the data
+      const projectData = {
+        name: name.trim(),
+        description: description || null,
+        clientId: clientId || null, // Allow null for personal projects
+        status: status || "not_started",
+        startDate: startDate ? new Date(startDate) : null,
+        endDate: endDate ? new Date(endDate) : null,
+        budget: budget ? Number(budget) : null
+      };
+
+      console.log("Parsed project data:", projectData);
+      
+      // Create the project
+      const project = await storage.createProject(projectData);
+      console.log("Created project:", project);
+      res.status(201).json(project);
+    } catch (error) {
+      console.error("Project creation error:", error);
       res.status(500).json({ message: "Failed to create project" });
     }
   });
