@@ -112,7 +112,12 @@ export default function ProjectForm({ clients, defaultValues, onSubmit, isSubmit
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit((data) => {
+        console.log("Form validation passed, submitting:", data);
+        onSubmit(data);
+      }, (errors) => {
+        console.log("Form validation errors:", errors);
+      })} className="space-y-4">
         <FormField
           control={form.control}
           name="name"
