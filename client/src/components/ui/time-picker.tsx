@@ -20,6 +20,7 @@ export function TimePicker({ value, onChange, disabled, className }: TimePickerP
 
   // Debug log to check user timeFormat
   console.log('TimePicker - user timeFormat:', user?.timeFormat);
+  console.log('TimePicker - full user object:', user);
 
   // Parse initial value
   useEffect(() => {
