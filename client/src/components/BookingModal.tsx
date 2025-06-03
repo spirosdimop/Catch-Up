@@ -36,7 +36,9 @@ export default function BookingModal({
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
-    clientName: "",
+    clientFirstName: "",
+    clientLastName: "",
+    clientEmail: "",
     clientPhone: "",
     serviceId: "",
     date: "",
@@ -55,7 +57,7 @@ export default function BookingModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.clientName || !formData.clientPhone || !formData.serviceId || !formData.date || !formData.time) {
+    if (!formData.clientFirstName || !formData.clientLastName || !formData.clientPhone || !formData.serviceId || !formData.date || !formData.time) {
       toast({
         title: "Incomplete Form",
         description: "Please fill in all required fields.",
@@ -71,7 +73,10 @@ export default function BookingModal({
       
       const bookingRequest = {
         externalId: Date.now().toString(),
-        clientName: formData.clientName,
+        clientName: `${formData.clientFirstName} ${formData.clientLastName}`,
+        clientFirstName: formData.clientFirstName,
+        clientLastName: formData.clientLastName,
+        clientEmail: formData.clientEmail || null,
         clientPhone: formData.clientPhone,
         serviceName: selectedService?.name,
         servicePrice: selectedService?.price,
@@ -99,7 +104,9 @@ export default function BookingModal({
       
       // Reset form
       setFormData({
-        clientName: "",
+        clientFirstName: "",
+        clientLastName: "",
+        clientEmail: "",
         clientPhone: "",
         serviceId: "",
         date: "",
@@ -136,17 +143,40 @@ export default function BookingModal({
         </div>
         
         <form onSubmit={handleSubmit} className="p-6 space-y-4">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="clientFirstName">First Name</Label>
+              <Input
+                id="clientFirstName"
+                name="clientFirstName"
+                value={formData.clientFirstName}
+                onChange={handleChange}
+                placeholder="Enter your first name"
+                required
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="clientLastName">Last Name</Label>
+              <Input
+                id="clientLastName"
+                name="clientLastName"
+                value={formData.clientLastName}
+                onChange={handleChange}
+                placeholder="Enter your last name"
+                required
+              />
+            </div>
+          </div>
+          
           <div className="space-y-2">
-            <Label htmlFor="clientName" className="flex items-center">
-              <User size={16} className="mr-2" />
-              Your Name
-            </Label>
+            <Label htmlFor="clientEmail">Email Address (optional)</Label>
             <Input
-              id="clientName"
-              name="clientName"
-              value={formData.clientName}
+              id="clientEmail"
+              name="clientEmail"
+              type="email"
+              value={formData.clientEmail}
               onChange={handleChange}
-              placeholder="Enter your full name"
+              placeholder="Enter your email address"
             />
           </div>
           
