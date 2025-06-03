@@ -24,10 +24,15 @@ export function EmailVerification({ email, isVerified, userId, onVerificationCom
 
   const sendVerificationMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/verify/send-email", {
+      const response = await fetch("/api/verify/send-email", {
         method: "POST",
-        body: { userId, email }
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, email })
       });
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+      return response.json();
     },
     onSuccess: (data) => {
       toast({
@@ -56,10 +61,15 @@ export function EmailVerification({ email, isVerified, userId, onVerificationCom
 
   const verifyEmailMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/verify/email", {
+      const response = await fetch("/api/verify/email", {
         method: "POST",
-        body: { userId, token: verificationToken }
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, token: verificationToken })
       });
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+      return response.json();
     },
     onSuccess: () => {
       toast({

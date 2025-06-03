@@ -624,6 +624,30 @@ export default function Settings() {
               
               <Separator />
               
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Contact Verification</h3>
+                <p className="text-sm text-muted-foreground">
+                  Verify your email and phone number to secure your account and enable notifications
+                </p>
+                
+                {user && (
+                  <div className="space-y-4">
+                    <EmailVerification 
+                      userId={user.id.toString()} 
+                      email={formData.email}
+                      isVerified={user.emailVerified || false}
+                    />
+                    <PhoneVerification 
+                      userId={user.id.toString()} 
+                      phone={formData.phone}
+                      isVerified={user.phoneVerified || false}
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <Separator />
+              
               <div className="flex items-center justify-between">
                 <div>
                   <p className="font-medium">Two-Factor Authentication</p>

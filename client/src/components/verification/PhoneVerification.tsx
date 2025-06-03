@@ -24,10 +24,15 @@ export function PhoneVerification({ phone, isVerified, userId, onVerificationCom
 
   const sendVerificationMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/verify/send-sms", {
+      const response = await fetch("/api/verify/send-sms", {
         method: "POST",
-        body: { userId, phone }
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, phone })
       });
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+      return response.json();
     },
     onSuccess: (data) => {
       toast({
@@ -56,10 +61,15 @@ export function PhoneVerification({ phone, isVerified, userId, onVerificationCom
 
   const verifyPhoneMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/verify/phone", {
+      const response = await fetch("/api/verify/phone", {
         method: "POST",
-        body: { userId, token: verificationCode }
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId, token: verificationCode })
       });
+      if (!response.ok) {
+        throw new Error(await response.text());
+      }
+      return response.json();
     },
     onSuccess: () => {
       toast({
