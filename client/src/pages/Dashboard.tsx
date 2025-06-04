@@ -257,6 +257,41 @@ export default function Dashboard() {
     },
   });
 
+  // AI chat state
+  const [aiMessages, setAiMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
+  const [aiInput, setAiInput] = useState('');
+  const [isAiLoading, setIsAiLoading] = useState(false);
+
+  // AI chat mutation
+  const aiChatMutation = useMutation({
+    mutationFn: async (message: string) => {
+      return apiRequest('/api/ai/chat', 'POST', { message });
+    },
+    onSuccess: (response: any) => {
+      setAiMessages(prev => [...prev, { role: 'assistant', content: response.response }]);
+      setIsAiLoading(false);
+    },
+    onError: () => {
+      toast({
+        title: "AI Error",
+        description: "Failed to get AI response. Please try again.",
+        variant: "destructive",
+      });
+      setIsAiLoading(false);
+    },
+  });
+
+  const handleAiSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!aiInput.trim()) return;
+
+    const userMessage = aiInput.trim();
+    setAiMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setAiInput('');
+    setIsAiLoading(true);
+    aiChatMutation.mutate(userMessage);
+  };
+
   // Calculate statistics
   const activeProjectsCount = projects?.filter(p => p.status === 'in_progress').length || 0;
   const projectsDueThisWeek = projects?.filter(p => {
@@ -542,23 +577,73 @@ export default function Dashboard() {
                 <Bot className="mr-2 h-5 w-5 text-catchup-primary" />
                 AI Assistant
               </h3>
-              <Link href="/ai-assistant">
-                <Button variant="ghost" size="sm" className="text-sm text-gray-500 hover:underline">
-                  Open Assistant
-                </Button>
-              </Link>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => setAiMessages([])}
+                className="text-sm text-gray-500 hover:underline"
+              >
+                Clear Chat
+              </Button>
             </div>
-            <div className="p-6">
-              <div className="text-center py-8">
-                <Bot className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-gray-500 mb-4">
-                  Your AI assistant is ready to help with scheduling, client management, and task automation.
-                </p>
-                <Link href="/ai-assistant">
-                  <Button className="bg-catchup-primary hover:bg-catchup-primary/90">
-                    Start Conversation
+            <div className="flex flex-col h-96">
+              {/* Chat Messages */}
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {aiMessages.length === 0 ? (
+                  <div className="text-center py-8">
+                    <Bot className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                    <p className="text-gray-500 mb-2">
+                      AI assistance for task management, scheduling, and productivity insights.
+                    </p>
+                    <p className="text-sm text-gray-400">
+                      Ask me anything about your projects, tasks, or schedule!
+                    </p>
+                  </div>
+                ) : (
+                  aiMessages.map((message, index) => (
+                    <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                      <div className={`max-w-[80%] p-3 rounded-lg ${
+                        message.role === 'user' 
+                          ? 'bg-catchup-primary text-white' 
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+                {isAiLoading && (
+                  <div className="flex justify-start">
+                    <div className="bg-gray-100 p-3 rounded-lg">
+                      <div className="flex items-center space-x-2">
+                        <RefreshCwIcon className="w-4 h-4 animate-spin text-gray-500" />
+                        <span className="text-sm text-gray-500">AI is thinking...</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+              
+              {/* Chat Input */}
+              <div className="border-t border-gray-100 p-4">
+                <form onSubmit={handleAiSubmit} className="flex gap-2">
+                  <input
+                    type="text"
+                    value={aiInput}
+                    onChange={(e) => setAiInput(e.target.value)}
+                    placeholder="Ask AI about your tasks, projects, or schedule..."
+                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-catchup-primary focus:border-transparent text-sm"
+                    disabled={isAiLoading}
+                  />
+                  <Button 
+                    type="submit" 
+                    size="sm"
+                    disabled={isAiLoading || !aiInput.trim()}
+                    className="px-4"
+                  >
+                    Send
                   </Button>
-                </Link>
+                </form>
               </div>
             </div>
           </motion.div>

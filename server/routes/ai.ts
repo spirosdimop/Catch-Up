@@ -1,111 +1,61 @@
-import { Router } from "express";
-import { chatWithLLM, processCommand } from "../ai";
+import { Request, Response } from 'express';
+import { chatWithLLM, generateTaskSuggestions, generateTaskSummary } from '../ai';
+import { storage } from '../storage';
 
-const router = Router();
-
-/**
- * Process a natural language command using OpenAI
- */
-router.post("/process-command", async (req, res) => {
+export async function handleAiChat(req: Request, res: Response) {
   try {
-    const { command } = req.body;
+    const { message } = req.body;
     
-    if (!command || typeof command !== "string") {
-      return res.status(400).json({ 
-        success: false,
-        result: "Invalid command. Please provide a text command."
-      });
+    if (!message || typeof message !== 'string') {
+      return res.status(400).json({ error: 'Message is required and must be a string' });
     }
-    
-    const result = await processCommand(command);
-    
-    return res.json(result);
-  } catch (error) {
-    console.error("Error processing command:", error);
-    return res.status(500).json({ 
-      success: false,
-      result: "An error occurred while processing your command."
-    });
-  }
-});
 
-/**
- * Generate AI-powered task suggestions based on existing tasks
- */
-router.post("/task-suggestions", async (req, res) => {
+    // Get user context for better AI responses
+    const tasks = await storage.getTasks();
+    const projects = await storage.getProjects();
+    const clients = await storage.getClients();
+    
+    // Create context for AI
+    const context = `
+Current user data:
+- Tasks: ${tasks.length} total (${tasks.filter(t => !t.completed).length} pending)
+- Projects: ${projects.length} total (${projects.filter(p => p.status === 'in_progress').length} active)
+- Clients: ${clients.length} total
+
+User message: ${message}
+
+Please provide helpful advice about productivity, task management, scheduling, or client management based on this context.
+`;
+
+    const aiResponse = await chatWithLLM(context, "gpt-4o", 0.7, 800);
+    
+    res.json({ response: aiResponse });
+  } catch (error: any) {
+    console.error('AI chat error:', error);
+    res.status(500).json({ error: 'Failed to get AI response' });
+  }
+}
+
+export async function handleTaskSuggestions(req: Request, res: Response) {
   try {
-    const { tasks, context } = req.body;
+    const tasks = await storage.getTasks();
+    const suggestions = await generateTaskSuggestions(tasks);
     
-    if (!Array.isArray(tasks)) {
-      return res.status(400).json({ 
-        success: false,
-        result: "Invalid tasks data. Please provide an array of tasks."
-      });
-    }
-    
-    // Simple example response until full implementation
-    const result = {
-      success: true,
-      suggestions: [
-        {
-          title: "Review project requirements",
-          description: "Ensure all requirements are understood and documented",
-          priority: "high",
-          category: "Planning"
-        },
-        {
-          title: "Set up development environment",
-          description: "Install necessary tools and dependencies",
-          priority: "normal",
-          category: "Setup"
-        },
-        {
-          title: "Create project timeline",
-          description: "Define milestones and deadlines",
-          priority: "high",
-          category: "Planning"
-        }
-      ]
-    };
-    
-    return res.json(result);
-  } catch (error) {
-    console.error("Error generating suggestions:", error);
-    return res.status(500).json({ 
-      success: false,
-      result: "An error occurred while generating task suggestions."
-    });
+    res.json({ suggestions });
+  } catch (error: any) {
+    console.error('Task suggestions error:', error);
+    res.status(500).json({ error: 'Failed to generate task suggestions' });
   }
-});
+}
 
-/**
- * Generate a task summary based on existing tasks
- */
-router.post("/task-summary", async (req, res) => {
+export async function handleTaskSummary(req: Request, res: Response) {
   try {
-    const { tasks } = req.body;
+    const tasks = await storage.getTasks();
+    const summary = await generateTaskSummary(tasks);
     
-    if (!Array.isArray(tasks)) {
-      return res.status(400).json({ 
-        success: false,
-        result: "Invalid tasks data. Please provide an array of tasks."
-      });
-    }
-    
-    // For now, return a static summary
-    const result = {
-      success: true,
-      summary: "You have 5 high priority tasks due this week, with most focus needed on the project proposal due tomorrow. Consider rescheduling some lower priority tasks to free up time for the critical deliverables."
-    };
-    
-    return res.json(result);
-  } catch (error) {
-    console.error("Error generating summary:", error);
-    return res.status(500).json({ 
-      success: false,
-      result: "An error occurred while generating the task summary."
-    });
+    res.json({ summary });
+  } catch (error: any) {
+    console.error('Task summary error:', error);
+    res.status(500).json({ error: 'Failed to generate task summary' });
   }
-});
-
-export default router;
+}
