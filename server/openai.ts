@@ -374,9 +374,13 @@ export async function routeInputToApis(message: string, conversationContext?: st
       You are a proactive AI assistant that routes user requests to specialized APIs. Your priority is to gather comprehensive information before executing any command.
 
       Available APIs:
-      1. settings_api - For changing app settings, preferences, availability status, etc.
-      2. calendar_api - For scheduling, rescheduling, or canceling events and meetings.
-      3. message_api - For generating professional auto-response messages when the user is unavailable.
+      1. settings_api - For changing app settings, theme, language, notifications, view preferences
+      2. calendar_api - For managing events, meetings, bookings, and schedule operations
+      3. task_api - For creating, updating, completing, and managing tasks
+      4. project_api - For creating, updating, and managing projects
+      5. client_api - For creating, updating, and managing client information
+      6. booking_api - For scheduling, rescheduling, and managing appointments
+      7. message_api - For generating professional auto-response messages
       
       CRITICAL: Be thorough in collecting information. When users give incomplete commands, ask specific follow-up questions to gather ALL necessary details.
 
@@ -409,7 +413,11 @@ export async function routeInputToApis(message: string, conversationContext?: st
       Output JSON structure:
       {
         "settings_prompt": "...", // Include only if complete settings info provided
-        "calendar_prompt": "...", // Include only if complete calendar info provided  
+        "calendar_prompt": "...", // Include only if complete calendar/event info provided  
+        "task_prompt": "...", // Include only if complete task info provided
+        "project_prompt": "...", // Include only if complete project info provided
+        "client_prompt": "...", // Include only if complete client info provided
+        "booking_prompt": "...", // Include only if complete booking info provided
         "message_prompt": "...", // Include only if complete message info provided
         "clarification_prompt": "...", // Detailed questions to gather missing info
         "missing_fields": ["field1", "field2"], // Specific missing information
@@ -447,8 +455,26 @@ export async function routeInputToApis(message: string, conversationContext?: st
 
       User: "Add three tasks for Spiros: Task 1 is about litholds due today priority urgent, Task 2 is changing litholds due tomorrow priority medium, Task 3 is updating website due next week priority low"
       Response: {
-        "calendar_prompt": "Create three tasks for Spiros: 1) Task about litholds, due today, urgent priority 2) Changing litholds, due tomorrow, medium priority 3) Updating website, due next week, low priority",
+        "task_prompt": "Create three tasks for Spiros: 1) Task about litholds, due today, urgent priority 2) Changing litholds, due tomorrow, medium priority 3) Updating website, due next week, low priority",
         "conversation_context": "User provided complete task details for Spiros - ready to execute task creation"
+      }
+
+      User: "Create a new client named John Smith, email john@example.com, phone 555-0123, company ABC Corp"
+      Response: {
+        "client_prompt": "Create client: John Smith, email john@example.com, phone 555-0123, company ABC Corp",
+        "conversation_context": "User provided complete client information - ready to create client"
+      }
+
+      User: "Create a new project for client Spiros called Website Redesign, budget $5000, starts next Monday"
+      Response: {
+        "project_prompt": "Create project: Website Redesign for Spiros, budget $5000, starts next Monday",
+        "conversation_context": "User provided complete project details - ready to create project"
+      }
+
+      User: "Change theme to dark mode and language to Spanish"
+      Response: {
+        "settings_prompt": "Change theme to dark mode and language to Spanish",
+        "conversation_context": "User wants to update app settings - ready to execute"
       }
 
       User: "Schedule meeting with George tomorrow at 3 PM for 1 hour via video call to discuss project updates"

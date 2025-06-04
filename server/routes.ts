@@ -2007,6 +2007,143 @@ Remember: The most helpful thing you can do is direct users to the specialized t
           results.calendar_error = "Unable to process calendar request";
         }
       }
+
+      // Process task request if present
+      if (routingResult.task_prompt) {
+        try {
+          const taskResult = await executeUserCommand(userId, message, { 
+            calendar_prompt: routingResult.task_prompt,
+            conversation_context: routingResult.conversation_context 
+          });
+          results.task = taskResult;
+        } catch (taskError) {
+          console.error('Error processing task:', taskError);
+          results.task_error = "Unable to process task request";
+        }
+      }
+
+      // Process project request if present
+      if (routingResult.project_prompt) {
+        try {
+          const projectClient = getOpenAIClient('general');
+          const projectPrompt = `
+            Extract project creation details from this request: "${routingResult.project_prompt}"
+            Return JSON with: name, clientName (if mentioned), description, budget (if mentioned), startDate, status
+          `;
+          
+          const response = await projectClient.chat.completions.create({
+            model: model,
+            messages: [
+              { role: 'system', content: projectPrompt },
+              { role: 'user', content: routingResult.project_prompt }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.1
+          });
+
+          const projectData = JSON.parse(response.choices[0]?.message?.content || '{}');
+          
+          // Find client if specified
+          let clientId = null;
+          if (projectData.clientName) {
+            const clients = await storage.getClients();
+            const client = clients.find(c => 
+              `${c.firstName} ${c.lastName}`.toLowerCase().includes(projectData.clientName.toLowerCase())
+            );
+            clientId = client?.id || null;
+          }
+
+          const newProject = await storage.createProject({
+            name: projectData.name || 'New Project',
+            clientId: clientId,
+            startDate: projectData.startDate ? new Date(projectData.startDate) : new Date(),
+            endDate: null,
+            status: projectData.status || 'not_started',
+            description: projectData.description,
+            budget: projectData.budget ? Number(projectData.budget) : null
+          });
+
+          results.project = { success: true, project: newProject };
+        } catch (projectError) {
+          console.error('Error processing project:', projectError);
+          results.project_error = "Unable to process project request";
+        }
+      }
+
+      // Process client request if present
+      if (routingResult.client_prompt) {
+        try {
+          const clientClient = getOpenAIClient('general');
+          const clientPrompt = `
+            Extract client creation details from this request: "${routingResult.client_prompt}"
+            Return JSON with: firstName, lastName, email, phone, company
+            IMPORTANT: Never extract or modify existing user profile data (username, personal email, etc.)
+          `;
+          
+          const response = await clientClient.chat.completions.create({
+            model: model,
+            messages: [
+              { role: 'system', content: clientPrompt },
+              { role: 'user', content: routingResult.client_prompt }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.1
+          });
+
+          const clientData = JSON.parse(response.choices[0]?.message?.content || '{}');
+          
+          const newClient = await storage.createClient({
+            firstName: clientData.firstName || '',
+            lastName: clientData.lastName || '',
+            email: clientData.email,
+            phone: clientData.phone,
+            company: clientData.company
+          });
+
+          results.client = { success: true, client: newClient };
+        } catch (clientError) {
+          console.error('Error processing client:', clientError);
+          results.client_error = "Unable to process client request";
+        }
+      }
+
+      // Process booking request if present
+      if (routingResult.booking_prompt) {
+        try {
+          const bookingClient = getOpenAIClient('general');
+          const bookingPrompt = `
+            Extract booking details from this request: "${routingResult.booking_prompt}"
+            Return JSON with: date (YYYY-MM-DD), time (HH:MM), duration, clientName, service, notes
+          `;
+          
+          const response = await bookingClient.chat.completions.create({
+            model: model,
+            messages: [
+              { role: 'system', content: bookingPrompt },
+              { role: 'user', content: routingResult.booking_prompt }
+            ],
+            response_format: { type: "json_object" },
+            temperature: 0.1
+          });
+
+          const bookingData = JSON.parse(response.choices[0]?.message?.content || '{}');
+          
+          const newBooking = await storage.createBooking({
+            date: bookingData.date || new Date().toISOString().split('T')[0],
+            time: bookingData.time || '10:00',
+            duration: bookingData.duration || 60,
+            clientId: null, // Would need to match client if specified
+            service: bookingData.service || 'Consultation',
+            notes: bookingData.notes,
+            status: 'confirmed'
+          });
+
+          results.booking = { success: true, booking: newBooking };
+        } catch (bookingError) {
+          console.error('Error processing booking:', bookingError);
+          results.booking_error = "Unable to process booking request";
+        }
+      }
       
       // Process message request if present
       if (routingResult.message_prompt) {
