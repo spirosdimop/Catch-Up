@@ -34,6 +34,15 @@ interface CommandResult {
   conversation_context?: string;
 }
 
+// Available LLM models
+const AVAILABLE_MODELS = [
+  { id: 'gpt-4o', name: 'GPT-4o', description: 'Latest OpenAI model with enhanced capabilities' },
+  { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', description: 'Fast and capable OpenAI model' },
+  { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast and cost-effective model' },
+  { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', description: 'Anthropic\'s balanced model' },
+  { id: 'claude-3-opus', name: 'Claude 3 Opus', description: 'Anthropic\'s most capable model' }
+];
+
 function AIAssistant() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -42,6 +51,9 @@ function AIAssistant() {
   // Assistant name modal state
   const [nameModalOpen, setNameModalOpen] = useState(false);
   const [nameInputValue, setNameInputValue] = useState(settings.assistantName || 'Assistant');
+  
+  // Model selection state
+  const [selectedModel, setSelectedModel] = useState('gpt-4o');
   
   // Message state
   const [inputValue, setInputValue] = useState("");
@@ -139,7 +151,8 @@ function AIAssistant() {
         },
         body: JSON.stringify({
           message: messageToSend,
-          conversationContext: conversationContext // Send the context for better continuity
+          conversationContext: conversationContext, // Send the context for better continuity
+          model: selectedModel // Include selected model in the request
         }),
       });
       
@@ -348,62 +361,74 @@ function AIAssistant() {
       </div>
       
       <Card className="h-[calc(100vh-200px)] flex flex-col">
-        <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
             <CardTitle>AI Assistant</CardTitle>
             <CardDescription>
               Use natural language to control settings, create events, or generate responses
             </CardDescription>
           </div>
-          <div className="flex gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                // Reset conversation but keep in localStorage
-                setMessages([createWelcomeMessage(settings.assistantName)]);
-                // Reset context
-                setConversationContext("");
-                setInClarificationMode(false);
-                setOriginalMessage("");
-              }}
-            >
-              <Bot className="h-4 w-4 mr-1" />
-              New Chat
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setNameModalOpen(true)}
-            >
-              <Edit className="h-4 w-4 mr-1" />
-              Name Assistant
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                // Remove from localStorage
-                localStorage.removeItem('aiAssistantMessages');
-                localStorage.removeItem('aiAssistantContext');
-                
-                // Reset to default welcome message with custom name
-                setMessages([createWelcomeMessage(settings.assistantName)]);
-                
-                // Reset conversation context
-                setConversationContext("");
-                setInClarificationMode(false);
-                setOriginalMessage("");
-                
-                toast({
-                  title: "Conversation history cleared",
-                  description: "Your conversation history has been removed from local storage.",
-                  duration: 3000,
-                });
-              }}
-            >
-              Clear History
-            </Button>
+          <div className="flex flex-col sm:flex-row gap-2 items-start sm:items-center">
+            <div className="flex items-center gap-2">
+              <Settings className="h-4 w-4 text-gray-500" />
+              <Select value={selectedModel} onValueChange={setSelectedModel}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select AI Model" />
+                </SelectTrigger>
+                <SelectContent>
+                  {AVAILABLE_MODELS.map((model) => (
+                    <SelectItem key={model.id} value={model.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{model.name}</span>
+                        <span className="text-xs text-gray-500">{model.description}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setMessages([createWelcomeMessage(settings.assistantName)]);
+                  setConversationContext("");
+                  setInClarificationMode(false);
+                  setOriginalMessage("");
+                }}
+              >
+                <Bot className="h-4 w-4 mr-1" />
+                New Chat
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setNameModalOpen(true)}
+              >
+                <Edit className="h-4 w-4 mr-1" />
+                Name Assistant
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  localStorage.removeItem('aiAssistantMessages');
+                  localStorage.removeItem('aiAssistantContext');
+                  setMessages([createWelcomeMessage(settings.assistantName)]);
+                  setConversationContext("");
+                  setInClarificationMode(false);
+                  setOriginalMessage("");
+                  toast({
+                    title: "Conversation history cleared",
+                    description: "Your conversation history has been removed from local storage.",
+                    duration: 3000,
+                  });
+                }}
+              >
+                Clear History
+              </Button>
+            </div>
           </div>
         </CardHeader>
         
