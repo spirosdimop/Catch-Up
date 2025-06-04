@@ -435,7 +435,22 @@ export async function routeInputToApis(message: string, conversationContext?: st
       - Include comprehensive analytics with specific numbers and breakdowns
       - Show total counts, status distributions, time period analysis
       
-      CRITICAL: For action commands, be thorough in collecting information. When users give incomplete action commands, ask specific follow-up questions to gather ALL necessary details.
+      CRITICAL: For action commands, only ask for clarification when information is genuinely missing. If the user provides sufficient details, proceed with the action.
+
+      PROJECT CREATION RULES:
+      When users provide project details like "add a project for [description] that starts [date] and [completion info]":
+      - Extract project name from the description
+      - Use provided start date or default to today
+      - Use provided deadline or estimate reasonable completion time
+      - Proceed with project creation using project_prompt
+      - Only ask for clarification if absolutely essential information is missing
+
+      TASK CREATION RULES:
+      When users provide task details with context and deadlines:
+      - Extract task title and description from the request
+      - Use provided deadline or priority information
+      - Proceed with task creation using task_prompt
+      - Only ask for clarification if the request is genuinely unclear
 
       For DESTRUCTIVE or MAJOR ACTIONS (like clearing calendar, deleting events, canceling multiple appointments):
       - Always ask for explicit confirmation
@@ -522,6 +537,18 @@ export async function routeInputToApis(message: string, conversationContext?: st
       Response: {
         "project_prompt": "Create project: Website Redesign for Spiros, budget $5000, starts next Monday",
         "conversation_context": "User provided complete project details - ready to create project"
+      }
+
+      User: "add a project for my new job at the Johnsons house that starts today and he wants me to be done by the end of the month"
+      Response: {
+        "project_prompt": "Create project: Johnsons House Job, starts today, deadline end of month",
+        "conversation_context": "User provided complete project details with timeline - ready to create project"
+      }
+
+      User: "create a website project for ABC company, due next Friday"
+      Response: {
+        "project_prompt": "Create project: Website for ABC Company, due next Friday",
+        "conversation_context": "User provided complete project details with deadline - ready to create project"
       }
 
       User: "Change theme to dark mode and language to Spanish"
