@@ -2011,11 +2011,62 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       // Process task request if present
       if (routingResult.task_prompt) {
         try {
-          const taskResult = await executeUserCommand(userId, message, { 
-            calendar_prompt: routingResult.task_prompt,
-            conversation_context: routingResult.conversation_context 
-          });
-          results.task = taskResult;
+          // Check if this is a count/summary request
+          const isCountRequest = message.toLowerCase().includes('how many') || 
+                                message.toLowerCase().includes('count') ||
+                                message.toLowerCase().includes('total') ||
+                                message.toLowerCase().includes('number of');
+          
+          if (isCountRequest) {
+            const tasks = await storage.getTasks();
+            const tasksByStatus = tasks.reduce((acc, task) => {
+              acc[task.status] = (acc[task.status] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+            
+            const tasksByPriority = tasks.reduce((acc, task) => {
+              acc[task.priority || 'none'] = (acc[task.priority || 'none'] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+            
+            results.task = {
+              total: tasks.length,
+              by_status: tasksByStatus,
+              by_priority: tasksByPriority,
+              summary: `You have ${tasks.length} total tasks. Status breakdown: ${Object.entries(tasksByStatus).map(([status, count]) => `${count} ${status}`).join(', ')}. Priority breakdown: ${Object.entries(tasksByPriority).map(([priority, count]) => `${count} ${priority}`).join(', ')}.`
+            };
+          } else {
+            // Handle task creation/modification
+            const taskClient = getOpenAIClient('general');
+            const taskPrompt = `
+              Extract task creation details from this request: "${routingResult.task_prompt}"
+              Return JSON with: title, description, priority (urgent/high/medium/low), status, dueDate
+            `;
+            
+            const response = await taskClient.chat.completions.create({
+              model: model,
+              messages: [
+                { role: 'system', content: taskPrompt },
+                { role: 'user', content: routingResult.task_prompt }
+              ],
+              response_format: { type: "json_object" },
+              temperature: 0.1
+            });
+
+            const taskData = JSON.parse(response.choices[0]?.message?.content || '{}');
+            
+            const newTask = await storage.createTask({
+              title: taskData.title || 'New Task',
+              description: taskData.description,
+              projectId: null,
+              clientId: null,
+              status: taskData.status || 'to_do',
+              priority: taskData.priority || 'medium',
+              deadline: taskData.dueDate ? new Date(taskData.dueDate) : null
+            });
+
+            results.task = { success: true, task: newTask };
+          }
         } catch (taskError) {
           console.error('Error processing task:', taskError);
           results.task_error = "Unable to process task request";
@@ -2025,45 +2076,71 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       // Process project request if present
       if (routingResult.project_prompt) {
         try {
-          const projectClient = getOpenAIClient('general');
-          const projectPrompt = `
-            Extract project creation details from this request: "${routingResult.project_prompt}"
-            Return JSON with: name, clientName (if mentioned), description, budget (if mentioned), startDate, status
-          `;
+          // Check if this is a count/summary request
+          const isCountRequest = message.toLowerCase().includes('how many') || 
+                                message.toLowerCase().includes('count') ||
+                                message.toLowerCase().includes('total') ||
+                                message.toLowerCase().includes('number of');
           
-          const response = await projectClient.chat.completions.create({
-            model: model,
-            messages: [
-              { role: 'system', content: projectPrompt },
-              { role: 'user', content: routingResult.project_prompt }
-            ],
-            response_format: { type: "json_object" },
-            temperature: 0.1
-          });
+          if (isCountRequest) {
+            const projects = await storage.getProjects();
+            const projectsByStatus = projects.reduce((acc, project) => {
+              acc[project.status] = (acc[project.status] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+            
+            const projectsWithBudget = projects.filter(p => p.budget).length;
+            const totalBudget = projects.reduce((sum, p) => sum + (p.budget || 0), 0);
+            
+            results.project = {
+              total: projects.length,
+              by_status: projectsByStatus,
+              with_budget: projectsWithBudget,
+              total_budget: totalBudget,
+              summary: `You have ${projects.length} total projects. Status breakdown: ${Object.entries(projectsByStatus).map(([status, count]) => `${count} ${status}`).join(', ')}. ${projectsWithBudget} projects have budgets totaling $${totalBudget.toLocaleString()}.`
+            };
+          } else {
+            // Handle project creation
+            const projectClient = getOpenAIClient('general');
+            const projectPrompt = `
+              Extract project creation details from this request: "${routingResult.project_prompt}"
+              Return JSON with: name, clientName (if mentioned), description, budget (if mentioned), startDate, status
+            `;
+            
+            const response = await projectClient.chat.completions.create({
+              model: model,
+              messages: [
+                { role: 'system', content: projectPrompt },
+                { role: 'user', content: routingResult.project_prompt }
+              ],
+              response_format: { type: "json_object" },
+              temperature: 0.1
+            });
 
-          const projectData = JSON.parse(response.choices[0]?.message?.content || '{}');
-          
-          // Find client if specified
-          let clientId = null;
-          if (projectData.clientName) {
-            const clients = await storage.getClients();
-            const client = clients.find(c => 
-              `${c.firstName} ${c.lastName}`.toLowerCase().includes(projectData.clientName.toLowerCase())
-            );
-            clientId = client?.id || null;
+            const projectData = JSON.parse(response.choices[0]?.message?.content || '{}');
+            
+            // Find client if specified
+            let clientId: number | null = null;
+            if (projectData.clientName) {
+              const clients = await storage.getClients();
+              const client = clients.find(c => 
+                `${c.firstName} ${c.lastName}`.toLowerCase().includes(projectData.clientName.toLowerCase())
+              );
+              clientId = client?.id || null;
+            }
+
+            const newProject = await storage.createProject({
+              name: projectData.name || 'New Project',
+              clientId: clientId,
+              startDate: projectData.startDate ? new Date(projectData.startDate) : new Date(),
+              endDate: null,
+              status: projectData.status || 'not_started',
+              description: projectData.description,
+              budget: projectData.budget ? Number(projectData.budget) : null
+            });
+
+            results.project = { success: true, project: newProject };
           }
-
-          const newProject = await storage.createProject({
-            name: projectData.name || 'New Project',
-            clientId: clientId,
-            startDate: projectData.startDate ? new Date(projectData.startDate) : new Date(),
-            endDate: null,
-            status: projectData.status || 'not_started',
-            description: projectData.description,
-            budget: projectData.budget ? Number(projectData.budget) : null
-          });
-
-          results.project = { success: true, project: newProject };
         } catch (projectError) {
           console.error('Error processing project:', projectError);
           results.project_error = "Unable to process project request";

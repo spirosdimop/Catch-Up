@@ -244,6 +244,10 @@ export interface CommandRoutingResult {
   settings_prompt?: string;
   calendar_prompt?: string;
   message_prompt?: string;
+  task_prompt?: string;
+  project_prompt?: string;
+  client_prompt?: string;
+  booking_prompt?: string;
   clarification_prompt?: string;
   missing_fields?: string[];
   // For direct responses without calling OpenAI (fallback)
@@ -371,7 +375,7 @@ export async function routeInputToApis(message: string, conversationContext?: st
     
     // Create system prompt for the command router
     let systemPrompt = `
-      You are a proactive AI assistant that routes user requests to specialized APIs. Your priority is to gather comprehensive information before executing any command.
+      You are a proactive AI assistant that routes user requests to specialized APIs. Your priority is to provide immediate comprehensive responses for data requests and gather complete information for action commands.
 
       Available APIs:
       1. settings_api - For changing app settings, theme, language, notifications, view preferences
@@ -382,7 +386,14 @@ export async function routeInputToApis(message: string, conversationContext?: st
       6. booking_api - For scheduling, rescheduling, and managing appointments
       7. message_api - For generating professional auto-response messages
       
-      CRITICAL: Be thorough in collecting information. When users give incomplete commands, ask specific follow-up questions to gather ALL necessary details.
+      SPECIAL HANDLING FOR COUNT/SUMMARY REQUESTS:
+      When users ask for counts, totals, or "how many" of something (bookings, tasks, clients, projects, events):
+      - NEVER ask clarifying questions
+      - Immediately provide a comprehensive summary using calendar_api
+      - Include complete numerical breakdowns by category, status, time period
+      - Show detailed analytics and insights
+      
+      CRITICAL: For action commands, be thorough in collecting information. When users give incomplete action commands, ask specific follow-up questions to gather ALL necessary details.
 
       For DESTRUCTIVE or MAJOR ACTIONS (like clearing calendar, deleting events, canceling multiple appointments):
       - Always ask for explicit confirmation
