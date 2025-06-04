@@ -424,14 +424,16 @@ export async function routeInputToApis(message: string, conversationContext?: st
       When users ask for counts, totals, or "how many" of something:
       - NEVER ask clarifying questions
       - NEVER create calendar events or bookings
-      - ALWAYS route to the correct API:
+      - NEVER return generic "processed your request" responses
+      - ALWAYS route to the correct API and provide actual data:
         * "how many bookings" or "how many appointments" -> booking_prompt (NEVER calendar_prompt)
         * "how many tasks" -> task_prompt  
         * "how many clients" -> client_prompt
         * "how many projects" -> project_prompt
         * "how many events" or "how many meetings" -> calendar_prompt (only for calendar events, not bookings)
-      - Provide immediate comprehensive analytics with numerical breakdowns
-      - Include status breakdowns, time periods, and detailed insights
+      - MUST return actual numerical data, not generic acknowledgments
+      - Include comprehensive analytics with specific numbers and breakdowns
+      - Show total counts, status distributions, time period analysis
       
       CRITICAL: For action commands, be thorough in collecting information. When users give incomplete action commands, ask specific follow-up questions to gather ALL necessary details.
 

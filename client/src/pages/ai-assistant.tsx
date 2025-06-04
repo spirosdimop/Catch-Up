@@ -301,6 +301,125 @@ function AIAssistant() {
         responseText += `\n\n⚠️ ${result.calendar_error}`;
       }
       
+      if (result.booking) {
+        const booking = result.booking;
+        
+        if (booking.total !== undefined) {
+          // This is booking analytics
+          responseText = `📊 **Booking Analytics**\n\n`;
+          responseText += `**Total Bookings:** ${booking.total}\n`;
+          responseText += `**This Month:** ${booking.this_month}\n`;
+          responseText += `**Total Duration:** ${booking.total_duration_minutes} minutes\n\n`;
+          
+          if (booking.by_status && Object.keys(booking.by_status).length > 0) {
+            responseText += `**Status Breakdown:**\n`;
+            Object.entries(booking.by_status).forEach(([status, count]) => {
+              responseText += `• ${status}: ${count}\n`;
+            });
+          }
+          
+          if (booking.summary) {
+            responseText += `\n${booking.summary}`;
+          }
+        } else if (booking.success) {
+          responseText += `\n\n✓ Booking created successfully`;
+          setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['/api/bookings'] });
+          }, 500);
+        }
+      } else if (result.booking_error) {
+        responseText += `\n\n⚠️ ${result.booking_error}`;
+      }
+
+      if (result.task) {
+        const task = result.task;
+        
+        if (task.total !== undefined) {
+          // This is task analytics
+          responseText = `📋 **Task Analytics**\n\n`;
+          responseText += `**Total Tasks:** ${task.total}\n\n`;
+          
+          if (task.by_status && Object.keys(task.by_status).length > 0) {
+            responseText += `**Status Breakdown:**\n`;
+            Object.entries(task.by_status).forEach(([status, count]) => {
+              responseText += `• ${status}: ${count}\n`;
+            });
+          }
+          
+          if (task.by_priority && Object.keys(task.by_priority).length > 0) {
+            responseText += `\n**Priority Breakdown:**\n`;
+            Object.entries(task.by_priority).forEach(([priority, count]) => {
+              responseText += `• ${priority}: ${count}\n`;
+            });
+          }
+          
+          if (task.summary) {
+            responseText += `\n${task.summary}`;
+          }
+        } else if (task.success) {
+          responseText += `\n\n✓ Task created successfully`;
+          setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['/api/tasks'] });
+          }, 500);
+        }
+      } else if (result.task_error) {
+        responseText += `\n\n⚠️ ${result.task_error}`;
+      }
+
+      if (result.project) {
+        const project = result.project;
+        
+        if (project.total !== undefined) {
+          // This is project analytics
+          responseText = `🏗️ **Project Analytics**\n\n`;
+          responseText += `**Total Projects:** ${project.total}\n`;
+          responseText += `**With Budget:** ${project.with_budget}\n`;
+          responseText += `**Total Budget:** $${project.total_budget?.toLocaleString()}\n\n`;
+          
+          if (project.by_status && Object.keys(project.by_status).length > 0) {
+            responseText += `**Status Breakdown:**\n`;
+            Object.entries(project.by_status).forEach(([status, count]) => {
+              responseText += `• ${status}: ${count}\n`;
+            });
+          }
+          
+          if (project.summary) {
+            responseText += `\n${project.summary}`;
+          }
+        } else if (project.success) {
+          responseText += `\n\n✓ Project created successfully`;
+          setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+          }, 500);
+        }
+      } else if (result.project_error) {
+        responseText += `\n\n⚠️ ${result.project_error}`;
+      }
+
+      if (result.client) {
+        const client = result.client;
+        
+        if (client.total !== undefined) {
+          // This is client analytics
+          responseText = `👥 **Client Analytics**\n\n`;
+          responseText += `**Total Clients:** ${client.total}\n`;
+          responseText += `**With Email:** ${client.with_email}\n`;
+          responseText += `**With Phone:** ${client.with_phone}\n`;
+          responseText += `**With Company:** ${client.with_company}\n\n`;
+          
+          if (client.summary) {
+            responseText += `${client.summary}`;
+          }
+        } else if (client.success) {
+          responseText += `\n\n✓ Client created successfully`;
+          setTimeout(() => {
+            queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
+          }, 500);
+        }
+      } else if (result.client_error) {
+        responseText += `\n\n⚠️ ${result.client_error}`;
+      }
+
       if (result.message) {
         responseText += `\n\n✓ Auto-response message created: "${result.message}"`;
       } else if (result.message_error) {
