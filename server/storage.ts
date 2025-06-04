@@ -1054,9 +1054,10 @@ export class MemStorage implements IStorage {
     const emailMap = new Map<string, number>();
     const duplicateEmails = new Set<string>();
     
-    // Find duplicate emails
+    // Find duplicate emails, skipping clients without an email
     allClients.forEach(client => {
-      const email = client.email.toLowerCase().trim();
+      const email = client.email?.toLowerCase().trim();
+      if (!email) return;
       if (emailMap.has(email)) {
         duplicateEmails.add(email);
       } else {
@@ -1065,9 +1066,10 @@ export class MemStorage implements IStorage {
     });
     
     // Return all clients with duplicate emails
-    return allClients.filter(client => 
-      duplicateEmails.has(client.email.toLowerCase().trim())
-    );
+    return allClients.filter(client => {
+      const email = client.email?.toLowerCase().trim();
+      return email ? duplicateEmails.has(email) : false;
+    });
   }
 }
 
