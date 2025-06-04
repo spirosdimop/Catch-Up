@@ -564,6 +564,24 @@ export async function routeInputToApis(message: string, conversationContext?: st
         "conversation_context": "User provided complete project details with deadline - ready to create project"
       }
 
+      User: "appointment with John tomorrow at 3 PM"
+      Response: {
+        "booking_prompt": "Create booking: John tomorrow at 3 PM",
+        "conversation_context": "User provided date and time - ready to create booking"
+      }
+
+      User: "book meeting with Sarah next Monday at 10 AM"
+      Response: {
+        "booking_prompt": "Create booking: Sarah next Monday at 10 AM", 
+        "conversation_context": "User provided date and time - ready to create booking"
+      }
+
+      User: "schedule appointment tomorrow at 2 PM"
+      Response: {
+        "booking_prompt": "Create booking: tomorrow at 2 PM",
+        "conversation_context": "User provided date and time - ready to create booking"
+      }
+
       User: "Change theme to dark mode and language to Spanish"
       Response: {
         "settings_prompt": "Change theme to dark mode and language to Spanish",

@@ -2415,16 +2415,21 @@ Remember: The most helpful thing you can do is direct users to the specialized t
                 status: 'confirmed'
               });
 
-              // PHASE 2: Offer optional field enhancement
+              // PHASE 2: Offer optional field enhancement with your requested format
+              let clientName = 'your appointment';
+              if (bookingData.client_name) {
+                clientName = bookingData.client_name;
+              }
+              
               let enhancementMessage = '';
               if (!bookingData.has_optional_details) {
-                enhancementMessage = ' Would you like to add details like duration, client assignment, or service type?';
+                enhancementMessage = ` Would you like to add the duration or any other details?`;
               }
 
               results.booking = { 
                 success: true, 
                 booking: newBooking,
-                message: `Created booking for ${bookingData.date} at ${bookingData.time}${enhancementMessage}`,
+                message: `I've added your booking with ${clientName} ${bookingData.date} at ${bookingData.time}.${enhancementMessage}`,
                 needs_enhancement: !bookingData.has_optional_details,
                 enhancement_options: ['duration', 'client', 'service', 'notes']
               };
