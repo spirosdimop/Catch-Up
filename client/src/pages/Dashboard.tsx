@@ -89,9 +89,10 @@ interface QuickAction {
 const defaultWidgets: DashboardWidget[] = [
   { id: 'stats', title: 'Statistics', visible: true, order: 1, icon: <BarChart3Icon className="h-4 w-4" /> },
   { id: 'missed-calls', title: 'Missed Calls', visible: true, order: 2, icon: <PhoneIcon className="h-4 w-4" /> },
-  { id: 'calendar', title: 'Calendar', visible: true, order: 3, icon: <CalendarIcon className="h-4 w-4" /> },
-  { id: 'recent-projects', title: 'Recent Projects', visible: true, order: 4, icon: <FolderIcon className="h-4 w-4" /> },
-  { id: 'tasks', title: 'Tasks', visible: true, order: 5, icon: <CheckSquareIcon className="h-4 w-4" /> },
+  { id: 'ai-assistant', title: 'AI Assistant', visible: true, order: 3, icon: <Bot className="h-4 w-4" /> },
+  { id: 'calendar', title: 'Calendar', visible: true, order: 4, icon: <CalendarIcon className="h-4 w-4" /> },
+  { id: 'recent-projects', title: 'Recent Projects', visible: true, order: 5, icon: <FolderIcon className="h-4 w-4" /> },
+  { id: 'tasks', title: 'Tasks', visible: true, order: 6, icon: <CheckSquareIcon className="h-4 w-4" /> },
 ];
 
 const defaultQuickActions: QuickAction[] = [
@@ -255,8 +256,6 @@ export default function Dashboard() {
       });
     },
   });
-
-
 
   // Calculate statistics
   const activeProjectsCount = projects?.filter(p => p.status === 'in_progress').length || 0;
@@ -531,7 +530,39 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-
+        {/* AI Assistant Widget */}
+        {widgets.find(w => w.id === 'ai-assistant')?.visible && (
+          <motion.div 
+            variants={itemVariants}
+            className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
+            style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
+          >
+            <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
+              <h3 className="font-semibold text-lg text-gray-800 flex items-center">
+                <Bot className="mr-2 h-5 w-5 text-catchup-primary" />
+                AI Assistant
+              </h3>
+              <Link href="/ai-assistant">
+                <Button variant="ghost" size="sm" className="text-sm text-gray-500 hover:underline">
+                  Open Assistant
+                </Button>
+              </Link>
+            </div>
+            <div className="p-6">
+              <div className="text-center py-8">
+                <Bot className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <p className="text-gray-500 mb-4">
+                  Your AI assistant is ready to help with scheduling, client management, and task automation.
+                </p>
+                <Link href="/ai-assistant">
+                  <Button className="bg-catchup-primary hover:bg-catchup-primary/90">
+                    Start Conversation
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Recent Projects Widget */}
         {widgets.find(w => w.id === 'recent-projects')?.visible && (
@@ -566,7 +597,7 @@ export default function Dashboard() {
                         variant={project.status === 'completed' ? 'default' : 'secondary'}
                         className={project.status === 'in_progress' ? 'bg-blue-100 text-blue-800' : ''}
                       >
-                        {String(project.status || 'pending').replace('_', ' ')}
+                        {project.status.replace('_', ' ')}
                       </Badge>
                     </div>
                   ))}
@@ -644,7 +675,7 @@ export default function Dashboard() {
                             task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : ''
                           }
                         >
-                          {String(task.priority || 'low')}
+                          {task.priority}
                         </Badge>
                         {updateTaskMutation.isPending && (
                           <RefreshCwIcon className="w-4 h-4 animate-spin text-gray-400" />
@@ -720,17 +751,17 @@ export default function Dashboard() {
                       <div className="h-3 w-3 rounded-full bg-catchup-primary flex-shrink-0"></div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          {booking.type ? String(booking.type).charAt(0).toUpperCase() + String(booking.type).slice(1).replace('_', ' ') : 'Appointment'}
+                          {booking.type ? booking.type.charAt(0).toUpperCase() + booking.type.slice(1).replace('_', ' ') : 'Appointment'}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {String(booking.time || '')} • {String(booking.duration || '30')} min
+                          {booking.time} • {booking.duration || '30'} min
                         </p>
                       </div>
                       <Badge 
                         variant={booking.status === 'confirmed' ? 'default' : 'secondary'}
                         className="text-xs"
                       >
-                        {String(booking.status || 'pending')}
+                        {booking.status}
                       </Badge>
                     </div>
                   ))}

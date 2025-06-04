@@ -34,7 +34,7 @@ import {
 } from "@shared/schema";
 import { z } from "zod";
 import { registerPublicProfileRoutes } from "./routes/publicProfile";
-import { handleAiChat, handleTaskSuggestions, handleTaskSummary } from "./routes/ai";
+import aiRoutes from "./routes/ai";
 import bookingsRoutes from "./routes/bookings";
 
 // Helper functions for navigation tracking
@@ -2549,12 +2549,8 @@ Remember: The most helpful thing you can do is direct users to the specialized t
   // Register public profile routes
   registerPublicProfileRoutes(app);
   
-  // AI Chat endpoints
-  apiRouter.post("/ai/chat", handleAiChat);
-  apiRouter.post("/ai/task-suggestions", handleTaskSuggestions);
-  apiRouter.post("/ai/task-summary", handleTaskSummary);
-  
   // Register API routes
+  app.use("/api/ai", aiRoutes);
   app.use("/api/bookings", bookingsRoutes);
   
   const httpServer = createServer(app);
