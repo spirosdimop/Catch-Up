@@ -89,10 +89,9 @@ interface QuickAction {
 const defaultWidgets: DashboardWidget[] = [
   { id: 'stats', title: 'Statistics', visible: true, order: 1, icon: <BarChart3Icon className="h-4 w-4" /> },
   { id: 'missed-calls', title: 'Missed Calls', visible: true, order: 2, icon: <PhoneIcon className="h-4 w-4" /> },
-  { id: 'ai-assistant', title: 'AI Assistant', visible: true, order: 3, icon: <Bot className="h-4 w-4" /> },
-  { id: 'calendar', title: 'Calendar', visible: true, order: 4, icon: <CalendarIcon className="h-4 w-4" /> },
-  { id: 'recent-projects', title: 'Recent Projects', visible: true, order: 5, icon: <FolderIcon className="h-4 w-4" /> },
-  { id: 'tasks', title: 'Tasks', visible: true, order: 6, icon: <CheckSquareIcon className="h-4 w-4" /> },
+  { id: 'calendar', title: 'Calendar', visible: true, order: 3, icon: <CalendarIcon className="h-4 w-4" /> },
+  { id: 'recent-projects', title: 'Recent Projects', visible: true, order: 4, icon: <FolderIcon className="h-4 w-4" /> },
+  { id: 'tasks', title: 'Tasks', visible: true, order: 5, icon: <CheckSquareIcon className="h-4 w-4" /> },
 ];
 
 const defaultQuickActions: QuickAction[] = [
@@ -257,40 +256,7 @@ export default function Dashboard() {
     },
   });
 
-  // AI chat state
-  const [aiMessages, setAiMessages] = useState<{role: 'user' | 'assistant', content: string}[]>([]);
-  const [aiInput, setAiInput] = useState('');
-  const [isAiLoading, setIsAiLoading] = useState(false);
 
-  // AI chat mutation
-  const aiChatMutation = useMutation({
-    mutationFn: async (message: string) => {
-      return apiRequest('/api/ai/chat', 'POST', { message });
-    },
-    onSuccess: (response: any) => {
-      setAiMessages(prev => [...prev, { role: 'assistant', content: response.response }]);
-      setIsAiLoading(false);
-    },
-    onError: () => {
-      toast({
-        title: "AI Error",
-        description: "Failed to get AI response. Please try again.",
-        variant: "destructive",
-      });
-      setIsAiLoading(false);
-    },
-  });
-
-  const handleAiSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!aiInput.trim()) return;
-
-    const userMessage = aiInput.trim();
-    setAiMessages(prev => [...prev, { role: 'user', content: userMessage }]);
-    setAiInput('');
-    setIsAiLoading(true);
-    aiChatMutation.mutate(userMessage);
-  };
 
   // Calculate statistics
   const activeProjectsCount = projects?.filter(p => p.status === 'in_progress').length || 0;
@@ -565,89 +531,7 @@ export default function Dashboard() {
           </motion.div>
         )}
 
-        {/* AI Assistant Widget */}
-        {widgets.find(w => w.id === 'ai-assistant')?.visible && (
-          <motion.div 
-            variants={itemVariants}
-            className="bg-white rounded-xl shadow-md overflow-hidden border border-gray-100"
-            style={{ boxShadow: '0px 4px 12px rgba(0,0,0,0.06)' }}
-          >
-            <div className="border-b border-gray-100 px-6 py-4 flex justify-between items-center">
-              <h3 className="font-semibold text-lg text-gray-800 flex items-center">
-                <Bot className="mr-2 h-5 w-5 text-catchup-primary" />
-                AI Assistant
-              </h3>
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={() => setAiMessages([])}
-                className="text-sm text-gray-500 hover:underline"
-              >
-                Clear Chat
-              </Button>
-            </div>
-            <div className="flex flex-col h-96">
-              {/* Chat Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {aiMessages.length === 0 ? (
-                  <div className="text-center py-8">
-                    <Bot className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                    <p className="text-gray-500 mb-2">
-                      AI assistance for task management, scheduling, and productivity insights.
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      Ask me anything about your projects, tasks, or schedule!
-                    </p>
-                  </div>
-                ) : (
-                  aiMessages.map((message, index) => (
-                    <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[80%] p-3 rounded-lg ${
-                        message.role === 'user' 
-                          ? 'bg-catchup-primary text-white' 
-                          : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        <p className="text-sm whitespace-pre-wrap">{String(message.content || '')}</p>
-                      </div>
-                    </div>
-                  ))
-                )}
-                {isAiLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 p-3 rounded-lg">
-                      <div className="flex items-center space-x-2">
-                        <RefreshCwIcon className="w-4 h-4 animate-spin text-gray-500" />
-                        <span className="text-sm text-gray-500">AI is thinking...</span>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              {/* Chat Input */}
-              <div className="border-t border-gray-100 p-4">
-                <form onSubmit={handleAiSubmit} className="flex gap-2">
-                  <input
-                    type="text"
-                    value={aiInput}
-                    onChange={(e) => setAiInput(e.target.value)}
-                    placeholder="Ask AI about your tasks, projects, or schedule..."
-                    className="flex-1 px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-catchup-primary focus:border-transparent text-sm"
-                    disabled={isAiLoading}
-                  />
-                  <Button 
-                    type="submit" 
-                    size="sm"
-                    disabled={isAiLoading || !aiInput.trim()}
-                    className="px-4"
-                  >
-                    Send
-                  </Button>
-                </form>
-              </div>
-            </div>
-          </motion.div>
-        )}
+
 
         {/* Recent Projects Widget */}
         {widgets.find(w => w.id === 'recent-projects')?.visible && (
