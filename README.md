@@ -5,7 +5,7 @@ A comprehensive AI-powered freelancer productivity platform that provides intell
 ## Features
 
 ### 🤖 AI Assistant
-- **Multi-LLM Support**: Choose from GPT-4o, GPT-4 Turbo, GPT-3.5 Turbo, Claude 3 Sonnet, and Claude 3 Opus
+- **Model Support**: Choose from GPT-4o, GPT-4 Turbo, or GPT-3.5 Turbo
 - **Full App Access**: AI can manage tasks, projects, clients, bookings, events, and settings
 - **Smart Entity Creation**: Two-phase approach - mandatory fields first, then optional enhancements
 - **Immediate Analytics**: Comprehensive numerical summaries with detailed breakdowns

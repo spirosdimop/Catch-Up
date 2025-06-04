@@ -47,8 +47,7 @@ const AVAILABLE_MODELS = [
   { id: 'gpt-4o', name: 'GPT-4o', description: 'Latest OpenAI model with enhanced capabilities' },
   { id: 'gpt-4-turbo', name: 'GPT-4 Turbo', description: 'Fast and capable OpenAI model' },
   { id: 'gpt-3.5-turbo', name: 'GPT-3.5 Turbo', description: 'Fast and cost-effective model' },
-  { id: 'claude-3-sonnet', name: 'Claude 3 Sonnet', description: 'Anthropic\'s balanced model' },
-  { id: 'claude-3-opus', name: 'Claude 3 Opus', description: 'Anthropic\'s most capable model' }
+  // Anthropic models are not yet supported
 ];
 
 function AIAssistant() {
