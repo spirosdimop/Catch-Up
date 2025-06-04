@@ -1,22 +1,16 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Link, useLocation } from "wouter";
+import { useLocation } from "wouter";
+import { Project, Client, InsertProject, ProjectStatus } from "@shared/schema";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import { formatDate, getStatusColor } from "@/lib/utils";
+import { PlusIcon, SearchIcon, TrashIcon, PencilIcon, ExternalLinkIcon } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import ProjectForm from "@/components/ProjectForm";
 import {
   Table,
   TableBody,
@@ -26,237 +20,374 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Plus, Search, MoreVertical, Edit, Trash2 } from "lucide-react";
-import { Project, Client, ProjectStatus } from "@shared/schema";
-import { format } from "date-fns";
-import { queryClient, apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function Projects() {
-  const [, navigate] = useLocation();
   const { toast } = useToast();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [deleteProjectId, setDeleteProjectId] = useState<number | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [, navigate] = useLocation();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string | undefined>(undefined);
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
-  const { data: projects, isLoading: projectsLoading } = useQuery<Project[]>({
-    queryKey: ["/api/projects"],
-  });
-
-  const { data: clients, isLoading: clientsLoading } = useQuery<Client[]>({
-    queryKey: ["/api/clients"],
-  });
-
-  const deleteProjectMutation = useMutation({
-    mutationFn: async (id: number) => {
-      return apiRequest("DELETE", `/api/projects/${id}`, undefined);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/projects"] });
-      toast({
-        title: "Project deleted",
-        description: "The project has been deleted successfully",
-      });
-      setDeleteDialogOpen(false);
+  // Fetch projects and clients
+  const { data: projects, isLoading: isLoadingProjects, refetch: refetchProjects } = useQuery<Project[]>({
+    queryKey: ['/api/projects'],
+    onSuccess: (data) => {
+      console.log("Projects loaded successfully:", data);
     },
     onError: (error) => {
+      console.error("Error loading projects:", error);
+    },
+    staleTime: 0, // Always fetch fresh data
+    refetchOnMount: true, // Refetch when component mounts
+    refetchOnWindowFocus: true // Refetch when window regains focus
+  });
+
+  const { data: clients, isLoading: isLoadingClients, isError: isClientsError } = useQuery<Client[]>({
+    queryKey: ['/api/clients'],
+    onSuccess: (data) => {
+      console.log("Clients loaded successfully:", data);
+    },
+    onError: (error) => {
+      console.error("Error loading clients:", error);
+      // Don't show toast, just log the error to console
+    },
+    retry: 2,
+    staleTime: 0, // Always fetch fresh data
+    // Return empty array if there's an error to prevent null reference errors
+    placeholderData: []
+  });
+
+  // Create project mutation
+  const createProjectMutation = useMutation({
+    mutationFn: async (project: InsertProject) => {
+      console.log("Creating project:", project);
+      const res = await apiRequest("POST", "/api/projects", project);
+      const newProject = await res.json();
+      console.log("Project created:", newProject);
+      return newProject;
+    },
+    onSuccess: () => {
+      console.log("Project created successfully, invalidating queries");
+      
+      // Properly invalidate the cache
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      
+      // Explicitly refetch to ensure fresh data
+      refetchProjects();
+      
+      setIsAddDialogOpen(false);
       toast({
-        title: "Error",
-        description: "Failed to delete project",
+        title: "Project created",
+        description: "The project has been created successfully.",
+      });
+    },
+    onError: (error) => {
+      console.error("Error creating project:", error);
+      toast({
+        title: "Error creating project",
+        description: error.message,
         variant: "destructive",
       });
     },
   });
 
-  const isLoading = projectsLoading || clientsLoading;
-
-  // Get client name by ID
-  const getClientName = (clientId: number) => {
-    const client = clients?.find((c) => c.id === clientId);
-    return client?.name || "Unknown Client";
-  };
-
-  // Format status for display
-  const formatStatus = (status: string) => {
-    switch (status) {
-      case ProjectStatus.NOT_STARTED:
-        return "Not Started";
-      case ProjectStatus.IN_PROGRESS:
-        return "In Progress";
-      case ProjectStatus.ON_HOLD:
-        return "On Hold";
-      case ProjectStatus.COMPLETED:
-        return "Completed";
-      default:
-        return status;
-    }
-  };
-
-  // Get status style
-  const getStatusStyle = (status: string) => {
-    switch (status) {
-      case ProjectStatus.NOT_STARTED:
-        return "bg-blue-100 text-blue-800";
-      case ProjectStatus.IN_PROGRESS:
-        return "bg-green-100 text-green-800";
-      case ProjectStatus.ON_HOLD:
-        return "bg-yellow-100 text-yellow-800";
-      case ProjectStatus.COMPLETED:
-        return "bg-gray-100 text-gray-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-
-  // Filter projects based on search query
-  const filteredProjects = projects?.filter(project => {
-    if (!searchQuery) return true;
-    
-    const projectName = project.name.toLowerCase();
-    const clientName = getClientName(project.clientId).toLowerCase();
-    const query = searchQuery.toLowerCase();
-    
-    return projectName.includes(query) || clientName.includes(query);
+  // Update project mutation
+  const updateProjectMutation = useMutation({
+    mutationFn: async ({ id, project }: { id: number; project: Partial<InsertProject> }) => {
+      console.log("Updating project:", id, project);
+      const res = await apiRequest("PATCH", `/api/projects/${id}`, project);
+      const updatedProject = await res.json();
+      console.log("Project updated:", updatedProject);
+      return updatedProject;
+    },
+    onSuccess: () => {
+      console.log("Project updated successfully, invalidating queries");
+      
+      // Properly invalidate the cache
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      
+      // Explicitly refetch to ensure fresh data
+      refetchProjects();
+      
+      setIsEditDialogOpen(false);
+      toast({
+        title: "Project updated",
+        description: "The project has been updated successfully.",
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating project:", error);
+      toast({
+        title: "Error updating project",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
   });
 
-  const handleDeleteClick = (id: number) => {
-    setDeleteProjectId(id);
-    setDeleteDialogOpen(true);
-  };
+  // Delete project mutation
+  const deleteProjectMutation = useMutation({
+    mutationFn: async (id: number) => {
+      console.log("Deleting project:", id);
+      await apiRequest("DELETE", `/api/projects/${id}`);
+      console.log("Project deleted successfully");
+      return id;
+    },
+    onSuccess: () => {
+      console.log("Project deleted, invalidating queries");
+      
+      // Properly invalidate the cache
+      queryClient.invalidateQueries({ queryKey: ['/api/projects'] });
+      
+      // Explicitly refetch to ensure fresh data
+      refetchProjects();
+      
+      toast({
+        title: "Project deleted",
+        description: "The project has been deleted successfully.",
+      });
+    },
+    onError: (error) => {
+      console.error("Error deleting project:", error);
+      toast({
+        title: "Error deleting project",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
-  const confirmDelete = () => {
-    if (deleteProjectId) {
-      deleteProjectMutation.mutate(deleteProjectId);
+  // Handle project form submission
+  const handleSubmit = (data: any) => {
+    console.log("Form data received:", data);
+    
+    // Convert form data to InsertProject format with properly formatted dates
+    const projectData: InsertProject = {
+      name: data.name,
+      clientId: data.clientId,
+      description: data.description || null,
+      status: data.status,
+      
+      // Convert date strings to ISO strings or null
+      startDate: data.startDate ? 
+        (typeof data.startDate === 'string' ? data.startDate : data.startDate.toISOString())
+        : null,
+        
+      endDate: data.endDate ? 
+        (typeof data.endDate === 'string' ? data.endDate : data.endDate.toISOString())
+        : null,
+        
+      budget: data.budget || null
+    };
+    
+    console.log("Submitting project data:", projectData);
+    
+    if (selectedProject) {
+      updateProjectMutation.mutate({ id: selectedProject.id, project: projectData });
+    } else {
+      createProjectMutation.mutate(projectData);
     }
   };
+
+  // Handle project deletion
+  const handleDeleteProject = (id: number) => {
+    if (confirm("Are you sure you want to delete this project?")) {
+      deleteProjectMutation.mutate(id);
+    }
+  };
+
+  // Filter projects based on search term and status filter
+  const filteredProjects = projects?.filter(project => {
+    const matchesSearch = searchTerm === "" || 
+      project.name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = !statusFilter || project.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  // Map projects with client data
+  const projectsWithClients = filteredProjects?.map(project => {
+    const client = clients?.find(c => c.id === project.clientId);
+    return { ...project, client };
+  });
 
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold text-gray-800">Projects</h2>
-          <p className="mt-1 text-sm text-gray-500">Manage your client projects and track their progress</p>
+          <p className="mt-1 text-sm text-gray-500">
+            Manage all your client projects in one place
+          </p>
         </div>
         <div className="mt-4 md:mt-0">
-          <Link href="/projects/new">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" /> New Project
-            </Button>
-          </Link>
+          <Button onClick={() => {
+            setSelectedProject(null);
+            setIsAddDialogOpen(true);
+          }}>
+            <PlusIcon className="mr-2 h-4 w-4" />
+            New Project
+          </Button>
         </div>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                <Input
-                  type="search"
-                  placeholder="Search projects..."
-                  className="pl-8"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
+      <div className="bg-white shadow rounded-lg overflow-hidden">
+        <div className="p-5 border-b border-gray-200">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
+              <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                type="text"
+                placeholder="Search projects..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-9"
+              />
             </div>
-            <div className="flex items-center gap-2">
-              {/* Additional filters could be added here */}
+            <div className="w-full sm:w-48">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Statuses</SelectItem>
+                  <SelectItem value={ProjectStatus.NOT_STARTED}>Not Started</SelectItem>
+                  <SelectItem value={ProjectStatus.IN_PROGRESS}>In Progress</SelectItem>
+                  <SelectItem value={ProjectStatus.ON_HOLD}>On Hold</SelectItem>
+                  <SelectItem value={ProjectStatus.COMPLETED}>Completed</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="py-10 text-center text-gray-500">Loading projects...</div>
-          ) : filteredProjects && filteredProjects.length > 0 ? (
+        </div>
+
+        {isLoadingProjects ? (
+          <div className="p-8 space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Project Name</TableHead>
+                  <TableHead>Project</TableHead>
                   <TableHead>Client</TableHead>
-                  <TableHead>Status</TableHead>
                   <TableHead>Start Date</TableHead>
-                  <TableHead>Deadline</TableHead>
+                  <TableHead>End Date</TableHead>
                   <TableHead>Budget</TableHead>
-                  <TableHead className="w-[80px]"></TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredProjects.map((project) => (
-                  <TableRow key={project.id}>
-                    <TableCell className="font-medium">{project.name}</TableCell>
-                    <TableCell>{getClientName(project.clientId)}</TableCell>
-                    <TableCell>
-                      <span className={`px-2 py-1 inline-flex text-xs leading-4 font-semibold rounded-full ${getStatusStyle(project.status)}`}>
-                        {formatStatus(project.status)}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {project.startDate ? format(new Date(project.startDate), "MMM d, yyyy") : "-"}
-                    </TableCell>
-                    <TableCell>
-                      {project.endDate ? format(new Date(project.endDate), "MMM d, yyyy") : "-"}
-                    </TableCell>
-                    <TableCell>
-                      {project.budget ? `$${project.budget.toLocaleString()}` : "-"}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => navigate(`/projects/${project.id}`)}>
-                            <Edit className="h-4 w-4 mr-2" /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            className="text-red-600"
-                            onClick={() => handleDeleteClick(project.id)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                {projectsWithClients?.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-gray-500">
+                      No projects found. Create your first project to get started.
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : (
+                  projectsWithClients?.map((project) => (
+                    <TableRow 
+                      key={project.id} 
+                      className="cursor-pointer hover:bg-gray-50"
+                      onClick={() => navigate(`/projects/${project.id}`)}
+                    >
+                      <TableCell className="font-medium">{project.name}</TableCell>
+                      <TableCell>{project.client?.name}</TableCell>
+                      <TableCell>{formatDate(project.startDate)}</TableCell>
+                      <TableCell>{formatDate(project.endDate)}</TableCell>
+                      <TableCell>${Number(project.budget).toLocaleString()}</TableCell>
+                      <TableCell>
+                        <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-${getStatusColor(project.status)}-100 text-${getStatusColor(project.status)}-800`}>
+                          {project.status === ProjectStatus.NOT_STARTED ? "Not Started" :
+                           project.status === ProjectStatus.IN_PROGRESS ? "In Progress" :
+                           project.status === ProjectStatus.ON_HOLD ? "On Hold" :
+                           project.status === ProjectStatus.COMPLETED ? "Completed" : 
+                           project.status}
+                        </span>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            navigate(`/projects/${project.id}`);
+                          }}
+                        >
+                          <ExternalLinkIcon className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            setSelectedProject(project);
+                            setIsEditDialogOpen(true);
+                          }}
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent row click
+                            handleDeleteProject(project.id);
+                          }}
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
-          ) : (
-            <div className="py-10 text-center text-gray-500">
-              {searchQuery ? "No projects found matching your search" : "No projects yet. Create your first project!"}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+          </div>
+        )}
+      </div>
 
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
+      {/* Add Project Dialog */}
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <DialogContent className="sm:max-w-xl">
           <DialogHeader>
-            <DialogTitle>Are you sure you want to delete this project?</DialogTitle>
-            <DialogDescription>
-              This action cannot be undone. This will permanently delete the project and all related data.
-            </DialogDescription>
+            <DialogTitle>Create New Project</DialogTitle>
           </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button variant="destructive" onClick={confirmDelete} disabled={deleteProjectMutation.isPending}>
-              {deleteProjectMutation.isPending ? "Deleting..." : "Delete Project"}
-            </Button>
-          </DialogFooter>
+          <ProjectForm
+            clients={clients || []}
+            onSubmit={handleSubmit}
+            isSubmitting={createProjectMutation.isPending}
+          />
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Project Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-xl">
+          <DialogHeader>
+            <DialogTitle>Edit Project</DialogTitle>
+          </DialogHeader>
+          {selectedProject && (
+            <ProjectForm
+              clients={clients || []}
+              onSubmit={handleSubmit}
+              isSubmitting={updateProjectMutation.isPending}
+              defaultValues={selectedProject}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </div>
