@@ -607,7 +607,7 @@ export default function Dashboard() {
                           ? 'bg-catchup-primary text-white' 
                           : 'bg-gray-100 text-gray-800'
                       }`}>
-                        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                        <p className="text-sm whitespace-pre-wrap">{String(message.content || '')}</p>
                       </div>
                     </div>
                   ))
@@ -836,10 +836,10 @@ export default function Dashboard() {
                       <div className="h-3 w-3 rounded-full bg-catchup-primary flex-shrink-0"></div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900 truncate">
-                          {booking.type ? booking.type.charAt(0).toUpperCase() + booking.type.slice(1).replace('_', ' ') : 'Appointment'}
+                          {booking.type ? String(booking.type).charAt(0).toUpperCase() + String(booking.type).slice(1).replace('_', ' ') : 'Appointment'}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {booking.time} • {booking.duration || '30'} min
+                          {String(booking.time || '')} • {String(booking.duration || '30')} min
                         </p>
                       </div>
                       <Badge 
