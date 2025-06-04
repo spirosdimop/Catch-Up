@@ -420,8 +420,10 @@ export default function Dashboard() {
                   className="w-full justify-start bg-gray-50 hover:bg-gray-100 border-gray-200"
                   onClick={action.onClick}
                 >
-                  {action.icon}
-                  <span className="ml-2 text-xs">{action.label}</span>
+                  <div className="flex items-center">
+                    {action.icon}
+                    <span className="ml-2 text-xs">{action.label}</span>
+                  </div>
                 </Button>
               </Link>
             ))}
