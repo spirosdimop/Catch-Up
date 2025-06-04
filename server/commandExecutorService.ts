@@ -180,17 +180,27 @@ async function executeCalendarCommand(
     
     // System prompt for calendar operations
     const systemPrompt = `
-      You are an AI assistant that manages calendar events. Analyze the user's request and respond with a JSON object 
-      containing the details for creating, rescheduling, canceling, or deleting an event.
+      You are an AI assistant that manages calendar events and tasks. Analyze the user's request and respond with a JSON object 
+      containing the details for creating, rescheduling, canceling, or deleting events or tasks.
       
       Response must be a JSON object with these properties:
-      - action: "create", "reschedule", "cancel", "delete", or "suggest_times"
-      - event_title: The title of the event (for create/reschedule)
-      - start_time: ISO formatted date and time when the event starts (for create/reschedule)
-      - end_time: ISO formatted date and time when the event ends (for create/reschedule)
-      - status: "confirmed", "pending", "conflict", "cancelled", or "deleted"
-      - notes: Any additional notes or explanation
+      - action: "create_event", "create_task", "reschedule", "cancel", "delete", or "suggest_times"
+      - item_type: "event" or "task"
+      - title: The title of the event/task (for create/reschedule)
+      - start_time: ISO formatted date and time when the event starts (for events only)
+      - end_time: ISO formatted date and time when the event ends (for events only)
+      - deadline: ISO formatted date for task deadline (for tasks only)
+      - priority: "low", "medium", "high", or "urgent" (for tasks only)
+      - description: Detailed description or notes
+      - client_name: Name of the client if this is client-related
+      - status: "confirmed", "pending", "conflict", "cancelled", "deleted", or "completed"
       - event_id: ID of an existing event (for reschedule/cancel/delete)
+      
+      For TASK CREATION requests, use action "create_task" and include:
+      - title, description, deadline, priority, client_name (if applicable)
+      
+      For EVENT CREATION requests, use action "create_event" and include:
+      - title, start_time, end_time, description
       
       When determining event_id, try to match by title and time if possible.
       Include all fields for the specified action.
@@ -227,11 +237,79 @@ async function executeCalendarCommand(
     const calendarAction = JSON.parse(content);
     
     // Execute the calendar action
-    if (calendarAction.action === 'create' && calendarAction.event_title && calendarAction.start_time && calendarAction.end_time) {
+    if (calendarAction.action === 'create_task' && calendarAction.title) {
+      // Find the client by name if provided
+      let projectId = null;
+      if (calendarAction.client_name) {
+        const clients = await storage.getClients();
+        const client = clients.find(c => 
+          c.firstName?.toLowerCase().includes(calendarAction.client_name.toLowerCase()) ||
+          c.lastName?.toLowerCase().includes(calendarAction.client_name.toLowerCase()) ||
+          `${c.firstName} ${c.lastName}`.toLowerCase().includes(calendarAction.client_name.toLowerCase())
+        );
+        
+        if (client) {
+          // Try to find an existing project for this client
+          const projects = await storage.getProjectsByClient(client.id);
+          if (projects.length > 0) {
+            projectId = projects[0].id; // Use the first project found
+          } else {
+            // Create a new project for this client
+            const newProject = await storage.createProject({
+              name: `${client.firstName} ${client.lastName} Project`,
+              clientId: client.id,
+              startDate: new Date(),
+              endDate: null,
+              status: 'in_progress' as const,
+              description: `Project for ${client.firstName} ${client.lastName}`
+            });
+            projectId = newProject.id;
+          }
+        }
+      }
+
+      // Create the task
+      const newTask = await storage.createTask({
+        title: calendarAction.title,
+        description: calendarAction.description,
+        projectId: projectId,
+        priority: calendarAction.priority as 'low' | 'medium' | 'high' | 'urgent' || 'medium',
+        status: 'to_do' as const,
+        deadline: calendarAction.deadline ? new Date(calendarAction.deadline) : null,
+        completed: false
+      });
+
+      // Record the action
+      await recordCommandEffect(
+        commandId, 
+        'task_create', 
+        'task', 
+        `Created task: ${calendarAction.title}`,
+        userId,
+        String(newTask.id)
+      );
+
+      return {
+        success: true,
+        message: `Created task: ${calendarAction.title}${calendarAction.client_name ? ` for ${calendarAction.client_name}` : ''}`,
+        executedAction: "task_create",
+        affectedResource: "task",
+        resourceId: newTask.id,
+        resourceType: "task",
+        changes: {
+          title: calendarAction.title,
+          description: calendarAction.description,
+          priority: calendarAction.priority,
+          deadline: calendarAction.deadline,
+          client: calendarAction.client_name
+        }
+      };
+
+    } else if (calendarAction.action === 'create_event' && calendarAction.title && calendarAction.start_time && calendarAction.end_time) {
       // Create a new event
       const newEvent = await storage.createEvent({
         userId,
-        title: calendarAction.event_title,
+        title: calendarAction.title,
         description: calendarAction.notes,
         startTime: new Date(calendarAction.start_time),
         endTime: new Date(calendarAction.end_time),
