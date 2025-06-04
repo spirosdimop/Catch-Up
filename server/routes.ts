@@ -1537,7 +1537,7 @@ Remember: The most helpful thing you can do is direct users to the specialized t
   // Unified command API endpoint
   apiRouter.post("/command", async (req, res) => {
     try {
-      const { message, userId = "user-1", conversationContext } = req.body;
+      const { message, userId = "user-1", conversationContext, model = "gpt-4o" } = req.body;
       
       if (!message || typeof message !== 'string') {
         return res.status(400).json({ 
@@ -1563,8 +1563,8 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       // First, route the message to determine which APIs to call
       let routingResult;
       try {
-        // Pass the conversation context if provided
-        routingResult = await routeInputToApis(message, conversationContext);
+        // Pass the conversation context and model if provided
+        routingResult = await routeInputToApis(message, conversationContext, model);
       } catch (routingError) {
         console.error('Error during API routing:', routingError);
         

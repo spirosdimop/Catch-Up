@@ -358,7 +358,7 @@ function fallbackKeywordRouter(message: string): CommandRoutingResult {
  * @param conversationContext Optional previous conversation context to maintain continuity
  * @returns An object containing prompts for each API or clarification requests
  */
-export async function routeInputToApis(message: string, conversationContext?: string): Promise<CommandRoutingResult> {
+export async function routeInputToApis(message: string, conversationContext?: string, model: string = 'gpt-4o'): Promise<CommandRoutingResult> {
   try {
     // Get OpenAI client specifically for routing (using the general client)
     const routingClient = getOpenAIClient('general');
@@ -408,7 +408,7 @@ export async function routeInputToApis(message: string, conversationContext?: st
 
     // Make the API call to OpenAI
     const response = await routingClient.chat.completions.create({
-      model: 'gpt-4o', // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+      model: model, // Use the selected model from the user interface
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message }
