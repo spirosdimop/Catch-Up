@@ -2272,7 +2272,7 @@ Remember: The most helpful thing you can do is direct users to the specialized t
               date: bookingData.date || new Date().toISOString().split('T')[0],
               time: bookingData.time || '10:00',
               duration: bookingData.duration || 60,
-              clientId: clientId,
+              clientId: clientId || undefined,
               service: bookingData.service || 'Consultation',
               notes: bookingData.notes,
               status: 'confirmed'

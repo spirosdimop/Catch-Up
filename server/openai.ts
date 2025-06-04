@@ -268,6 +268,40 @@ function fallbackKeywordRouter(message: string): CommandRoutingResult {
   const result: CommandRoutingResult = {
     conversation_context: `User asked: "${message}"`
   };
+
+  // Check for count/summary requests first (highest priority to prevent unwanted actions)
+  const isCountRequest = lowerMessage.includes('how many') || 
+                        lowerMessage.includes('count') ||
+                        lowerMessage.includes('total') ||
+                        lowerMessage.includes('number of');
+
+  if (isCountRequest) {
+    if (lowerMessage.includes('booking') || lowerMessage.includes('appointment')) {
+      result.booking_prompt = `Provide comprehensive booking analytics and count summary`;
+      result.conversation_context = `User requesting booking count summary - provide immediate analytics without creating events`;
+      return result;
+    }
+    if (lowerMessage.includes('task')) {
+      result.task_prompt = `Provide comprehensive task analytics and count summary`;
+      result.conversation_context = `User requesting task count summary - provide immediate analytics`;
+      return result;
+    }
+    if (lowerMessage.includes('client')) {
+      result.client_prompt = `Provide comprehensive client analytics and count summary`;
+      result.conversation_context = `User requesting client count summary - provide immediate analytics`;
+      return result;
+    }
+    if (lowerMessage.includes('project')) {
+      result.project_prompt = `Provide comprehensive project analytics and count summary`;
+      result.conversation_context = `User requesting project count summary - provide immediate analytics`;
+      return result;
+    }
+    if (lowerMessage.includes('event') || lowerMessage.includes('meeting') || lowerMessage.includes('calendar')) {
+      result.calendar_prompt = `Provide comprehensive calendar analytics and count summary without creating events`;
+      result.conversation_context = `User requesting calendar count summary - provide immediate analytics without creating events`;
+      return result;
+    }
+  }
   
   // Check for settings-related keywords
   if (
@@ -389,7 +423,13 @@ export async function routeInputToApis(message: string, conversationContext?: st
       SPECIAL HANDLING FOR COUNT/SUMMARY REQUESTS:
       When users ask for counts, totals, or "how many" of something (bookings, tasks, clients, projects, events):
       - NEVER ask clarifying questions
-      - Immediately provide a comprehensive summary using calendar_api
+      - NEVER create calendar events or bookings
+      - Route to the appropriate API based on what they're counting:
+        * "how many bookings" -> booking_prompt for booking analytics
+        * "how many tasks" -> task_prompt for task analytics  
+        * "how many clients" -> client_prompt for client analytics
+        * "how many projects" -> project_prompt for project analytics
+        * "how many events/meetings" -> calendar_prompt for calendar analytics
       - Include complete numerical breakdowns by category, status, time period
       - Show detailed analytics and insights
       
@@ -492,6 +532,24 @@ export async function routeInputToApis(message: string, conversationContext?: st
       Response: {
         "calendar_prompt": "Schedule meeting with George tomorrow at 3 PM, duration 1 hour, via video call, purpose: discuss project updates",
         "conversation_context": "User provided complete meeting details - ready to schedule"
+      }
+
+      User: "How many bookings do I have this month?"
+      Response: {
+        "booking_prompt": "Provide comprehensive booking analytics and count for this month",
+        "conversation_context": "User requesting booking count summary - provide immediate analytics"
+      }
+
+      User: "How many tasks are completed?"
+      Response: {
+        "task_prompt": "Provide task analytics focusing on completed tasks and overall status breakdown",
+        "conversation_context": "User requesting task completion analytics - provide immediate summary"
+      }
+
+      User: "How many clients do I have?"
+      Response: {
+        "client_prompt": "Provide comprehensive client count and analytics",
+        "conversation_context": "User requesting client analytics - provide immediate summary"
       }
 
       CRITICAL RULE: If user provides complete information (all required details), populate the appropriate prompt field. Only use clarification_prompt when information is genuinely missing.
