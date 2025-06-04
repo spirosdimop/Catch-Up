@@ -566,7 +566,7 @@ export default function Dashboard() {
                         variant={project.status === 'completed' ? 'default' : 'secondary'}
                         className={project.status === 'in_progress' ? 'bg-blue-100 text-blue-800' : ''}
                       >
-                        {project.status.replace('_', ' ')}
+                        {String(project.status || 'pending').replace('_', ' ')}
                       </Badge>
                     </div>
                   ))}
@@ -644,7 +644,7 @@ export default function Dashboard() {
                             task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' : ''
                           }
                         >
-                          {task.priority}
+                          {String(task.priority || 'low')}
                         </Badge>
                         {updateTaskMutation.isPending && (
                           <RefreshCwIcon className="w-4 h-4 animate-spin text-gray-400" />
@@ -730,7 +730,7 @@ export default function Dashboard() {
                         variant={booking.status === 'confirmed' ? 'default' : 'secondary'}
                         className="text-xs"
                       >
-                        {booking.status}
+                        {String(booking.status || 'pending')}
                       </Badge>
                     </div>
                   ))}
