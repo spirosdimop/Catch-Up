@@ -871,7 +871,8 @@ export class MemStorage implements IStorage {
     
     const updatedCommand: AiCommand = {
       ...existingCommand,
-      ...command
+      ...command,
+      status: command.status ?? existingCommand.status
     };
     
     this.aiCommands.set(id, updatedCommand);
@@ -891,6 +892,7 @@ export class MemStorage implements IStorage {
     const newEffect: AiCommandEffect = {
       id,
       ...effect,
+      targetId: effect.targetId ?? null,
       createdAt
     };
     
@@ -928,7 +930,7 @@ export class MemStorage implements IStorage {
     
     // If this is set as default, unset any existing defaults for this type
     if (response.isDefault) {
-      for (const [existingId, existingResponse] of this.autoResponses.entries()) {
+      for (const [existingId, existingResponse] of Array.from(this.autoResponses.entries())) {
         if (existingResponse.userId === response.userId && 
             existingResponse.type === response.type && 
             existingResponse.isDefault) {
@@ -958,7 +960,7 @@ export class MemStorage implements IStorage {
 
     // If setting this as default, unset any other defaults of the same type
     if (response.isDefault && !existingResponse.isDefault) {
-      for (const [existingId, existing] of this.autoResponses.entries()) {
+      for (const [existingId, existing] of Array.from(this.autoResponses.entries())) {
         if (existingId !== id && 
             existing.userId === existingResponse.userId && 
             existing.type === existingResponse.type && 
@@ -972,10 +974,11 @@ export class MemStorage implements IStorage {
       }
     }
 
-    const updatedResponse = { 
-      ...existingResponse, 
+    const updatedResponse = {
+      ...existingResponse,
       ...response,
-      updatedAt: new Date() 
+      isDefault: response.isDefault ?? existingResponse.isDefault,
+      updatedAt: new Date()
     };
     
     this.autoResponses.set(id, updatedResponse);
@@ -1019,13 +1022,13 @@ export class MemStorage implements IStorage {
     
     // Get all client IDs that have projects
     const projectClientIds = new Set<number>();
-    for (const project of this.projects.values()) {
+    for (const project of Array.from(this.projects.values())) {
       projectClientIds.add(project.clientId);
     }
     
     // Get all client IDs that have events
     const eventClientIds = new Set<number>();
-    for (const event of this.events.values()) {
+    for (const event of Array.from(this.events.values())) {
       if (event.clientId !== null) {
         eventClientIds.add(event.clientId);
       }
@@ -1033,7 +1036,7 @@ export class MemStorage implements IStorage {
     
     // Get all client IDs that have invoices
     const invoiceClientIds = new Set<number>();
-    for (const invoice of this.invoices.values()) {
+    for (const invoice of Array.from(this.invoices.values())) {
       invoiceClientIds.add(invoice.clientId);
     }
     
@@ -1056,7 +1059,7 @@ export class MemStorage implements IStorage {
     
     // Find duplicate emails
     allClients.forEach(client => {
-      const email = client.email.toLowerCase().trim();
+      const email = (client.email ?? "").toLowerCase().trim();
       if (emailMap.has(email)) {
         duplicateEmails.add(email);
       } else {
@@ -1065,8 +1068,8 @@ export class MemStorage implements IStorage {
     });
     
     // Return all clients with duplicate emails
-    return allClients.filter(client => 
-      duplicateEmails.has(client.email.toLowerCase().trim())
+    return allClients.filter(client =>
+      duplicateEmails.has((client.email ?? "").toLowerCase().trim())
     );
   }
 }
