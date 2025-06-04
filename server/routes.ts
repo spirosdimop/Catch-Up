@@ -2551,8 +2551,8 @@ Remember: The most helpful thing you can do is direct users to the specialized t
   
   // AI Chat endpoints
   apiRouter.post("/ai/chat", handleAiChat);
-  apiRouter.get("/ai/suggestions", handleTaskSuggestions);
-  apiRouter.get("/ai/summary", handleTaskSummary);
+  apiRouter.post("/ai/task-suggestions", handleTaskSuggestions);
+  apiRouter.post("/ai/task-summary", handleTaskSummary);
   
   // Register API routes
   app.use("/api/bookings", bookingsRoutes);
