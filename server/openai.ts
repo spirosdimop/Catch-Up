@@ -445,7 +445,21 @@ export async function routeInputToApis(message: string, conversationContext?: st
         "conversation_context": "User wants to delete all meetings this week - major destructive action requiring explicit confirmation"
       }
 
-      Never proceed with incomplete information or destructive actions without explicit confirmation. Always ask detailed follow-up questions.
+      User: "Add three tasks for Spiros: Task 1 is about litholds due today priority urgent, Task 2 is changing litholds due tomorrow priority medium, Task 3 is updating website due next week priority low"
+      Response: {
+        "calendar_prompt": "Create three tasks for Spiros: 1) Task about litholds, due today, urgent priority 2) Changing litholds, due tomorrow, medium priority 3) Updating website, due next week, low priority",
+        "conversation_context": "User provided complete task details for Spiros - ready to execute task creation"
+      }
+
+      User: "Schedule meeting with George tomorrow at 3 PM for 1 hour via video call to discuss project updates"
+      Response: {
+        "calendar_prompt": "Schedule meeting with George tomorrow at 3 PM, duration 1 hour, via video call, purpose: discuss project updates",
+        "conversation_context": "User provided complete meeting details - ready to schedule"
+      }
+
+      CRITICAL RULE: If user provides complete information (all required details), populate the appropriate prompt field. Only use clarification_prompt when information is genuinely missing.
+
+      Never proceed with incomplete information or destructive actions without explicit confirmation. Always ask detailed follow-up questions when information is missing.
     `;
     
     // If we have previous conversation context, include it

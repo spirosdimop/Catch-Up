@@ -272,6 +272,11 @@ async function executeCalendarCommand(
       const newTask = await storage.createTask({
         title: calendarAction.title,
         description: calendarAction.description,
+        clientId: calendarAction.client_name ? (await storage.getClients()).find(c => 
+          c.firstName?.toLowerCase().includes(calendarAction.client_name.toLowerCase()) ||
+          c.lastName?.toLowerCase().includes(calendarAction.client_name.toLowerCase()) ||
+          `${c.firstName} ${c.lastName}`.toLowerCase().includes(calendarAction.client_name.toLowerCase())
+        )?.id || null : null,
         projectId: projectId,
         priority: calendarAction.priority as 'low' | 'medium' | 'high' | 'urgent' || 'medium',
         status: 'to_do' as const,
