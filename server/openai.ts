@@ -413,25 +413,25 @@ export async function routeInputToApis(message: string, conversationContext?: st
 
       Available APIs:
       1. settings_api - For changing app settings, theme, language, notifications, view preferences
-      2. calendar_api - For managing events, meetings, bookings, and schedule operations
+      2. calendar_api - For managing calendar events, meetings, and schedule operations (NOT for bookings)
       3. task_api - For creating, updating, completing, and managing tasks
       4. project_api - For creating, updating, and managing projects
       5. client_api - For creating, updating, and managing client information
-      6. booking_api - For scheduling, rescheduling, and managing appointments
+      6. booking_api - For scheduling, rescheduling, and managing ALL appointments and bookings
       7. message_api - For generating professional auto-response messages
       
-      SPECIAL HANDLING FOR COUNT/SUMMARY REQUESTS:
-      When users ask for counts, totals, or "how many" of something (bookings, tasks, clients, projects, events):
+      CRITICAL ROUTING RULES FOR COUNT/SUMMARY REQUESTS:
+      When users ask for counts, totals, or "how many" of something:
       - NEVER ask clarifying questions
       - NEVER create calendar events or bookings
-      - Route to the appropriate API based on what they're counting:
-        * "how many bookings" -> booking_prompt for booking analytics
-        * "how many tasks" -> task_prompt for task analytics  
-        * "how many clients" -> client_prompt for client analytics
-        * "how many projects" -> project_prompt for project analytics
-        * "how many events/meetings" -> calendar_prompt for calendar analytics
-      - Include complete numerical breakdowns by category, status, time period
-      - Show detailed analytics and insights
+      - ALWAYS route to the correct API:
+        * "how many bookings" or "how many appointments" -> booking_prompt (NEVER calendar_prompt)
+        * "how many tasks" -> task_prompt  
+        * "how many clients" -> client_prompt
+        * "how many projects" -> project_prompt
+        * "how many events" or "how many meetings" -> calendar_prompt (only for calendar events, not bookings)
+      - Provide immediate comprehensive analytics with numerical breakdowns
+      - Include status breakdowns, time periods, and detailed insights
       
       CRITICAL: For action commands, be thorough in collecting information. When users give incomplete action commands, ask specific follow-up questions to gather ALL necessary details.
 
@@ -538,6 +538,24 @@ export async function routeInputToApis(message: string, conversationContext?: st
       Response: {
         "booking_prompt": "Provide comprehensive booking analytics and count for this month",
         "conversation_context": "User requesting booking count summary - provide immediate analytics"
+      }
+
+      User: "How many appointments do I have?"
+      Response: {
+        "booking_prompt": "Provide comprehensive appointment/booking analytics and count",
+        "conversation_context": "User requesting appointment count summary - provide immediate analytics"
+      }
+
+      User: "How many bookings scheduled?"
+      Response: {
+        "booking_prompt": "Provide comprehensive booking count and scheduling analytics",
+        "conversation_context": "User requesting booking scheduling summary - provide immediate analytics"
+      }
+
+      User: "Total number of bookings"
+      Response: {
+        "booking_prompt": "Provide total booking count and comprehensive analytics",
+        "conversation_context": "User requesting total booking count - provide immediate analytics"
       }
 
       User: "How many tasks are completed?"
