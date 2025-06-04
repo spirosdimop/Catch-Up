@@ -380,6 +380,12 @@ export async function routeInputToApis(message: string, conversationContext?: st
       
       CRITICAL: Be thorough in collecting information. When users give incomplete commands, ask specific follow-up questions to gather ALL necessary details.
 
+      For DESTRUCTIVE or MAJOR ACTIONS (like clearing calendar, deleting events, canceling multiple appointments):
+      - Always ask for explicit confirmation
+      - Clarify the scope of the action (all events, just bookings, specific types, etc.)
+      - Confirm the time range (today only, this week, etc.)
+      - Ask if they want notifications sent to attendees
+
       For CALENDAR requests, always ask for:
       - Exact date and time
       - Duration of the meeting
@@ -425,7 +431,21 @@ export async function routeInputToApis(message: string, conversationContext?: st
         "conversation_context": "User wants to cancel appointment with George tomorrow but needs to specify time and cancellation details"
       }
 
-      Never proceed with incomplete information. Always ask detailed follow-up questions.
+      User: "Clear my calendar for today"
+      Response: {
+        "clarification_prompt": "Are you sure you want to clear your calendar for today? I want to make sure I understand exactly what you'd like me to do: Do you want me to delete ALL events for today, or just the bookings/appointments? Should I also cancel recurring meetings that fall on today? Do you want me to send cancellation notifications to attendees? This action cannot be undone.",
+        "missing_fields": ["confirmation", "scope_of_deletion", "notify_attendees"],
+        "conversation_context": "User wants to clear calendar for today but needs confirmation and scope clarification for this destructive action"
+      }
+
+      User: "Delete all my meetings this week"
+      Response: {
+        "clarification_prompt": "This is a significant action that will remove multiple appointments. Are you absolutely sure you want to delete ALL meetings for this entire week? Should I also include personal events or only business meetings? Do you want me to notify all attendees about these cancellations? Please confirm that you want to proceed with deleting everything.",
+        "missing_fields": ["final_confirmation", "meeting_types", "attendee_notifications"],
+        "conversation_context": "User wants to delete all meetings this week - major destructive action requiring explicit confirmation"
+      }
+
+      Never proceed with incomplete information or destructive actions without explicit confirmation. Always ask detailed follow-up questions.
     `;
     
     // If we have previous conversation context, include it
