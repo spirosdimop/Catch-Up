@@ -1,0 +1,117 @@
+chunk-XQLYTHWV.js?v=245ecb9e:21551 Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools
+3chunk-XQLYTHWV.js?v=245ecb9e:9934 Uncaught Error: Objects are not valid as a React child (found: object with keys {type, key, ref, props, _owner, _store}). If you meant to render a collection of children, use an array instead.
+    at throwOnInvalidObjectType (chunk-XQLYTHWV.js?v=245ecb9e:9934:17)
+    at createChild (chunk-XQLYTHWV.js?v=245ecb9e:10110:15)
+    at reconcileChildrenArray (chunk-XQLYTHWV.js?v=245ecb9e:10282:33)
+    at reconcileChildFibers2 (chunk-XQLYTHWV.js?v=245ecb9e:10559:24)
+    at reconcileChildren (chunk-XQLYTHWV.js?v=245ecb9e:14290:37)
+    at updateHostComponent (chunk-XQLYTHWV.js?v=245ecb9e:14807:11)
+    at beginWork (chunk-XQLYTHWV.js?v=245ecb9e:15935:22)
+    at HTMLUnknownElement.callCallback2 (chunk-XQLYTHWV.js?v=245ecb9e:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-XQLYTHWV.js?v=245ecb9e:3699:24)
+    at invokeGuardedCallback (chunk-XQLYTHWV.js?v=245ecb9e:3733:39)
+throwOnInvalidObjectType @ chunk-XQLYTHWV.js?v=245ecb9e:9934
+createChild @ chunk-XQLYTHWV.js?v=245ecb9e:10110
+reconcileChildrenArray @ chunk-XQLYTHWV.js?v=245ecb9e:10282
+reconcileChildFibers2 @ chunk-XQLYTHWV.js?v=245ecb9e:10559
+reconcileChildren @ chunk-XQLYTHWV.js?v=245ecb9e:14290
+updateHostComponent @ chunk-XQLYTHWV.js?v=245ecb9e:14807
+beginWork @ chunk-XQLYTHWV.js?v=245ecb9e:15935
+callCallback2 @ chunk-XQLYTHWV.js?v=245ecb9e:3674
+invokeGuardedCallbackDev @ chunk-XQLYTHWV.js?v=245ecb9e:3699
+invokeGuardedCallback @ chunk-XQLYTHWV.js?v=245ecb9e:3733
+beginWork$1 @ chunk-XQLYTHWV.js?v=245ecb9e:19765
+performUnitOfWork @ chunk-XQLYTHWV.js?v=245ecb9e:19198
+workLoopSync @ chunk-XQLYTHWV.js?v=245ecb9e:19137
+renderRootSync @ chunk-XQLYTHWV.js?v=245ecb9e:19116
+performConcurrentWorkOnRoot @ chunk-XQLYTHWV.js?v=245ecb9e:18678
+workLoop @ chunk-XQLYTHWV.js?v=245ecb9e:197
+flushWork @ chunk-XQLYTHWV.js?v=245ecb9e:176
+performWorkUntilDeadline @ chunk-XQLYTHWV.js?v=245ecb9e:384Understand this error
+3chunk-XQLYTHWV.js?v=245ecb9e:9934 Uncaught Error: Objects are not valid as a React child (found: object with keys {type, key, ref, props, _owner, _store}). If you meant to render a collection of children, use an array instead.
+    at throwOnInvalidObjectType (chunk-XQLYTHWV.js?v=245ecb9e:9934:17)
+    at createChild (chunk-XQLYTHWV.js?v=245ecb9e:10110:15)
+    at reconcileChildrenArray (chunk-XQLYTHWV.js?v=245ecb9e:10282:33)
+    at reconcileChildFibers2 (chunk-XQLYTHWV.js?v=245ecb9e:10559:24)
+    at reconcileChildren (chunk-XQLYTHWV.js?v=245ecb9e:14290:37)
+    at updateHostComponent (chunk-XQLYTHWV.js?v=245ecb9e:14807:11)
+    at beginWork (chunk-XQLYTHWV.js?v=245ecb9e:15935:22)
+    at HTMLUnknownElement.callCallback2 (chunk-XQLYTHWV.js?v=245ecb9e:3674:22)
+    at Object.invokeGuardedCallbackDev (chunk-XQLYTHWV.js?v=245ecb9e:3699:24)
+    at invokeGuardedCallback (chunk-XQLYTHWV.js?v=245ecb9e:3733:39)
+throwOnInvalidObjectType @ chunk-XQLYTHWV.js?v=245ecb9e:9934
+createChild @ chunk-XQLYTHWV.js?v=245ecb9e:10110
+reconcileChildrenArray @ chunk-XQLYTHWV.js?v=245ecb9e:10282
+reconcileChildFibers2 @ chunk-XQLYTHWV.js?v=245ecb9e:10559
+reconcileChildren @ chunk-XQLYTHWV.js?v=245ecb9e:14290
+updateHostComponent @ chunk-XQLYTHWV.js?v=245ecb9e:14807
+beginWork @ chunk-XQLYTHWV.js?v=245ecb9e:15935
+callCallback2 @ chunk-XQLYTHWV.js?v=245ecb9e:3674
+invokeGuardedCallbackDev @ chunk-XQLYTHWV.js?v=245ecb9e:3699
+invokeGuardedCallback @ chunk-XQLYTHWV.js?v=245ecb9e:3733
+beginWork$1 @ chunk-XQLYTHWV.js?v=245ecb9e:19765
+performUnitOfWork @ chunk-XQLYTHWV.js?v=245ecb9e:19198
+workLoopSync @ chunk-XQLYTHWV.js?v=245ecb9e:19137
+renderRootSync @ chunk-XQLYTHWV.js?v=245ecb9e:19116
+recoverFromConcurrentError @ chunk-XQLYTHWV.js?v=245ecb9e:18736
+performConcurrentWorkOnRoot @ chunk-XQLYTHWV.js?v=245ecb9e:18684
+workLoop @ chunk-XQLYTHWV.js?v=245ecb9e:197
+flushWork @ chunk-XQLYTHWV.js?v=245ecb9e:176
+performWorkUntilDeadline @ chunk-XQLYTHWV.js?v=245ecb9e:384Understand this error
+3chunk-XQLYTHWV.js?v=245ecb9e:14032 The above error occurred in the <div> component:
+
+    at div
+    at button
+    at _c (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/src/components/ui/button.tsx:47:11)
+    at a
+    at https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=245ecb9e:337:18
+    at div
+    at div
+    at MotionComponent (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=245ecb9e:945:40)
+    at div
+    at MotionComponent (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/framer-motion.js?v=245ecb9e:945:40)
+    at Dashboard (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/src/pages/Dashboard.tsx:117:20)
+    at Route (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=245ecb9e:323:16)
+    at Switch (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/wouter.js?v=245ecb9e:379:17)
+    at div
+    at main
+    at div
+    at div
+    at AppShell (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/src/components/layout/app-shell.tsx:40:3)
+    at Router (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/src/App.tsx?v=qakUfzWwgeFAwC5mlzXfp:63:22)
+    at Provider (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/chunk-2M7HY3UG.js?v=245ecb9e:38:15)
+    at TooltipProvider (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@radix-ui_react-tooltip.js?v=245ecb9e:64:5)
+    at UserProvider (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/src/lib/userContext.tsx:36:32)
+    at ThemeProvider (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/src/components/ui/theme-provider.tsx:25:3)
+    at QueryClientProvider (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/@fs/home/runner/workspace/node_modules/.vite/deps/@tanstack_react-query.js?v=245ecb9e:2805:3)
+    at App
+    at AppSettingsProvider (https://344ec1e0-b51b-439d-9535-84568982ce2d-00-2jm8r5u5a5k8l.worf.replit.dev/src/lib/appSettingsContext.tsx:75:39)
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries.
+logCapturedError @ chunk-XQLYTHWV.js?v=245ecb9e:14032
+update.callback @ chunk-XQLYTHWV.js?v=245ecb9e:14052
+callCallback @ chunk-XQLYTHWV.js?v=245ecb9e:11248
+commitUpdateQueue @ chunk-XQLYTHWV.js?v=245ecb9e:11265
+commitLayoutEffectOnFiber @ chunk-XQLYTHWV.js?v=245ecb9e:17093
+commitLayoutMountEffects_complete @ chunk-XQLYTHWV.js?v=245ecb9e:17980
+commitLayoutEffects_begin @ chunk-XQLYTHWV.js?v=245ecb9e:17969
+commitLayoutEffects @ chunk-XQLYTHWV.js?v=245ecb9e:17920
+commitRootImpl @ chunk-XQLYTHWV.js?v=245ecb9e:19353
+commitRoot @ chunk-XQLYTHWV.js?v=245ecb9e:19277
+finishConcurrentRender @ chunk-XQLYTHWV.js?v=245ecb9e:18760
+performConcurrentWorkOnRoot @ chunk-XQLYTHWV.js?v=245ecb9e:18718
+workLoop @ chunk-XQLYTHWV.js?v=245ecb9e:197
+flushWork @ chunk-XQLYTHWV.js?v=245ecb9e:176
+performWorkUntilDeadline @ chunk-XQLYTHWV.js?v=245ecb9e:384Understand this error
+chunk-XQLYTHWV.js?v=245ecb9e:9934 Uncaught Error: Objects are not valid as a React child (found: object with keys {type, key, ref, props, _owner, _store}). If you meant to render a collection of children, use an array instead.
+    at throwOnInvalidObjectType (chunk-XQLYTHWV.js?v=245ecb9e:9934:17)
+    at createChild (chunk-XQLYTHWV.js?v=245ecb9e:10110:15)
+    at reconcileChildrenArray (chunk-XQLYTHWV.js?v=245ecb9e:10282:33)
+    at reconcileChildFibers2 (chunk-XQLYTHWV.js?v=245ecb9e:10559:24)
+    at reconcileChildren (chunk-XQLYTHWV.js?v=245ecb9e:14290:37)
+    at updateHostComponent (chunk-XQLYTHWV.js?v=245ecb9e:14807:11)
+    at beginWork (chunk-XQLYTHWV.js?v=245ecb9e:15935:22)
+    at beginWork$1 (chunk-XQLYTHWV.js?v=245ecb9e:19753:22)
+    at performUnitOfWork (chunk-XQLYTHWV.js?v=245ecb9e:19198:20)
+    at workLoopSync (chunk-XQLYTHWV.js?v=245ecb9e:19137:13)

@@ -74,31 +74,48 @@ interface DashboardWidget {
   title: string;
   visible: boolean;
   order: number;
-  icon: React.ReactNode;
+  iconName: string;
 }
 
 interface QuickAction {
   id: string;
   label: string;
-  icon: React.ReactNode;
+  iconName: string;
   href?: string;
   onClick?: () => void;
   visible: boolean;
 }
 
+// Icon mapping function
+const getIcon = (iconName: string, className: string = "h-4 w-4") => {
+  const icons: Record<string, React.ComponentType<any>> = {
+    'BarChart3': BarChart3Icon,
+    'Phone': PhoneIcon,
+    'Bot': Bot,
+    'Calendar': CalendarIcon,
+    'Folder': FolderIcon,
+    'CheckSquare': CheckSquareIcon,
+    'Users': UsersIcon,
+    'CalendarPlus': CalendarPlusIcon,
+  };
+  
+  const IconComponent = icons[iconName];
+  return IconComponent ? <IconComponent className={className} /> : null;
+};
+
 const defaultWidgets: DashboardWidget[] = [
-  { id: 'stats', title: 'Statistics', visible: true, order: 1, icon: <BarChart3Icon className="h-4 w-4" /> },
-  { id: 'missed-calls', title: 'Missed Calls', visible: true, order: 2, icon: <PhoneIcon className="h-4 w-4" /> },
-  { id: 'ai-assistant', title: 'AI Assistant', visible: true, order: 3, icon: <Bot className="h-4 w-4" /> },
-  { id: 'calendar', title: 'Calendar', visible: true, order: 4, icon: <CalendarIcon className="h-4 w-4" /> },
-  { id: 'recent-projects', title: 'Recent Projects', visible: true, order: 5, icon: <FolderIcon className="h-4 w-4" /> },
-  { id: 'tasks', title: 'Tasks', visible: true, order: 6, icon: <CheckSquareIcon className="h-4 w-4" /> },
+  { id: 'stats', title: 'Statistics', visible: true, order: 1, iconName: 'BarChart3' },
+  { id: 'missed-calls', title: 'Missed Calls', visible: true, order: 2, iconName: 'Phone' },
+  { id: 'ai-assistant', title: 'AI Assistant', visible: true, order: 3, iconName: 'Bot' },
+  { id: 'calendar', title: 'Calendar', visible: true, order: 4, iconName: 'Calendar' },
+  { id: 'recent-projects', title: 'Recent Projects', visible: true, order: 5, iconName: 'Folder' },
+  { id: 'tasks', title: 'Tasks', visible: true, order: 6, iconName: 'CheckSquare' },
 ];
 
 const defaultQuickActions: QuickAction[] = [
-  { id: 'new-client', label: 'New Client', icon: <UsersIcon className="h-4 w-4" />, href: '/clients', visible: true },
-  { id: 'new-project', label: 'New Project', icon: <FolderIcon className="h-4 w-4" />, href: '/projects', visible: true },
-  { id: 'new-booking', label: 'Schedule Meeting', icon: <CalendarPlusIcon className="h-4 w-4" />, href: '/calendar', visible: true },
+  { id: 'new-client', label: 'New Client', iconName: 'Users', href: '/clients', visible: true },
+  { id: 'new-project', label: 'New Project', iconName: 'Folder', href: '/projects', visible: true },
+  { id: 'new-booking', label: 'Schedule Meeting', iconName: 'CalendarPlus', href: '/calendar', visible: true },
 ];
 
 export default function Dashboard() {
@@ -369,7 +386,7 @@ export default function Dashboard() {
                 {quickActions.map((action) => (
                   <div key={action.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                     <div className="flex items-center gap-2">
-                      {action.icon}
+                      {getIcon(action.iconName)}
                       <span className="text-sm">{action.label}</span>
                     </div>
                     <Switch
@@ -388,7 +405,7 @@ export default function Dashboard() {
                 {widgets.map((widget) => (
                   <div key={widget.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
                     <div className="flex items-center gap-2">
-                      {widget.icon}
+                      {getIcon(widget.iconName)}
                       <span className="text-sm">{widget.title}</span>
                     </div>
                     <Switch
@@ -421,7 +438,7 @@ export default function Dashboard() {
                   onClick={action.onClick}
                 >
                   <div className="flex items-center">
-                    {action.icon}
+                    {getIcon(action.iconName)}
                     <span className="ml-2 text-xs">{action.label}</span>
                   </div>
                 </Button>
