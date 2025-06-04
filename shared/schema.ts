@@ -261,24 +261,24 @@ export const bookings = pgTable("bookings", {
   id: serial("id").primaryKey(),
   date: text("date").notNull(),
   time: text("time").notNull(),
-  duration: integer("duration"),
+  duration: integer("duration"), // Optional
   type: bookingTypeEnum("type").notNull().default("meeting"),
   status: bookingStatusEnum("status").notNull().default("pending"),
   location: text("location"),
   notes: text("notes"),
-  clientId: integer("client_id").notNull().references(() => clients.id), // Required reference to clients table
+  clientId: integer("client_id").references(() => clients.id), // Optional reference to clients table
   projectId: integer("project_id").references(() => projects.id), // Optional reference to projects table
   taskId: integer("task_id").references(() => tasks.id), // Optional reference to tasks table
-  serviceId: text("service_id").notNull(),
+  serviceId: text("service_id"), // Optional
   priority: text("priority").default("normal"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  externalId: text("external_id").notNull(), // Client-side ID
-  clientName: text("client_name").notNull(),
-  clientPhone: text("client_phone").notNull(),
+  externalId: text("external_id"), // Optional
+  clientName: text("client_name"), // Optional
+  clientPhone: text("client_phone"), // Optional
   serviceName: text("service_name"),
   servicePrice: text("service_price"),
-  professionalId: text("professional_id").notNull(), // Points to a user
+  professionalId: text("professional_id"), // Optional
 });
 
 export const insertBookingSchema = createInsertSchema(bookings).pick({

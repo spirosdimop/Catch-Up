@@ -2404,15 +2404,20 @@ Remember: The most helpful thing you can do is direct users to the specialized t
                 clientId = client?.id || null;
               }
               
-              // PHASE 1: Create booking with mandatory fields only
+              // PHASE 1: Create booking with mandatory fields and defaults
               const newBooking = await storage.createBooking({
                 date: bookingData.date,
                 time: bookingData.time,
-                duration: bookingData.has_optional_details ? bookingData.duration : null,
+                duration: bookingData.has_optional_details ? bookingData.duration : 60,
                 clientId: clientId,
-                service: bookingData.has_optional_details ? bookingData.service : null,
-                notes: bookingData.has_optional_details ? bookingData.notes : null,
-                status: 'confirmed'
+                serviceName: bookingData.has_optional_details ? bookingData.service : 'Appointment',
+                notes: bookingData.has_optional_details ? bookingData.notes : '',
+                status: 'confirmed',
+                externalId: `booking_${Date.now()}`,
+                clientName: bookingData.client_name || 'Client',
+                clientPhone: '',
+                serviceId: 'default',
+                professionalId: '1'
               });
 
               // PHASE 2: Offer optional field enhancement with your requested format
