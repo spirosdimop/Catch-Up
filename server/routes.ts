@@ -2354,11 +2354,20 @@ Remember: The most helpful thing you can do is direct users to the specialized t
               summary: `You have ${bookings.length} total bookings with ${totalDuration} minutes scheduled. This month: ${thisMonthBookings} bookings. Status breakdown: ${Object.entries(bookingsByStatus).map(([status, count]) => `${count} ${status}`).join(', ')}.`
             };
           } else {
-            // Handle booking creation
+            // Handle booking creation - TWO-PHASE APPROACH
             const bookingClient = getOpenAIClient('general');
             const bookingPrompt = `
               Extract booking details from this request: "${routingResult.booking_prompt}"
-              Return JSON with: date (YYYY-MM-DD), time (HH:MM), duration, clientName, service, notes
+              
+              MANDATORY FIELDS: date and time are required for booking creation.
+              OPTIONAL FIELDS: duration, clientId, service, notes
+              
+              Return JSON with:
+              - date (required): Extract the date in YYYY-MM-DD format
+              - time (required): Extract the time in HH:MM format
+              - has_mandatory_fields (boolean): Whether both date and time are provided
+              - has_optional_details (boolean): Whether optional details like duration, client, service were provided
+              - duration, client_name, service, notes: Only if explicitly mentioned
             `;
             
             const response = await bookingClient.chat.completions.create({
@@ -2373,27 +2382,53 @@ Remember: The most helpful thing you can do is direct users to the specialized t
 
             const bookingData = JSON.parse(response.choices[0]?.message?.content || '{}');
             
-            // Find client if specified
-            let clientId: number | undefined = undefined;
-            if (bookingData.clientName) {
-              const clients = await storage.getClients();
-              const client = clients.find(c => 
-                `${c.firstName} ${c.lastName}`.toLowerCase().includes(bookingData.clientName.toLowerCase())
-              );
-              clientId = client?.id;
-            }
-            
-            const newBooking = await storage.createBooking({
-              date: bookingData.date || new Date().toISOString().split('T')[0],
-              time: bookingData.time || '10:00',
-              duration: bookingData.duration || 60,
-              clientId: clientId || undefined,
-              service: bookingData.service || 'Consultation',
-              notes: bookingData.notes,
-              status: 'confirmed'
-            });
+            // Check if mandatory fields are present
+            if (!bookingData.has_mandatory_fields || !bookingData.date || !bookingData.time) {
+              const missingFields = [];
+              if (!bookingData.date) missingFields.push('date');
+              if (!bookingData.time) missingFields.push('time');
+              
+              results.booking = {
+                success: false,
+                message: `To create a booking, I need the following mandatory information: ${missingFields.join(', ')}. Please provide these details.`,
+                missing_fields: missingFields
+              };
+            } else {
+              // Find client if specified
+              let clientId: number | null = null;
+              if (bookingData.has_optional_details && bookingData.client_name) {
+                const clients = await storage.getClients();
+                const client = clients.find(c => 
+                  `${c.firstName} ${c.lastName}`.toLowerCase().includes(bookingData.client_name.toLowerCase())
+                );
+                clientId = client?.id || null;
+              }
+              
+              // PHASE 1: Create booking with mandatory fields only
+              const newBooking = await storage.createBooking({
+                date: bookingData.date,
+                time: bookingData.time,
+                duration: bookingData.has_optional_details ? bookingData.duration : null,
+                clientId: clientId,
+                service: bookingData.has_optional_details ? bookingData.service : null,
+                notes: bookingData.has_optional_details ? bookingData.notes : null,
+                status: 'confirmed'
+              });
 
-            results.booking = { success: true, booking: newBooking };
+              // PHASE 2: Offer optional field enhancement
+              let enhancementMessage = '';
+              if (!bookingData.has_optional_details) {
+                enhancementMessage = ' Would you like to add details like duration, client assignment, or service type?';
+              }
+
+              results.booking = { 
+                success: true, 
+                booking: newBooking,
+                message: `Created booking for ${bookingData.date} at ${bookingData.time}${enhancementMessage}`,
+                needs_enhancement: !bookingData.has_optional_details,
+                enhancement_options: ['duration', 'client', 'service', 'notes']
+              };
+            }
           }
         } catch (bookingError) {
           console.error('Error processing booking:', bookingError);
