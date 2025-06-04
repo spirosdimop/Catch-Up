@@ -1717,16 +1717,51 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       // Process calendar request if present
       if (routingResult.calendar_prompt) {
         try {
-          // Get user's existing schedule
-          const userId = "user-1"; // Default user ID
-          const schedule = await storage.getEvents(userId);
+          // Check if this is a count/summary request for bookings
+          const isBookingCountRequest = (message.toLowerCase().includes('how many') || 
+                                       message.toLowerCase().includes('count') ||
+                                       message.toLowerCase().includes('total') ||
+                                       message.toLowerCase().includes('number of')) &&
+                                      (message.toLowerCase().includes('booking') || 
+                                       message.toLowerCase().includes('appointment'));
           
-          // Process the scheduling request
-          let calendarResponse;
-          
-          try {
-            calendarResponse = await processSchedulingRequest(schedule, routingResult.calendar_prompt);
-          } catch (e) {
+          if (isBookingCountRequest) {
+            // Provide booking analytics instead of creating calendar events
+            const bookings = await storage.getBookings();
+            const bookingsByStatus = bookings.reduce((acc, booking) => {
+              acc[booking.status] = (acc[booking.status] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+            
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const thisMonthBookings = bookings.filter(b => {
+              const bookingDate = new Date(b.date);
+              return bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear;
+            }).length;
+            
+            const totalDuration = bookings.reduce((sum, b) => sum + (b.duration || 0), 0);
+            
+            results.calendar = {
+              booking_analytics: {
+                total: bookings.length,
+                by_status: bookingsByStatus,
+                this_month: thisMonthBookings,
+                total_duration_minutes: totalDuration,
+                summary: `You have ${bookings.length} total bookings with ${totalDuration} minutes scheduled. This month: ${thisMonthBookings} bookings. Status breakdown: ${Object.entries(bookingsByStatus).map(([status, count]) => `${count} ${status}`).join(', ')}.`
+              }
+            };
+          } else {
+            // Get user's existing schedule for calendar operations
+            const userId = "user-1"; // Default user ID
+            const schedule = await storage.getEvents(userId);
+            
+            // Process the scheduling request
+            let calendarResponse;
+            
+            try {
+              calendarResponse = await processSchedulingRequest(schedule, routingResult.calendar_prompt);
+            } catch (e) {
             console.log("Using fallback calendar processing due to API error");
             // Fallback calendar processing logic that doesn't require OpenAI
             const userInput = routingResult.calendar_prompt.toLowerCase();
@@ -2001,6 +2036,7 @@ Remember: The most helpful thing you can do is direct users to the specialized t
           }
           
           results.calendar = calendarResponse;
+          }
         } catch (calendarError) {
           console.error('Error processing calendar request:', calendarError);
           // Add error information to the results
