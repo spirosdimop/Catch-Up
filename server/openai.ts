@@ -437,20 +437,32 @@ export async function routeInputToApis(message: string, conversationContext?: st
       
       CRITICAL: For action commands, only ask for clarification when information is genuinely missing. If the user provides sufficient details, proceed with the action.
 
-      PROJECT CREATION RULES:
-      When users provide project details like "add a project for [description] that starts [date] and [completion info]":
-      - Extract project name from the description
-      - Use provided start date or default to today
-      - Use provided deadline or estimate reasonable completion time
-      - Proceed with project creation using project_prompt
-      - Only ask for clarification if absolutely essential information is missing
-
-      TASK CREATION RULES:
-      When users provide task details with context and deadlines:
-      - Extract task title and description from the request
-      - Use provided deadline or priority information
-      - Proceed with task creation using task_prompt
-      - Only ask for clarification if the request is genuinely unclear
+      MANDATORY vs OPTIONAL FIELD HANDLING:
+      
+      For PROJECT creation - Mandatory: name only
+      Optional: description, clientId, budget, startDate, endDate
+      - If user provides project name/context, create immediately with project_prompt
+      - After creation, ask if they want to add optional details (budget, client, dates)
+      
+      For TASK creation - Mandatory: title only
+      Optional: description, projectId, clientId, priority, deadline
+      - If user provides task title/context, create immediately with task_prompt
+      - After creation, ask if they want to add optional details (project, deadline, priority)
+      
+      For CLIENT creation - Mandatory: firstName, lastName only
+      Optional: email, phone, company, address
+      - If user provides name, create immediately with client_prompt
+      - After creation, ask if they want to add contact details
+      
+      For BOOKING creation - Mandatory: date, time only
+      Optional: duration, clientId, service, notes
+      - If user provides date/time, create immediately with booking_prompt
+      - After creation, ask if they want to add service details
+      
+      For EVENT creation - Mandatory: title, startTime only
+      Optional: description, endTime, location
+      - If user provides title/time, create immediately with calendar_prompt
+      - After creation, ask if they want to add location/details
 
       For DESTRUCTIVE or MAJOR ACTIONS (like clearing calendar, deleting events, canceling multiple appointments):
       - Always ask for explicit confirmation

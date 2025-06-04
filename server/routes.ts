@@ -2072,11 +2072,18 @@ Remember: The most helpful thing you can do is direct users to the specialized t
               summary: `You have ${tasks.length} total tasks. Status breakdown: ${Object.entries(tasksByStatus).map(([status, count]) => `${count} ${status}`).join(', ')}. Priority breakdown: ${Object.entries(tasksByPriority).map(([priority, count]) => `${count} ${priority}`).join(', ')}.`
             };
           } else {
-            // Handle task creation/modification
+            // Handle task creation/modification - TWO-PHASE APPROACH
             const taskClient = getOpenAIClient('general');
             const taskPrompt = `
               Extract task creation details from this request: "${routingResult.task_prompt}"
-              Return JSON with: title, description, priority (urgent/high/medium/low), status, dueDate
+              
+              MANDATORY FIELD: Only title is required for task creation.
+              OPTIONAL FIELDS: description, priority, deadline, projectId, clientId
+              
+              Return JSON with:
+              - title (required): Extract the main task title
+              - has_optional_details (boolean): Whether optional details like description, priority, deadline were provided
+              - description, priority, deadline, project_name, client_name: Only if explicitly mentioned
             `;
             
             const response = await taskClient.chat.completions.create({
@@ -2091,17 +2098,30 @@ Remember: The most helpful thing you can do is direct users to the specialized t
 
             const taskData = JSON.parse(response.choices[0]?.message?.content || '{}');
             
+            // PHASE 1: Create task with mandatory field only
             const newTask = await storage.createTask({
               title: taskData.title || 'New Task',
-              description: taskData.description,
+              description: taskData.has_optional_details ? taskData.description : null,
               projectId: null,
               clientId: null,
-              status: taskData.status || 'to_do',
-              priority: taskData.priority || 'medium',
-              deadline: taskData.dueDate ? new Date(taskData.dueDate) : null
+              status: 'to_do',
+              priority: taskData.has_optional_details ? (taskData.priority || 'medium') : 'medium',
+              deadline: taskData.deadline ? new Date(taskData.deadline) : null
             });
 
-            results.task = { success: true, task: newTask };
+            // PHASE 2: Offer optional field enhancement
+            let enhancementMessage = '';
+            if (!taskData.has_optional_details) {
+              enhancementMessage = ' Would you like to add a description, set a priority level, assign it to a project, or set a deadline?';
+            }
+
+            results.task = { 
+              success: true, 
+              task: newTask,
+              message: `Created task: ${newTask.title}${enhancementMessage}`,
+              needs_enhancement: !taskData.has_optional_details,
+              enhancement_options: ['description', 'priority', 'deadline', 'project', 'client']
+            };
           }
         } catch (taskError) {
           console.error('Error processing task:', taskError);
@@ -2136,11 +2156,18 @@ Remember: The most helpful thing you can do is direct users to the specialized t
               summary: `You have ${projects.length} total projects. Status breakdown: ${Object.entries(projectsByStatus).map(([status, count]) => `${count} ${status}`).join(', ')}. ${projectsWithBudget} projects have budgets totaling $${totalBudget.toLocaleString()}.`
             };
           } else {
-            // Handle project creation
+            // Handle project creation - TWO-PHASE APPROACH
             const projectClient = getOpenAIClient('general');
             const projectPrompt = `
               Extract project creation details from this request: "${routingResult.project_prompt}"
-              Return JSON with: name, clientName (if mentioned), description, budget (if mentioned), startDate, status
+              
+              MANDATORY FIELD: Only name is required for project creation.
+              OPTIONAL FIELDS: description, clientId, budget, startDate, endDate
+              
+              Return JSON with:
+              - name (required): Extract the main project name/title
+              - has_optional_details (boolean): Whether optional details like description, budget, client, dates were provided
+              - description, budget, start_date, end_date, client_name: Only if explicitly mentioned
             `;
             
             const response = await projectClient.chat.completions.create({
@@ -2157,25 +2184,38 @@ Remember: The most helpful thing you can do is direct users to the specialized t
             
             // Find client if specified
             let clientId: number | null = null;
-            if (projectData.clientName) {
+            if (projectData.has_optional_details && projectData.client_name) {
               const clients = await storage.getClients();
               const client = clients.find(c => 
-                `${c.firstName} ${c.lastName}`.toLowerCase().includes(projectData.clientName.toLowerCase())
+                `${c.firstName} ${c.lastName}`.toLowerCase().includes(projectData.client_name.toLowerCase())
               );
               clientId = client?.id || null;
             }
 
+            // PHASE 1: Create project with mandatory field only
             const newProject = await storage.createProject({
               name: projectData.name || 'New Project',
               clientId: clientId,
-              startDate: projectData.startDate ? new Date(projectData.startDate) : new Date(),
-              endDate: null,
-              status: projectData.status || 'not_started',
-              description: projectData.description,
-              budget: projectData.budget ? Number(projectData.budget) : null
+              startDate: projectData.has_optional_details && projectData.start_date ? new Date(projectData.start_date) : null,
+              endDate: projectData.has_optional_details && projectData.end_date ? new Date(projectData.end_date) : null,
+              status: 'not_started',
+              description: projectData.has_optional_details ? projectData.description : null,
+              budget: projectData.has_optional_details && projectData.budget ? Number(projectData.budget) : null
             });
 
-            results.project = { success: true, project: newProject };
+            // PHASE 2: Offer optional field enhancement
+            let enhancementMessage = '';
+            if (!projectData.has_optional_details) {
+              enhancementMessage = ' Would you like to add a description, set a budget, assign a client, or set start/end dates?';
+            }
+
+            results.project = { 
+              success: true, 
+              project: newProject,
+              message: `Created project: ${newProject.name}${enhancementMessage}`,
+              needs_enhancement: !projectData.has_optional_details,
+              enhancement_options: ['description', 'budget', 'client', 'start_date', 'end_date']
+            };
           }
         } catch (projectError) {
           console.error('Error processing project:', projectError);

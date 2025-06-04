@@ -29,6 +29,14 @@ interface CommandResult {
   calendar_error?: string;
   message?: string;
   message_error?: string;
+  task?: any;
+  task_error?: string;
+  project?: any;
+  project_error?: string;
+  client?: any;
+  client_error?: string;
+  booking?: any;
+  booking_error?: string;
   ask_user?: string;
   missing_fields?: string[];
   conversation_context?: string;
