@@ -2150,34 +2150,56 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       // Process client request if present
       if (routingResult.client_prompt) {
         try {
-          const clientClient = getOpenAIClient('general');
-          const clientPrompt = `
-            Extract client creation details from this request: "${routingResult.client_prompt}"
-            Return JSON with: firstName, lastName, email, phone, company
-            IMPORTANT: Never extract or modify existing user profile data (username, personal email, etc.)
-          `;
+          // Check if this is a count/summary request
+          const isCountRequest = message.toLowerCase().includes('how many') || 
+                                message.toLowerCase().includes('count') ||
+                                message.toLowerCase().includes('total') ||
+                                message.toLowerCase().includes('number of');
           
-          const response = await clientClient.chat.completions.create({
-            model: model,
-            messages: [
-              { role: 'system', content: clientPrompt },
-              { role: 'user', content: routingResult.client_prompt }
-            ],
-            response_format: { type: "json_object" },
-            temperature: 0.1
-          });
+          if (isCountRequest) {
+            const clients = await storage.getClients();
+            const clientsWithCompany = clients.filter(c => c.company).length;
+            const clientsWithPhone = clients.filter(c => c.phone).length;
+            const clientsWithEmail = clients.filter(c => c.email).length;
+            
+            results.client = {
+              total: clients.length,
+              with_company: clientsWithCompany,
+              with_phone: clientsWithPhone,
+              with_email: clientsWithEmail,
+              summary: `You have ${clients.length} total clients. ${clientsWithEmail} have email addresses, ${clientsWithPhone} have phone numbers, and ${clientsWithCompany} are associated with companies.`
+            };
+          } else {
+            // Handle client creation
+            const clientClient = getOpenAIClient('general');
+            const clientPrompt = `
+              Extract client creation details from this request: "${routingResult.client_prompt}"
+              Return JSON with: firstName, lastName, email, phone, company
+              IMPORTANT: Never extract or modify existing user profile data (username, personal email, etc.)
+            `;
+            
+            const response = await clientClient.chat.completions.create({
+              model: model,
+              messages: [
+                { role: 'system', content: clientPrompt },
+                { role: 'user', content: routingResult.client_prompt }
+              ],
+              response_format: { type: "json_object" },
+              temperature: 0.1
+            });
 
-          const clientData = JSON.parse(response.choices[0]?.message?.content || '{}');
-          
-          const newClient = await storage.createClient({
-            firstName: clientData.firstName || '',
-            lastName: clientData.lastName || '',
-            email: clientData.email,
-            phone: clientData.phone,
-            company: clientData.company
-          });
+            const clientData = JSON.parse(response.choices[0]?.message?.content || '{}');
+            
+            const newClient = await storage.createClient({
+              firstName: clientData.firstName || '',
+              lastName: clientData.lastName || '',
+              email: clientData.email,
+              phone: clientData.phone,
+              company: clientData.company
+            });
 
-          results.client = { success: true, client: newClient };
+            results.client = { success: true, client: newClient };
+          }
         } catch (clientError) {
           console.error('Error processing client:', clientError);
           results.client_error = "Unable to process client request";
@@ -2187,35 +2209,77 @@ Remember: The most helpful thing you can do is direct users to the specialized t
       // Process booking request if present
       if (routingResult.booking_prompt) {
         try {
-          const bookingClient = getOpenAIClient('general');
-          const bookingPrompt = `
-            Extract booking details from this request: "${routingResult.booking_prompt}"
-            Return JSON with: date (YYYY-MM-DD), time (HH:MM), duration, clientName, service, notes
-          `;
+          // Check if this is a count/summary request
+          const isCountRequest = message.toLowerCase().includes('how many') || 
+                                message.toLowerCase().includes('count') ||
+                                message.toLowerCase().includes('total') ||
+                                message.toLowerCase().includes('number of');
           
-          const response = await bookingClient.chat.completions.create({
-            model: model,
-            messages: [
-              { role: 'system', content: bookingPrompt },
-              { role: 'user', content: routingResult.booking_prompt }
-            ],
-            response_format: { type: "json_object" },
-            temperature: 0.1
-          });
+          if (isCountRequest) {
+            const bookings = await storage.getBookings();
+            const bookingsByStatus = bookings.reduce((acc, booking) => {
+              acc[booking.status] = (acc[booking.status] || 0) + 1;
+              return acc;
+            }, {} as Record<string, number>);
+            
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const thisMonthBookings = bookings.filter(b => {
+              const bookingDate = new Date(b.date);
+              return bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear;
+            }).length;
+            
+            const totalDuration = bookings.reduce((sum, b) => sum + (b.duration || 0), 0);
+            
+            results.booking = {
+              total: bookings.length,
+              by_status: bookingsByStatus,
+              this_month: thisMonthBookings,
+              total_duration_minutes: totalDuration,
+              summary: `You have ${bookings.length} total bookings with ${totalDuration} minutes scheduled. This month: ${thisMonthBookings} bookings. Status breakdown: ${Object.entries(bookingsByStatus).map(([status, count]) => `${count} ${status}`).join(', ')}.`
+            };
+          } else {
+            // Handle booking creation
+            const bookingClient = getOpenAIClient('general');
+            const bookingPrompt = `
+              Extract booking details from this request: "${routingResult.booking_prompt}"
+              Return JSON with: date (YYYY-MM-DD), time (HH:MM), duration, clientName, service, notes
+            `;
+            
+            const response = await bookingClient.chat.completions.create({
+              model: model,
+              messages: [
+                { role: 'system', content: bookingPrompt },
+                { role: 'user', content: routingResult.booking_prompt }
+              ],
+              response_format: { type: "json_object" },
+              temperature: 0.1
+            });
 
-          const bookingData = JSON.parse(response.choices[0]?.message?.content || '{}');
-          
-          const newBooking = await storage.createBooking({
-            date: bookingData.date || new Date().toISOString().split('T')[0],
-            time: bookingData.time || '10:00',
-            duration: bookingData.duration || 60,
-            clientId: null, // Would need to match client if specified
-            service: bookingData.service || 'Consultation',
-            notes: bookingData.notes,
-            status: 'confirmed'
-          });
+            const bookingData = JSON.parse(response.choices[0]?.message?.content || '{}');
+            
+            // Find client if specified
+            let clientId: number | undefined = undefined;
+            if (bookingData.clientName) {
+              const clients = await storage.getClients();
+              const client = clients.find(c => 
+                `${c.firstName} ${c.lastName}`.toLowerCase().includes(bookingData.clientName.toLowerCase())
+              );
+              clientId = client?.id;
+            }
+            
+            const newBooking = await storage.createBooking({
+              date: bookingData.date || new Date().toISOString().split('T')[0],
+              time: bookingData.time || '10:00',
+              duration: bookingData.duration || 60,
+              clientId: clientId,
+              service: bookingData.service || 'Consultation',
+              notes: bookingData.notes,
+              status: 'confirmed'
+            });
 
-          results.booking = { success: true, booking: newBooking };
+            results.booking = { success: true, booking: newBooking };
+          }
         } catch (bookingError) {
           console.error('Error processing booking:', bookingError);
           results.booking_error = "Unable to process booking request";
