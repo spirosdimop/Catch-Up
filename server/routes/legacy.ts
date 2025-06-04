@@ -36,6 +36,8 @@ import { z } from "zod";
 import { registerPublicProfileRoutes } from "./routes/publicProfile";
 import aiRoutes from "./routes/ai";
 import bookingsRoutes from "./routes/bookings";
+import calendarRoutes from "./routes/calendar";
+import linkRoutes from "./routes/links";
 
 // Helper functions for navigation tracking
 function getDisplayNameForPath(path: string): string {
@@ -2990,6 +2992,8 @@ Remember: The most helpful thing you can do is direct users to the specialized t
   // Register API routes
   app.use("/api/ai", aiRoutes);
   app.use("/api/bookings", bookingsRoutes);
+  app.use("/api/calendar", calendarRoutes);
+  app.use("/api/links", linkRoutes);
   
   const httpServer = createServer(app);
   return httpServer;
