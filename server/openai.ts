@@ -420,6 +420,11 @@ export async function routeInputToApis(message: string, conversationContext?: st
       6. booking_api - For scheduling, rescheduling, and managing ALL appointments and bookings
       7. message_api - For generating professional auto-response messages
       
+      CRITICAL BOOKING vs CALENDAR ROUTING:
+      - Keywords "appointment", "booking", "schedule appointment", "book" → ALWAYS use booking_prompt
+      - Keywords "calendar event", "meeting with agenda", "add to calendar" → use calendar_prompt
+      - When in doubt about appointments, ALWAYS choose booking_prompt over calendar_prompt
+      
       CRITICAL ROUTING RULES FOR COUNT/SUMMARY REQUESTS:
       When users ask for counts, totals, or "how many" of something:
       - NEVER ask clarifying questions
@@ -582,6 +587,14 @@ export async function routeInputToApis(message: string, conversationContext?: st
         "conversation_context": "User provided date and time - ready to create booking"
       }
 
+      User: "booking with jhon tomorrow at 3"
+      Response: {
+        "booking_prompt": "Create booking: John tomorrow at 3",
+        "conversation_context": "User provided date and time - ready to create booking"
+      }
+
+      NEVER use calendar_prompt for words like "appointment", "booking", "schedule appointment" - these are ALWAYS booking_prompt
+
       User: "Change theme to dark mode and language to Spanish"
       Response: {
         "settings_prompt": "Change theme to dark mode and language to Spanish",
@@ -658,7 +671,21 @@ export async function routeInputToApis(message: string, conversationContext?: st
       throw new Error('No content in response from OpenAI');
     }
 
-    return JSON.parse(content) as CommandRoutingResult;
+    const routingResult = JSON.parse(content) as CommandRoutingResult;
+    
+    // FORCE BOOKING ROUTING: Override LLM decision for appointment keywords
+    const lowerMessage = message.toLowerCase();
+    if ((lowerMessage.includes('appointment') || lowerMessage.includes('booking') || 
+         lowerMessage.includes('schedule') && (lowerMessage.includes('appointment') || lowerMessage.includes('with'))) &&
+        routingResult.calendar_prompt && !routingResult.booking_prompt) {
+      // Convert calendar_prompt to booking_prompt for appointment requests
+      return {
+        booking_prompt: routingResult.calendar_prompt,
+        conversation_context: "Forced booking routing for appointment request"
+      };
+    }
+    
+    return routingResult;
 
   } catch (error) {
     console.error('Error routing input to APIs:', error);
