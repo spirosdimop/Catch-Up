@@ -180,30 +180,36 @@ async function executeCalendarCommand(
     
     // System prompt for calendar operations
     const systemPrompt = `
-      You are an AI assistant that manages calendar events and tasks. Analyze the user's request and respond with a JSON object 
-      containing the details for creating, rescheduling, canceling, or deleting events or tasks.
-      
+      You are an AI assistant that manages calendar events and tasks. Analyze the user's request carefully to determine if they want to create TASKS or EVENTS.
+
+      TASKS are work items with deadlines and priorities (keywords: "task", "todo", "work on", "complete", "finish", "priority", "due")
+      EVENTS are calendar appointments with specific times (keywords: "meeting", "appointment", "schedule", "at [time]", "from-to")
+
       Response must be a JSON object with these properties:
-      - action: "create_event", "create_task", "reschedule", "cancel", "delete", or "suggest_times"
-      - item_type: "event" or "task"
-      - title: The title of the event/task (for create/reschedule)
-      - start_time: ISO formatted date and time when the event starts (for events only)
-      - end_time: ISO formatted date and time when the event ends (for events only)
-      - deadline: ISO formatted date for task deadline (for tasks only)
+      - action: "create_task", "create_event", "reschedule", "cancel", "delete", or "suggest_times"
+      - item_type: "task" or "event"
+      - title: The title of the event/task
+      - start_time: ISO formatted date and time (for events only)
+      - end_time: ISO formatted date and time (for events only)
+      - deadline: ISO formatted date (for tasks only)
       - priority: "low", "medium", "high", or "urgent" (for tasks only)
       - description: Detailed description or notes
-      - client_name: Name of the client if this is client-related
-      - status: "confirmed", "pending", "conflict", "cancelled", "deleted", or "completed"
-      - event_id: ID of an existing event (for reschedule/cancel/delete)
-      
-      For TASK CREATION requests, use action "create_task" and include:
-      - title, description, deadline, priority, client_name (if applicable)
-      
-      For EVENT CREATION requests, use action "create_event" and include:
-      - title, start_time, end_time, description
-      
-      When determining event_id, try to match by title and time if possible.
-      Include all fields for the specified action.
+      - client_name: Name of the client if mentioned
+      - status: "confirmed", "pending", "cancelled", "deleted", or "completed"
+
+      CRITICAL RULES:
+      - If user says "add task", "create task", "task for", "work on" → use action "create_task"
+      - If user says "schedule meeting", "book appointment", "meet at" → use action "create_event"
+      - Tasks have deadlines and priorities, events have start/end times
+      - For multiple tasks, return an array in the "tasks" field
+      - For single task, still use the standard fields
+
+      EXAMPLES:
+      "Add task about litholds for Spiros, urgent priority, due today"
+      → action: "create_task", title: "About litholds", client_name: "Spiros", priority: "urgent", deadline: today
+
+      "Schedule meeting with George tomorrow at 3 PM"
+      → action: "create_event", title: "Meeting with George", start_time: tomorrow 3 PM, end_time: tomorrow 4 PM
     `;
     
     // Include relevant existing events in the prompt for context
