@@ -41,7 +41,7 @@ export const clients = pgTable("clients", {
   firstName: text("first_name").notNull(),
   lastName: text("last_name").notNull(),
   email: text("email"),
-  phone: text("phone"),
+  phone: text("phone").notNull(), // Made mandatory
   company: text("company"),
   address: text("address"),
   createdAt: timestamp("created_at").defaultNow().notNull(),

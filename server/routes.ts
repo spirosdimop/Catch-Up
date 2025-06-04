@@ -2251,14 +2251,16 @@ Remember: The most helpful thing you can do is direct users to the specialized t
             const clientPrompt = `
               Extract client creation details from this request: "${routingResult.client_prompt}"
               
-              MANDATORY FIELDS: firstName and lastName are required for client creation.
-              OPTIONAL FIELDS: email, phone, company, address
+              MANDATORY FIELDS: firstName, lastName, and phone are required for client creation.
+              OPTIONAL FIELDS: email, company, address
               
               Return JSON with:
               - firstName (required): Extract the first name
               - lastName (required): Extract the last name  
-              - has_optional_details (boolean): Whether optional details like email, phone, company were provided
-              - email, phone, company, address: Only if explicitly mentioned
+              - phone (required): Extract the phone number
+              - has_mandatory_fields (boolean): Whether all mandatory fields (firstName, lastName, phone) are provided
+              - has_optional_details (boolean): Whether optional details like email, company were provided
+              - email, company, address: Only if explicitly mentioned
               
               IMPORTANT: Never extract or modify existing user profile data (username, personal email, etc.)
             `;
@@ -2275,29 +2277,43 @@ Remember: The most helpful thing you can do is direct users to the specialized t
 
             const clientData = JSON.parse(response.choices[0]?.message?.content || '{}');
             
-            // PHASE 1: Create client with mandatory fields only
-            const newClient = await storage.createClient({
-              firstName: clientData.firstName || 'New',
-              lastName: clientData.lastName || 'Client',
-              email: clientData.has_optional_details ? clientData.email : null,
-              phone: clientData.has_optional_details ? clientData.phone : null,
-              company: clientData.has_optional_details ? clientData.company : null,
-              address: clientData.has_optional_details ? clientData.address : null
-            });
+            // Check if mandatory fields are present
+            if (!clientData.has_mandatory_fields || !clientData.firstName || !clientData.lastName || !clientData.phone) {
+              const missingFields = [];
+              if (!clientData.firstName) missingFields.push('first name');
+              if (!clientData.lastName) missingFields.push('last name');
+              if (!clientData.phone) missingFields.push('phone number');
+              
+              results.client = {
+                success: false,
+                message: `To create a client, I need the following mandatory information: ${missingFields.join(', ')}. Please provide these details.`,
+                missing_fields: missingFields
+              };
+            } else {
+              // PHASE 1: Create client with mandatory fields
+              const newClient = await storage.createClient({
+                firstName: clientData.firstName,
+                lastName: clientData.lastName,
+                phone: clientData.phone,
+                email: clientData.has_optional_details ? clientData.email : null,
+                company: clientData.has_optional_details ? clientData.company : null,
+                address: clientData.has_optional_details ? clientData.address : null
+              });
 
-            // PHASE 2: Offer optional field enhancement
-            let enhancementMessage = '';
-            if (!clientData.has_optional_details) {
-              enhancementMessage = ' Would you like to add contact details like email, phone number, or company information?';
+              // PHASE 2: Offer optional field enhancement
+              let enhancementMessage = '';
+              if (!clientData.has_optional_details) {
+                enhancementMessage = ' Would you like to add additional details like email address or company information?';
+              }
+
+              results.client = { 
+                success: true, 
+                client: newClient,
+                message: `Created client: ${newClient.firstName} ${newClient.lastName}${enhancementMessage}`,
+                needs_enhancement: !clientData.has_optional_details,
+                enhancement_options: ['email', 'company', 'address']
+              };
             }
-
-            results.client = { 
-              success: true, 
-              client: newClient,
-              message: `Created client: ${newClient.firstName} ${newClient.lastName}${enhancementMessage}`,
-              needs_enhancement: !clientData.has_optional_details,
-              enhancement_options: ['email', 'phone', 'company', 'address']
-            };
           }
         } catch (clientError) {
           console.error('Error processing client:', clientError);

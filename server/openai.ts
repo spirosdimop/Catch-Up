@@ -449,10 +449,11 @@ export async function routeInputToApis(message: string, conversationContext?: st
       - If user provides task title/context, create immediately with task_prompt
       - After creation, ask if they want to add optional details (project, deadline, priority)
       
-      For CLIENT creation - Mandatory: firstName, lastName only
-      Optional: email, phone, company, address
-      - If user provides name, create immediately with client_prompt
-      - After creation, ask if they want to add contact details
+      For CLIENT creation - Mandatory: firstName, lastName, phone only
+      Optional: email, company, address
+      - If user provides name and phone, create immediately with client_prompt
+      - If missing phone number, ask for it before creation
+      - After creation, ask if they want to add optional details (email, company, address)
       
       For BOOKING creation - Mandatory: date, time only
       Optional: duration, clientId, service, notes
