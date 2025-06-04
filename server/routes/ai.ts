@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { chatWithLLM, processCommand } from "../ai";
+import { handleCommand } from "../ai/CommandRouter";
 
 const router = Router();
 
@@ -105,6 +106,21 @@ router.post("/task-summary", async (req, res) => {
       success: false,
       result: "An error occurred while generating the task summary."
     });
+  }
+});
+
+// Unified command endpoint using new command router
+router.post("/command", async (req, res) => {
+  const { message, userId = "user-1", model } = req.body;
+  if (!message || typeof message !== "string") {
+    return res.status(400).json({ message: "Invalid request" });
+  }
+  try {
+    const result = await handleCommand(userId, message, model);
+    res.json(result);
+  } catch (err) {
+    console.error("Error handling command:", err);
+    res.status(500).json({ message: "Failed to process command" });
   }
 });
 

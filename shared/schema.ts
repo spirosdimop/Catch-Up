@@ -337,6 +337,26 @@ export type InsertInvoiceItem = z.infer<typeof insertInvoiceItemSchema>;
 export type Booking = typeof bookings.$inferSelect;
 export type InsertBooking = z.infer<typeof insertBookingSchema>;
 
+// Generic links between any two entities
+export const entityLinks = pgTable("entity_links", {
+  id: serial("id").primaryKey(),
+  fromType: text("from_type").notNull(),
+  fromId: integer("from_id").notNull(),
+  toType: text("to_type").notNull(),
+  toId: integer("to_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertEntityLinkSchema = createInsertSchema(entityLinks).pick({
+  fromType: true,
+  fromId: true,
+  toType: true,
+  toId: true,
+});
+
+export type EntityLink = typeof entityLinks.$inferSelect;
+export type InsertEntityLink = z.infer<typeof insertEntityLinkSchema>;
+
 // Sign-up related schemas
 export const locationTypeEnum = pgEnum("location_type", [
   "has_shop",
